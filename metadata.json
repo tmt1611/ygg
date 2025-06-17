@@ -1,0 +1,6 @@
+{
+  "name": "Copy of Project : Yggdrasil",
+  "description": "An AI-powered web application for designing, visualizing, and collaboratively editing tech trees, skill trees, and other complex hierarchical tree graphs using Gemini and D3.js.",
+  "requestFramePermissions": [],
+  "prompt": ""
+}
