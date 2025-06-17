@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef, useMemo, useCallback } from 'react';
 import { linkHorizontal } from 'd3'; // Assuming d3 is globally available or managed by import map
 // import { TechTreeNode, D3GraphNode, D3GraphLink, NodeStatus, NodeEditModalConfig, Project } from '../types.js'; // Types removed
@@ -23,6 +22,8 @@ const GraphViewComponent = ({
   projects,
   activeProjectId,
   findLinkSource,
+  onNavigateToLinkedProject,
+  handleNavigateToSourceNode,
 }) => {
   const svgContainerDivRef = useRef(null); 
   const svgRef = useRef(null); 
@@ -35,20 +36,78 @@ const GraphViewComponent = ({
 
   const { nodeRadius } = config; 
 
+  const projectLinksAndProxyNodes = useMemo(() => {
+    if (!nodes || nodes.length === 0 || !projects) {
+        return { proxyNodes: [], projectLinks: [] };
+    }
+
+    const proxyNodes = [];
+    const projectLinks = [];
+    const PROXY_DISTANCE = 150;
+
+    nodes.forEach(node => {
+        if (node.data.linkedProjectId) {
+            const targetProject = projects.find(p => p.id === node.data.linkedProjectId);
+            if (targetProject) {
+                const proxyNode = {
+                    id: `proxy-target-${node.data.id}`, x: node.x + PROXY_DISTANCE, y: node.y,
+                    isProxy: true,
+                    data: {
+                        name: `${targetProject.name}`, id: `proxy-data-${targetProject.id}`, status: 'medium',
+                        isOutgoingLink: true, realProjectId: targetProject.id, realNodeId: targetProject.treeData.id,
+                    },
+                    parent: node 
+                };
+                proxyNodes.push(proxyNode);
+                projectLinks.push({ source: node, target: proxyNode, isProjectLink: true });
+            }
+        }
+    });
+
+    const rootNode = nodes.find(n => n.depth === 0);
+    if (rootNode) {
+        const linkSource = findLinkSource(activeProjectId, projects);
+        if (linkSource) {
+            const proxyNode = {
+                id: `proxy-source-${linkSource.sourceProjectId}`, x: rootNode.x - PROXY_DISTANCE, y: rootNode.y,
+                isProxy: true,
+                data: {
+                    name: `${linkSource.sourceProjectName}`, id: `proxy-data-${linkSource.sourceProjectId}`, status: 'medium',
+                    isIncomingLink: true, realProjectId: linkSource.sourceProjectId, realNodeId: linkSource.sourceNodeId,
+                },
+                parent: rootNode
+            };
+            proxyNodes.push(proxyNode);
+            projectLinks.push({ source: proxyNode, target: rootNode, isProjectLink: true });
+        }
+    }
+
+    return { proxyNodes, projectLinks };
+  }, [nodes, projects, activeProjectId, findLinkSource]);
+
+
   const handleNodeClick = useCallback((event, d) => {
     event.stopPropagation();
     if (isAppBusy) return;
+    if (d.isProxy) {
+        if (d.data.isOutgoingLink && onNavigateToLinkedProject) {
+            onNavigateToLinkedProject(d.data.realProjectId);
+        } else if (d.data.isIncomingLink && handleNavigateToSourceNode) {
+            handleNavigateToSourceNode(d.data.realProjectId, d.data.realNodeId);
+        }
+        return;
+    }
     const nodeId = d.data.id; 
     if (nodeId) {
         onSelectNode(nodeId === activeNodeId ? null : nodeId);
     } else {
         console.warn("Node ID not found on D3GraphNode data in click handler", d);
     }
-  }, [isAppBusy, onSelectNode, activeNodeId]);
+  }, [isAppBusy, onSelectNode, activeNodeId, onNavigateToLinkedProject, handleNavigateToSourceNode]);
 
   const handleNodeDoubleClick = useCallback((event, d) => {
     event.stopPropagation();
-    if (isAppBusy) return;
+    if (isAppBusy || d.isProxy) return;
     const nodeId = d.data.id;
     if (nodeId) {
         onSwitchToFocusView(nodeId);
@@ -60,7 +119,7 @@ const GraphViewComponent = ({
   const handleNodeContextMenu = useCallback((event, d) => {
     event.preventDefault();
     event.stopPropagation();
-    if (isAppBusy) return;
+    if (isAppBusy || d.isProxy) return;
     const nodeId = d.data.id;
     if (nodeId) {
         let linkSourceInfo = null;
@@ -76,20 +135,24 @@ const GraphViewComponent = ({
   useEffect(() => {
     if (!g || !nodes || !links) return;
 
-    g.selectAll(".graph-view-link").remove(); 
+    const allNodes = [...nodes, ...projectLinksAndProxyNodes.proxyNodes];
+    const allLinks = [...links, ...projectLinksAndProxyNodes.projectLinks];
+
+    g.selectAll(".graph-view-link, .graph-view-project-link").remove(); 
     g.selectAll(".graph-view-node").remove(); 
 
-    g.selectAll(".graph-view-link")
-      .data(links, (d) => `${d.source.data.id}-${d.target.data.id}`)
+    g.selectAll(".graph-view-all-links")
+      .data(allLinks, (d) => `${d.source.id}-${d.target.id}`)
       .join(
         (enter) =>
           enter
             .append("path")
-            .attr("class", "graph-view-link")
+            .attr("class", d => d.isProjectLink ? "graph-view-project-link" : "graph-view-link")
             .attr("fill", "none")
-            .attr("stroke", "var(--graph-link-stroke)")
+            .attr("stroke", d => d.isProjectLink ? null : "var(--graph-link-stroke)")
             .attr("stroke-width", 1.5)
-            .attr("stroke-opacity", 0.7),
+            .attr("stroke-opacity", d => d.isProjectLink ? 0.6 : 0.7)
+            .attr("stroke-dasharray", d => d.isProjectLink ? "5,5" : "none"),
         (update) => update,
         (exit) => exit.remove()
       )
@@ -100,14 +163,14 @@ const GraphViewComponent = ({
 
     const nodeGroups = g
       .selectAll(".graph-view-node")
-      .data(nodes, (d_node) => d_node.data.id) 
+      .data(allNodes, (d_node) => d_node.id) 
       .join(
         (enter) => {
-          const group = enter.append("g").attr("class", "graph-view-node");
+          const group = enter.append("g")
+            .attr("class", d => d.isProxy ? "graph-view-node proxy" : "graph-view-node");
           
           group.append("circle")
             .attr("r", nodeRadius)
-            .attr("stroke", "var(--graph-node-stroke)")
             .attr("stroke-width", 1.5)
             .style("cursor", "pointer");
 
@@ -116,7 +179,6 @@ const GraphViewComponent = ({
             .attr("dy", "0.31em")
             .attr("text-anchor", "middle")
             .attr("font-size", "10px")
-            .attr("fill", "var(--graph-node-text)")
             .style("pointer-events", "none")
             .style("user-select", "none");
           
@@ -136,25 +198,6 @@ const GraphViewComponent = ({
             .attr("font-size", `${nodeRadius * 0.8}px`)
             .attr("fill", "var(--text-tertiary)")
             .style("pointer-events", "none");
-
-          group.append("text") 
-            .attr("class", "node-icon node-project-link-icon outgoing-link")
-            .attr("dy", `${nodeRadius * 0.4}px`)
-            .attr("dx", `${nodeRadius * 0.9}px`)
-            .attr("text-anchor", "middle")
-            .attr("font-size", `${nodeRadius * 0.8}px`)
-            .attr("fill", "var(--primary-accent)")
-            .style("pointer-events", "none");
-            
-          group.append("text") 
-            .attr("class", "node-icon node-project-link-icon incoming-link")
-            .attr("dy", `${nodeRadius * 0.4}px`) 
-            .attr("dx", `${nodeRadius * 1.5}px`) 
-            .attr("text-anchor", "middle")
-            .attr("font-size", `${nodeRadius * 0.8}px`)
-            .attr("fill", "var(--secondary-accent-dark)") 
-            .style("pointer-events", "none");
-
           return group;
         },
         (update) => update,
@@ -163,43 +206,41 @@ const GraphViewComponent = ({
 
     nodeGroups
       .attr("transform", (d_node) => `translate(${d_node.x},${d_node.y})`)
-      .classed("selected", (d_node) => d_node.data.id === activeNodeId)
+      .classed("selected", (d_node) => !d_node.isProxy && d_node.data.id === activeNodeId)
       .on("click", handleNodeClick) 
       .on("dblclick", handleNodeDoubleClick)
       .on("contextmenu", handleNodeContextMenu);
 
     nodeGroups.select("circle")
       .attr("fill", (d_node) => {
+          if (d_node.isProxy) return null;
           if (d_node.data.status === 'small') return 'var(--status-small-bg)';
           if (d_node.data.status === 'large') return 'var(--status-large-bg)';
           return 'var(--status-medium-bg)';
       })
-      .attr("stroke", (d_node) => d_node.data.id === activeNodeId ? 'var(--graph-node-selected-stroke)' : 'var(--graph-node-stroke)');
+      .attr("stroke", (d_node) => {
+          if (d_node.isProxy) return null;
+          return d_node.data.id === activeNodeId ? 'var(--graph-node-selected-stroke)' : 'var(--graph-node-stroke)';
+      });
 
     nodeGroups.select(".node-label")
       .text((d_node) => d_node.data.name) 
-      .attr("x", (d_node) => d_node.children ? - (nodeRadius + 5) : (nodeRadius + 5)) 
-      .attr("text-anchor", (d_node) => d_node.children ? "end" : "start");
+      .attr("fill", d => d.isProxy ? null : "var(--graph-node-text)")
+      .attr("x", (d_node) => d_node.children && !d_node.isProxy ? - (nodeRadius + 5) : (nodeRadius + 5)) 
+      .attr("text-anchor", (d_node) => d_node.children && !d_node.isProxy ? "end" : "start");
     
     nodeGroups.select(".node-rune-icon")
-        .text((d_node) => NODE_STATUS_RUNES[d_node.data.status || 'medium'])
+        .text((d_node) => d_node.isProxy ? (d_node.data.isIncomingLink ? '↩️' : '🔗') : NODE_STATUS_RUNES[d_node.data.status || 'medium'])
         .attr("fill", (d_node) => {
+            if (d_node.isProxy) return null;
             if (d_node.data.status === 'small') return 'var(--status-small-text)';
             if (d_node.data.status === 'large') return 'var(--status-large-text)';
             return 'var(--status-medium-text)';
         });
 
-    nodeGroups.select(".node-lock-icon").text((d_node) => (d_node.data.isLocked ? "🔒" : ""));
-    nodeGroups.select(".outgoing-link").text((d_node) => (d_node.data.linkedProjectId ? "🔗" : ""));
-    nodeGroups.select(".incoming-link").text((d_node) => {
-        if (d_node.data.id === treeData.id && activeProjectId) { 
-            const linkSource = findLinkSource(activeProjectId, projects);
-            return linkSource ? "↩️" : ""; 
-        }
-        return "";
-    });
+    nodeGroups.select(".node-lock-icon").text((d_node) => (d_node.data.isLocked && !d_node.isProxy ? "🔒" : ""));
 
-  }, [g, nodes, links, nodeRadius, activeNodeId, handleNodeClick, handleNodeDoubleClick, handleNodeContextMenu, treeData.id, activeProjectId, projects, findLinkSource]);
+  }, [g, nodes, links, nodeRadius, activeNodeId, handleNodeClick, handleNodeDoubleClick, handleNodeContextMenu, treeData.id, activeProjectId, projects, findLinkSource, projectLinksAndProxyNodes]);
 
 
   if (!treeData) {

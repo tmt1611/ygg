@@ -716,8 +716,20 @@
       .graph-view-link { stroke: var(--graph-link-stroke-ecosystem); }
       .graph-view-node .node-rune-icon { font-size: 0.7em; dominant-baseline: middle; text-anchor: middle; fill: var(--text-primary); }
       .graph-view-node .node-icon { font-size: 0.6em; }
-      .graph-view-node .node-icon.project-link-icon { fill: var(--primary-accent); }
-      .graph-view-node .node-icon.project-link-icon.incoming-link { fill: var(--secondary-accent-dark); /* Different color for incoming link icon */ }
+      .graph-view-project-link { 
+          stroke: var(--primary-accent); 
+      }
+      .graph-view-node.proxy circle {
+        stroke-dasharray: 3, 3;
+        fill: var(--disabled-bg);
+        stroke: var(--disabled-border);
+      }
+      .graph-view-node.proxy .node-label {
+        fill: var(--text-secondary);
+      }
+      .graph-view-node.proxy .node-rune-icon {
+        fill: var(--text-tertiary);
+      }
 
 
       .graph-view-controls { position: absolute; top: 8px; right: 8px; display: flex; flex-direction: column; gap: 6px; z-index: 10; pointer-events: auto; } /* Reduced spacing/gap */
