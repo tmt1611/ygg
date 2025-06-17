@@ -33,5 +33,9 @@ export const useHistoryManager = () => {
     setHistory(prev => [{ id: generateUUID(), timestamp: new Date().toISOString(), type, summary, details }, ...prev.slice(0, 99)]);
   }, []);
 
-  return { history, addHistoryEntry };
+  const clearHistory = useCallback(() => {
+    setHistory([]);
+  }, []);
+
+  return { history, addHistoryEntry, clearHistory };
 };

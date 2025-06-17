@@ -27,6 +27,7 @@ const KnowledgeBranchSidebar = ({
   selectedNodeForInsights, aiInsightsData, aiInsightsIsLoading, aiInsightsError, onGenerateAiNodeInsights,
   onUseSuggestedDescription, onUseAlternativeName, onAddSuggestedChildFromInsight,
   history,
+  onClearHistory,
 }) => {
 
   const canGenerateStrategicSuggestions = apiKeyIsSet && !!initialPromptForStrategy?.trim() && !isAppBusy && !isFetchingStrategicSuggestions;
@@ -189,7 +190,7 @@ const KnowledgeBranchSidebar = ({
             ),
             
             activeSidebarTab === 'history' && (
-              React.createElement(HistoryViewTabContent, { history: history })
+              React.createElement(HistoryViewTabContent, { history: history, onClearHistory: onClearHistory })
             )
           )
         )

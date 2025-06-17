@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Project : Yggdrasil v3.0 - The World Tree</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌳</text></svg>">
+    <link rel="shortcut icon" href="data:image/x-icon;," type="image/x-icon">
     <link rel="stylesheet" href="./css/theme.css">
     <script type="importmap">
     {
@@ -706,17 +707,85 @@
       .overlay-panel-view .focus-view-detail-panel .panel-button-group button.danger { background-color: var(--error-color); color: var(--text-on-accent); border-color: var(--error-color);}
 
       .graph-view-wrapper { display: flex; height: 100%; width:100%; overflow: hidden; background: var(--app-bg); } 
-      html[data-theme='dark'] .graph-view-svg-container { background: radial-gradient(ellipse at center, rgba(var(--primary-accent-rgb),0.05) 0%, rgba(var(--yggdrasil-leaf-green),0.02) 40%, transparent 75%), var(--app-bg); }
-      html[data-theme='light'] .graph-view-svg-container { background: radial-gradient(ellipse at center, rgba(200,230,201,0.08) 0%, rgba(var(--yggdrasil-leaf-green),0.03) 40%, transparent 75%), var(--app-bg); }
+      html[data-theme='dark'] .graph-view-svg-container { 
+        --grid-line-color: rgba(var(--primary-accent-rgb), 0.08);
+        background: 
+          linear-gradient(var(--grid-line-color) 1px, transparent 1px),
+          linear-gradient(to right, var(--grid-line-color) 1px, transparent 1px),
+          radial-gradient(ellipse at center, rgba(var(--primary-accent-rgb),0.05) 0%, rgba(var(--yggdrasil-leaf-green),0.02) 40%, transparent 75%), var(--app-bg); 
+        background-size: 25px 25px, 25px 25px, auto, auto;
+      }
+      html[data-theme='light'] .graph-view-svg-container { 
+        --grid-line-color: rgba(var(--primary-accent-rgb), 0.1);
+        background: 
+          linear-gradient(var(--grid-line-color) 1px, transparent 1px),
+          linear-gradient(to right, var(--grid-line-color) 1px, transparent 1px),
+          radial-gradient(ellipse at center, rgba(200,230,201,0.08) 0%, rgba(var(--yggdrasil-leaf-green),0.03) 40%, transparent 75%), var(--app-bg);
+        background-size: 25px 25px, 25px 25px, auto, auto;
+      }
       
-      .graph-view-node.selected circle { stroke: var(--graph-node-selected-stroke); stroke-width: 2.5px; filter: drop-shadow(0 0 5px var(--graph-node-selected-stroke)); }
+      .graph-view-node circle {
+        transition: transform 0.2s ease-out, filter 0.2s ease-out;
+        filter: drop-shadow(0px 2px 3px rgba(0,0,0,0.15));
+      }
+      .graph-view-node:not(.proxy):hover circle {
+        transform: scale(1.1);
+        filter: drop-shadow(0px 3px 6px rgba(var(--primary-accent-rgb), 0.4));
+      }
+      .graph-view-node.selected circle, .graph-view-node.on-active-path circle { 
+        stroke: var(--graph-node-selected-stroke) !important;
+        stroke-width: 3.5px !important;
+      }
+      .graph-view-node.selected circle {
+        filter: drop-shadow(0 0 8px var(--graph-node-selected-stroke));
+      }
+      .graph-view-node.on-active-path:not(.selected) circle {
+        stroke: var(--primary-accent-dark) !important;
+        filter: drop-shadow(0 0 5px var(--primary-accent));
+      }
       .graph-view-node text.node-label { text-shadow: 0 0 3px var(--app-bg), 0 0 3px var(--app-bg), 0 0 3px var(--app-bg); } 
       html[data-theme='dark'] .graph-view-node text.node-label { text-shadow: 0 0 3px var(--app-bg), 0 0 3px var(--app-bg), 0 0 3px var(--app-bg), 0 0 5px var(--primary-accent-light); }
-      .graph-view-link { stroke: var(--graph-link-stroke-ecosystem); }
+      
+      .graph-view-link, .graph-view-project-link {
+        transition: stroke-opacity 0.3s ease, stroke-width 0.3s ease, stroke 0.3s ease;
+      }
+      .graph-view-link { stroke: var(--graph-link-stroke-ecosystem); stroke-linecap: round; }
+      .graph-view-project-link { stroke: var(--secondary-accent-dark); stroke-linecap: round; stroke-opacity: 0.8; stroke-dasharray: 4,4; }
+
+      .graph-view-link.active-path {
+        stroke: var(--primary-accent) !important;
+        stroke-width: 2.5px !important;
+        stroke-opacity: 1 !important;
+      }
+      .graph-view-link-marker {
+        fill: var(--graph-link-stroke-ecosystem);
+      }
+      .graph-view-link-marker.active-path {
+        fill: var(--primary-accent) !important;
+      }
+      
       .graph-view-node .node-rune-icon { font-size: 0.7em; dominant-baseline: middle; text-anchor: middle; fill: var(--text-primary); }
       .graph-view-node .node-icon { font-size: 0.6em; }
-      .graph-view-node .node-icon.project-link-icon { fill: var(--primary-accent); }
-      .graph-view-node .node-icon.project-link-icon.incoming-link { fill: var(--secondary-accent-dark); /* Different color for incoming link icon */ }
+
+      .graph-view-node.proxy circle {
+        stroke-dasharray: 3, 3;
+        fill: rgba(var(--panel-bg-rgb), 0.1);
+        stroke: var(--text-tertiary);
+        filter: none;
+      }
+      .graph-view-node.proxy:hover circle {
+        transform: scale(1.05);
+        stroke: var(--primary-accent);
+      }
+      .graph-view-node.proxy .node-label {
+        fill: var(--text-secondary);
+        font-size: 10px;
+        font-weight: 600;
+        text-transform: uppercase;
+      }
+      .graph-view-node.proxy .node-rune-icon {
+        display: none; /* Icon is replaced by internal label */
+      }
 
 
       .graph-view-controls { position: absolute; top: 8px; right: 8px; display: flex; flex-direction: column; gap: 6px; z-index: 10; pointer-events: auto; } /* Reduced spacing/gap */
