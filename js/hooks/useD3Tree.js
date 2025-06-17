@@ -1,11 +1,8 @@
-
 import { useEffect, useMemo, useRef, useCallback, useState } from 'react';
 import { select, zoom, hierarchy, tree, zoomIdentity, linkHorizontal } from 'd3';
 // import { TechTreeNode, D3GraphNode, D3GraphLink, D3TreeConfig } from '../types.js'; // Types removed
 
 const defaultTreeConfig = {
-  width: 800,
-  height: 600,
   nodeRadius: 8,
   horizontalSpacing: 100, 
   verticalSpacing: 35,    
@@ -18,7 +15,7 @@ export const useD3Tree = (
   config = {}
 ) => {
   const finalConfig = { ...defaultTreeConfig, ...config };
-  const { width, height, margin, horizontalSpacing, verticalSpacing } = finalConfig;
+  const { margin, horizontalSpacing, verticalSpacing } = finalConfig;
 
   const svgSelectionRef = useRef(null);
   const gSelectionRef = useRef(null);
@@ -44,6 +41,8 @@ export const useD3Tree = (
       svgSelectionRef.current = svg;
       svg.select("g").remove(); 
       
+      const { clientWidth, clientHeight } = containerRef.current;
+
       const gElement = svg.append("g")
         .attr("transform", `translate(${margin.left},${margin.top})`);
       gSelectionRef.current = gElement;
@@ -58,14 +57,12 @@ export const useD3Tree = (
         });
       svg.call(zoomBehaviorRef.current);
       
-      const initialTransform = zoomIdentity.translate(width / 4, height / 2).scale(0.8);
-      svg.call(zoomBehaviorRef.current.transform, initialTransform);
-    } else {
-        if (gSelectionRef.current) {
-            // gSelectionRef.current.attr("transform", `translate(${margin.left},${margin.top})`);
-        }
+      if (clientWidth > 0 && clientHeight > 0) {
+        const initialTransform = zoomIdentity.translate(clientWidth / 4, clientHeight / 2).scale(0.8);
+        svg.call(zoomBehaviorRef.current.transform, initialTransform);
+      }
     }
-  }, [containerRef, width, height, margin.left, margin.top]); 
+  }, [containerRef, margin.left, margin.top]); 
 
   const nodesAndLinks = useMemo(() => {
     if (!rootHierarchy) return { nodes: [], links: [] };
@@ -77,11 +74,12 @@ export const useD3Tree = (
   }, [rootHierarchy, treeLayout]);
 
   const resetZoom = useCallback(() => {
-    if (svgSelectionRef.current && zoomBehaviorRef.current) {
-      const initialTransform = zoomIdentity.translate(width / 4, height / 2).scale(0.8);
+    if (svgSelectionRef.current && zoomBehaviorRef.current && containerRef.current) {
+      const { clientWidth, clientHeight } = containerRef.current;
+      const initialTransform = zoomIdentity.translate(clientWidth / 4, clientHeight / 2).scale(0.8);
       svgSelectionRef.current.transition().duration(750).call(zoomBehaviorRef.current.transform, initialTransform);
     }
-  }, [width, height]); 
+  }, [containerRef]); 
 
   const zoomIn = useCallback(() => {
     if (svgSelectionRef.current && zoomBehaviorRef.current) {
