@@ -31,7 +31,7 @@ const GraphViewComponent = ({
   const { g, nodes, links, config, resetZoom, zoomIn, zoomOut } = useD3Tree(svgRef, treeData, { 
     nodeRadius: 10,
     horizontalSpacing: 220, 
-    verticalSpacing: 60,
+    verticalSpacing: 90,
   });
 
   const { nodeRadius } = config; 
@@ -41,10 +41,12 @@ const GraphViewComponent = ({
         return { proxyNodes: [], projectLinks: [] };
     }
 
+    const createAcronym = (name) => (name || '').split(' ').filter(Boolean).map(word => word[0]).join('').toUpperCase();
+
     const proxyNodes = [];
     const projectLinks = [];
-    const PROXY_DISTANCE_X = 120;
-    const PROXY_OFFSET_Y = 25;
+    const PROXY_DISTANCE_X = 80; // Shortened edge
+    const PROXY_OFFSET_Y = 20;
     let proxyIndex = 0;
 
     nodes.forEach(node => {
@@ -56,7 +58,9 @@ const GraphViewComponent = ({
                     id: `proxy-target-${node.data.id}`, x: node.x + PROXY_DISTANCE_X, y: node.y + yOffset,
                     isProxy: true,
                     data: {
-                        name: `${targetProject.name}`, id: `proxy-data-${targetProject.id}`, status: 'medium',
+                        name: createAcronym(targetProject.name),
+                        fullName: targetProject.name,
+                        id: `proxy-data-${targetProject.id}`, status: 'medium',
                         isOutgoingLink: true, realProjectId: targetProject.id, realNodeId: targetProject.treeData.id,
                     },
                     parent: node 
@@ -76,7 +80,9 @@ const GraphViewComponent = ({
                 id: `proxy-source-${linkSource.sourceProjectId}`, x: rootNode.x - PROXY_DISTANCE_X, y: rootNode.y,
                 isProxy: true,
                 data: {
-                    name: `${linkSource.sourceProjectName}`, id: `proxy-data-${linkSource.sourceProjectId}`, status: 'medium',
+                    name: createAcronym(linkSource.sourceProjectName),
+                    fullName: linkSource.sourceProjectName,
+                    id: `proxy-data-${linkSource.sourceProjectId}`, status: 'medium',
                     isIncomingLink: true, realProjectId: linkSource.sourceProjectId, realNodeId: linkSource.sourceNodeId,
                 },
                 parent: rootNode
@@ -173,6 +179,8 @@ const GraphViewComponent = ({
           const group = enter.append("g")
             .attr("class", d => d.isProxy ? "graph-view-node proxy" : "graph-view-node");
           
+          group.append("title"); // For tooltips
+
           group.append("circle")
             .attr("r", nodeRadius)
             .attr("stroke-width", 1.5)
@@ -214,6 +222,8 @@ const GraphViewComponent = ({
       .on("click", handleNodeClick) 
       .on("dblclick", handleNodeDoubleClick)
       .on("contextmenu", handleNodeContextMenu);
+
+    nodeGroups.select("title").text(d => d.isProxy ? `Project: ${d.data.fullName}\n(Click to navigate)` : d.data.name);
 
     nodeGroups.select("circle")
       .attr("fill", (d_node) => {
