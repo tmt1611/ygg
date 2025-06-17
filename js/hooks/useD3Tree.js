@@ -10,7 +10,7 @@ const defaultTreeConfig = {
 };
 
 export const useD3Tree = (
-  containerRef,
+  svgRef,
   treeData,
   config = {}
 ) => {
@@ -34,14 +34,16 @@ export const useD3Tree = (
   }, [verticalSpacing, horizontalSpacing]);
 
   useEffect(() => {
-    if (!containerRef.current) return;
+    if (!svgRef.current) return;
 
     if (!svgSelectionRef.current) {
-      const svg = select(containerRef.current);
+      const svg = select(svgRef.current);
       svgSelectionRef.current = svg;
       svg.select("g").remove(); 
       
-      const { clientWidth, clientHeight } = containerRef.current;
+      const containerDiv = svgRef.current.parentElement;
+      if (!containerDiv) return;
+      const { clientWidth, clientHeight } = containerDiv;
 
       const gElement = svg.append("g")
         .attr("transform", `translate(${margin.left},${margin.top})`);
@@ -62,7 +64,7 @@ export const useD3Tree = (
         svg.call(zoomBehaviorRef.current.transform, initialTransform);
       }
     }
-  }, [containerRef, margin.left, margin.top]); 
+  }, [svgRef, margin.left, margin.top]); 
 
   const nodesAndLinks = useMemo(() => {
     if (!rootHierarchy) return { nodes: [], links: [] };
@@ -74,12 +76,14 @@ export const useD3Tree = (
   }, [rootHierarchy, treeLayout]);
 
   const resetZoom = useCallback(() => {
-    if (svgSelectionRef.current && zoomBehaviorRef.current && containerRef.current) {
-      const { clientWidth, clientHeight } = containerRef.current;
-      const initialTransform = zoomIdentity.translate(clientWidth / 4, clientHeight / 2).scale(0.8);
-      svgSelectionRef.current.transition().duration(750).call(zoomBehaviorRef.current.transform, initialTransform);
+    if (svgSelectionRef.current && zoomBehaviorRef.current && svgRef.current && svgRef.current.parentElement) {
+      const { clientWidth, clientHeight } = svgRef.current.parentElement;
+      if (clientWidth > 0 && clientHeight > 0) {
+        const initialTransform = zoomIdentity.translate(clientWidth / 4, clientHeight / 2).scale(0.8);
+        svgSelectionRef.current.transition().duration(750).call(zoomBehaviorRef.current.transform, initialTransform);
+      }
     }
-  }, [containerRef]); 
+  }, [svgRef]); 
 
   const zoomIn = useCallback(() => {
     if (svgSelectionRef.current && zoomBehaviorRef.current) {
