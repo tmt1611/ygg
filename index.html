@@ -707,28 +707,59 @@
       .overlay-panel-view .focus-view-detail-panel .panel-button-group button.danger { background-color: var(--error-color); color: var(--text-on-accent); border-color: var(--error-color);}
 
       .graph-view-wrapper { display: flex; height: 100%; width:100%; overflow: hidden; background: var(--app-bg); } 
-      html[data-theme='dark'] .graph-view-svg-container { background: radial-gradient(ellipse at center, rgba(var(--primary-accent-rgb),0.05) 0%, rgba(var(--yggdrasil-leaf-green),0.02) 40%, transparent 75%), var(--app-bg); }
-      html[data-theme='light'] .graph-view-svg-container { background: radial-gradient(ellipse at center, rgba(200,230,201,0.08) 0%, rgba(var(--yggdrasil-leaf-green),0.03) 40%, transparent 75%), var(--app-bg); }
+      html[data-theme='dark'] .graph-view-svg-container { 
+        --grid-line-color: rgba(var(--primary-accent-rgb), 0.08);
+        background: 
+          linear-gradient(var(--grid-line-color) 1px, transparent 1px),
+          linear-gradient(to right, var(--grid-line-color) 1px, transparent 1px),
+          radial-gradient(ellipse at center, rgba(var(--primary-accent-rgb),0.05) 0%, rgba(var(--yggdrasil-leaf-green),0.02) 40%, transparent 75%), var(--app-bg); 
+        background-size: 25px 25px, 25px 25px, auto, auto;
+      }
+      html[data-theme='light'] .graph-view-svg-container { 
+        --grid-line-color: rgba(var(--primary-accent-rgb), 0.1);
+        background: 
+          linear-gradient(var(--grid-line-color) 1px, transparent 1px),
+          linear-gradient(to right, var(--grid-line-color) 1px, transparent 1px),
+          radial-gradient(ellipse at center, rgba(200,230,201,0.08) 0%, rgba(var(--yggdrasil-leaf-green),0.03) 40%, transparent 75%), var(--app-bg);
+        background-size: 25px 25px, 25px 25px, auto, auto;
+      }
       
-      .graph-view-node.selected circle { stroke: var(--graph-node-selected-stroke); stroke-width: 2.5px; filter: drop-shadow(0 0 5px var(--graph-node-selected-stroke)); }
+      .graph-view-node circle {
+        transition: transform 0.2s ease-out, filter 0.2s ease-out;
+        filter: drop-shadow(0px 2px 3px rgba(0,0,0,0.15));
+      }
+      .graph-view-node:not(.proxy):hover circle {
+        transform: scale(1.1);
+        filter: drop-shadow(0px 3px 6px rgba(var(--primary-accent-rgb), 0.4));
+      }
+      .graph-view-node.selected circle { stroke: var(--graph-node-selected-stroke); stroke-width: 3px; filter: drop-shadow(0 0 8px var(--graph-node-selected-stroke)); }
       .graph-view-node text.node-label { text-shadow: 0 0 3px var(--app-bg), 0 0 3px var(--app-bg), 0 0 3px var(--app-bg); } 
       html[data-theme='dark'] .graph-view-node text.node-label { text-shadow: 0 0 3px var(--app-bg), 0 0 3px var(--app-bg), 0 0 3px var(--app-bg), 0 0 5px var(--primary-accent-light); }
-      .graph-view-link { stroke: var(--graph-link-stroke-ecosystem); }
+      
+      .graph-view-link { stroke: var(--graph-link-stroke-ecosystem); stroke-linecap: round; }
+      .graph-view-project-link { stroke: var(--primary-accent); stroke-linecap: round; }
+      
       .graph-view-node .node-rune-icon { font-size: 0.7em; dominant-baseline: middle; text-anchor: middle; fill: var(--text-primary); }
       .graph-view-node .node-icon { font-size: 0.6em; }
-      .graph-view-project-link { 
-          stroke: var(--primary-accent); 
-      }
+
       .graph-view-node.proxy circle {
         stroke-dasharray: 3, 3;
         fill: var(--disabled-bg);
         stroke: var(--disabled-border);
+        filter: none;
+      }
+      .graph-view-node.proxy:hover circle {
+        transform: scale(1.05);
+        stroke: var(--primary-accent);
       }
       .graph-view-node.proxy .node-label {
-        fill: var(--text-secondary);
+        fill: var(--text-tertiary);
+        font-size: 9px;
+        font-weight: 500;
       }
       .graph-view-node.proxy .node-rune-icon {
-        fill: var(--text-tertiary);
+        fill: var(--text-secondary);
+        font-size: 1.1em;
       }
 
 
