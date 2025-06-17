@@ -45,17 +45,20 @@ const GraphViewComponent = ({
 
     const proxyNodes = [];
     const projectLinks = [];
-    const PROXY_DISTANCE_X = 80; // Shortened edge
-    const PROXY_OFFSET_Y = 20;
+    const PROXY_OFFSET_X = 25;    // How far to the side
+    const PROXY_DISTANCE_Y = 70;  // How far up/down
     let proxyIndex = 0;
 
     nodes.forEach(node => {
         if (node.data.linkedProjectId) {
             const targetProject = projects.find(p => p.id === node.data.linkedProjectId);
             if (targetProject) {
-                const yOffset = (proxyIndex % 2 === 0) ? PROXY_OFFSET_Y : -PROXY_OFFSET_Y;
+                // Alternate placing proxy nodes above and below the source node
+                const yDirection = (proxyIndex % 2 === 0) ? -1 : 1;
                 const proxyNode = {
-                    id: `proxy-target-${node.data.id}`, x: node.x + PROXY_DISTANCE_X, y: node.y + yOffset,
+                    id: `proxy-target-${node.data.id}`,
+                    x: node.x + PROXY_OFFSET_X, 
+                    y: node.y + (yDirection * PROXY_DISTANCE_Y),
                     isProxy: true,
                     data: {
                         name: createAcronym(targetProject.name),
@@ -77,7 +80,9 @@ const GraphViewComponent = ({
         const linkSource = findLinkSource(activeProjectId, projects);
         if (linkSource) {
             const proxyNode = {
-                id: `proxy-source-${linkSource.sourceProjectId}`, x: rootNode.x - PROXY_DISTANCE_X, y: rootNode.y,
+                id: `proxy-source-${linkSource.sourceProjectId}`,
+                x: rootNode.x - PROXY_OFFSET_X, // To the left of the root
+                y: rootNode.y - PROXY_DISTANCE_Y, // Above the root
                 isProxy: true,
                 data: {
                     name: createAcronym(linkSource.sourceProjectName),
