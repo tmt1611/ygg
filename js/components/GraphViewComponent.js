@@ -27,7 +27,7 @@ const GraphViewComponent = ({
   const svgContainerDivRef = useRef(null); 
   const svgRef = useRef(null); 
   
-  const { gRef, nodes, links, config, resetZoom, zoomIn, zoomOut } = useD3Tree(svgRef, treeData, { 
+  const { g, nodes, links, config, resetZoom, zoomIn, zoomOut } = useD3Tree(svgRef, treeData, { 
     nodeRadius: 10,
     horizontalSpacing: 220, 
     verticalSpacing: 60,
@@ -74,9 +74,8 @@ const GraphViewComponent = ({
   }, [isAppBusy, onOpenContextMenu, treeData.id, activeProjectId, projects, findLinkSource]);
 
   useEffect(() => {
-    if (!gRef.current || !nodes || !links) return;
+    if (!g || !nodes || !links) return;
 
-    const g = gRef.current; 
     g.selectAll(".graph-view-link").remove(); 
     g.selectAll(".graph-view-node").remove(); 
 
@@ -200,7 +199,7 @@ const GraphViewComponent = ({
         return "";
     });
 
-  }, [nodes, links, gRef, nodeRadius, activeNodeId, handleNodeClick, handleNodeDoubleClick, handleNodeContextMenu, treeData.id, activeProjectId, projects, findLinkSource]);
+  }, [g, nodes, links, nodeRadius, activeNodeId, handleNodeClick, handleNodeDoubleClick, handleNodeContextMenu, treeData.id, activeProjectId, projects, findLinkSource]);
 
 
   if (!treeData) {

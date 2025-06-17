@@ -1,5 +1,5 @@
 
-import { useEffect, useMemo, useRef, useCallback } from 'react';
+import { useEffect, useMemo, useRef, useCallback, useState } from 'react';
 import { select, zoom, hierarchy, tree, zoomIdentity, linkHorizontal } from 'd3';
 // import { TechTreeNode, D3GraphNode, D3GraphLink, D3TreeConfig } from '../types.js'; // Types removed
 
@@ -23,6 +23,7 @@ export const useD3Tree = (
   const svgSelectionRef = useRef(null);
   const gSelectionRef = useRef(null);
   const zoomBehaviorRef = useRef(null);
+  const [g, setG] = useState(null);
 
   const rootHierarchy = useMemo(() => {
     if (!treeData) return null;
@@ -43,9 +44,10 @@ export const useD3Tree = (
       svgSelectionRef.current = svg;
       svg.select("g").remove(); 
       
-      const g = svg.append("g")
+      const gElement = svg.append("g")
         .attr("transform", `translate(${margin.left},${margin.top})`);
-      gSelectionRef.current = g;
+      gSelectionRef.current = gElement;
+      setG(gElement);
 
       zoomBehaviorRef.current = zoom()
         .scaleExtent([0.1, 3])
@@ -95,7 +97,7 @@ export const useD3Tree = (
 
 
   return { 
-    gRef: gSelectionRef, 
+    g,
     nodes: nodesAndLinks.nodes, 
     links: nodesAndLinks.links,
     config: finalConfig,
