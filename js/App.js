@@ -54,7 +54,7 @@ const App = () => {
 
   // --- HOOKS ---
   const historyManager = useHistoryManager();
-  const { addHistoryEntry } = historyManager;
+  const { addHistoryEntry, clearHistory } = historyManager;
 
   const appThemeAndLayout = useAppThemeAndLayout(addHistoryEntry);
   const {
@@ -276,7 +276,8 @@ const App = () => {
           onUseSuggestedDescription: (desc) => aiInsightsHook.handleUseSuggestedDescription(selectedNodeForInsights.id, desc),
           onUseAlternativeName: (altName) => aiInsightsHook.handleUseAlternativeName(selectedNodeForInsights.id, altName),
           onAddSuggestedChildFromInsight: (name, desc) => aiInsightsHook.handleAddSuggestedChildFromInsight(selectedNodeForInsights.id, name, desc),
-          history: historyManager.history
+          history: historyManager.history,
+          onClearHistory: clearHistory
         }),
         
         React.createElement("main", { className: "yggdrasil-core-canvas" },
