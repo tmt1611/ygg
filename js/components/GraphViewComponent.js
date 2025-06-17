@@ -74,7 +74,7 @@ const GraphViewComponent = ({
   }, [isAppBusy, onOpenContextMenu, treeData.id, activeProjectId, projects, findLinkSource]);
 
   useEffect(() => {
-    if (!gRef.current || !nodes || !links || !window.d3) return; // Ensure d3 is available
+    if (!gRef.current || !nodes || !links) return;
 
     const g = gRef.current; 
     g.selectAll(".graph-view-link").remove(); 
@@ -94,7 +94,7 @@ const GraphViewComponent = ({
         (update) => update,
         (exit) => exit.remove()
       )
-      .attr("d", window.d3.linkHorizontal() 
+      .attr("d", linkHorizontal()
         .x((d_node) => d_node.x)
         .y((d_node) => d_node.y)
       );
