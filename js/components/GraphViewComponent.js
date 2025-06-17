@@ -45,8 +45,8 @@ const GraphViewComponent = ({
 
     const proxyNodes = [];
     const projectLinks = [];
-    const PROXY_OFFSET_X = 25;    // How far to the side
-    const PROXY_DISTANCE_Y = 70;  // How far up/down
+    const PROXY_OFFSET_X = 15;    // Reduced horizontal distance for a more vertical appearance
+    const PROXY_DISTANCE_Y = 60;  // Reduced vertical distance to shorten the line
     let proxyIndex = 0;
 
     nodes.forEach(node => {
