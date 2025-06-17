@@ -45,8 +45,8 @@ const GraphViewComponent = ({
 
     const proxyNodes = [];
     const projectLinks = [];
-    const PROXY_OFFSET_X = 15;    // Reduced horizontal distance for a more vertical appearance
-    const PROXY_DISTANCE_Y = 60;  // Reduced vertical distance to shorten the line
+    const PROXY_OFFSET_X = 10;
+    const PROXY_DISTANCE_Y = 45;  // Much shorter line
     let proxyIndex = 0;
 
     nodes.forEach(node => {
@@ -165,9 +165,9 @@ const GraphViewComponent = ({
             .attr("class", d => d.isProjectLink ? "graph-view-project-link" : "graph-view-link")
             .attr("fill", "none")
             .attr("stroke", d => d.isProjectLink ? null : "var(--graph-link-stroke)")
-            .attr("stroke-width", 1.5)
-            .attr("stroke-opacity", d => d.isProjectLink ? 0.6 : 0.7)
-            .attr("stroke-dasharray", d => d.isProjectLink ? "5,5" : "none"),
+            .attr("stroke-width", d => d.isProjectLink ? 2 : 1.5)
+            .attr("stroke-opacity", 0.7) // Unified opacity
+            .attr("stroke-dasharray", d => d.isProjectLink ? "4,4" : "none"),
         (update) => update,
         (exit) => exit.remove()
       )
@@ -228,7 +228,7 @@ const GraphViewComponent = ({
       .on("dblclick", handleNodeDoubleClick)
       .on("contextmenu", handleNodeContextMenu);
 
-    nodeGroups.select("title").text(d => d.isProxy ? `Project: ${d.data.fullName}\n(Click to navigate)` : d.data.name);
+    nodeGroups.select("title").text(d => d.isProxy ? `Project: ${d.data.fullName}\n(Click to navigate)` : `${d.data.name}\n(Double-click for Focus View)`);
 
     nodeGroups.select("circle")
       .attr("fill", (d_node) => {
@@ -245,11 +245,17 @@ const GraphViewComponent = ({
     nodeGroups.select(".node-label")
       .text((d_node) => d_node.data.name) 
       .attr("fill", d => d.isProxy ? null : "var(--graph-node-text)")
-      .attr("x", (d_node) => d_node.children && !d_node.isProxy ? - (nodeRadius + 5) : (nodeRadius + 5)) 
-      .attr("text-anchor", (d_node) => d_node.children && !d_node.isProxy ? "end" : "start");
+      .attr("x", (d_node) => {
+        if (d_node.isProxy) return 0;
+        return d_node.children ? -(nodeRadius + 5) : (nodeRadius + 5);
+      })
+      .attr("text-anchor", (d_node) => {
+        if (d_node.isProxy) return "middle";
+        return d_node.children ? "end" : "start";
+      });
     
     nodeGroups.select(".node-rune-icon")
-        .text((d_node) => d_node.isProxy ? (d_node.data.isIncomingLink ? '↩️' : '🔗') : NODE_STATUS_RUNES[d_node.data.status || 'medium'])
+        .text((d_node) => d_node.isProxy ? '' : NODE_STATUS_RUNES[d_node.data.status || 'medium'])
         .attr("fill", (d_node) => {
             if (d_node.isProxy) return null;
             if (d_node.data.status === 'small') return 'var(--status-small-text)';
