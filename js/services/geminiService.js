@@ -37,14 +37,27 @@ const _initializeClient = (key, source) => {
 };
 
 export const attemptLoadEnvKey = async () => {
-  const envKey = process.env.API_KEY;
+  let envKey;
+  try {
+    // Safely access process.env, which may not exist in all browser environments
+    if (typeof process !== 'undefined' && process.env) {
+      envKey = process.env.API_KEY;
+    }
+  } catch (e) {
+    console.warn("Could not access process.env.API_KEY. This is expected in some browser environments.");
+    envKey = undefined;
+  }
+
   if (envKey?.trim()) {
     const result = _initializeClient(envKey, 'environment');
     return { ...result, source: result.success ? 'environment' : null };
   }
+  
+  // If envKey is not found or empty, and there's no active key from another source, reset.
   if (!apiClientState.isKeyAvailable) { 
     apiClientState = { client: null, isKeyAvailable: false, activeKey: null, activeSource: null };
   }
+  
   return { success: false, message: "API_KEY not found in environment. Provide key manually or set in deployment.", source: null };
 };
 
@@ -62,8 +75,12 @@ export const getApiKeyStatus = () => {
     if (apiClientState.isKeyAvailable && apiClientState.activeSource && apiClientState.activeKey) {
         return { available: true, source: apiClientState.activeSource, message: `Using API Key from ${apiClientState.activeSource}. AI features enabled.` };
     }
-    if (process.env.API_KEY && apiClientState.activeSource !== 'environment' && !apiClientState.isKeyAvailable) { 
-        return { available: false, source: null, message: "Environment API_KEY detected but not active. Try selecting 'Use Environment API_KEY' or enter manually."};
+    try {
+        if (typeof process !== 'undefined' && process.env && process.env.API_KEY && apiClientState.activeSource !== 'environment' && !apiClientState.isKeyAvailable) { 
+            return { available: false, source: null, message: "Environment API_KEY detected but not active. Try selecting 'Use Environment API_KEY' or enter manually."};
+        }
+    } catch (e) {
+        // silently ignore, as process.env might not be available
     }
     return { available: false, source: null, message: "API Key not set. Provide a valid API Key for AI features." };
 };
