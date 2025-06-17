@@ -43,14 +43,17 @@ const GraphViewComponent = ({
 
     const proxyNodes = [];
     const projectLinks = [];
-    const PROXY_DISTANCE = 150;
+    const PROXY_DISTANCE_X = 120;
+    const PROXY_OFFSET_Y = 25;
+    let proxyIndex = 0;
 
     nodes.forEach(node => {
         if (node.data.linkedProjectId) {
             const targetProject = projects.find(p => p.id === node.data.linkedProjectId);
             if (targetProject) {
+                const yOffset = (proxyIndex % 2 === 0) ? PROXY_OFFSET_Y : -PROXY_OFFSET_Y;
                 const proxyNode = {
-                    id: `proxy-target-${node.data.id}`, x: node.x + PROXY_DISTANCE, y: node.y,
+                    id: `proxy-target-${node.data.id}`, x: node.x + PROXY_DISTANCE_X, y: node.y + yOffset,
                     isProxy: true,
                     data: {
                         name: `${targetProject.name}`, id: `proxy-data-${targetProject.id}`, status: 'medium',
@@ -60,6 +63,7 @@ const GraphViewComponent = ({
                 };
                 proxyNodes.push(proxyNode);
                 projectLinks.push({ source: node, target: proxyNode, isProjectLink: true });
+                proxyIndex++;
             }
         }
     });
@@ -69,7 +73,7 @@ const GraphViewComponent = ({
         const linkSource = findLinkSource(activeProjectId, projects);
         if (linkSource) {
             const proxyNode = {
-                id: `proxy-source-${linkSource.sourceProjectId}`, x: rootNode.x - PROXY_DISTANCE, y: rootNode.y,
+                id: `proxy-source-${linkSource.sourceProjectId}`, x: rootNode.x - PROXY_DISTANCE_X, y: rootNode.y,
                 isProxy: true,
                 data: {
                     name: `${linkSource.sourceProjectName}`, id: `proxy-data-${linkSource.sourceProjectId}`, status: 'medium',
