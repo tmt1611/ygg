@@ -10,6 +10,7 @@ export const useViewStates = ({
   addHistoryEntry,
   setYggdrasilViewMode,
   setActiveOverlayPanel,
+  activeOverlayPanel,
 }) => {
   const [activeWorkspaceSubTab, setActiveWorkspaceSubTab] = useState(() => (localStorage.getItem(APP_STORAGE_KEYS.ACTIVE_WORKSPACE_SUB_TAB)) || 'projects');
   
@@ -26,6 +27,14 @@ export const useViewStates = ({
 
   useEffect(() => { localStorage.setItem(APP_STORAGE_KEYS.ACTIVE_WORKSPACE_SUB_TAB, activeWorkspaceSubTab); }, [activeWorkspaceSubTab]);
   useEffect(() => { localStorage.setItem(APP_STORAGE_KEYS.COLLAPSED_NODES, JSON.stringify(Array.from(collapsedNodeIds))); }, [collapsedNodeIds]);
+
+  useEffect(() => {
+    // If the focus panel is open but there's no longer a valid focus node ID,
+    // close the panel automatically. This can happen if the focused node is deleted.
+    if (activeOverlayPanel === 'focus' && !focusNodeId) {
+      setActiveOverlayPanel(null);
+    }
+  }, [focusNodeId, activeOverlayPanel, setActiveOverlayPanel]);
 
   const commonViewResetLogic = useCallback((forNewProjectContext = false) => {
     setError(null);

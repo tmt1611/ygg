@@ -73,7 +73,7 @@ const App = () => {
 
   const viewStates = useViewStates({
     techTreeData, setError, modalManager, addHistoryEntry,
-    setYggdrasilViewMode, setActiveOverlayPanel
+    setYggdrasilViewMode, setActiveOverlayPanel, activeOverlayPanel
   });
   const { focusNodeId, selectedGraphNodeId, setSelectedGraphNodeId, handleSwitchToFocusView } = viewStates;
 

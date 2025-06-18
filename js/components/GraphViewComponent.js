@@ -80,25 +80,16 @@ const GraphViewComponent = ({
             let proxyAngle = Math.PI; // Default to bottom
             const childrenOfRoot = rootNode.children;
             if (childrenOfRoot && childrenOfRoot.length > 0) {
-                const childAngles = childrenOfRoot.map(c => c.x).sort((a,b) => a-b);
-                if (childAngles.length === 1) {
-                    proxyAngle = (childAngles[0] + Math.PI) % (2 * Math.PI); // Opposite
-                } else {
-                    let maxGap = 0;
-                    let angleForMaxGap = 0;
-                    // Check gap between last and first child (crossing the 0/2PI line)
-                    maxGap = (childAngles[0] + 2 * Math.PI) - childAngles[childAngles.length - 1];
-                    angleForMaxGap = (childAngles[childAngles.length - 1] + maxGap / 2) % (2* Math.PI);
-
-                    for (let i = 0; i < childAngles.length - 1; i++) {
-                        const gap = childAngles[i+1] - childAngles[i];
-                        if (gap > maxGap) {
-                            maxGap = gap;
-                            angleForMaxGap = childAngles[i] + gap / 2;
-                        }
-                    }
-                    proxyAngle = angleForMaxGap;
-                }
+                // Simplified logic: calculate the average angle of children and place the proxy opposite to it.
+                // This is more robust than finding the largest gap.
+                let sumX = 0;
+                let sumY = 0;
+                childrenOfRoot.forEach(child => {
+                    sumX += Math.cos(child.x);
+                    sumY += Math.sin(child.x);
+                });
+                const avgAngle = Math.atan2(sumY, sumX);
+                proxyAngle = (avgAngle + Math.PI) % (2 * Math.PI); // Opposite angle
             }
 
             const proxyNode = {

@@ -27,7 +27,8 @@ const AiSuggestionModal = ({
             id: 'error-root-' + Date.now(), name: 'Invalid AI Suggestion Structure',
             description: 'AI returned data that is malformed or not a valid tree structure. Cannot display detailed preview.',
             children: [], isLocked: false, importance: 'common', _changeStatus: 'unchanged',
-            _modificationDetails: ["The AI's suggestion was not a valid tree object."]
+            _modificationDetails: ["The AI's suggestion was not a valid tree object."],
+            _isErrorNode: true
         };
         return {
             annotatedTree: errorNode,
@@ -96,7 +97,7 @@ const AiSuggestionModal = ({
               "Preview of Changes"
             ),
             React.createElement("div", { className: "ai-suggestion-modal-content-area", "aria-live": "polite", "aria-atomic": "true" },
-              annotatedTree && !annotatedTree.id.startsWith('error-root-') ? (
+              annotatedTree && !annotatedTree._isErrorNode ? (
                 React.createElement("ul", { style: { listStyle: 'none', padding: 0, margin: 0 }},
                     React.createElement(AiSuggestionPreviewListItem, { node: annotatedTree, level: 0, isVisualDiff: true })
                 )
@@ -150,7 +151,7 @@ const AiSuggestionModal = ({
                     setPrompt: setFollowUpPrompt,
                     onModify: handleInternalRefine,
                     isLoading: isRefining,
-                    disabled: !apiKeyIsSet || isRefining || annotatedTree?.id.startsWith('error-root-'),
+                    disabled: !apiKeyIsSet || isRefining || annotatedTree?._isErrorNode,
                     isApiKeySet: apiKeyIsSet,
                     hasTreeData: !!suggestion,
                     labelOverride: "Refine This Suggestion:"
@@ -166,7 +167,7 @@ const AiSuggestionModal = ({
         React.createElement("div", { className: "ai-suggestion-modal-footer-actions" },
           React.createElement("button", { type: "button", onClick: onCancel, className: "secondary" }, "Reject Suggestion"),
           React.createElement("button", { ref: applyButtonRef, type: "button", onClick: onConfirm, className: "success",
-            disabled: annotatedTree?.id.startsWith('error-root-') || isRefining
+            disabled: annotatedTree?._isErrorNode || isRefining
             },
             isRefining ? "Refining..." : "Apply Changes to Project"
           )
