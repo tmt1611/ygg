@@ -52,7 +52,7 @@ const AiInsightsPanel = ({
               id: "current-node-desc",
               value: node.description || "(No current description)",
               readOnly: true,
-              rows: 7, 
+              rows: 5, 
               style: {backgroundColor: 'var(--panel-alt-bg)', opacity: node.description ? 1 : 0.7},
               "aria-label": "Current node description"
             })
@@ -68,7 +68,7 @@ const AiInsightsPanel = ({
                   id: "suggested-node-desc",
                   value: insightsData.suggested_description,
                   readOnly: true,
-                  rows: 7, 
+                  rows: 5, 
                   "aria-label": "AI suggested description"
                 })
             ),
