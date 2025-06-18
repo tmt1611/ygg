@@ -464,6 +464,8 @@ html[data-theme='light'] .contextual-help-icon:hover, html[data-theme='light'] .
 .overlay-panel-view .focus-view-detail-panel .panel-button-group button:hover { background-color: rgba(255,255,255,0.2); }
 .overlay-panel-view .focus-view-detail-panel .panel-button-group button.primary { background-color: var(--focus-connector-stroke); color: var(--focus-stellar-bg); border-color: var(--focus-connector-stroke);}
 .overlay-panel-view .focus-view-detail-panel .panel-button-group button.danger { background-color: var(--error-color); color: var(--text-on-accent); border-color: var(--error-color);}
+.overlay-panel-view .focus-view-detail-panel .panel-button-group button.primary { background-color: var(--focus-connector-stroke); color: var(--focus-stellar-bg); border-color: var(--focus-connector-stroke);}
+.overlay-panel-view .focus-view-detail-panel .panel-button-group button.danger { background-color: var(--error-color); color: var(--text-on-accent); border-color: var(--error-color);}
 
 .graph-view-wrapper { display: flex; height: 100%; width:100%; overflow: hidden; background: var(--app-bg); } 
 html[data-theme='dark'] .graph-view-svg-container { 
