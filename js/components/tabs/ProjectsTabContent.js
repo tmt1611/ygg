@@ -44,7 +44,7 @@ const ProjectsTabContent = ({
   return (
     React.createElement("div", { style: { display: 'flex', flexDirection: 'column', gap: '25px' }}, 
       React.createElement("fieldset", null,
-        React.createElement("legend", null, "Project Management"),
+        React.createElement("legend", null, "Project Management", React.createElement(ContextualHelpTooltip, { helpText: "Load existing projects, create new ones, or import from a file. You can also save the current active tree as a reusable example template." })),
         React.createElement("div", { className: "panel-button-group", style: { marginBottom: '15px' }},
           React.createElement("button", { onClick: onCreateEmptyProject, disabled: isAppBusy, className: "primary panel-button", title: "Create a new project with a single root node." },
             React.createElement("span", { className: "button-icon", "aria-hidden": "true" }, "➕"),

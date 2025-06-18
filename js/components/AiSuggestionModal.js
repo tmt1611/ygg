@@ -81,7 +81,7 @@ const AiSuggestionModal = ({
 
   return (
     React.createElement("div", { className: "modal-overlay-basic", role: "dialog", "aria-modal": "true", "aria-labelledby": "ai-suggestion-modal-title", "aria-describedby": "ai-suggestion-summary" },
-      React.createElement("div", { className: "modal-content-basic", style: { display: 'flex', flexDirection: 'column', width: 'clamp(700px, 90vw, 1100px)', maxHeight: '85vh' }},
+      React.createElement("div", { className: "modal-content-basic", style: { display: 'flex', flexDirection: 'column', width: 'clamp(600px, 80vw, 1000px)', maxHeight: '85vh' }},
         React.createElement("h2", { id: "ai-suggestion-modal-title", style: { fontSize: '1.4em', color: 'var(--text-primary)', marginBottom: '15px', flexShrink: 0 }},
           "AI Modification Preview"
         ),

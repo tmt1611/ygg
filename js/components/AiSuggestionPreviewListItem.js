@@ -8,7 +8,7 @@ const AiSuggestionPreviewListItem = ({ node, level, isVisualDiff = false }) => {
     margin: '2px 0',    // Reduced margin
     borderRadius: 'var(--border-radius)',
     border: '1px solid transparent',
-    marginLeft: isVisualDiff ? `${level * 15}px` : `${level * 16}px`, // Further reduced indent for visual diff
+    marginLeft: `${level * 15}px`,
     position: 'relative', 
     overflow: 'hidden', 
   };

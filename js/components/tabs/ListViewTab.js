@@ -32,7 +32,7 @@ const ListViewTabContent = ({
       React.createElement("div", { style: { textAlign: 'center', padding: '30px', color: 'var(--text-secondary)', background: 'var(--panel-alt-bg)', borderRadius: 'var(--border-radius)', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }},
         React.createElement("span", {style: {fontSize: '2.5em', marginBottom: '15px'}}, "🍃"),
         React.createElement("p", {style: {fontSize: '1.2em', color: 'var(--text-primary)'}}, "No Structure Data"),
-        React.createElement("p", null, "Generate or load a structure using the Sanctum (Workspace) to see it here.")
+        React.createElement("p", null, "Generate or load a structure using the Workspace to see it here.")
       )
     );
   }

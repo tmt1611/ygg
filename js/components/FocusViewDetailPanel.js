@@ -138,8 +138,7 @@ const FocusViewDetailPanel = ({
         React.createElement("button", {
           onClick: () => handleDetailPanelNodeAction(() => onDeleteNode(node.id)),
           disabled: isAppBusy,
-          className: "danger",
-          style: { background: 'var(--error-bg)', color: 'var(--error-color)', borderColor: 'var(--error-color)' }
+          className: "danger"
         },
           React.createElement("span", { className: "button-icon" }, "🗑️"), " Decommission System"
         )
