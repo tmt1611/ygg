@@ -243,7 +243,9 @@ const App = () => {
         activeOverlayPanel: activeOverlayPanel,
         setYggdrasilViewMode: setYggdrasilViewMode,
         setActiveOverlayPanel: setActiveOverlayPanel,
-        focusNodeId: focusNodeId
+        focusNodeId: focusNodeId,
+        globalSearchTerm: globalSearchTerm,
+        setGlobalSearchTerm: setGlobalSearchTerm
       }),
       React.createElement("div", { className: `yggdrasil-app-body theme-${themeMode} view-mode-${yggdrasilViewMode} ${isSidebarCollapsed ? 'sidebar-collapsed' : ''} ${activeOverlayPanel ? 'overlay-panel-active' : ''}` },
         React.createElement(KnowledgeBranchSidebar, {

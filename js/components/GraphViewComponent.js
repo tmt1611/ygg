@@ -232,9 +232,21 @@ const GraphViewComponent = ({
         (exit) => exit.remove()
       );
 
+    const lowerSearchTerm = searchTerm?.toLowerCase().trim();
+    const isMatch = (d_node) => {
+        if (!lowerSearchTerm) return false;
+        if (d_node.isProxy) return false;
+        const data = d_node.data;
+        return (
+            data.name?.toLowerCase().includes(lowerSearchTerm) ||
+            data.description?.toLowerCase().includes(lowerSearchTerm)
+        );
+    };
+
     nodeGroups
       .attr("transform", (d_node) => `translate(${d_node.x},${d_node.y})`)
       .classed("selected", (d_node) => !d_node.isProxy && d_node.data.id === activeNodeId)
+      .classed("highlighted", isMatch)
       .on("click", handleNodeClick) 
       .on("dblclick", handleNodeDoubleClick)
       .on("contextmenu", handleNodeContextMenu);
@@ -276,7 +288,7 @@ const GraphViewComponent = ({
 
     nodeGroups.select(".node-lock-icon").text((d_node) => (d_node.data.isLocked && !d_node.isProxy ? "🔒" : ""));
 
-  }, [g, nodes, links, nodeRadius, activeNodeId, handleNodeClick, handleNodeDoubleClick, handleNodeContextMenu, treeData.id, activeProjectId, projects, findLinkSource, projectLinksAndProxyNodes]);
+  }, [g, nodes, links, nodeRadius, activeNodeId, searchTerm, handleNodeClick, handleNodeDoubleClick, handleNodeContextMenu, treeData.id, activeProjectId, projects, findLinkSource, projectLinksAndProxyNodes]);
 
 
   if (!treeData) {

@@ -66,7 +66,8 @@ const MainContentRouter = ({
           projects: projectManager.projects,
           activeProjectId: projectManager.activeProjectId,
           findLinkSource: projectLinkingHook.findLinkSource,
-          handleNavigateToSourceNode: projectLinkingHook.handleNavigateToSourceNode
+          handleNavigateToSourceNode: projectLinkingHook.handleNavigateToSourceNode,
+          searchTerm: viewStates.globalSearchTerm,
         })
       );
     }
@@ -81,7 +82,7 @@ const MainContentRouter = ({
                 onAddQuickChild: nodeOperations.handleQuickAddChild,
                 onNodeImportanceChange: nodeOperations.handleNodeImportanceChange,
                 onOpenNodeEditModal: modalManager.openNodeEditModal,
-                searchTerm: viewStates.listSearchTerm, 
+                searchTerm: viewStates.globalSearchTerm, 
                 isAppBusy: isAppBusy,
                 collapsedNodeIds: viewStates.collapsedNodeIds,
                 onToggleCollapseNode: viewStates.handleToggleCollapseNode,
