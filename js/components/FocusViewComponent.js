@@ -1,12 +1,11 @@
 
 import React, { useMemo, useCallback, useRef } from 'react';
-import { getAllNodesAsMap } from '../utils.js'; 
+import { getAllNodesAsMap } from '../utils.js';
 import FocusNodeDisplay from './FocusNodeDisplay.js';
-// PathToRootDisplay is now rendered in OverlayPanelView
-import FocusViewDetailPanel from './FocusViewDetailPanel.js'; 
+import FocusViewDetailPanel from './FocusViewDetailPanel.js';
 import { useFocusViewLayout } from '../hooks/useFocusViewLayout.js';
 
-const VERTICAL_SPACING = 30;
+const VERTICAL_SPACING = 40;
 
 const FocusViewComponent = ({
   treeData, focusNodeId, selectedNodeInPanelId, onSelectNodeInPanel, onChangeFocusNode,
@@ -96,7 +95,6 @@ const FocusViewComponent = ({
 
   return (
     React.createElement("div", { className: "focus-view-container" },
-      React.createElement(PathToRootDisplay, { treeData: treeData, currentNodeId: focusNodeId, onSelectPathNode: onChangeFocusNode, pathContext: "stellar" }),
       React.createElement("div", { className: "focus-view-main-area" },
         React.createElement("div", { ref: layoutRef, className: "focus-view-layout" },
           React.createElement("svg", { className: "focus-view-svg-overlay" },
@@ -116,7 +114,7 @@ const FocusViewComponent = ({
           ),
           parentNodeData && renderNode(parentNodeData, 'parent'),
           !parentNodeData && allNodePositions.get(focusNodeData.id) && (
-            React.createElement("div", { className: "focus-node-placeholder", style: { position: 'absolute', top: `${(allNodePositions.get(focusNodeData.id)?.y || 0) - (allNodePositions.get(focusNodeData.id)?.height || 0)/2 - VERTICAL_SPACING - 40}px`, left: '50%', transform: 'translateX(-50%)' }},
+            React.createElement("div", { className: "focus-node-placeholder", style: { position: 'absolute', top: `${(allNodePositions.get(focusNodeData.id)?.y || 0) - (allNodePositions.get(focusNodeData.id)?.height || 0)/2 - VERTICAL_SPACING - 50}px`, left: '50%', transform: 'translateX(-50%)' }},
               React.createElement("span", { className: "focus-node-placeholder-icon" }, "🌌"),
               "Sector Core (Root)"
             )
@@ -125,7 +123,7 @@ const FocusViewComponent = ({
           childrenNodeData.length > 0 ? (
             childrenNodeData.map((child) => renderNode(child, 'child'))
           ) : (
-            allNodePositions.get(focusNodeData.id) && React.createElement("div", { className: "focus-node-placeholder", style: { position: 'absolute', top: `${(allNodePositions.get(focusNodeData.id)?.y || 0) + (allNodePositions.get(focusNodeData.id)?.height || 0)/2 + VERTICAL_SPACING + 40}px`, left: '50%', transform: 'translateX(-50%)' }},
+            allNodePositions.get(focusNodeData.id) && React.createElement("div", { className: "focus-node-placeholder", style: { position: 'absolute', top: `${(allNodePositions.get(focusNodeData.id)?.y || 0) + (allNodePositions.get(focusNodeData.id)?.height || 0)/2 + VERTICAL_SPACING + 50}px`, left: '50%', transform: 'translateX(-50%)' }},
               React.createElement("span", { className: "focus-node-placeholder-icon" }, "🛰️"),
               "No Subsystems Detected"
             )
