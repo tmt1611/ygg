@@ -101,7 +101,13 @@ const AiSuggestionModal = ({
                     React.createElement(AiSuggestionPreviewListItem, { node: annotatedTree, level: 0, isVisualDiff: true })
                 )
               ) : (
-                React.createElement("p", {style: {color: 'var(--error-color)', fontWeight: 'bold', padding: '10px'}}, annotatedTree?.description || "Could not display preview due to malformed AI suggestion.")
+                React.createElement("div", { className: "error-message-inline", style: { margin: '1em' } },
+                  React.createElement("div", { className: "error-icon" }, "⚠️"),
+                  React.createElement("div", null,
+                    React.createElement("strong", null, "AI Suggestion Error:"), " ",
+                    annotatedTree?.description || "Could not display preview due to a malformed AI suggestion. The AI may have returned data that is not a valid tree structure. You can try refining your prompt."
+                  )
+                )
               ),
               removedNodes.length > 0 && (
                 React.createElement("div", { className: "ai-suggestion-modal-removed-nodes-section" },

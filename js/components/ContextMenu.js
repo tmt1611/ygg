@@ -86,9 +86,9 @@ const ContextMenu = ({
 
     items.push(
         { type: 'separator' },
-        { id: 'copy-name', label: "Copy Name", icon: copyFeedback === 'name' ? '✅' : '📋', action: () => handleCopy('name') },
-        { id: 'copy-id', label: "Copy ID", icon: copyFeedback === 'id' ? '✅' : '🆔', action: () => handleCopy('id') },
-        { id: 'copy-json', label: "Copy as JSON", icon: copyFeedback === 'json' ? '✅' : '📦', action: () => handleCopy('json') }
+        { id: 'copy-name', label: copyFeedback === 'name' ? 'Copied!' : "Copy Name", icon: '📋', action: () => handleCopy('name') },
+        { id: 'copy-id', label: copyFeedback === 'id' ? 'Copied!' : "Copy ID", icon: '🆔', action: () => handleCopy('id') },
+        { id: 'copy-json', label: copyFeedback === 'json' ? 'Copied!' : "Copy as JSON", icon: '📦', action: () => handleCopy('json') }
     );
 
     if (onDeleteNode) {

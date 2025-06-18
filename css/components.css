@@ -958,7 +958,8 @@ html[data-theme='dark'] .graph-view-node.proxy rect {
   font-size: 11px; /* Slightly larger */
   font-weight: 600;
   text-transform: uppercase;
-  /* The label is outside, so this is fine. I'll just style the circle. */
+  dominant-baseline: middle;
+  text-anchor: middle;
 }
 .graph-view-node.proxy .node-rune-icon {
   display: none; /* Icon is replaced by internal label */

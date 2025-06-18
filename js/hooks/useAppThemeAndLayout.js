@@ -26,15 +26,7 @@ export const useAppThemeAndLayout = (addHistoryEntry) => {
 
   useEffect(() => {
     localStorage.setItem(APP_STORAGE_KEYS.SIDEBAR_COLLAPSED_STATE, JSON.stringify(isSidebarCollapsed));
-     const appContainer = document.querySelector('.yggdrasil-app-container'); 
-    if (appContainer) {
-        if (isSidebarCollapsed) appContainer.classList.add('sidebar-collapsed');
-        else appContainer.classList.remove('sidebar-collapsed');
-    } else { 
-        const bodyElement = document.querySelector('.yggdrasil-app-body') || document.body;
-        if (isSidebarCollapsed) bodyElement.classList.add('sidebar-collapsed');
-        else bodyElement.classList.remove('sidebar-collapsed');
-    }
+    // The class is now applied directly in App.js to avoid race conditions or incorrect element selection.
   }, [isSidebarCollapsed]);
   
   useEffect(() => { localStorage.setItem(APP_STORAGE_KEYS.ACTIVE_MAIN_VIEW, yggdrasilViewMode); }, [yggdrasilViewMode]);
