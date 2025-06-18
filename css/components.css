@@ -832,13 +832,11 @@ html[data-theme='sol'] .contextual-help-icon:hover, html[data-theme='sol'] .cont
 .overlay-panel-view .focus-view-detail-panel .panel-button-group button.danger { background-color: var(--error-color); color: var(--text-on-accent); border-color: var(--error-color); }
 .overlay-panel-view .focus-view-detail-panel .panel-button-group button.danger:hover { background-color: var(--error-color); filter: brightness(1.1); }
 
-.graph-view-wrapper { display: flex; height: 100%; width:100%; overflow: hidden; background: var(--app-bg); }
-
 /* Path to Root Display in Overlay Panels */
 .path-to-root-display {
   display: flex;
   align-items: center;
-  flex-wrap: wrap; /* Allow wrapping on small screens */
+  flex-wrap: nowrap; /* Prevent wrapping */
   gap: 2px 4px;
   padding: 3px 8px;
   border-radius: var(--border-radius);
@@ -847,7 +845,20 @@ html[data-theme='sol'] .contextual-help-icon:hover, html[data-theme='sol'] .cont
   color: var(--text-secondary);
   border: 1px solid var(--border-color);
   max-width: 100%;
-  overflow: hidden;
+  overflow-x: auto; /* Allow horizontal scroll on overflow */
+  /* Simple scrollbar styling */
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-color) transparent;
+}
+.path-to-root-display::-webkit-scrollbar {
+    height: 4px;
+}
+.path-to-root-display::-webkit-scrollbar-track {
+    background: transparent;
+}
+.path-to-root-display::-webkit-scrollbar-thumb {
+    background-color: var(--border-color);
+    border-radius: 2px;
 }
 .path-to-root-display .path-segment {
   cursor: pointer;
@@ -895,6 +906,7 @@ html[data-theme='sol'] .graph-view-svg-container {
   background-size: 25px 25px, 25px 25px, auto, auto;
 }
 
+.graph-view-wrapper { display: flex; height: 100%; width:100%; overflow: hidden; background: var(--app-bg); }
 .graph-view-node circle {
   transition: transform 0.2s ease-out, filter 0.2s ease-out;
   filter: drop-shadow(0px 2px 3px rgba(0,0,0,0.15));
