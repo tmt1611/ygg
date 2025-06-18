@@ -1,5 +1,5 @@
 
-import { GoogleGenAI } from "@google/genai";
+import { GoogleGenerativeAI } from "@google/genai";
 import { initializeNodes, isValidTechTreeNodeShape } from "../utils.js";
 
 let apiClientState = {
@@ -16,7 +16,7 @@ const _initializeClient = (key, source) => {
   }
 
   try {
-    const newClient = new GoogleGenAI({ apiKey: key });
+    const newClient = new GoogleGenerativeAI(key);
     apiClientState = { client: newClient, isKeyAvailable: true, activeKey: key, activeSource: source };
     return { success: true, message: `API Key from ${source} set successfully. AI features enabled.` };
   } catch (error) {
