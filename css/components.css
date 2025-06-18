@@ -460,10 +460,14 @@ html[data-theme='sol'] .contextual-help-icon:hover, html[data-theme='sol'] .cont
   text-align: left;
 }
 
-.modal-overlay-basic { position: fixed; inset: 0; background-color: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 15px; backdrop-filter: blur(4px); } /* Reduced padding */
-.modal-content-basic { background-color: var(--panel-bg); padding: 15px 20px; border-radius: var(--border-radius-lg); box-shadow: var(--box-shadow-lg); max-width: 90vw; max-height: 90vh; overflow-y: auto; animation: modalFadeIn 0.3s ease-out; border-top: 3px solid var(--primary-accent); } /* Reduced padding and added top border */
+.modal-overlay-basic { position: fixed; inset: 0; background-color: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 15px; backdrop-filter: blur(4px); }
+.modal-content-basic { background-color: var(--panel-bg); padding: 15px 20px; border-radius: var(--border-radius-lg); box-shadow: var(--box-shadow-lg); max-width: 90vw; max-height: 90vh; overflow-y: auto; animation: modalFadeIn 0.3s ease-out; border-top: 3px solid var(--primary-accent); }
 .modal-content-basic.large { width: clamp(600px, 80vw, 1000px); max-height: 85vh; display: flex; flex-direction: column; }
-.modal-content-basic .modal-title { font-size: 1.4em; color: var(--text-primary); margin-bottom: 15px; flex-shrink: 0; }
+.modal-content-basic .modal-title { font-size: 1.4em; color: var(--text-primary); margin-bottom: 15px; flex-shrink: 0; display: flex; align-items: center; gap: 10px; }
+.modal-content-basic .modal-title .modal-icon { font-size: 1.2em; line-height: 1; }
+.modal-content-basic.confirm-danger .modal-title { color: var(--error-color); }
+.modal-content-basic.confirm-danger { border-top-color: var(--error-color); }
+
 @keyframes modalFadeIn { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
 
 
@@ -698,7 +702,33 @@ html[data-theme='sol'] .contextual-help-icon:hover, html[data-theme='sol'] .cont
 #warp-arrow path { fill: var(--focus-connector-stroke); }
 
 /* The old .focus-view-*-area divs have been removed from the layout. */
-.overlay-panel-view .focus-node-placeholder { padding: 10px 15px; border-radius: var(--border-radius); background: var(--focus-placeholder-bg); color: var(--focus-placeholder-text); font-style: italic; text-align: center; min-width: 100px; } /* Reduced padding/min-width */
+.focus-node-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 15px;
+  border-radius: var(--border-radius);
+  background: var(--focus-placeholder-bg);
+  color: var(--focus-placeholder-text);
+  text-align: center;
+  min-width: 150px;
+  font-size: 0.9em;
+  font-style: italic;
+  border: 2px dashed var(--focus-connector-stroke);
+  opacity: 0.7;
+  animation: placeholderPulse 3s ease-in-out infinite alternate;
+}
+@keyframes placeholderPulse {
+  from { opacity: 0.5; transform: scale(0.98); }
+  to { opacity: 0.8; transform: scale(1); }
+}
+.focus-node-placeholder-icon {
+  font-size: 2em;
+  color: var(--focus-connector-stroke);
+}
+
 
 .overlay-panel-view .focus-view-detail-panel { 
   width: 320px; /* Restored width */
@@ -1294,20 +1324,21 @@ html[data-theme='nebula'] .history-item-summary strong {
   padding-top: 3px;
 }
 
-.history-item-summary .history-keyword {
-  font-weight: 600;
-  color: var(--text-secondary); /* A more subtle keyword color */
-}
-
-/* For quoted parts, make them stand out slightly */
-.history-item-summary strong:not(.history-keyword) {
-    color: var(--text-primary);
+/* For quoted parts (node names), make them stand out */
+.history-item-summary strong.history-entity {
+    color: var(--primary-accent-dark);
     font-weight: 600;
 }
+html[data-theme='dark'] .history-item-summary strong.history-entity,
+html[data-theme='nebula'] .history-item-summary strong.history-entity {
+    color: var(--primary-accent-light);
+}
 
-html[data-theme='dark'] .history-item-summary .history-keyword,
-html[data-theme='nebula'] .history-item-summary .history-keyword {
-  color: var(--text-tertiary);
+/* For action keywords, make them distinct but less prominent than names */
+.history-item-summary strong.history-keyword {
+  color: var(--text-secondary);
+  font-weight: 500;
+  font-style: italic;
 }
 
 

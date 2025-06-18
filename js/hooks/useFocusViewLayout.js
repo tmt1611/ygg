@@ -6,9 +6,9 @@ const NODE_SIZES_PX = {
     major: { width: 130, height: 130 },
 };
 const FOCUS_NODE_SCALE = 1.15;
-const VERTICAL_SPACING = 30;
-const HORIZONTAL_CHILD_GAP = 20;
-const CHILD_ROW_VERTICAL_GAP = 25;
+const VERTICAL_SPACING = 40; // Increased spacing
+const HORIZONTAL_CHILD_GAP = 25; // Increased spacing
+const CHILD_ROW_VERTICAL_GAP = 30; // Increased spacing
 
 export const useFocusViewLayout = (
   layoutRef,

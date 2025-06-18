@@ -79,59 +79,59 @@ export const useProjectManagement = ({
     return [];
   }, [addHistoryEntry]);
 
-  const _ensureAndLinkExampleProjects = useCallback((existingProjects) => {
-    let newProjects = [...existingProjects];
-    const elfDataParsed = JSON.parse(ELF_WARFARE_STRUCTURE_JSON_STRING);
-    const natureMagicDataParsed = JSON.parse(ADVANCED_NATURE_MAGIC_JSON_STRING);
+  const _addMissingExampleProjects = useCallback((projectsList) => {
+      let newProjects = [...projectsList];
+      const examplesData = [
+          { parsedData: JSON.parse(ELF_WARFARE_STRUCTURE_JSON_STRING), name: "Elven Warfare Doctrines" },
+          { parsedData: JSON.parse(ADVANCED_NATURE_MAGIC_JSON_STRING), name: "Advanced Nature Magic" },
+      ];
 
-    const examples = [
-      { parsedData: elfDataParsed, name: "Elven Warfare Doctrines" },
-      { parsedData: natureMagicDataParsed, name: "Advanced Nature Magic" },
-    ];
+      examplesData.forEach(example => {
+          const exampleExists = newProjects.some(p => p.isExample && p.treeData.id === example.parsedData.tree.id);
+          if (!exampleExists) {
+              newProjects.push({
+                  id: generateUUID(),
+                  name: example.parsedData.tree.name || example.name,
+                  treeData: initializeNodes(example.parsedData.tree),
+                  lastModified: new Date().toISOString(),
+                  isExample: true,
+              });
+          }
+      });
+      return newProjects;
+  }, []);
 
-    examples.forEach(example => {
-      let project = newProjects.find(p => p.isExample && p.treeData.id === example.parsedData.tree.id);
-      if (!project) {
-        project = {
-          id: generateUUID(),
-          name: example.parsedData.tree.name || example.name,
-          treeData: initializeNodes(example.parsedData.tree),
-          lastModified: new Date().toISOString(),
-          isExample: true,
-        };
-        newProjects.push(project);
-      }
-    });
+  const _linkExampleProjects = useCallback((projectsList) => {
+      let linkedProjects = [...projectsList];
+      const ewProject = linkedProjects.find(p => p.isExample && p.treeData.id === 'elf-warfare-root-example-v1');
+      const anmProject = linkedProjects.find(p => p.isExample && p.treeData.id === 'nature-magic-root-example-v1');
 
-    const ewProject = newProjects.find(p => p.isExample && p.treeData.id === elfDataParsed.tree.id);
-    const anmProject = newProjects.find(p => p.isExample && p.treeData.id === natureMagicDataParsed.tree.id);
-
-    if (ewProject && anmProject) {
-      let isEwModified = false;
-      let isAnmModified = false;
+      if (!ewProject || !anmProject) return linkedProjects;
+      
       let ewTree = ewProject.treeData;
       let anmTree = anmProject.treeData;
-      
+      let modified = false;
+
       const nodeToLinkInEW = findNodeById(ewTree, "natures-embrace");
       if (nodeToLinkInEW && nodeToLinkInEW.linkedProjectId !== anmProject.id) {
-        ewTree = updateNodeInTree(ewTree, "natures-embrace", { linkedProjectId: anmProject.id, linkedProjectName: anmProject.name });
-        isEwModified = true;
+          ewTree = updateNodeInTree(ewTree, "natures-embrace", { linkedProjectId: anmProject.id, linkedProjectName: anmProject.name });
+          modified = true;
       }
       
       if (anmTree.linkedProjectId !== ewProject.id) {
-        anmTree = { ...anmTree, linkedProjectId: ewProject.id, linkedProjectName: ewProject.name };
-        isAnmModified = true;
+          anmTree = { ...anmTree, linkedProjectId: ewProject.id, linkedProjectName: ewProject.name };
+          modified = true;
       }
 
-      if (isEwModified || isAnmModified) {
-          newProjects = newProjects.map(p => {
-              if (p.id === ewProject.id && isEwModified) return { ...p, treeData: ewTree, lastModified: new Date().toISOString() };
-              if (p.id === anmProject.id && isAnmModified) return { ...p, treeData: anmTree, lastModified: new Date().toISOString() };
+      if (modified) {
+          return linkedProjects.map(p => {
+              if (p.id === ewProject.id) return { ...p, treeData: ewTree, lastModified: new Date().toISOString() };
+              if (p.id === anmProject.id) return { ...p, treeData: anmTree, lastModified: new Date().toISOString() };
               return p;
           });
       }
-    }
-    return newProjects;
+      
+      return linkedProjects;
   }, []);
 
   const _setActiveInitialProject = useCallback((allProjects) => {
@@ -173,7 +173,9 @@ export const useProjectManagement = ({
     const startupLogged = localStorage.getItem(APP_STORAGE_KEYS.STARTUP_LOAD_LOGGED);
     try {
       let projectsFromStorage = _loadProjectsFromStorage();
-      let allProjects = _ensureAndLinkExampleProjects(projectsFromStorage);
+      let projectsWithExamples = _addMissingExampleProjects(projectsFromStorage);
+      let allProjects = _linkExampleProjects(projectsWithExamples);
+      
       setProjects(allProjects);
       _setActiveInitialProject(allProjects);
     } catch (e) {
@@ -183,7 +185,7 @@ export const useProjectManagement = ({
     } finally {
         if (!startupLogged) localStorage.setItem(APP_STORAGE_KEYS.STARTUP_LOAD_LOGGED, 'true');
     }
-  }, [_loadProjectsFromStorage, _ensureAndLinkExampleProjects, _setActiveInitialProject, setError, addHistoryEntry]);
+  }, [_loadProjectsFromStorage, _addMissingExampleProjects, _linkExampleProjects, _setActiveInitialProject, setError, addHistoryEntry]);
 
 
   const handleSetActiveProject = useCallback((projectId, fromExample = false) => {

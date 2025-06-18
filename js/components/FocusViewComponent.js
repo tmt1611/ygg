@@ -115,14 +115,20 @@ const FocusViewComponent = ({
             )
           ),
           parentNodeData && renderNode(parentNodeData, 'parent'),
-          !parentNodeData && allNodePositions.get(focusNodeData.id) && ( 
-             React.createElement("div", { className: "focus-node-placeholder", style: { position: 'absolute', top: `${(allNodePositions.get(focusNodeData.id)?.y || 0) - (allNodePositions.get(focusNodeData.id)?.height || 0)/2 - VERTICAL_SPACING - 20}px`, left: '50%', transform: 'translateX(-50%)' }}, "Sector Core (Root)")
+          !parentNodeData && allNodePositions.get(focusNodeData.id) && (
+            React.createElement("div", { className: "focus-node-placeholder", style: { position: 'absolute', top: `${(allNodePositions.get(focusNodeData.id)?.y || 0) - (allNodePositions.get(focusNodeData.id)?.height || 0)/2 - VERTICAL_SPACING - 40}px`, left: '50%', transform: 'translateX(-50%)' }},
+              React.createElement("span", { className: "focus-node-placeholder-icon" }, "🌌"),
+              "Sector Core (Root)"
+            )
           ),
           renderNode(focusNodeData, 'focus'),
           childrenNodeData.length > 0 ? (
             childrenNodeData.map((child) => renderNode(child, 'child'))
           ) : (
-             allNodePositions.get(focusNodeData.id) && React.createElement("div", { className: "focus-node-placeholder", style: { position: 'absolute', top: `${(allNodePositions.get(focusNodeData.id)?.y || 0) + (allNodePositions.get(focusNodeData.id)?.height || 0)/2 + VERTICAL_SPACING + 20}px`, left: '50%', transform: 'translateX(-50%)' }}, "No Subsystems Detected")
+            allNodePositions.get(focusNodeData.id) && React.createElement("div", { className: "focus-node-placeholder", style: { position: 'absolute', top: `${(allNodePositions.get(focusNodeData.id)?.y || 0) + (allNodePositions.get(focusNodeData.id)?.height || 0)/2 + VERTICAL_SPACING + 40}px`, left: '50%', transform: 'translateX(-50%)' }},
+              React.createElement("span", { className: "focus-node-placeholder-icon" }, "🛰️"),
+              "No Subsystems Detected"
+            )
           )
         ),
         React.createElement(FocusViewDetailPanel, {

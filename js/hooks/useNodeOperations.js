@@ -104,6 +104,17 @@ export const useNodeOperations = ({
     if (!techTreeData) return;
     const nodeToDelete = findNodeById(techTreeData, nodeIdToDelete);
     if (!nodeToDelete) return;
+
+    if (nodeToDelete.isLocked) {
+      modalManager.openConfirmModal({
+        title: "Deletion Blocked",
+        message: `The node "${nodeToDelete.name}" is locked and cannot be deleted. Please unlock it first.`,
+        confirmText: "OK",
+        cancelText: null, 
+      });
+      return;
+    }
+
     openConfirmModal({
       title: "Delete Node?", message: `Delete "${nodeToDelete.name}" and ALL its descendants? This cannot be undone.`,
       confirmText: "Delete Node & Children", cancelText: "Cancel", confirmButtonStyle: 'danger',

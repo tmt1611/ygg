@@ -39,6 +39,10 @@ const ConfirmModal = ({
     return null;
   }
 
+  const isDanger = confirmButtonStyle === 'danger';
+  const icon = isDanger ? '⚠️' : '❓';
+  const modalClass = `modal-content-basic ${isDanger ? 'confirm-danger' : ''}`;
+
   return (
     React.createElement("div", {
       className: "modal-overlay-basic",
@@ -47,8 +51,9 @@ const ConfirmModal = ({
       "aria-labelledby": "confirm-modal-title",
       "aria-describedby": "confirm-modal-message"
     },
-      React.createElement("div", { className: "modal-content-basic" },
+      React.createElement("div", { className: modalClass },
         React.createElement("h2", { id: "confirm-modal-title", className: "modal-title", style: { marginBottom: '12px' }},
+          React.createElement("span", { className: "modal-icon", "aria-hidden": "true" }, icon),
           title
         ),
         React.createElement("div", { id: "confirm-modal-message", style: { color: 'var(--text-secondary)', marginBottom: '25px', whiteSpace: 'pre-wrap', lineHeight: '1.5', fontSize: '0.95em' }}, message),
