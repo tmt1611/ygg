@@ -18,7 +18,7 @@ const HistoryItem = ({ entry }) => {
     const summaryWithHighlights = useMemo(() => {
         if (!entry.summary) return '';
         // This regex will match quoted strings or known keywords
-        const regex = /"([^"]*)"|\b(created|deleted|updated|locked|unlocked|saved|loaded|imported|generated|applied|rejected|undone|cleared|failed|added|removed|changed|renamed|activated|switched|proposed|discarded|downloaded|set|enabled|disabled|opened|closed|cleared)\b/gi;
+        const regex = /"([^"]*)"|\b(created|deleted|updated|locked|unlocked|saved|loaded|imported|generated|applied|rejected|undone|cleared|failed|added|removed|changed|renamed|activated|switched|proposed|discarded|downloaded|set|enabled|disabled|opened|closed|cleared|regenerate|regenerated|revert|reverted|link|linked|unlink|unlinked)\b/gi;
         
         return entry.summary.replace(regex, (match, quotedContent, keyword) => {
             // Both `quotedContent` and `keyword` are captured. One will be defined, the other undefined.
@@ -27,7 +27,7 @@ const HistoryItem = ({ entry }) => {
                 return `<strong class="history-entity">"${escapeHtml(quotedContent)}"</strong>`;
             }
             if (keyword !== undefined) {
-                return `<strong class="history-keyword">${keyword}</strong>`;
+                return `<strong class="history-keyword">${keyword.toLowerCase()}</strong>`;
             }
             return match; // Should not happen with this regex, but for safety.
         });

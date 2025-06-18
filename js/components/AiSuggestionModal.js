@@ -1,5 +1,5 @@
 
-import React, { useMemo, useEffect, useRef, useState } from 'react';
+import React, { useMemo, useEffect, useRef, useState, useCallback } from 'react';
 import { compareAndAnnotateTree, countNodesInTree, isValidTechTreeNodeShape, getAllNodesAsMap } from '../utils.js';
 import AiSuggestionPreviewListItem from './AiSuggestionPreviewListItem.js';
 import ModificationPromptInput from './ModificationPromptInput.js';
@@ -16,6 +16,7 @@ const AiSuggestionModal = ({
 }) => {
   const applyButtonRef = useRef(null);
   const [followUpPrompt, setFollowUpPrompt] = useState('');
+  const [isRemovedNodesCollapsed, setIsRemovedNodesCollapsed] = useState(true);
 
   const comparisonResult = useMemo(() => {
     if (!isOpen || !suggestion) return null;
@@ -109,9 +110,16 @@ const AiSuggestionModal = ({
               ),
               removedNodes.length > 0 && (
                 React.createElement("div", { className: "ai-suggestion-modal-removed-nodes-section" },
-                    React.createElement("h4", { className: "ai-suggestion-modal-removed-nodes-title" }, "Nodes To Be Removed (", removedNodes.length, "):"),
-                    React.createElement("ul", { className: "ai-suggestion-modal-removed-nodes-list" },
-                        removedNodes.map(node => (
+                    React.createElement("h4", { 
+                      className: `ai-suggestion-modal-removed-nodes-title ${isRemovedNodesCollapsed ? 'collapsed' : ''}`,
+                      onClick: () => setIsRemovedNodesCollapsed(!isRemovedNodesCollapsed),
+                      "aria-expanded": !isRemovedNodesCollapsed,
+                      role: "button",
+                      tabIndex: 0,
+                      onKeyDown: (e) => { if (e.key === 'Enter' || e.key === ' ') setIsRemovedNodesCollapsed(!isRemovedNodesCollapsed); }
+                    }, "Nodes To Be Removed (", removedNodes.length, "):"),
+                    React.createElement("ul", { className: `ai-suggestion-modal-removed-nodes-list ${isRemovedNodesCollapsed ? 'collapsed' : ''}` },
+                        !isRemovedNodesCollapsed && removedNodes.map(node => (
                             React.createElement("li", { key: `removed-${node.id}`},
                               React.createElement("strong", null, node.name), " ", node.description && `- "${node.description.substring(0, 40)}${node.description.length > 40 ? '...' : ''}"`,
                               React.createElement("span", { className: "node-id" }, " (ID: ", node.id.substring(0,8), "...)")

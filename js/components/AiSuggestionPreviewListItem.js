@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 const DiffDetail = ({ detail }) => {
   const renderValue = (value) => {
@@ -27,6 +27,11 @@ const DiffDetail = ({ detail }) => {
 
 
 const AiSuggestionPreviewListItem = ({ node, level, isVisualDiff = false }) => {
+  const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
+
+  const hasLongDescription = node.description && node.description.length > 120; // Set a threshold for when to collapse
+  const isDescriptionEffectivelyCollapsed = hasLongDescription && !isDescriptionExpanded;
+
   const changeStatusMap = {
     new: { icon: '➕', title: "This node is newly added." },
     content_modified: { icon: '✏️', title: "Name, description, importance, or link of this unlocked node has changed." },
@@ -61,8 +66,19 @@ const AiSuggestionPreviewListItem = ({ node, level, isVisualDiff = false }) => {
             )
         ),
         node.description && (
-          React.createElement("p", { className: "diff-list-item-desc" },
-            node.description
+          React.createElement("div", { className: "diff-list-item-desc-wrapper" },
+            hasLongDescription && (
+              React.createElement("button", {
+                className: "diff-list-item-desc-toggle",
+                onClick: (e) => { e.stopPropagation(); setIsDescriptionExpanded(!isDescriptionExpanded); },
+                "aria-expanded": isDescriptionExpanded
+              },
+                isDescriptionExpanded ? "Show less" : "Show full description..."
+              )
+            ),
+            React.createElement("div", { className: `diff-list-item-desc ${isDescriptionEffectivelyCollapsed ? 'collapsed' : ''}` },
+              node.description
+            )
           )
         ),
         node._modificationDetails && node._modificationDetails.length > 0 && isVisualDiff && (
