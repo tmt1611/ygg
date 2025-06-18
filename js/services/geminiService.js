@@ -1,5 +1,5 @@
 
-import { GoogleGenerativeAI } from "@google/genai";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 import { initializeNodes, isValidTechTreeNodeShape } from "../utils.js";
 
 let apiClientState = {
