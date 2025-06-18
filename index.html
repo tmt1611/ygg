@@ -117,15 +117,15 @@
         --box-shadow-lg: 0 8px 12px -3px rgba(0,0,0,0.08), 0 3px 5px -2px rgba(0,0,0,0.04);
         --text-shadow-subtle: 1px 1px 2px rgba(0,0,0,0.1);
 
-        --status-small-bg: #E8F5E9; 
-        --status-small-text: #1B5E20; 
-        --status-small-border: #A5D6A7; 
-        --status-medium-bg: #FFF3E0; 
-        --status-medium-text: #E65100; 
-        --status-medium-border: #FFCC80; 
-        --status-large-bg: #E3F2FD; 
-        --status-large-text: #0D47A1; 
-        --status-large-border: #90CAF9; 
+        --importance-minor-bg: #E8F5E9; 
+        --importance-minor-text: #1B5E20; 
+        --importance-minor-border: #A5D6A7; 
+        --importance-common-bg: #FFF3E0; 
+        --importance-common-text: #E65100; 
+        --importance-common-border: #FFCC80; 
+        --importance-major-bg: #E3F2FD; 
+        --importance-major-text: #0D47A1; 
+        --importance-major-border: #90CAF9; 
 
         --yggdrasil-bark-bg: #3E2723; 
         --yggdrasil-leaf-green: #2E7D32; 
@@ -188,15 +188,15 @@
         --graph-node-text: var(--text-primary);
         --graph-link-stroke-ecosystem: #A1887F; 
 
-        --status-small-bg: #2E7D32; 
-        --status-small-text: #C8E6C9; 
-        --status-small-border: #4CAF50; 
-        --status-medium-bg: #D84315; 
-        --status-medium-text: #FFCCBC; 
-        --status-medium-border: #FF7043;
-        --status-large-bg: #1565C0; 
-        --status-large-text: #BBDEFB;
-        --status-large-border: #42A5F5;
+        --importance-minor-bg: #2E7D32; 
+        --importance-minor-text: #C8E6C9; 
+        --importance-minor-border: #4CAF50; 
+        --importance-common-bg: #D84315; 
+        --importance-common-text: #FFCCBC; 
+        --importance-common-border: #FF7043;
+        --importance-major-bg: #1565C0; 
+        --importance-major-text: #BBDEFB;
+        --importance-major-border: #42A5F5;
 
         --yggdrasil-bark-bg: #2A1B16; 
         --yggdrasil-leaf-green: #388E3C;
@@ -591,12 +591,12 @@
       .panel-header-actions .base-icon-button { font-size: 0.9em; padding: 3px; } /* Reduced size/padding */
       
       .status-label { padding: 2px 6px; border-radius: var(--border-radius); font-size: 0.8em; font-weight: 500; } /* Reduced padding/font-size */
-      .status-small { background-color: var(--status-small-bg); color: var(--status-small-text); border: 1px solid var(--status-small-border); }
-      .status-medium { background-color: var(--status-medium-bg); color: var(--status-medium-text); border: 1px solid var(--status-medium-border); }
-      .status-large { background-color: var(--status-large-bg); color: var(--status-large-text); border: 1px solid var(--status-large-border); }
+      .importance-minor { background-color: var(--importance-minor-bg); color: var(--importance-minor-text); border: 1px solid var(--importance-minor-border); }
+      .importance-common { background-color: var(--importance-common-bg); color: var(--importance-common-text); border: 1px solid var(--importance-common-border); }
+      .importance-major { background-color: var(--importance-major-bg); color: var(--importance-major-text); border: 1px solid var(--importance-major-border); }
       
       .status-rune { font-size: 0.9em; margin-right: 4px; } 
-      .list-view-status-select, .focus-view-detail-panel .status-select, .graph-view-selected-node-panel .status-select, .overlay-panel-view .status-select {
+      .list-view-importance-select, .focus-view-detail-panel .importance-select, .graph-view-selected-node-panel .importance-select, .overlay-panel-view .importance-select {
         padding: 6px 8px; text-align: left; font-size: 0.9em; /* Reduced padding/font-size */
       }
 
@@ -833,12 +833,12 @@
       } 
       .celestial-body .celestial-body-desc { font-size: 0.65em; opacity: 0.8; padding: 0 4px; max-height: 1.5em; overflow:hidden;} 
       
-      .celestial-body.status-small { 
+      .celestial-body.importance-minor { 
         background: radial-gradient(circle, var(--focus-node-asteroid-bg) 60%, var(--focus-node-asteroid-glow)); 
         width: 60px; height: 60px; 
       } 
-      .celestial-body.status-medium { background: radial-gradient(circle, var(--focus-node-planet-bg) 70%, var(--focus-node-planet-glow)); } /* Default size is 90px */
-      .celestial-body.status-large { 
+      .celestial-body.importance-common { background: radial-gradient(circle, var(--focus-node-planet-bg) 70%, var(--focus-node-planet-glow)); } /* Default size is 90px */
+      .celestial-body.importance-major { 
         background: radial-gradient(circle, var(--focus-node-star-bg) 50%, var(--focus-node-star-glow) 80%, transparent 100%); 
         width: 130px; height: 130px;
       } 
@@ -905,8 +905,8 @@
       .list-item-action-icon.locked { color: var(--warning-color); }
       .list-item-action-icon.primary-action { color: var(--primary-accent); }
       
-      .list-view-status-select-wrapper { width: auto; } /* Make width flexible */
-      .list-view-status-select { font-size: 0.8em; padding: 4px 6px; text-align: left; } /* Keep existing select styles, wrapper change will make it compact */
+      .list-view-importance-select-wrapper { width: auto; } /* Make width flexible */
+      .list-view-importance-select { font-size: 0.8em; padding: 4px 6px; text-align: left; } /* Keep existing select styles, wrapper change will make it compact */
       
       .list-view-item-content { padding: 0 8px 8px 8px; } 
       .list-view-description-area { 
@@ -966,9 +966,9 @@
       .stat-label { display: block; font-size: 0.85em; color: var(--text-secondary); margin-bottom: 3px; } 
       .stat-value { font-size: 1.2em; font-weight: 600; color: var(--text-primary); } 
       .stat-value.locked { color: var(--warning-color); }
-      .stat-value.status-small { color: var(--status-small-text); }
-      .stat-value.status-medium { color: var(--status-medium-text); }
-      .stat-value.status-large { color: var(--status-large-text); }
+      .stat-value.importance-minor { color: var(--importance-minor-text); }
+      .stat-value.importance-common { color: var(--importance-common-text); }
+      .stat-value.importance-major { color: var(--importance-major-text); }
 
 
       @media (max-width: 768px) {

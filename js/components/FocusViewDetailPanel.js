@@ -4,16 +4,16 @@ import React, { useState, useEffect, useMemo } from 'react';
 import ContextualHelpTooltip from './ContextualHelpTooltip.js';
 // import { LinkSourceInfo } from '../hooks/useProjectLinking.js'; // Types removed
 
-const NODE_STATUS_OPTIONS = [
-    { value: 'small', label: 'Small', rune: '🌱' },
-    { value: 'medium', label: 'Medium', rune: '🌿' },
-    { value: 'large', label: 'Large', rune: '🌳' },
+const NODE_IMPORTANCE_OPTIONS = [
+    { value: 'minor', label: 'Minor', rune: '🌱' },
+    { value: 'common', label: 'Common', rune: '🌿' },
+    { value: 'major', label: 'Major', rune: '🌳' },
 ];
 
 const FocusViewDetailPanel = ({
   node,
   isAppBusy,
-  onNodeStatusChange,
+  onNodeImportanceChange,
   onToggleLock,
   onOpenNodeEditModal,
   onOpenLinkProjectModal,
@@ -114,15 +114,15 @@ const FocusViewDetailPanel = ({
       node.isLocked && React.createElement("p", { style: { fontSize: '0.85em', color: 'var(--warning-color)', textAlign: 'center' }}, "System details locked. Unlock to edit."),
 
       React.createElement("div", { className: "form-group" },
-        React.createElement("label", { htmlFor: "focus-node-status" }, "System Size/Status:"),
+        React.createElement("label", { htmlFor: "focus-node-importance" }, "System Importance:"),
         React.createElement("select", {
-          id: "focus-node-status",
-          value: node.status || 'medium',
-          onChange: (e) => handleDetailPanelNodeAction(() => onNodeStatusChange(node.id, e.target.value)),
+          id: "focus-node-importance",
+          value: node.importance || 'common',
+          onChange: (e) => handleDetailPanelNodeAction(() => onNodeImportanceChange(node.id, e.target.value)),
           disabled: isAppBusy || node.isLocked,
-          className: `status-select status-${node.status || 'medium'}`
+          className: `importance-select importance-${node.importance || 'common'}`
         },
-          NODE_STATUS_OPTIONS.map(opt => React.createElement("option", { key: opt.value, value: opt.value }, opt.rune, " ", opt.label))
+          NODE_IMPORTANCE_OPTIONS.map(opt => React.createElement("option", { key: opt.value, value: opt.value }, opt.rune, " ", opt.label))
         )
       ),
 

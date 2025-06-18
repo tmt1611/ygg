@@ -113,7 +113,7 @@ const AppModals = ({
           node: findNodeById(techTreeData, contextMenuNodeId),
           onClose: closeContextMenu,
           onToggleLock: () => nodeOperations.handleToggleNodeLock(contextMenuNodeId),
-          onChangeStatus: (status) => nodeOperations.handleNodeStatusChange(contextMenuNodeId, status),
+          onChangeImportance: (importance) => nodeOperations.handleNodeImportanceChange(contextMenuNodeId, importance),
           onEditName: () => { const n = findNodeById(techTreeData, contextMenuNodeId); if (n) modalManager.openNodeEditModal({mode:'editName', targetNodeId: n.id, currentNodeName: n.name, currentNodeDescription: n.description, title: `Edit: ${n.name}`, label: 'Node Name', placeholder: 'Enter new name', initialValue: n.name, initialDescription: n.description});},
           onAddChild: () => { const n = findNodeById(techTreeData, contextMenuNodeId); if (n) modalManager.openNodeEditModal({mode:'addChild', targetNodeId: n.id, parentNodeName: n.name, title: `Add Child to: ${n.name}`, label: 'New Child Name', placeholder: 'Enter name'});},
           onSetFocus: () => handleSwitchToFocusView(contextMenuNodeId),

@@ -20,20 +20,20 @@ export const ELF_WARFARE_STRUCTURE_JSON_STRING = `
     "id": "elf-warfare-root-example-v1",
     "name": "Elven Warfare Doctrines",
     "description": "Core principles of elven combat strategies, focusing on agility, precision, and harmony with nature.",
-    "status": "large",
+    "importance": "major",
     "isLocked": false,
     "children": [
       {
         "id": "elf-archery-example-v1",
         "name": "Masterful Archery",
         "description": "Techniques for elven longbows, including volley fire, pinpoint accuracy, and enchanted arrows.",
-        "status": "medium",
+        "importance": "common",
         "children": [
           {
             "id": "elf-arrow-crafting-example-v1",
             "name": "Arrow Crafting & Enchantment",
             "description": "Fletching specialized arrows and imbuing them with minor magical properties.",
-            "status": "small",
+            "importance": "minor",
             "children": []
           }
         ]
@@ -42,14 +42,14 @@ export const ELF_WARFARE_STRUCTURE_JSON_STRING = `
         "id": "natures-embrace",
         "name": "Nature's Embrace",
         "description": "Integration of natural magic and creatures into military operations. This branch can explore links to deeper nature magic.",
-        "status": "medium",
+        "importance": "common",
         "children": [
           {
             "id": "druidic-healing",
             "name": "Druidic Healing",
             "description": "Develop advanced nature-based healing for troops.",
             "isLocked": false,
-            "status": "medium",
+            "importance": "common",
             "children": []
           }
         ]
@@ -58,7 +58,7 @@ export const ELF_WARFARE_STRUCTURE_JSON_STRING = `
         "id": "elf-blade-dancing-example-v1",
         "name": "Blade Dancing Combat",
         "description": "Fluid and graceful close-quarters combat with dual blades or sword and dagger.",
-        "status": "medium",
+        "importance": "common",
         "children": []
       }
     ]
@@ -72,27 +72,27 @@ export const ADVANCED_NATURE_MAGIC_JSON_STRING = `
     "id": "nature-magic-root-example-v1", 
     "name": "Advanced Nature Magic",
     "description": "Deep understanding and manipulation of natural forces, flora, and fauna.",
-    "status": "large",
+    "importance": "major",
     "isLocked": false,
     "children": [
       {
         "id": "elemental-attunement-example-v1",
         "name": "Elemental Attunement",
         "description": "Channeling the power of earth, air, fire, and water for potent spells.",
-        "status": "medium",
+        "importance": "common",
         "children": [
           {
             "id": "geomancy-example-v1",
             "name": "Geomancy",
             "description": "Shaping stone and earth, creating barriers or tremors.",
-            "status": "small",
+            "importance": "minor",
             "children": []
           },
           {
             "id": "aeromancy-example-v1",
             "name": "Aeromancy",
             "description": "Controlling winds, summoning gusts, or creating localized storms.",
-            "status": "small",
+            "importance": "minor",
             "children": []
           }
         ]
@@ -101,14 +101,14 @@ export const ADVANCED_NATURE_MAGIC_JSON_STRING = `
         "id": "druidic-shapeshifting-example-v1",
         "name": "Druidic Shapeshifting",
         "description": "Assuming potent animal forms (bear, wolf, eagle) for various combat and utility purposes.",
-        "status": "medium",
+        "importance": "common",
         "children": []
       },
       {
         "id": "flora-manipulation-example-v1",
         "name": "Verdant Growth & Flora Control",
         "description": "Accelerating plant growth, animating plants for defense, or creating entangling vines.",
-        "status": "medium",
+        "importance": "common",
         "children": []
       }
     ]

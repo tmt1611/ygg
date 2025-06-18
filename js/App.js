@@ -25,7 +25,7 @@ import { useApiKey } from './hooks/useApiKey.js';
 
 // Services & Utils
 import * as geminiService from './services/geminiService.js';
-import { findNodeById, countNodesInTree, getTreeDepth, getLockedNodeIds, countNodesByStatus } from './utils.js';
+import { findNodeById, countNodesInTree, getTreeDepth, getLockedNodeIds, countNodesByImportance } from './utils.js';
 
 // Types (imports will be preserved but types themselves are gone from types.js)
 // import { TechTreeNode, NodeStatus, Project, WorkspaceSubTab, YggdrasilViewMode, ActiveOverlayPanel, SidebarTabId } from './types.js';
@@ -191,7 +191,7 @@ const App = () => {
           totalNodes: techTreeData ? countNodesInTree(techTreeData) : 0,
           depth: techTreeData ? getTreeDepth(techTreeData) : 0,
           lockedCount: techTreeData ? getLockedNodeIds(techTreeData).length : 0,
-          statusCounts: techTreeData ? countNodesByStatus(techTreeData) : {small:0, medium:0, large:0},
+          importanceCounts: techTreeData ? countNodesByImportance(techTreeData) : {minor:0, common:0, major:0},
       };
   }, [techTreeData]);
 
@@ -318,7 +318,7 @@ const App = () => {
           treeData: techTreeData,
           onOpenNodeEditModal: modalManager.openNodeEditModal,
           onToggleLock: nodeOperations.handleToggleNodeLock,
-          onNodeStatusChange: nodeOperations.handleNodeStatusChange,
+          onNodeImportanceChange: nodeOperations.handleNodeImportanceChange,
           onLinkToProject: projectLinkingHook.handleOpenLinkProjectModal,
           onGoToLinkedProject: projectLinkingHook.handleNavigateToLinkedProject,
           onUnlinkProject: projectLinkingHook.handleUnlinkProjectFromNode,

@@ -3,16 +3,16 @@ import React, { useMemo, useCallback, useState, useEffect } from 'react';
 // import { TechTreeNode, NodeStatus, Project } from '../types.js'; // Types removed
 // import { LinkSourceInfo } from '../hooks/useProjectLinking.js'; // Types removed
 
-const RUNE_STATUS_OPTIONS = [
-    { value: 'small', label: 'Small', rune: '🌱' },
-    { value: 'medium', label: 'Medium', rune: '🌿' },
-    { value: 'large', label: 'Large', rune: '🌳' },
+const RUNE_IMPORTANCE_OPTIONS = [
+    { value: 'minor', label: 'Minor', rune: '🌱' },
+    { value: 'common', label: 'Common', rune: '🌿' },
+    { value: 'major', label: 'Major', rune: '🌳' },
 ];
 
 const TechTreeListItemComponent = ({
     node, showDescriptionsGlobal,
     onToggleLock,
-    onNodeStatusChange,
+    onNodeImportanceChange,
     onOpenNodeEditModal, level, searchTerm, isAppBusy, collapsedNodeIds, onToggleCollapseNode,
     onSwitchToFocusView,
     onNavigateToLinkedProject,
@@ -41,9 +41,9 @@ const TechTreeListItemComponent = ({
   const isCollapsed = collapsedNodeIds.has(node.id);
   const hasChildren = !!(node.children && node.children.length > 0);
 
-  const handleStatusChange = useCallback((e) => {
-    onNodeStatusChange(node.id, e.target.value);
-  }, [node.id, onNodeStatusChange]);
+  const handleImportanceChange = useCallback((e) => {
+    onNodeImportanceChange(node.id, e.target.value);
+  }, [node.id, onNodeImportanceChange]);
 
   const handleEditNameAndDescriptionClick = useCallback(() => {
     onOpenNodeEditModal({
@@ -138,7 +138,7 @@ const TechTreeListItemComponent = ({
     nodeNameTitle += ` (↩️ Linked from: ${incomingLinkSource.sourceProjectName} / ${incomingLinkSource.sourceNodeName})`;
   }
 
-  const currentStatusObject = RUNE_STATUS_OPTIONS.find(opt => opt.value === (node.status || 'medium')) || RUNE_STATUS_OPTIONS[1];
+  const currentImportanceObject = RUNE_IMPORTANCE_OPTIONS.find(opt => opt.value === (node.importance || 'common')) || RUNE_IMPORTANCE_OPTIONS[1];
 
 
   return (
@@ -179,16 +179,16 @@ const TechTreeListItemComponent = ({
             title: node.isLocked ? `Unlock Node` : `Lock Node`},
             node.isLocked ? '🔒' : '🔓'
           ),
-           React.createElement("div", { className: "list-view-status-select-wrapper" },
+           React.createElement("div", { className: "list-view-importance-select-wrapper" },
               React.createElement("select", {
-                value: node.status || 'medium',
-                onChange: handleStatusChange,
+                value: node.importance || 'common',
+                onChange: handleImportanceChange,
                 disabled: isAppBusy,
-                className: `list-view-status-select status-${node.status || 'medium'}`,
-                "aria-label": `Status for ${node.name}`,
-                title: `Current status: ${currentStatusObject.rune} ${currentStatusObject.label}. Click to change.`
+                className: `list-view-importance-select importance-${node.importance || 'common'}`,
+                "aria-label": `Importance for ${node.name}`,
+                title: `Current importance: ${currentImportanceObject.rune} ${currentImportanceObject.label}. Click to change.`
               },
-                RUNE_STATUS_OPTIONS.map(opt => React.createElement("option", { key: opt.value, value: opt.value }, opt.rune, " ", opt.label))
+                RUNE_IMPORTANCE_OPTIONS.map(opt => React.createElement("option", { key: opt.value, value: opt.value }, opt.rune, " ", opt.label))
               )
             ),
            React.createElement("button", { onClick: handleToggleLocalDescription, disabled: isAppBusy || !node.description, className: "list-item-action-icon base-icon-button",
@@ -236,7 +236,7 @@ const TechTreeListItemComponent = ({
               key: child.id, node: child,
               showDescriptionsGlobal: showDescriptionsGlobal,
               onToggleLock: onToggleLock,
-              onNodeStatusChange: onNodeStatusChange,
+              onNodeImportanceChange: onNodeImportanceChange,
               onOpenNodeEditModal: onOpenNodeEditModal, level: level + 1,
               searchTerm: searchTerm, isAppBusy: isAppBusy,
               collapsedNodeIds: collapsedNodeIds, onToggleCollapseNode: onToggleCollapseNode,

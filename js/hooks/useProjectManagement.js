@@ -227,7 +227,7 @@ export const useProjectManagement = ({
   const internalCreateNewProject = useCallback((name) => {
     resetTreeForNewProjectContext();
     const newEmptyTree = initializeNodes({
-      id: 'root-empty-' + generateUUID().substring(0,8), name: 'New Project Root', description: 'Start building your tech tree.', status: 'medium'
+      id: 'root-empty-' + generateUUID().substring(0,8), name: 'New Project Root', description: 'Start building your tech tree.', importance: 'common'
     });
     setTechTreeData(newEmptyTree); 
     setContextText(name);

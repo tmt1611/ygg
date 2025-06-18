@@ -124,7 +124,7 @@ const isValidTechTreeNodeShape = (data) => {
     if (typeof data.name !== 'string' || data.name.trim() === '') return false;
     if (data.description !== undefined && typeof data.description !== 'string') return false;
     if (data.isLocked !== undefined && typeof data.isLocked !== 'boolean') return false;
-    if (data.status !== undefined && !(typeof data.status === 'string' && ['small', 'medium', 'large'].includes(data.status))) return false;
+    if (data.importance !== undefined && !(typeof data.importance === 'string' && ['minor', 'common', 'major'].includes(data.importance))) return false;
     if (data.children !== undefined && data.children !== null) {
         if (!Array.isArray(data.children)) return false;
         if (!data.children.every((child) => isValidTechTreeNodeShape(child))) return false;
@@ -154,7 +154,7 @@ const parseGeminiJsonResponse = (responseText, forModification = false) => {
     }
     if (!isValidTechTreeNodeShape(parsed)) {
         console.error("Gemini JSON parsing error: Root object structure invalid.", parsed);
-        throw new Error("AI returned malformed JSON (root object invalid). Ensure AI is configured for valid node JSON output (name, description, isLocked, status, children).");
+        throw new Error("AI returned malformed JSON (root object invalid). Ensure AI is configured for valid node JSON output (name, description, isLocked, importance, children).");
     }
     return parsed;
   } catch(e) {
@@ -193,13 +193,13 @@ const parseGeminiJsonResponseForInsights = (responseText) => {
     }
 };
 
-const COMMON_NODE_FORMAT_INSTRUCTION = `{ "id": "auto-gen-if-new", "name": "Concise Name (max 50 chars)", "description": "Brief Desc (optional, max 150 chars, '' if none)", "isLocked": false, "status": "medium", "children": [] }`;
+const COMMON_NODE_FORMAT_INSTRUCTION = `{ "id": "auto-gen-if-new", "name": "Concise Name (max 50 chars)", "description": "Brief Desc (optional, max 150 chars, '' if none)", "isLocked": false, "importance": "common", "children": [] }`;
 const COMMON_JSON_SYNTAX_RULES = `
 Strict JSON Rules:
 1. Keys and string values in DOUBLE QUOTES. No trailing commas.
-2. Valid statuses: "small", "medium", "large". Default: "medium" for new nodes.
+2. Valid importances: "minor", "common", "major". Default: "common" for new nodes.
 3. Output ONLY the single JSON object (for new tree) or the complete modified tree's root JSON object. NO extra text/markdown.
-4. ALL nodes MUST have: "id", "name", "description" (use "" if empty), "isLocked" (boolean), "status" (string), "children" (array, can be empty []).
+4. ALL nodes MUST have: "id", "name", "description" (use "" if empty), "isLocked" (boolean), "importance" (string), "children" (array, can be empty []).
 `;
 
 export const generateTechTree = async (userPrompt) => {
@@ -225,7 +225,7 @@ Ensure: Logical hierarchy, 2-4 levels deep, 2-5 children per parent. Prioritize 
     const parsedData = parseGeminiJsonResponse(response.text, false); 
      if (Array.isArray(parsedData) || !isValidTechTreeNodeShape(parsedData)) { 
         console.error("Generated JSON root structure error after parsing for new tree:", parsedData);
-        throw new Error("Generated JSON root structure invalid (expected single object with name, children, status, etc.).");
+        throw new Error("Generated JSON root structure invalid (expected single object with name, children, importance, etc.).");
     }
     return initializeNodes(parsedData);
   } catch (error) {
@@ -245,14 +245,14 @@ export const modifyTechTreeByGemini = async (
 
   const systemInstruction = `You are an AI assistant modifying a JSON tech tree.
 **MANDATORY RULES:**
-1.  Node Status: Must be "small", "medium", "large". New nodes default to "medium".
-2.  Locked Nodes: For nodes listed in 'Locked Node IDs', their 'id', 'name', 'description', 'status', and 'isLocked: true' properties MUST NOT CHANGE.
+1.  Node Importance: Must be "minor", "common", "major". New nodes default to "common".
+2.  Locked Nodes: For nodes listed in 'Locked Node IDs', their 'id', 'name', 'description', 'importance', and 'isLocked: true' properties MUST NOT CHANGE.
 3.  Children of Locked Nodes: Adding NEW children TO locked nodes IS PERMITTED.
-4.  Re-parenting Locked Nodes: Moving locked nodes (changing their parent) IS PERMITTED, but their core properties (name, desc, status, id, isLocked) must be preserved as per rule 2.
-5.  Unlocked Nodes: Nodes NOT in 'Locked Node IDs' are fully modifiable (name, description, status, children). Their 'isLocked' should remain false unless explicitly told to lock.
+4.  Re-parenting Locked Nodes: Moving locked nodes (changing their parent) IS PERMITTED, but their core properties (name, desc, importance, id, isLocked) must be preserved as per rule 2.
+5.  Unlocked Nodes: Nodes NOT in 'Locked Node IDs' are fully modifiable (name, description, importance, children). Their 'isLocked' should remain false unless explicitly told to lock.
 6.  ID Preservation: RETAIN existing IDs for all nodes that are kept or modified (unless it's a new node). New nodes should get "NEW_NODE" as their 'id' field value (it will be replaced automatically later).
-7.  New Node Defaults: New nodes must have 'isLocked: false', an empty string "" for 'description' if none is specified, and 'status: "medium"'.
-8.  Mandatory Fields: ALL nodes in the output MUST have 'id', 'name', 'isLocked' (boolean), 'status' (string), and 'children' (array, can be empty []). 'description' (string, can be "") is also mandatory.
+7.  New Node Defaults: New nodes must have 'isLocked: false', an empty string "" for 'description' if none is specified, and 'importance: "common"'.
+8.  Mandatory Fields: ALL nodes in the output MUST have 'id', 'name', 'isLocked' (boolean), 'importance' (string), and 'children' (array, can be empty []). 'description' (string, can be "") is also mandatory.
 9.  Output: Respond ONLY with a single, valid JSON object representing the MODIFIED tree's root node. NO EXTRA TEXT, explanations, or markdown fences.
 10. JSON Syntax: Strictly follow JSON rules. Example node structure: ${COMMON_NODE_FORMAT_INSTRUCTION}
 `;
@@ -292,7 +292,7 @@ Output the complete, modified JSON for the tech tree, adhering to ALL rules abov
 
     if (!isValidTechTreeNodeShape(parsedData)) {
         console.error("Gemini modification resulted in invalid JSON root structure after potential wrap.", parsedData);
-        throw new Error("AI suggestion has an invalid root structure (e.g., name/children/status missing or invalid type).");
+        throw new Error("AI suggestion has an invalid root structure (e.g., name/children/importance missing or invalid type).");
     }
     
     return initializeNodes(parsedData);
@@ -363,7 +363,7 @@ Context for the entire tech tree project: "${projectContext || 'General Technolo
 Analyze the following specific node within this tech tree:
 Node Name: "${node.name}"
 Node Description: "${node.description || '(No description provided)'}"
-Node Status/Size: "${node.status || 'Medium'}"
+Node Importance: "${node.importance || 'Common'}"
 ${parentInfo}
 ${siblingInfo}
 ${childrenInfo}

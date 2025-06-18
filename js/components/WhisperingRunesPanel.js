@@ -6,7 +6,7 @@ import { findNodeById } from '../utils.js';
 
 const WhisperingRunesPanel = ({
   targetNodeId, treeData,
-  onOpenNodeEditModal, onToggleLock, onNodeStatusChange,
+  onOpenNodeEditModal, onToggleLock, onNodeImportanceChange,
   onLinkToProject, onGoToLinkedProject, onUnlinkProject,
   onDeleteNode, onSetFocusNode, onGenerateInsights,
   isAppBusy, activeOverlayPanel, yggdrasilViewMode,
@@ -52,10 +52,10 @@ const WhisperingRunesPanel = ({
   const handleEdit = () => onOpenNodeEditModal({ mode: 'editName', targetNodeId: node.id, currentNodeName: node.name, currentNodeDescription: node.description, title: `Edit Properties: ${node.name}`, label: "Node Name", placeholder: "Enter new node name", initialValue: node.name, initialDescription: node.description });
   const handleAddChild = () => onOpenNodeEditModal({ mode: 'addChild', targetNodeId: node.id, parentNodeName: node.name, title: `Add Child to: ${node.name}`, label: "New Child Name", placeholder: "Enter new child name" });
 
-  const statusOptions = [
-    { value: 'small', label: 'Small', rune: '🌱' },
-    { value: 'medium', label: 'Medium', rune: '🌿' },
-    { value: 'large', label: 'Large', rune: '🌳' },
+  const importanceOptions = [
+    { value: 'minor', label: 'Minor', rune: '🌱' },
+    { value: 'common', label: 'Common', rune: '🌿' },
+    { value: 'major', label: 'Major', rune: '🌳' },
   ];
 
   const lockIcon = node.isLocked ? (lockButtonFeedback ? '🔓' : '🔒') : (lockButtonFeedback ? '🔒' : '🔓');
@@ -78,17 +78,17 @@ const WhisperingRunesPanel = ({
       ),
 
       React.createElement("div", { style: { margin: '5px 0' }},
-        React.createElement("label", { htmlFor: `rune-status-select-${node.id}`, style: {fontSize: '0.85em', color: 'var(--text-tertiary)', display: 'block', marginBottom: '3px'}}, "Status:"),
+        React.createElement("label", { htmlFor: `rune-importance-select-${node.id}`, style: {fontSize: '0.85em', color: 'var(--text-tertiary)', display: 'block', marginBottom: '3px'}}, "Importance:"),
         React.createElement("select", {
-          id: `rune-status-select-${node.id}`,
-          value: node.status || 'medium',
-          onChange: (e) => onNodeStatusChange(node.id, e.target.value),
+          id: `rune-importance-select-${node.id}`,
+          value: node.importance || 'common',
+          onChange: (e) => onNodeImportanceChange(node.id, e.target.value),
           disabled: isAppBusy,
-          className: `status-select status-${node.status || 'medium'}`,
+          className: `importance-select importance-${node.importance || 'common'}`,
           style: {width: '100%', padding: '6px 8px', fontSize: '0.9em'},
-          "aria-label": `Current status: ${node.status || 'medium'}. Change status.`
+          "aria-label": `Current importance: ${node.importance || 'common'}. Change importance.`
         },
-          statusOptions.map(opt => React.createElement("option", { key: opt.value, value: opt.value }, opt.rune, " ", opt.label))
+          importanceOptions.map(opt => React.createElement("option", { key: opt.value, value: opt.value }, opt.rune, " ", opt.label))
         )
       ),
 

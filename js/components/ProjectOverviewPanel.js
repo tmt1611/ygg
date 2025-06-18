@@ -37,9 +37,9 @@ const ProjectOverviewPanel = ({
               React.createElement(StatDisplay, { label: "Total Nodes", value: stats.totalNodes }),
               React.createElement(StatDisplay, { label: "Maximum Depth", value: stats.depth }),
               React.createElement(StatDisplay, { label: "Locked Nodes", value: stats.lockedCount, valueClassName: stats.lockedCount > 0 ? 'locked' : '' }),
-              React.createElement(StatDisplay, { label: "Small Nodes", value: stats.statusCounts.small, valueClassName: "status-small" }),
-              React.createElement(StatDisplay, { label: "Medium Nodes", value: stats.statusCounts.medium, valueClassName: "status-medium" }),
-              React.createElement(StatDisplay, { label: "Large Nodes", value: stats.statusCounts.large, valueClassName: "status-large" })
+              React.createElement(StatDisplay, { label: "Minor Nodes", value: stats.importanceCounts.minor, valueClassName: "importance-minor" }),
+              React.createElement(StatDisplay, { label: "Common Nodes", value: stats.importanceCounts.common, valueClassName: "importance-common" }),
+              React.createElement(StatDisplay, { label: "Major Nodes", value: stats.importanceCounts.major, valueClassName: "importance-major" })
             )
           )
         ) : (

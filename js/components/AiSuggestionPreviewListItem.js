@@ -33,7 +33,7 @@ const AiSuggestionPreviewListItem = ({ node, level, isVisualDiff = false }) => {
       changeStatusText = " (Content Modified)";
       changeStatusTextStyle.color = 'var(--primary-accent)';
       nodeNameStyle.color = 'var(--primary-accent-dark)';
-      titleText = "Name, description, status, or link of this unlocked node has changed.";
+      titleText = "Name, description, importance, or link of this unlocked node has changed.";
       break;
     case 'structure_modified':
       itemStyle.backgroundColor = 'var(--panel-alt-bg)'; 
@@ -74,7 +74,7 @@ const AiSuggestionPreviewListItem = ({ node, level, isVisualDiff = false }) => {
       itemStyle.border = '1px solid var(--border-color)'; 
       break;
   }
-  const nodeSizeText = node.status ? ` (Size: ${node.status.charAt(0).toUpperCase() + node.status.slice(1)})` : '';
+  const nodeImportanceText = node.importance ? ` (Importance: ${node.importance.charAt(0).toUpperCase() + node.importance.slice(1)})` : '';
   const linkedProjectText = node.linkedProjectId && node.linkedProjectName ? ` (🔗 ${node.linkedProjectName})` : '';
 
   return (
@@ -86,7 +86,7 @@ const AiSuggestionPreviewListItem = ({ node, level, isVisualDiff = false }) => {
               node.name
             ),
             React.createElement("span", { style: { fontSize: '0.85em', color: 'var(--text-secondary)', marginLeft: 'auto', whiteSpace: 'nowrap', flexShrink: 0 }},
-                nodeSizeText,
+                nodeImportanceText,
                 linkedProjectText,
                 changeStatusText && React.createElement("span", { style: { marginLeft: '8px', ...changeStatusTextStyle, fontWeight: '500' }}, changeStatusText)
             )

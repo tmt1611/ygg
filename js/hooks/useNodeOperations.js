@@ -33,14 +33,14 @@ export const useNodeOperations = ({
     }
   }, [techTreeData, setTechTreeData, handleSaveActiveProject, addHistoryEntry]);
 
-  const handleNodeStatusChange = useCallback((nodeId, newStatus) => {
+  const handleNodeImportanceChange = useCallback((nodeId, newImportance) => {
     if (!techTreeData) return;
     const nodeToChange = findNodeById(techTreeData, nodeId);
-    if (nodeToChange && nodeToChange.status !== newStatus) {
-      const updatedTree = updateNodeInTree(techTreeData, nodeId, { status: newStatus });
+    if (nodeToChange && nodeToChange.importance !== newImportance) {
+      const updatedTree = updateNodeInTree(techTreeData, nodeId, { importance: newImportance });
       setTechTreeData(updatedTree);
       handleSaveActiveProject(false);
-      addHistoryEntry('NODE_STATUS_CHANGED', `Node "${nodeToChange.name}" status changed to ${newStatus}.`);
+      addHistoryEntry('NODE_IMPORTANCE_CHANGED', `Node "${nodeToChange.name}" importance changed to ${newImportance}.`);
     }
   }, [techTreeData, setTechTreeData, handleSaveActiveProject, addHistoryEntry]);
 
@@ -114,7 +114,7 @@ export const useNodeOperations = ({
 
   return {
     handleToggleNodeLock,
-    handleNodeStatusChange,
+    handleNodeImportanceChange,
     handleConfirmNodeEdit,
     handleToggleAllLocks,
     handleDeleteNodeAndChildren,

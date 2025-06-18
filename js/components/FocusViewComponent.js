@@ -8,9 +8,9 @@ import FocusViewDetailPanel from './FocusViewDetailPanel.js';
 // import { LinkSourceInfo } from '../hooks/useProjectLinking.js'; // Types removed
 
 const NODE_SIZES_PX = {
-    small: { width: 60, height: 60 },
-    medium: { width: 90, height: 90 },
-    large: { width: 130, height: 130 },
+    minor: { width: 60, height: 60 },
+    common: { width: 90, height: 90 },
+    major: { width: 130, height: 130 },
 };
 const FOCUS_NODE_SCALE = 1.15; 
 const VERTICAL_SPACING = 30; 
@@ -19,7 +19,7 @@ const CHILD_ROW_VERTICAL_GAP = 25;
 
 const FocusViewComponent = ({
   treeData, focusNodeId, selectedNodeInPanelId, onSelectNodeInPanel, onChangeFocusNode,
-  onExitFocusView, onOpenNodeEditModal, onToggleLock, onNodeStatusChange, isAppBusy,
+  onExitFocusView, onOpenNodeEditModal, onToggleLock, onNodeImportanceChange, isAppBusy,
   onNavigateToLinkedProject, onUnlinkProjectFromNode, onOpenContextMenu,
   onOpenLinkProjectModal, onDeleteNode, projects, activeProjectId, findLinkSource, handleNavigateToSourceNode,
 }) => {
@@ -61,7 +61,7 @@ const FocusViewComponent = ({
     const layoutHeight = layoutRect.height;
     const positions = new Map();
 
-    const focusSize = NODE_SIZES_PX[focusNodeData.status || 'medium'];
+    const focusSize = NODE_SIZES_PX[focusNodeData.importance || 'common'];
     const scaledFocusWidth = focusSize.width * FOCUS_NODE_SCALE;
     const scaledFocusHeight = focusSize.height * FOCUS_NODE_SCALE;
     const focusX = layoutWidth / 2;
@@ -69,7 +69,7 @@ const FocusViewComponent = ({
     positions.set(focusNodeData.id, { x: focusX, y: focusY, width: scaledFocusWidth, height: scaledFocusHeight });
 
     if (parentNodeData) {
-        const parentSize = NODE_SIZES_PX[parentNodeData.status || 'medium'];
+        const parentSize = NODE_SIZES_PX[parentNodeData.importance || 'common'];
         const parentX = focusX;
         const parentY = focusY - (scaledFocusHeight / 2) - (parentSize.height / 2) - VERTICAL_SPACING;
         positions.set(parentNodeData.id, { x: parentX, y: parentY, width: parentSize.width, height: parentSize.height });
@@ -82,11 +82,11 @@ const FocusViewComponent = ({
         let currentRowWidth = 0;
 
         const placeRow = (row, yPos) => {
-            const totalRowWidth = row.reduce((sum, child) => sum + NODE_SIZES_PX[child.status || 'medium'].width, 0) + (row.length - 1) * HORIZONTAL_CHILD_GAP;
+            const totalRowWidth = row.reduce((sum, child) => sum + NODE_SIZES_PX[child.importance || 'common'].width, 0) + (row.length - 1) * HORIZONTAL_CHILD_GAP;
             let currentX = focusX - totalRowWidth / 2;
             let maxChildHeightInRow = 0;
             row.forEach(child => {
-                const childSize = NODE_SIZES_PX[child.status || 'medium'];
+                const childSize = NODE_SIZES_PX[child.importance || 'common'];
                 maxChildHeightInRow = Math.max(maxChildHeightInRow, childSize.height);
                 positions.set(child.id, { 
                     x: currentX + childSize.width / 2, y: yPos + childSize.height / 2, 
@@ -98,7 +98,7 @@ const FocusViewComponent = ({
         };
         
         for (const child of childrenNodeData) {
-            const childSize = NODE_SIZES_PX[child.status || 'medium'];
+            const childSize = NODE_SIZES_PX[child.importance || 'common'];
             const potentialRowWidth = currentRowWidth + (currentRow.length > 0 ? HORIZONTAL_CHILD_GAP : 0) + childSize.width;
             if (currentRow.length > 0 && potentialRowWidth > maxRowWidth) {
                 const rowHeight = placeRow(currentRow, currentY);
@@ -201,7 +201,7 @@ const FocusViewComponent = ({
         React.createElement(FocusViewDetailPanel, {
             node: nodeForDetailPanel,
             isAppBusy: isAppBusy,
-            onNodeStatusChange: onNodeStatusChange,
+            onNodeImportanceChange: onNodeImportanceChange,
             onToggleLock: onToggleLock,
             onOpenNodeEditModal: onOpenNodeEditModal,
             onOpenLinkProjectModal: onOpenLinkProjectModal,

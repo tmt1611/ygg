@@ -5,10 +5,10 @@ import { useD3Tree } from '../hooks/useD3Tree.js';
 // import { findNodeById } from '../utils.js'; // Not directly used
 // import { LinkSourceInfo } from '../hooks/useProjectLinking.js'; // Types removed
 
-const NODE_STATUS_RUNES = {
-  small: '🌱',
-  medium: '🌿',
-  large: '🌳',
+const NODE_IMPORTANCE_RUNES = {
+  minor: '🌱',
+  common: '🌿',
+  major: '🌳',
 };
 
 const GraphViewComponent = ({
@@ -63,7 +63,7 @@ const GraphViewComponent = ({
                     data: {
                         name: createAcronym(targetProject.name),
                         fullName: targetProject.name,
-                        id: `proxy-data-${targetProject.id}`, status: 'medium',
+                        id: `proxy-data-${targetProject.id}`, importance: 'common',
                         isOutgoingLink: true, realProjectId: targetProject.id, realNodeId: targetProject.treeData.id,
                     },
                     parent: node 
@@ -87,7 +87,7 @@ const GraphViewComponent = ({
                 data: {
                     name: createAcronym(linkSource.sourceProjectName),
                     fullName: linkSource.sourceProjectName,
-                    id: `proxy-data-${linkSource.sourceProjectId}`, status: 'medium',
+                    id: `proxy-data-${linkSource.sourceProjectId}`, importance: 'common',
                     isIncomingLink: true, realProjectId: linkSource.sourceProjectId, realNodeId: linkSource.sourceNodeId,
                 },
                 parent: rootNode
@@ -233,9 +233,9 @@ const GraphViewComponent = ({
     nodeGroups.select("circle")
       .attr("fill", (d_node) => {
           if (d_node.isProxy) return null;
-          if (d_node.data.status === 'small') return 'var(--status-small-bg)';
-          if (d_node.data.status === 'large') return 'var(--status-large-bg)';
-          return 'var(--status-medium-bg)';
+          if (d_node.data.importance === 'minor') return 'var(--importance-minor-bg)';
+          if (d_node.data.importance === 'major') return 'var(--importance-major-bg)';
+          return 'var(--importance-common-bg)';
       })
       .attr("stroke", (d_node) => {
           if (d_node.isProxy) return null;
@@ -255,12 +255,12 @@ const GraphViewComponent = ({
       });
     
     nodeGroups.select(".node-rune-icon")
-        .text((d_node) => d_node.isProxy ? '' : NODE_STATUS_RUNES[d_node.data.status || 'medium'])
+        .text((d_node) => d_node.isProxy ? '' : NODE_IMPORTANCE_RUNES[d_node.data.importance || 'common'])
         .attr("fill", (d_node) => {
             if (d_node.isProxy) return null;
-            if (d_node.data.status === 'small') return 'var(--status-small-text)';
-            if (d_node.data.status === 'large') return 'var(--status-large-text)';
-            return 'var(--status-medium-text)';
+            if (d_node.data.importance === 'minor') return 'var(--importance-minor-text)';
+            if (d_node.data.importance === 'major') return 'var(--importance-major-text)';
+            return 'var(--importance-common-text)';
         });
 
     nodeGroups.select(".node-lock-icon").text((d_node) => (d_node.data.isLocked && !d_node.isProxy ? "🔒" : ""));

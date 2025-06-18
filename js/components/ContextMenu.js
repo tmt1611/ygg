@@ -3,22 +3,22 @@ import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react'
 // import { TechTreeNode, NodeStatus, Project } from '../types.js'; // Types removed
 // import { LinkSourceInfo } from '../hooks/useProjectLinking.js'; // Types removed
 
-const NODE_SIZE_OPTIONS = [
-    { value: 'small', label: 'Small' },
-    { value: 'medium', label: 'Medium' },
-    { value: 'large', label: 'Large' },
+const NODE_IMPORTANCE_OPTIONS = [
+    { value: 'minor', label: 'Minor' },
+    { value: 'common', label: 'Common' },
+    { value: 'major', label: 'Major' },
 ];
 
 const ContextMenu = ({
-  isOpen, position, node, onClose, onToggleLock, onChangeStatus, onEditName, onAddChild,
+  isOpen, position, node, onClose, onToggleLock, onChangeImportance, onEditName, onAddChild,
   onSetFocus, onDeleteNode, onLinkToProject, onGoToLinkedProject, onUnlinkProject,  
   projects, activeProjectId, currentProjectRootId, findLinkSource, handleNavigateToSourceNode,
   linkSourceInfoFromView,
 }) => {
   const menuRef = useRef(null);
-  const [isSizeSubMenuOpen, setIsSizeSubMenuOpen] = useState(false);
+  const [isImportanceSubMenuOpen, setIsImportanceSubMenuOpen] = useState(false);
   const [focusedItemIndex, setFocusedItemIndex] = useState(0); 
-  const [focusedSizeIndex, setFocusedSizeIndex] = useState(0);
+  const [focusedImportanceIndex, setFocusedImportanceIndex] = useState(0);
   const [menuStyle, setMenuStyle] = useState({});
   const [copyFeedback, setCopyFeedback] = useState(''); 
 
@@ -36,9 +36,9 @@ const ContextMenu = ({
   
   const focusedStyle = { backgroundColor: 'var(--primary-accent-hover-bg)', color: 'var(--primary-accent-dark)' };
 
-  const changeSizeActionRef = useRef(() => { 
-    setIsSizeSubMenuOpen(true); 
-    setFocusedSizeIndex(NODE_SIZE_OPTIONS.findIndex(opt => opt.value === (node?.status || 'medium'))); 
+  const changeImportanceActionRef = useRef(() => { 
+    setIsImportanceSubMenuOpen(true); 
+    setFocusedImportanceIndex(NODE_IMPORTANCE_OPTIONS.findIndex(opt => opt.value === (node?.importance || 'common'))); 
   });
 
   const handleCopyNodeId = useCallback(() => {
@@ -103,7 +103,7 @@ const ContextMenu = ({
         addItemToLists(() => onAddChild(), "Add Child Node...", {id: 'add-child'});
         items.push(React.createElement("li", { role: "none", key: "sep1" }, React.createElement("hr", null))); 
         addItemToLists(() => onToggleLock(), node.isLocked ? 'Unlock Node' : 'Lock Node', {id: 'toggle-lock'});
-        addItemToLists(changeSizeActionRef.current, "Change Size", { hasSubmenu: true, isSubmenuOpen: isSizeSubMenuOpen, id: 'change-size' });
+        addItemToLists(changeImportanceActionRef.current, "Change Importance", { hasSubmenu: true, isSubmenuOpen: isImportanceSubMenuOpen, id: 'change-importance' });
         
         if (onSetFocus) addItemToLists(() => onSetFocus(), "Set as Focus Node", {id: 'set-focus'});
 
@@ -158,14 +158,14 @@ const ContextMenu = ({
   const handleKeyDown = useCallback((event) => {
     if (!isOpen || !node) return;
     
-    if (isSizeSubMenuOpen) {
+    if (isImportanceSubMenuOpen) {
       switch (event.key) {
-        case 'ArrowUp': event.preventDefault(); setFocusedSizeIndex(prev => Math.max(0, prev - 1)); break;
-        case 'ArrowDown': event.preventDefault(); setFocusedSizeIndex(prev => Math.min(NODE_SIZE_OPTIONS.length - 1, prev + 1)); break;
-        case 'Enter': case ' ': event.preventDefault(); onChangeStatus(NODE_SIZE_OPTIONS[focusedSizeIndex].value); setIsSizeSubMenuOpen(false); onClose(); break;
-        case 'Escape': case 'ArrowLeft': event.preventDefault(); setIsSizeSubMenuOpen(false); 
-            const changeSizeActionIndex = menuActions.findIndex(action => action === changeSizeActionRef.current);
-            if (changeSizeActionIndex !== -1) setFocusedItemIndex(changeSizeActionIndex);
+        case 'ArrowUp': event.preventDefault(); setFocusedImportanceIndex(prev => Math.max(0, prev - 1)); break;
+        case 'ArrowDown': event.preventDefault(); setFocusedImportanceIndex(prev => Math.min(NODE_IMPORTANCE_OPTIONS.length - 1, prev + 1)); break;
+        case 'Enter': case ' ': event.preventDefault(); onChangeImportance(NODE_IMPORTANCE_OPTIONS[focusedImportanceIndex].value); setIsImportanceSubMenuOpen(false); onClose(); break;
+        case 'Escape': case 'ArrowLeft': event.preventDefault(); setIsImportanceSubMenuOpen(false); 
+            const changeImportanceActionIndex = menuActions.findIndex(action => action === changeImportanceActionRef.current);
+            if (changeImportanceActionIndex !== -1) setFocusedItemIndex(changeImportanceActionIndex);
             break; 
         default: break;
       }
@@ -179,22 +179,22 @@ const ContextMenu = ({
           if (currentAction) currentAction(); 
           break;
         case 'ArrowRight':
-          if (currentAction === changeSizeActionRef.current) {
-            event.preventDefault(); setIsSizeSubMenuOpen(true);
-            setFocusedSizeIndex(NODE_SIZE_OPTIONS.findIndex(opt => opt.value === (node?.status || 'medium')));
+          if (currentAction === changeImportanceActionRef.current) {
+            event.preventDefault(); setIsImportanceSubMenuOpen(true);
+            setFocusedImportanceIndex(NODE_IMPORTANCE_OPTIONS.findIndex(opt => opt.value === (node?.importance || 'common')));
           }
           break;
         default: break;
       }
     }
-  }, [isOpen, node, isSizeSubMenuOpen, focusedItemIndex, focusedSizeIndex, menuActions, onClose, onChangeStatus]);
+  }, [isOpen, node, isImportanceSubMenuOpen, focusedItemIndex, focusedImportanceIndex, menuActions, onClose, onChangeImportance]);
 
 
   useEffect(() => { 
     if (isOpen && menuRef.current) {
-      if (isSizeSubMenuOpen) {
-        const sizeItems = menuRef.current.querySelectorAll('button[role="menuitemradio"]');
-        (sizeItems[focusedSizeIndex])?.focus();
+      if (isImportanceSubMenuOpen) {
+        const importanceItems = menuRef.current.querySelectorAll('button[role="menuitemradio"]');
+        (importanceItems[focusedImportanceIndex])?.focus();
       } else {
         const mainItems = menuRef.current.querySelectorAll('button[role="menuitem"]:not([disabled])');
         if (mainItems.length > focusedItemIndex) {
@@ -217,14 +217,14 @@ const ContextMenu = ({
         "Node: ", React.createElement("strong", { style: { color: 'var(--text-primary)' }}, node.name.length > 25 ? node.name.substring(0,22) + '...' : node.name)
       ),
       React.createElement("ul", { style: { listStyle: 'none', padding: 0, margin: 0 }}, menuItemsJsx),
-      isSizeSubMenuOpen && (
+      isImportanceSubMenuOpen && (
         React.createElement("div", { style: { position: 'absolute', left: '100%', top: menuRef.current?.children[1]?.children[3] instanceof HTMLElement ? (menuRef.current.children[1].children[3]).offsetTop : 0, background: 'var(--panel-bg)', border: '1px solid var(--border-color-strong)', borderRadius: 'var(--border-radius)', boxShadow: 'var(--box-shadow-md)', padding: '5px 0', zIndex: 1011, minWidth: '120px' }, role: "menu", "aria-orientation": "vertical"},
-          NODE_SIZE_OPTIONS.map((sizeOption, index) => ( 
-            React.createElement("li", { role: "none", key: sizeOption.value },
-                React.createElement("button", { style: { ...basicButtonStyle, ...(focusedSizeIndex === index ? focusedStyle : {}), fontWeight: node.status === sizeOption.value ? '600' : 'normal', color: node.status === sizeOption.value ? 'var(--primary-accent-dark)' : 'var(--text-primary)', }, 
-                    role: "menuitemradio", "aria-checked": node.status === sizeOption.value, 
-                    onClick: () => { onChangeStatus(sizeOption.value); onClose(); }, tabIndex: -1}, 
-                    sizeOption.label 
+          NODE_IMPORTANCE_OPTIONS.map((importanceOption, index) => ( 
+            React.createElement("li", { role: "none", key: importanceOption.value },
+                React.createElement("button", { style: { ...basicButtonStyle, ...(focusedImportanceIndex === index ? focusedStyle : {}), fontWeight: node.importance === importanceOption.value ? '600' : 'normal', color: node.importance === importanceOption.value ? 'var(--primary-accent-dark)' : 'var(--text-primary)', }, 
+                    role: "menuitemradio", "aria-checked": node.importance === importanceOption.value, 
+                    onClick: () => { onChangeImportance(importanceOption.value); onClose(); }, tabIndex: -1}, 
+                    importanceOption.label 
                 )
             ))
           )
