@@ -65,12 +65,20 @@ const AiSuggestionModal = ({
   const summarySectionStyle = { fontSize: '0.9em', padding: '10px', background: 'var(--panel-alt-bg)', border: '1px solid var(--border-color)', borderRadius: 'var(--border-radius)' };
   const refinementSectionStyle = { paddingTop: '0px' }; 
 
-  const renderSummaryItem = (label, count, color) => count > 0 && (
-    React.createElement(React.Fragment, { key: label },
-      React.createElement("div", { style: {color} }, label),
-      React.createElement("div", { style: { fontWeight: 'bold', color, textAlign: 'right'}}, count)
-    )
-  );
+  const renderSummaryItem = (label, count, color) => {
+    if (count <= 0) return null;
+    const iconMatch = label.match(/^(.\s)/);
+    const icon = iconMatch ? iconMatch[1] : '';
+    const textLabel = label.replace(/^(.\s)/, '');
+    return (
+        React.createElement(React.Fragment, { key: label },
+            React.createElement("div", { style: {color, display: 'flex', alignItems: 'center', gap: '5px'}},
+                React.createElement("span", {style:{fontSize: '1.1em', opacity: 0.8}}, icon), textLabel
+            ),
+            React.createElement("div", { style: { fontWeight: 'bold', color, textAlign: 'right'}}, count)
+        )
+    );
+  };
 
   const handleInternalRefine = () => {
     if (followUpPrompt.trim()) {

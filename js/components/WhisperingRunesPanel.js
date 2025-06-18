@@ -1,5 +1,5 @@
 
-import React, { useMemo, useState, useEffect } from 'react';
+import React, { useMemo, useState, useEffect, useRef } from 'react';
 import { findNodeById } from '../utils.js';
 
 const WhisperingRunesPanel = ({
@@ -10,12 +10,16 @@ const WhisperingRunesPanel = ({
   isAppBusy, activeOverlayPanel, yggdrasilViewMode,
   projects, activeProjectId, currentProjectRootId, findLinkSource, handleNavigateToSourceNode,
 }) => {
+  const [isSubMenuOpen, setIsSubMenuOpen] = useState(false);
+  const [lockButtonFeedback, setLockButtonFeedback] = useState(false);
+  
+  const subMenuRef = useRef(null);
+  const moreButtonRef = useRef(null);
+
   const node = useMemo(() => {
     if (!targetNodeId || !treeData) return null;
     return findNodeById(treeData, targetNodeId);
   }, [targetNodeId, treeData]);
-
-  const [lockButtonFeedback, setLockButtonFeedback] = useState(false);
 
   const isTargetNodeRoot = node?.id === currentProjectRootId;
   const incomingLinkSource = useMemo(() => {
@@ -25,13 +29,24 @@ const WhisperingRunesPanel = ({
     return null;
   }, [isTargetNodeRoot, activeProjectId, projects, findLinkSource, node]);
 
-
-  const handleToggleLockWithFeedback = () => {
-    if (node) {
-      onToggleLock(node.id);
-      setLockButtonFeedback(true);
-    }
-  };
+  useEffect(() => {
+    if (!isSubMenuOpen) return;
+    const handleClickOutside = (event) => {
+        if (
+            subMenuRef.current && !subMenuRef.current.contains(event.target) &&
+            moreButtonRef.current && !moreButtonRef.current.contains(event.target)
+        ) {
+            setIsSubMenuOpen(false);
+        }
+    };
+    const handleEscapeKey = (event) => { if(event.key === 'Escape') setIsSubMenuOpen(false); };
+    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('keydown', handleEscapeKey);
+    return () => {
+        document.removeEventListener('mousedown', handleClickOutside);
+        document.removeEventListener('keydown', handleEscapeKey);
+    };
+  }, [isSubMenuOpen]);
 
   useEffect(() => {
     let timer;
@@ -46,8 +61,14 @@ const WhisperingRunesPanel = ({
     return React.createElement("div", { className: "whispering-runes-panel hidden" }); 
   }
   
+  const handleToggleLockWithFeedback = () => {
+    if (node) { onToggleLock(node.id); setLockButtonFeedback(true); }
+  };
   const handleEdit = () => onOpenNodeEditModal({ mode: 'editName', targetNodeId: node.id, currentNodeName: node.name, currentNodeDescription: node.description, title: `Edit Properties: ${node.name}`, label: "Node Name", placeholder: "Enter new node name", initialValue: node.name, initialDescription: node.description });
   const handleAddChild = () => onOpenNodeEditModal({ mode: 'addChild', targetNodeId: node.id, parentNodeName: node.name, title: `Add Child to: ${node.name}`, label: "New Child Name", placeholder: "Enter new child name" });
+  const handleCycleImportance = () => {
+    if (node) { onNodeImportanceChange(node.id, nextImportanceValue); }
+  };
 
   const importanceCycle = ['common', 'major', 'minor'];
   const importanceLabels = {
@@ -55,22 +76,12 @@ const WhisperingRunesPanel = ({
     common: { label: 'Common', rune: '🌿' },
     major: { label: 'Major', rune: '🌳' },
   };
-
   const currentImportance = node.importance || 'common';
   const currentImportanceIndex = importanceCycle.indexOf(currentImportance);
   const nextImportanceValue = importanceCycle[(currentImportanceIndex + 1) % importanceCycle.length];
-
-  const handleCycleImportance = () => {
-    if (node) {
-      onNodeImportanceChange(node.id, nextImportanceValue);
-    }
-  };
-
   const currentImportanceInfo = importanceLabels[currentImportance];
   const nextImportanceInfo = importanceLabels[nextImportanceValue];
-
   const lockIcon = node.isLocked ? (lockButtonFeedback ? '🔓' : '🔒') : (lockButtonFeedback ? '🔒' : '🔓');
-
 
   return (
     React.createElement("div", { className: `whispering-runes-panel ${node ? 'active' : ''}`, role: "toolbar", "aria-label": `Actions for ${node.name}` },
@@ -80,49 +91,46 @@ const WhisperingRunesPanel = ({
       React.createElement("button", { onClick: handleEdit, disabled: isAppBusy, title: "Edit node name and description" }, React.createElement("span", { className: "rune-icon" }, "✏️"), " Edit Details"),
       React.createElement("button", { onClick: handleAddChild, disabled: isAppBusy, title: "Add a new child to this node" }, React.createElement("span", { className: "rune-icon" }, "➕"), " Add Child"),
       React.createElement("button", { 
-        onClick: handleToggleLockWithFeedback, 
-        disabled: isAppBusy, 
-        title: node.isLocked ? "Unlock this node" : "Lock this node (prevents AI modification)",
-        className: lockButtonFeedback ? 'action-feedback' : ''
-       },
+        onClick: handleToggleLockWithFeedback, disabled: isAppBusy, title: node.isLocked ? "Unlock this node" : "Lock this node", className: lockButtonFeedback ? 'action-feedback' : '' },
         React.createElement("span", { className: "rune-icon" }, lockIcon), " ", node.isLocked ? 'Unlock' : 'Lock'
       ),
       React.createElement("button", {
-        onClick: handleCycleImportance,
-        disabled: isAppBusy,
-        title: `Cycle Importance (current: ${currentImportanceInfo.label}, next: ${nextImportanceInfo.label})`,
-        className: `importance-cycle-button importance-${currentImportance}`
-      },
-        React.createElement("span", { className: "rune-icon" }, currentImportanceInfo.rune),
-        ` ${currentImportanceInfo.label}`
+        onClick: handleCycleImportance, disabled: isAppBusy, title: `Cycle Importance (next: ${nextImportanceInfo.label})`, className: `importance-cycle-button importance-${currentImportance}`},
+        React.createElement("span", { className: "rune-icon" }, currentImportanceInfo.rune), ` ${currentImportanceInfo.label}`
       ),
 
-      activeOverlayPanel !== 'focus' && onSetFocusNode && (
-        React.createElement("button", { onClick: () => onSetFocusNode(node.id), disabled: isAppBusy, title: "Open in Focus View panel" }, React.createElement("span", { className: "rune-icon" }, "🎯"), " Focus View")
-      ),
-
-      onGenerateInsights && (
-        React.createElement("button", { onClick: () => onGenerateInsights(node), disabled: isAppBusy, title: "Get AI-powered insights and suggestions for this node."}, React.createElement("span", { className: "rune-icon" }, "💡"), " AI Insights")
-      ),
-
-      node.linkedProjectId && onGoToLinkedProject && (
-        React.createElement("button", { onClick: () => onGoToLinkedProject(node.linkedProjectId), disabled: isAppBusy, title: `Go to linked project: ${node.linkedProjectName}`}, React.createElement("span", { className: "rune-icon" }, "↪️"), " Go to Link")
-      ),
-      node.linkedProjectId && onUnlinkProject && (
-        React.createElement("button", { onClick: () => onUnlinkProject(node.id), disabled: isAppBusy, style: {color: 'var(--error-color)'}, title: "Remove outgoing link to other project"}, React.createElement("span", { className: "rune-icon" }, "🚫"), " Unlink Outgoing")
-      ),
-
-      incomingLinkSource && (
-        React.createElement("button", { onClick: () => handleNavigateToSourceNode(incomingLinkSource.sourceProjectId, incomingLinkSource.sourceNodeId), disabled: isAppBusy, title: `Go to source: ${incomingLinkSource.sourceProjectName} / ${incomingLinkSource.sourceNodeName}`}, React.createElement("span", { className: "rune-icon" }, "↩️"), " Go to Source")
-      ),
-      
-      !node.linkedProjectId && !incomingLinkSource && onLinkToProject && (
-        React.createElement("button", { onClick: () => onLinkToProject(node.id), disabled: isAppBusy, title: "Link this node to another project."}, React.createElement("span", { className: "rune-icon" }, "🔗"), " Link Project")
-      ),
-
-
-      onDeleteNode && (
-        React.createElement("button", { onClick: () => onDeleteNode(node.id), disabled: isAppBusy, style: {color: 'var(--error-color)'}, title: "Delete this node and all its children."}, React.createElement("span", { className: "rune-icon" }, "🗑️"), " Delete Node")
+      React.createElement("div", { className: "whispering-runes-more-actions-container" },
+        React.createElement("button", { ref: moreButtonRef, onClick: () => setIsSubMenuOpen(p => !p), disabled: isAppBusy, title: "Show more actions" },
+            React.createElement("span", { className: "rune-icon" }, "⚙️"), " More Actions"
+        ),
+        isSubMenuOpen && (
+            React.createElement("div", { ref: subMenuRef, className: "whispering-runes-submenu" },
+                activeOverlayPanel !== 'focus' && onSetFocusNode && (
+                  React.createElement("button", { onClick: () => { onSetFocusNode(node.id); setIsSubMenuOpen(false); }, disabled: isAppBusy, title: "Open in Focus View panel" }, React.createElement("span", { className: "rune-icon" }, "🎯"), " Focus View")
+                ),
+                onGenerateInsights && (
+                  React.createElement("button", { onClick: () => { onGenerateInsights(node); setIsSubMenuOpen(false); }, disabled: isAppBusy, title: "Get AI-powered insights"}, React.createElement("span", { className: "rune-icon" }, "💡"), " AI Insights")
+                ),
+                node.linkedProjectId && onGoToLinkedProject && (
+                  React.createElement("button", { onClick: () => { onGoToLinkedProject(node.linkedProjectId); setIsSubMenuOpen(false); }, disabled: isAppBusy, title: `Go to linked project: ${node.linkedProjectName}`}, React.createElement("span", { className: "rune-icon" }, "↪️"), " Go to Link")
+                ),
+                node.linkedProjectId && onUnlinkProject && (
+                  React.createElement("button", { onClick: () => { onUnlinkProject(node.id); setIsSubMenuOpen(false); }, disabled: isAppBusy, style: {color: 'var(--error-color)'}, title: "Remove outgoing link"}, React.createElement("span", { className: "rune-icon" }, "🚫"), " Unlink Outgoing")
+                ),
+                incomingLinkSource && (
+                  React.createElement("button", { onClick: () => { handleNavigateToSourceNode(incomingLinkSource.sourceProjectId, incomingLinkSource.sourceNodeId); setIsSubMenuOpen(false); }, disabled: isAppBusy, title: `Go to source: ${incomingLinkSource.sourceProjectName}`}, React.createElement("span", { className: "rune-icon" }, "↩️"), " Go to Source")
+                ),
+                !node.linkedProjectId && !incomingLinkSource && onLinkToProject && (
+                  React.createElement("button", { onClick: () => { onLinkToProject(node.id); setIsSubMenuOpen(false); }, disabled: isAppBusy, title: "Link this node to another project."}, React.createElement("span", { className: "rune-icon" }, "🔗"), " Link Project")
+                ),
+                onDeleteNode && (
+                  React.createElement(React.Fragment, null,
+                    React.createElement("hr", null),
+                    React.createElement("button", { onClick: () => { onDeleteNode(node.id); setIsSubMenuOpen(false); }, disabled: isAppBusy, style: {color: 'var(--error-color)'}, title: "Delete this node and all its children."}, React.createElement("span", { className: "rune-icon" }, "🗑️"), " Delete Node")
+                  )
+                )
+            )
+        )
       )
     )
   );
