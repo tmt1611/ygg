@@ -302,29 +302,25 @@ const App = () => {
           error && React.createElement(ErrorMessage, { message: error }),
 
           React.createElement(MainContentRouter, {
-            yggdrasilViewMode: yggdrasilViewMode,
-            activeOverlayPanel: activeOverlayPanel,
-            setActiveOverlayPanel: setActiveOverlayPanel,
-            techTreeData: techTreeData,
-            isLoading: isLoading,
-            isModifying: isModifying,
-            isAppBusy: isLoading || isModifying || isFetchingStrategicSuggestions,
-            projectManager: projectManager,
-            initialPrompt: initialPrompt,
-            setInitialPrompt: setInitialPrompt,
-            currentTreeStats: currentTreeStats,
-            nodeOperations: nodeOperations,
-            viewStates: { ...viewStates, globalSearchTerm },
-            treeOperationsAI: treeOperationsAI,
-            apiKeyHook: apiKeyHook,
-            onExtractData: handleExtractData,
-            extractionMode: modalManager.extractionMode,
-            setExtractionMode: modalManager.setExtractionMode,
-            isSummarizing: isSummarizing,
-            projectLinkingHook: projectLinkingHook,
-            handleNodeSelectedForInsightsOrActions: handleNodeSelectedForInsightsOrActions,
-            onToggleNodeActionsPanel: toggleNodeActionsPanelVisibility,
-            modalManager: modalManager
+            appState: {
+              techTreeData, isLoading, isModifying,
+              isAppBusy: isLoading || isModifying || isFetchingStrategicSuggestions,
+              initialPrompt, setInitialPrompt, currentTreeStats,
+              isSummarizing,
+              globalSearchTerm
+            },
+            appHooks: {
+              projectManager, nodeOperations, viewStates,
+              treeOperationsAI, apiKeyHook, projectLinkingHook,
+              modalManager
+            },
+            appCallbacks: {
+              handleExtractData, handleNodeSelectedForInsightsOrActions,
+              toggleNodeActionsPanelVisibility
+            },
+            viewControls: {
+              yggdrasilViewMode, activeOverlayPanel, setActiveOverlayPanel
+            }
           })
         )
       ), 

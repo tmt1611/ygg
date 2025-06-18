@@ -64,6 +64,53 @@ export const ELF_WARFARE_STRUCTURE_JSON_STRING = `
 }
 `;
 
+export const EVENT_TYPE_INFO = {
+    // AI
+    'TREE_INIT_AI': { icon: '🧠', color: 'var(--primary-accent)', isKey: true },
+    'AI_MOD_CONFIRMED': { icon: '🤖', color: 'var(--primary-accent)', isKey: true },
+    'AI_MOD_REJECTED': { icon: '🚫', color: 'var(--text-tertiary)', isKey: false },
+    'AI_MOD_UNDONE': { icon: '↩️', color: 'var(--warning-color)', isKey: true },
+    'NODE_INSIGHTS_GENERATED': { icon: '💡', color: 'var(--primary-accent-dark)', isKey: true },
+    'AI_STRATEGY_GEN': { icon: '✨', color: 'var(--primary-accent-dark)', isKey: true },
+    'AI_SUMMARY_GEN': { icon: '📜', color: 'var(--primary-accent-dark)', isKey: true },
+    'TREE_MOD_AI': { icon: '🤖', color: 'var(--text-secondary)', isKey: true },
+
+    // Node Ops
+    'NODE_CREATED': { icon: '➕', color: 'var(--success-color)', isKey: true },
+    'NODE_UPDATED': { icon: '✏️', color: 'var(--text-secondary)', isKey: true },
+    'NODE_DELETED': { icon: '🗑️', color: 'var(--error-color)', isKey: true },
+    'NODE_LOCK_TOGGLED': { icon: '🔒', color: 'var(--text-secondary)', isKey: true },
+    'NODE_IMPORTANCE_CHANGED': { icon: '⚖️', color: 'var(--text-secondary)', isKey: true },
+
+    // Project Linking
+    'NODE_PROJECT_LINK_CREATED': { icon: '🔗', color: 'var(--secondary-accent-dark)', isKey: true },
+    'NODE_PROJECT_LINK_REMOVED': { icon: '🚫', color: 'var(--secondary-accent-dark)', isKey: true },
+
+    // Tree-wide
+    'TREE_LOCK_ALL': { icon: '🛡️', color: 'var(--warning-color)', isKey: true },
+    'TREE_UNLOCK_ALL': { icon: '🛡️', color: 'var(--warning-color)', isKey: true },
+    'TREE_DOWNLOADED': { icon: '📥', color: 'var(--text-secondary)', isKey: false },
+    'TREE_DATA_EXTRACTED': { icon: '📤', color: 'var(--text-secondary)', isKey: false },
+
+    // Project Management
+    'PROJECT_CREATED': { icon: '📁', color: 'var(--success-color)', isKey: true },
+    'PROJECT_LOADED': { icon: '📂', color: 'var(--text-primary)', isKey: true },
+    'PROJECT_SAVED': { icon: '💾', color: 'var(--text-secondary)', isKey: false },
+    'PROJECT_RENAMED': { icon: '✏️', color: 'var(--text-primary)', isKey: true },
+    'PROJECT_DELETED': { icon: '🗑️', color: 'var(--error-color)', isKey: true },
+    'PROJECT_IMPORTED': { icon: '📄', color: 'var(--success-color)', isKey: true },
+    'PROJECT_EXAMPLE_LOADED': { icon: '⭐', color: 'var(--text-primary)', isKey: true },
+
+    // System & Misc
+    'API_KEY_STATUS_CHANGED': { icon: '🔑', color: 'var(--text-secondary)', isKey: false },
+    'APP_ERROR_ENCOUNTERED': { icon: '⚠️', color: 'var(--error-color)', isKey: true },
+    'THEME_CHANGED': { icon: '🎨', color: 'var(--text-tertiary)', isKey: false },
+    'VIEW_CHANGED': { icon: '👁️', color: 'var(--text-tertiary)', isKey: false },
+
+    // Default
+    'default': { icon: '🔹', color: 'var(--text-tertiary)', isKey: false }
+};
+
 export const ADVANCED_NATURE_MAGIC_JSON_STRING = `
 {
   "tree": {

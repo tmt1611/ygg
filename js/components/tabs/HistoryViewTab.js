@@ -1,19 +1,9 @@
 
 import React, { useState, useMemo } from 'react';
 import HistoryPanel from '../HistoryPanel.js';
+import { EVENT_TYPE_INFO } from '../../constants.js';
 
-const KEY_EVENT_TYPES = [
-  'TREE_INIT_AI', 'AI_MOD_CONFIRMED', 'AI_SUMMARY_GEN', 'NODE_INSIGHTS_GENERATED',
-  'AI_STRATEGY_GEN', 'AI_MOD_REJECTED', 'AI_MOD_UNDONE', 'TREE_MOD_AI',
-  'NODE_CREATED', 'NODE_UPDATED', 'NODE_DELETED', 'NODE_LOCK_TOGGLED',
-  'NODE_IMPORTANCE_CHANGED',
-  'NODE_PROJECT_LINK_CREATED', 'NODE_PROJECT_LINK_REMOVED',
-  'TREE_LOCK_ALL', 'TREE_UNLOCK_ALL', 'TREE_DOWNLOADED', 'TREE_DATA_EXTRACTED',
-  'PROJECT_CREATED', 'PROJECT_LOADED', 'PROJECT_SAVED', 'PROJECT_RENAMED', 
-  'PROJECT_DELETED', 'PROJECT_IMPORTED', 'PROJECT_EXAMPLE_LOADED',
-  'API_KEY_STATUS_CHANGED', 'APP_ERROR_ENCOUNTERED',
-  'THEME_CHANGED', 'VIEW_CHANGED'
-];
+const KEY_EVENT_TYPES = Object.keys(EVENT_TYPE_INFO).filter(key => EVENT_TYPE_INFO[key].isKey);
 
 const HistoryViewTabContent = ({ history }) => {
   const [filterMode, setFilterMode] = useState('key');

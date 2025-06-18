@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useRef, useEffect, useState, useLayoutEffect } from 'react';
 import { getAncestorIds, findNodeById } from '../utils.js'; 
 
 const PathToRootDisplay = ({
@@ -8,6 +8,31 @@ const PathToRootDisplay = ({
   onSelectPathNode,
   pathContext,
 }) => {
+  const containerRef = useRef(null);
+  const [scrollState, setScrollState] = useState({ atStart: true, atEnd: true });
+
+  const updateScrollState = () => {
+    const el = containerRef.current;
+    if (!el) return;
+    const atStart = el.scrollLeft <= 0;
+    const atEnd = el.scrollLeft >= el.scrollWidth - el.clientWidth - 1; // -1 for tolerance
+    setScrollState({ atStart, atEnd });
+  };
+  
+  useLayoutEffect(() => {
+    updateScrollState();
+    const el = containerRef.current;
+    if (el) {
+        el.addEventListener('scroll', updateScrollState, { passive: true });
+        const resizeObserver = new ResizeObserver(updateScrollState);
+        resizeObserver.observe(el);
+        return () => {
+            el.removeEventListener('scroll', updateScrollState);
+            resizeObserver.unobserve(el);
+        };
+    }
+  }, [treeData, currentNodeId]); // Rerun when content changes
+
   if (!treeData || !currentNodeId) {
     return React.createElement("div", { className: "path-to-root-display" }, React.createElement("span", null, "Not available."));
   }
@@ -36,9 +61,15 @@ const PathToRootDisplay = ({
   }
 
   const pathTitle = pathContext === 'stellar' ? "Route:" : "Path:";
+  
+  const containerClasses = [
+    "path-to-root-display",
+    scrollState.atStart ? "no-scroll-start" : "",
+    scrollState.atEnd ? "no-scroll-end" : "",
+  ].filter(Boolean).join(" ");
 
   return (
-    React.createElement("div", { className: "path-to-root-display", "aria-label": "Navigation path to current object" },
+    React.createElement("div", { ref: containerRef, className: containerClasses, "aria-label": "Navigation path to current object" },
       React.createElement("strong", { style: { marginRight: '5px', color: 'var(--text-secondary)', flexShrink: 0 }}, pathTitle),
       pathNodes.map((node, index) => (
         React.createElement(React.Fragment, { key: node.id },

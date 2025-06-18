@@ -15,7 +15,8 @@ const TechTreeListItemComponent = ({
     onSwitchToFocusView,
     onNavigateToLinkedProject,
     onOpenContextMenu,
-    onSelectListItem, 
+    onSelectListItem,
+    selectedNodeId,
     projects,
     activeProjectId,
     treeDataRootId,
@@ -38,6 +39,7 @@ const TechTreeListItemComponent = ({
 
   const isCollapsed = collapsedNodeIds.has(node.id);
   const hasChildren = !!(node.children && node.children.length > 0);
+  const isSelected = node.id === selectedNodeId;
 
   const handleImportanceChange = useCallback((e) => {
     onNodeImportanceChange(node.id, e.target.value);
@@ -227,7 +229,7 @@ const TechTreeListItemComponent = ({
       hasChildren && !isCollapsed && (
         React.createElement("ul", { id: `children-of-${node.id}`, className: "list-view-child-container" },
           node.children.map(child => (
-            React.createElement(TechTreeListItem, { 
+            React.createElement(TechTreeListItem, {
               key: child.id, node: child,
               showDescriptionsGlobal: showDescriptionsGlobal,
               onToggleLock: onToggleLock,
@@ -236,10 +238,11 @@ const TechTreeListItemComponent = ({
               onOpenNodeEditModal: onOpenNodeEditModal, level: level + 1,
               searchTerm: searchTerm, isAppBusy: isAppBusy,
               collapsedNodeIds: collapsedNodeIds, onToggleCollapseNode: onToggleCollapseNode,
-              onSwitchToFocusView: onSwitchToFocusView, 
+              onSwitchToFocusView: onSwitchToFocusView,
               onNavigateToLinkedProject: onNavigateToLinkedProject,
               onOpenContextMenu: onOpenContextMenu,
-              onSelectListItem: onSelectListItem, 
+              onSelectListItem: onSelectListItem,
+              selectedNodeId: selectedNodeId,
               projects: projects,
               activeProjectId: activeProjectId,
               treeDataRootId: treeDataRootId,

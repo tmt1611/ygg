@@ -9,7 +9,8 @@ const TechTreeListViewComponent = ({
     onNavigateToLinkedProject,
     onOpenContextMenu,
     onSelectListItem,
-    projects, 
+    selectedNodeId,
+    projects,
     activeProjectId,
     treeDataRootId,
     findLinkSource,
@@ -36,15 +37,16 @@ const TechTreeListViewComponent = ({
             onOpenNodeEditModal: onOpenNodeEditModal, level: 0,
             searchTerm: searchTerm, isAppBusy: isAppBusy,
             collapsedNodeIds: collapsedNodeIds, onToggleCollapseNode: onToggleCollapseNode,
-            onSwitchToFocusView: onSwitchToFocusView, 
-            onNavigateToLinkedProject: onNavigateToLinkedProject, 
+            onSwitchToFocusView: onSwitchToFocusView,
+            onNavigateToLinkedProject: onNavigateToLinkedProject,
             onOpenContextMenu: onOpenContextMenu,
             onSelectListItem: onSelectListItem,
-            projects: projects, 
-            activeProjectId: activeProjectId, 
-            treeDataRootId: treeDataRootId, 
-            findLinkSource: findLinkSource, 
-            handleNavigateToSourceNode: handleNavigateToSourceNode 
+            selectedNodeId: selectedNodeId,
+            projects: projects,
+            activeProjectId: activeProjectId,
+            treeDataRootId: treeDataRootId,
+            findLinkSource: findLinkSource,
+            handleNavigateToSourceNode: handleNavigateToSourceNode
         })
       )
     )

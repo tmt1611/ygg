@@ -69,59 +69,51 @@ export const useFocusViewLayout = (
     // Position Children Nodes (with wrapping logic)
     if (childrenNodeData && childrenNodeData.length > 0) {
         let currentY = focusY + scaledFocusHeight / 2 + VERTICAL_SPACING;
-        const maxRowWidth = viewportSize.width * 0.9;
-        
-        // Special case for 1-3 children: stack them vertically for a cleaner look
-        if (childrenNodeData.length <= 3 && viewportSize.width > 400) { // Check width to avoid on mobile
-            childrenNodeData.forEach(child => {
-                const childSize = NODE_SIZES_PX[child.importance || 'common'];
-                positions.set(child.id, {
-                    x: centerX, y: currentY + childSize.height / 2,
-                    width: childSize.width, height: childSize.height
-                });
-                currentY += childSize.height + VERTICAL_SPACING;
-            });
-            totalHeight = currentY;
-        } else { // Original wrapping logic for more than 3 children
-            let currentRow = [];
-            let currentRowWidth = 0;
+        const availableWidth = viewportSize.width * 0.95;
 
-            const placeRow = (row, yPos) => {
-                const totalRowWidth = row.reduce((sum, child) => sum + NODE_SIZES_PX[child.importance || 'common'].width, 0) + (row.length - 1) * HORIZONTAL_CHILD_GAP;
-                let currentX = centerX - totalRowWidth / 2;
-                let maxChildHeightInRow = 0;
+        const rows = [];
+        let currentRow = [];
+        let currentRowWidth = 0;
 
-                row.forEach(child => {
-                    const childSize = NODE_SIZES_PX[child.importance || 'common'];
-                    maxChildHeightInRow = Math.max(maxChildHeightInRow, childSize.height);
-                    positions.set(child.id, {
-                        x: currentX + childSize.width / 2, y: yPos + childSize.height / 2,
-                        width: childSize.width, height: childSize.height
-                    });
-                    currentX += childSize.width + HORIZONTAL_CHILD_GAP;
-                });
-                return maxChildHeightInRow;
-            };
+        // Group nodes into rows based on available width
+        childrenNodeData.forEach(child => {
+            const childSize = NODE_SIZES_PX[child.importance || 'common'];
+            const nodeWidthWithGap = childSize.width + (currentRow.length > 0 ? HORIZONTAL_CHILD_GAP : 0);
 
-            for (const child of childrenNodeData) {
-                const childSize = NODE_SIZES_PX[child.importance || 'common'];
-                const potentialRowWidth = currentRowWidth + (currentRow.length > 0 ? HORIZONTAL_CHILD_GAP : 0) + childSize.width;
-                
-                if (currentRow.length > 0 && potentialRowWidth > maxRowWidth) {
-                    const rowHeight = placeRow(currentRow, currentY);
-                    currentY += rowHeight + CHILD_ROW_VERTICAL_GAP;
-                    currentRow = [child];
-                    currentRowWidth = childSize.width;
-                } else {
-                    currentRow.push(child);
-                    currentRowWidth = potentialRowWidth;
-                }
+            if (currentRow.length > 0 && currentRowWidth + nodeWidthWithGap > availableWidth) {
+                rows.push(currentRow);
+                currentRow = [child];
+                currentRowWidth = childSize.width;
+            } else {
+                currentRow.push(child);
+                currentRowWidth += nodeWidthWithGap;
             }
-            if (currentRow.length > 0) {
-                const lastRowHeight = placeRow(currentRow, currentY);
-                totalHeight = currentY + lastRowHeight + VERTICAL_SPACING;
-            }
+        });
+        if (currentRow.length > 0) {
+            rows.push(currentRow);
         }
+
+        // Place the generated rows
+        rows.forEach(row => {
+            const totalRowWidth = row.reduce((sum, child) => sum + NODE_SIZES_PX[child.importance || 'common'].width, 0) + (row.length - 1) * HORIZONTAL_CHILD_GAP;
+            let currentX = centerX - totalRowWidth / 2;
+            let maxChildHeightInRow = 0;
+
+            row.forEach(child => {
+                const childSize = NODE_SIZES_PX[child.importance || 'common'];
+                maxChildHeightInRow = Math.max(maxChildHeightInRow, childSize.height);
+                positions.set(child.id, {
+                    x: currentX + childSize.width / 2,
+                    y: currentY + childSize.height / 2,
+                    width: childSize.width,
+                    height: childSize.height
+                });
+                currentX += childSize.width + HORIZONTAL_CHILD_GAP;
+            });
+            currentY += maxChildHeightInRow + CHILD_ROW_VERTICAL_GAP;
+        });
+
+        totalHeight = currentY;
     }
 
     setLayoutMetrics({
