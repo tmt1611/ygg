@@ -334,7 +334,7 @@ export const useProjectManagement = ({
         link.click(); document.body.removeChild(link); URL.revokeObjectURL(url);
         addHistoryEntry('TREE_DOWNLOADED', `Project "${updatedProject.name}" downloaded.`);
     }
-  }, [activeProjectId, currentTechTreeData, projects, currentContextText, addHistoryEntry, openProjectNameModal, saveCurrentTreeAsProject, closeProjectNameModal, setContextText, setInitialPromptFromHook, setError]);
+  }, [activeProjectId, currentTechTreeData, projects, currentContextText, addHistoryEntry, openProjectNameModal, saveNewProject, closeProjectNameModal, setContextText, setInitialPromptFromHook, setError]);
 
   const internalRenameProject = useCallback((projectId, newName) => {
     const oldProject = projects.find(p => p.id === projectId);
