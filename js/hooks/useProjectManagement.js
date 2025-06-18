@@ -344,15 +344,6 @@ export const useProjectManagement = ({
     closeProjectNameModal();
   }, [projects, activeProjectId, addHistoryEntry, closeProjectNameModal, setContextText, setInitialPromptFromHook]);
 
-  const handleRenameActiveProject = useCallback(() => { 
-    const projectToRename = projects.find(p => p.id === activeProjectId && !p.isExample);
-    if(projectToRename){
-        openProjectNameModal({ mode: 'rename', projectId: projectToRename.id, currentName: projectToRename.name, onConfirm: (newName) => internalRenameProject(projectToRename.id, newName) });
-    } else {
-        setError("No active user project selected to rename, or it's an example.");
-    }
-  }, [projects, activeProjectId, openProjectNameModal, internalRenameProject, setError]);
-
   const handleRenameProject = useCallback((projectIdToRename, currentName) => { 
     const projectToRename = projects.find(p => p.id === projectIdToRename && !p.isExample);
     if(projectToRename){
@@ -418,7 +409,7 @@ export const useProjectManagement = ({
   return {
     projects, activeProjectId, setActiveProjectId,
     handleSetActiveProject, saveNewProject, handleCreateNewProject,
-    handleAddNewProjectFromFile, handleSaveActiveProject, handleRenameActiveProject, handleRenameProject,
+    handleAddNewProjectFromFile, handleSaveActiveProject, handleRenameProject,
     handleDeleteProject, handleSaveCurrentTreeAsExampleProject, handleLoadAndGoToGraph,
     resetTreeForNewProjectContext, initializeDefaultProjects, saveProjectsToLocalStorage, internalRenameProject,
     updateProjectData, 
