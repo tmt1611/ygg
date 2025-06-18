@@ -874,7 +874,7 @@ html[data-theme='dark'] .graph-view-svg-container {
   background:
     linear-gradient(var(--grid-line-color) 1px, transparent 1px),
     linear-gradient(to right, var(--grid-line-color) 1px, transparent 1px),
-    radial-gradient(ellipse at center, rgba(var(--primary-accent-rgb),0.05) 0%, rgba(var(--yggdrasil-leaf-green),0.02) 40%, transparent 75%), var(--app-bg); 
+    radial-gradient(ellipse at center, rgba(var(--primary-accent-rgb),0.05) 0%, rgba(var(--yggdrasil-leaf-green),0.02) 40%, transparent 75%), var(--app-bg);
   background-size: 25px 25px, 25px 25px, auto, auto;
 }
 html[data-theme='light'] .graph-view-svg-container { 
