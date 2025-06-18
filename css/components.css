@@ -1120,13 +1120,7 @@ html[data-theme='light'] .ai-insights-list-item-name, html[data-theme='sol'] .ai
 .celestial-body.is-locked::after { content: ''; position: absolute; top: -4px; left: -4px; right: -4px; bottom: -4px; border-radius: 50%; border: 2px dashed var(--focus-node-shield-color); animation: rotateShield 20s linear infinite; opacity: 0.7; }
 @keyframes rotateShield { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 .celestial-body.has-link .celestial-body-link-indicator { animation: pulseBeacon 1.5s infinite alternate; }
-/* .celestial-body.has-link::before { content: '🔗'; position: absolute; top: 4px; right: 4px; font-size: 1em; color: var(--focus-node-beacon-color); animation: pulseBeacon 1.5s infinite alternate; filter: drop-shadow(0 0 3px var(--focus-node-beacon-color)); } */
 @keyframes pulseBeacon { from { opacity: 0.6; transform: scale(1); } to { opacity: 1; transform: scale(1.2); } }
-.celestial-body-link-indicator { /* Shared style for link indicators */
-  position: absolute; top: 4px; right: 4px; font-size: 1em; 
-  color: var(--focus-node-beacon-color); 
-  filter: drop-shadow(0 0 3px var(--focus-node-beacon-color));
-}
 .celestial-body-link-indicator { /* Shared style for link indicators */
   position: absolute; top: 4px; right: 4px; font-size: 1em; 
   color: var(--focus-node-beacon-color); 
