@@ -27,8 +27,8 @@ const ContextMenu = ({
   };
   
   const basicButtonStyle = {
-      display: 'block', width: '100%', textAlign: 'left', padding: '10px 15px', 
-      fontSize: '0.95em', background: 'none', border: 'none', cursor: 'pointer',
+      display: 'block', width: '100%', textAlign: 'left', padding: '8px 12px', 
+      fontSize: '0.9em', background: 'none', border: 'none', cursor: 'pointer',
       color: 'var(--text-primary)', transition: 'background-color 0.1s ease-in-out', position: 'relative', 
   };
   
@@ -71,8 +71,11 @@ const ContextMenu = ({
 
   const isCurrentNodeRoot = node?.id === currentProjectRootId;
   const incomingLink = useMemo(() => {
-    if (isCurrentNodeRoot && activeProjectId && node) { 
-        return linkSourceInfoFromView || findLinkSource(activeProjectId, projects);
+    if (isCurrentNodeRoot && activeProjectId && node) {
+        // Prioritize info passed directly from the view component that triggered the menu
+        if (linkSourceInfoFromView) return linkSourceInfoFromView;
+        // Fallback to searching all projects if not provided (e.g., from older component calls)
+        return findLinkSource(activeProjectId, projects);
     }
     return null;
   }, [isCurrentNodeRoot, activeProjectId, projects, findLinkSource, node, linkSourceInfoFromView]);
@@ -243,12 +246,12 @@ const ContextMenu = ({
   return (
     React.createElement("div", { ref: menuRef, className: "minimal-context-menu", style: { ...baseMenuStyle, ...menuStyle }, role: "menu",
       "aria-orientation": "vertical", "aria-labelledby": "context-menu-node-name", onKeyDown: handleKeyDown },
-      React.createElement("div", { id: "context-menu-node-name", style: { padding: '8px 15px', fontSize: '0.85em', color: 'var(--text-secondary)', borderBottom: '1px solid var(--border-color)', marginBottom: '4px' }},
+      React.createElement("div", { id: "context-menu-node-name", style: { padding: '6px 12px', fontSize: '0.8em', color: 'var(--text-secondary)', borderBottom: '1px solid var(--border-color)', marginBottom: '2px' }},
         "Node: ", React.createElement("strong", { style: { color: 'var(--text-primary)' }}, node.name.length > 25 ? node.name.substring(0,22) + '...' : node.name)
       ),
       React.createElement("ul", { style: { listStyle: 'none', padding: 0, margin: 0 }}, menuItemsJsx),
       isImportanceSubMenuOpen && (
-        React.createElement("div", { style: { position: 'absolute', left: '100%', top: menuRef.current?.children[1]?.children[3] instanceof HTMLElement ? (menuRef.current.children[1].children[3]).offsetTop : 0, background: 'var(--panel-bg)', border: '1px solid var(--border-color-strong)', borderRadius: 'var(--border-radius)', boxShadow: 'var(--box-shadow-md)', padding: '5px 0', zIndex: 1011, minWidth: '120px' }, role: "menu", "aria-orientation": "vertical"},
+        React.createElement("div", { style: { position: 'absolute', left: '100%', top: menuRef.current?.children[1]?.children[3] instanceof HTMLElement ? (menuRef.current.children[1].children[3]).offsetTop : 0, background: 'var(--panel-bg)', border: '1px solid var(--border-color-strong)', borderRadius: 'var(--border-radius)', boxShadow: 'var(--box-shadow-md)', padding: '2px 0', zIndex: 1011, minWidth: '120px' }, role: "menu", "aria-orientation": "vertical"},
           NODE_IMPORTANCE_OPTIONS.map((importanceOption, index) => ( 
             React.createElement("li", { role: "none", key: importanceOption.value },
                 React.createElement("button", { style: { ...basicButtonStyle, ...(focusedImportanceIndex === index ? focusedStyle : {}), fontWeight: node.importance === importanceOption.value ? '600' : 'normal', color: node.importance === importanceOption.value ? 'var(--primary-accent-dark)' : 'var(--text-primary)', }, 

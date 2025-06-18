@@ -35,7 +35,7 @@ const AppModals = ({
     isNodeEditModalOpen, nodeEditModalConfig, closeNodeEditModal,
     isTechExtractionModalOpen, extractedTechsContent, extractionModalTitle, closeTechExtractionModal,
     isLinkProjectModalOpen, linkProjectModalConfig, closeLinkProjectModal,
-    isContextMenuOpen, contextMenuPosition, contextMenuNodeId, closeContextMenu,
+    isContextMenuOpen, contextMenuPosition, contextMenuNodeId, contextMenuLinkSourceInfo, closeContextMenu,
   } = modalManager;
 
   return (
@@ -110,6 +110,7 @@ const AppModals = ({
           isOpen: isContextMenuOpen,
           position: contextMenuPosition,
           node: findNodeById(techTreeData, contextMenuNodeId),
+          linkSourceInfoFromView: contextMenuLinkSourceInfo,
           onClose: closeContextMenu,
           onToggleLock: () => nodeOperations.handleToggleNodeLock(contextMenuNodeId),
           onChangeImportance: (importance) => nodeOperations.handleNodeImportanceChange(contextMenuNodeId, importance),

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 
 const EVENT_TYPE_INFO = {
     // AI
@@ -52,8 +52,30 @@ const HistoryItem = ({ entry }) => {
 
     const title = `Type: ${entry.type}\nTimestamp: ${new Date(entry.timestamp).toLocaleString()}${entry.details ? `\nDetails: ${JSON.stringify(entry.details)}` : ''}`;
 
-    // Highlight keywords in the summary
-    const summaryWithHighlights = entry.summary.replace(/"(.*?)"/g, (match, p1) => `<strong>"${p1}"</strong>`);
+    const summaryWithHighlights = useMemo(() => {
+        if (!entry.summary) return '';
+        const keywords = [
+            'created', 'deleted', 'updated', 'locked', 'unlocked', 'saved', 'loaded',
+            'imported', 'generated', 'applied', 'rejected', 'undone', 'cleared',
+            'failed', 'added', 'removed', 'changed', 'renamed', 'activated', 'switched',
+            'proposed', 'discarded', 'downloaded'
+        ];
+        // This regex will match quoted strings or any of the keywords
+        const regex = new RegExp(`("(.*?)"|\\b(${keywords.join('|')})\\b)`, 'gi');
+        
+        return entry.summary.replace(regex, (match, fullMatch, quotedContent, keyword) => {
+            if (keyword) {
+                // It's a keyword, wrap it
+                const keywordClass = `history-keyword-${keyword.toLowerCase()}`;
+                return `<strong class="${keywordClass}">${keyword}</strong>`;
+            }
+            if (quotedContent) {
+                // It's a quoted string
+                return `<strong>"${quotedContent}"</strong>`;
+            }
+            return match; // Should not happen with this regex, but for safety
+        });
+    }, [entry.summary]);
 
     return (
         React.createElement("li", { className: "history-item", title: title },
