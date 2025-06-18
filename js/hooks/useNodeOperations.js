@@ -94,6 +94,17 @@ export const useNodeOperations = ({
     });
   }, [techTreeData, setTechTreeData, handleSaveActiveProject, addHistoryEntry, openConfirmModal, modalManager]);
 
+  const handleQuickAddChild = useCallback((parentId) => {
+    if (!techTreeData) return;
+    const parentNode = findNodeById(techTreeData, parentId);
+    if (parentNode) {
+      const updatedTree = addNodeToParent(techTreeData, parentId, "New Node", "");
+      setTechTreeData(updatedTree);
+      handleSaveActiveProject(false);
+      addHistoryEntry('NODE_CREATED', `Quick-added "New Node" to "${parentNode.name}".`);
+    }
+  }, [techTreeData, setTechTreeData, handleSaveActiveProject, addHistoryEntry]);
+
   const handleDeleteNodeAndChildren = useCallback((nodeIdToDelete) => {
     if (!techTreeData) return;
     const nodeToDelete = findNodeById(techTreeData, nodeIdToDelete);
@@ -118,5 +129,6 @@ export const useNodeOperations = ({
     handleConfirmNodeEdit,
     handleToggleAllLocks,
     handleDeleteNodeAndChildren,
+    handleQuickAddChild,
   };
 };

@@ -11,7 +11,7 @@ const RUNE_IMPORTANCE_OPTIONS = [
 
 const TechTreeListItemComponent = ({
     node, showDescriptionsGlobal,
-    onToggleLock,
+    onToggleLock, onAddQuickChild,
     onNodeImportanceChange,
     onOpenNodeEditModal, level, searchTerm, isAppBusy, collapsedNodeIds, onToggleCollapseNode,
     onSwitchToFocusView,
@@ -59,16 +59,20 @@ const TechTreeListItemComponent = ({
     });
   }, [node.id, node.name, node.description, onOpenNodeEditModal]);
 
-  const handleAddChildClick = useCallback(() => {
-    onOpenNodeEditModal({
-        mode: 'addChild',
-        targetNodeId: node.id,
-        parentNodeName: node.name,
-        title: `Add Child to: ${node.name}`,
-        label: "New Child Name",
-        placeholder: "Enter new child name",
-    });
-  }, [node.id, node.name, onOpenNodeEditModal]);
+  const handleAddChildClick = useCallback((event) => {
+    if (event.shiftKey) {
+      onAddQuickChild(node.id);
+    } else {
+      onOpenNodeEditModal({
+          mode: 'addChild',
+          targetNodeId: node.id,
+          parentNodeName: node.name,
+          title: `Add Child to: ${node.name}`,
+          label: "New Child Name",
+          placeholder: "Enter new child name",
+      });
+    }
+  }, [node.id, node.name, onOpenNodeEditModal, onAddQuickChild]);
 
   const handleNodeCollapseToggle = useCallback((event) => {
     if (hasChildren) {
@@ -202,7 +206,7 @@ const TechTreeListItemComponent = ({
             "✏️"
           ),
           React.createElement("button", { onClick: handleAddChildClick, disabled: isAppBusy, className: "list-item-action-icon base-icon-button",
-            "aria-label": `Add child to ${node.name}`, title: `Add Child Node`},
+            "aria-label": `Add child to ${node.name}. Hold Shift to add without a prompt.`, title: `Add Child Node (Shift+Click for quick add)`},
             "✨"
           ),
            React.createElement("button", { onClick: handleFocusNodeClick, disabled: isAppBusy, className: "list-item-action-icon primary-action base-icon-button", 
@@ -236,6 +240,7 @@ const TechTreeListItemComponent = ({
               key: child.id, node: child,
               showDescriptionsGlobal: showDescriptionsGlobal,
               onToggleLock: onToggleLock,
+              onAddQuickChild: onAddQuickChild,
               onNodeImportanceChange: onNodeImportanceChange,
               onOpenNodeEditModal: onOpenNodeEditModal, level: level + 1,
               searchTerm: searchTerm, isAppBusy: isAppBusy,

@@ -81,6 +81,7 @@ const MainContentRouter = ({
                 techTreeData: techTreeData,
                 showListDescriptionsGlobal: viewStates.showListDescriptionsGlobal, 
                 onToggleNodeLock: nodeOperations.handleToggleNodeLock,
+                onAddQuickChild: nodeOperations.handleQuickAddChild,
                 onNodeImportanceChange: nodeOperations.handleNodeImportanceChange,
                 onOpenNodeEditModal: modalManager.openNodeEditModal,
                 searchTerm: viewStates.listSearchTerm, 

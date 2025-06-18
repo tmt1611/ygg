@@ -5,7 +5,7 @@ import TechTreeListItem from './TechTreeListItem.js';
 // import { LinkSourceInfo } from '../hooks/useProjectLinking.js'; // Types removed
 
 const TechTreeListViewComponent = ({
-    treeData, showDescriptions, onToggleLock, onNodeImportanceChange,
+    treeData, showDescriptions, onToggleLock, onAddQuickChild, onNodeImportanceChange,
     onOpenNodeEditModal, searchTerm, isAppBusy, collapsedNodeIds, onToggleCollapseNode,
     onSwitchToFocusView,
     onNavigateToLinkedProject,
@@ -34,7 +34,7 @@ const TechTreeListViewComponent = ({
         React.createElement(TechTreeListItem, {
             key: treeData.id, node: treeData,
             showDescriptionsGlobal: showDescriptions,
-            onToggleLock: onToggleLock, onNodeImportanceChange: onNodeImportanceChange,
+            onToggleLock: onToggleLock, onAddQuickChild: onAddQuickChild, onNodeImportanceChange: onNodeImportanceChange,
             onOpenNodeEditModal: onOpenNodeEditModal, level: 0,
             searchTerm: searchTerm, isAppBusy: isAppBusy,
             collapsedNodeIds: collapsedNodeIds, onToggleCollapseNode: onToggleCollapseNode,

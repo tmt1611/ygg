@@ -89,7 +89,7 @@ const YggdrasilTopBar = ({
         React.createElement("span", {
           className: `yggdrasil-top-bar-action-item api-status ${apiKeyIsSet ? 'success' : 'error'}`,
           title: apiKeyIsSet ? "Gemini API Key is active." : "Gemini API Key not set. AI features disabled."
-        }, "API: ", apiKeyIsSet ? 'Active' : 'Error'),
+        }, apiKeyIsSet ? '🔑' : '⚠️'),
         React.createElement("button", { 
           onClick: handleSaveClick, 
           disabled: isAppBusy || !hasTechTreeData || saveFeedback, 
