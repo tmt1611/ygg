@@ -116,10 +116,7 @@ const TechTreeListItemComponent = ({
     if (onSelectListItem) {
       onSelectListItem(node.id);
     }
-    if (hasChildren) {
-      onToggleCollapseNode(node.id, false); 
-    }
-  }, [node.id, hasChildren, onSelectListItem, onToggleCollapseNode]);
+  }, [node.id, onSelectListItem]);
 
   const handleContextMenu = useCallback((event) => {
     event.preventDefault();
@@ -161,7 +158,7 @@ const TechTreeListItemComponent = ({
           ),
 
           React.createElement("span", { id: `node-name-${node.id}`,
-             className: `list-view-node-name ${hasChildren || onSelectListItem ? 'clickable' : ''} ${node.isLocked ? 'locked' : ''}`,
+             className: `list-view-node-name ${onSelectListItem ? 'clickable' : ''} ${node.isLocked ? 'locked' : ''}`,
              title: nodeNameTitle,
              onClick: handleNodeNameClick 
           },
