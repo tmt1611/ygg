@@ -79,11 +79,9 @@ export const useFocusViewLayout = (
                     x: centerX, y: currentY + childSize.height / 2,
                     width: childSize.width, height: childSize.height
                 });
-                currentY += childSize.height + VERTICAL_SPACING / 2;
+                currentY += childSize.height + VERTICAL_SPACING;
             });
-            const lastChild = childrenNodeData[childrenNodeData.length - 1];
-            const lastChildSize = NODE_SIZES_PX[lastChild.importance || 'common'];
-            totalHeight = currentY - VERTICAL_SPACING / 2 + VERTICAL_SPACING;
+            totalHeight = currentY;
         } else { // Original wrapping logic for more than 3 children
             let currentRow = [];
             let currentRowWidth = 0;

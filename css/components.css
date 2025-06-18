@@ -158,9 +158,7 @@ html[data-theme='sol'] .yggdrasil-top-bar-active-project {
   color: var(--button-primary-text) !important;
   font-weight: bold;
 }
-.yggdrasil-top-bar-download-button {
-  /* margin-left: -4px; No longer needed with fixed width buttons */
-}
+
 
 
 .knowledge-branch-sidebar {
@@ -526,31 +524,6 @@ html[data-theme='sol'] .contextual-help-icon:hover, html[data-theme='sol'] .cont
   position: relative;
   overflow: hidden;
   transition: background-color 0.2s, border-color 0.2s;
-}
-.diff-list-item.status-new {
-  background-color: var(--success-bg);
-  border-color: var(--success-color);
-}
-.diff-list-item.status-content_modified {
-  background-color: var(--primary-accent-hover-bg); 
-  border-color: var(--primary-accent-light);
-}
-.diff-list-item.status-structure_modified {
-  background-color: var(--panel-alt-bg);
-  border-color: var(--secondary-accent-dark);
-}
-.diff-list-item.status-reparented {
-  background-color: var(--warning-bg);
-  border-color: var(--warning-color);
-}
-.diff-list-item.status-locked_content_changed {
-  background-color: var(--error-bg);
-  border-color: var(--error-color);
-}
-.diff-list-item.status-removed {
-  background-color: rgba(220, 53, 69, 0.1); 
-  border-color: var(--error-color);
-  opacity: 0.7;
 }
 .diff-list-item.status-new {
   background-color: var(--success-bg);
