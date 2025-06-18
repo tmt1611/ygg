@@ -243,8 +243,8 @@ Ensure: Logical hierarchy, 2-4 levels deep, 2-5 children per parent. Prioritize 
 
     const result = await model.generateContent( `Topic: "${userPrompt}"` );
     const response = result.response;
-    const parsedData = parseGeminiJsonResponse(response.text, false); 
-     if (Array.isArray(parsedData) || !isValidTechTreeNodeShape(parsedData)) { 
+    const parsedData = parseGeminiJsonResponse(response.text(), false);
+     if (Array.isArray(parsedData) || !isValidTechTreeNodeShape(parsedData)) {
         console.error("Generated JSON root structure error after parsing for new tree:", parsedData);
         throw new Error("Generated JSON root structure invalid (expected single object with name, children, importance, etc.).");
     }
@@ -300,7 +300,7 @@ Output the complete, modified JSON for the tech tree, adhering to ALL rules abov
     const result = await model.generateContent(fullPrompt);
     const response = result.response;
     
-    let parsedData = parseGeminiJsonResponse(response.text, true); 
+    let parsedData = parseGeminiJsonResponse(response.text(), true);
 
     if (Array.isArray(parsedData)) {
         if (parsedData.length > 0 && parsedData.every(isValidTechTreeNodeShape)) {
@@ -424,7 +424,7 @@ Respond ONLY with the JSON object. No extra text or markdown.
         
         const result = await model.generateContent(prompt);
         const response = result.response;
-        return parseGeminiJsonResponseForInsights(response.text);
+        return parseGeminiJsonResponseForInsights(response.text());
     } catch (error) {
         console.error("Error generating node insights from Gemini API:", error);
         throw constructApiError(error, "Failed to generate AI insights for the node.");
@@ -461,7 +461,7 @@ Respond ONLY with the JSON array. No extra text or markdown.
     const result = await model.generateContent(prompt);
     const response = result.response;
 
-    let jsonStr = response.text.trim();
+    let jsonStr = response.text().trim();
     const fenceRegex = /^```(?:json|JSON)?\s*\n?(.*?)\n?\s*```$/s;
     const match = jsonStr.match(fenceRegex);
     if (match?.[1]) {
