@@ -1,6 +1,6 @@
 
 import React, { useMemo, useEffect, useRef, useState } from 'react';
-import { compareAndAnnotateTree, countNodesInTree } from '../utils.js';
+import { compareAndAnnotateTree, countNodesInTree, isValidTechTreeNodeShape, getAllNodesAsMap } from '../utils.js';
 import AiSuggestionPreviewListItem from './AiSuggestionPreviewListItem.js';
 import ModificationPromptInput from './ModificationPromptInput.js';
 
@@ -20,20 +20,19 @@ const AiSuggestionModal = ({
   const comparisonResult = useMemo(() => {
     if (!isOpen || !suggestion) return null;
 
-    if (typeof suggestion !== 'object' || suggestion === null || typeof suggestion.name !== 'string' ||
-        (suggestion.children !== undefined && suggestion.children !== null && !Array.isArray(suggestion.children))) {
+    if (!isValidTechTreeNodeShape(suggestion)) {
         console.error("Invalid raw suggestion structure passed to AiSuggestionModal:", suggestion);
         const errorNode = {
             id: 'error-root-' + Date.now(), name: 'Invalid AI Suggestion Structure',
-            description: 'AI returned data that is malformed or not a valid tree structure. Cannot display detailed preview.',
+            description: 'AI returned data that is malformed or not a valid tree structure. This can happen if the AI fails to generate a response with all the required fields (like name, description, children, etc.).',
             children: [], isLocked: false, importance: 'common', _changeStatus: 'unchanged',
             _modificationDetails: ["The AI's suggestion was not a valid tree object."],
             _isErrorNode: true
         };
         return {
             annotatedTree: errorNode,
-            removedNodes: currentTreeForDiff ? [currentTreeForDiff] : [],
-            newNodes: [errorNode],
+            removedNodes: currentTreeForDiff ? [...getAllNodesAsMap(currentTreeForDiff).values()] : [],
+            newNodes: [],
             modifiedContentNodes: [],
             lockedContentChangedNodes: [],
             structureModifiedNodes: [],
@@ -106,7 +105,7 @@ const AiSuggestionModal = ({
                   React.createElement("div", { className: "error-icon" }, "⚠️"),
                   React.createElement("div", null,
                     React.createElement("strong", null, "AI Suggestion Error:"), " ",
-                    annotatedTree?.description || "Could not display preview due to a malformed AI suggestion. The AI may have returned data that is not a valid tree structure. You can try refining your prompt."
+                    annotatedTree?.description || "Could not display preview due to a malformed AI suggestion. The AI may have returned data that is not a valid tree structure (e.g. missing required fields). You can try refining your prompt."
                   )
                 )
               ),

@@ -273,6 +273,7 @@ export const modifyTechTreeByGemini = async (
 5.  **Mandatory Fields:** ALL nodes in your output MUST have these fields: 'id', 'name', 'description' (use "" if empty), 'isLocked' (boolean), 'importance' (string), and 'children' (array, can be empty []).
 6.  **Output Format:** Respond ONLY with a single, valid JSON object for the modified tree's root node. NO EXTRA TEXT, explanations, or markdown fences.
 7.  **JSON Syntax:** Strictly follow JSON rules. Example node: ${COMMON_NODE_FORMAT_INSTRUCTION}
+8.  **Maintain Structure:** Avoid unnecessarily drastic changes to the overall tree shape (e.g., adding many new levels of depth) unless the user's instruction explicitly asks for it.
 `;
 
   const fullPrompt = `
