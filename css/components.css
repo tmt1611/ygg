@@ -421,25 +421,36 @@ html[data-theme='sol'] .panel-header-icon { color: var(--primary-accent-dark); f
 .tooltip-text.position-right { top: 50%; left: 105%; transform: translateY(-50%); }
 .tooltip-text.position-bottom { top: 110%; left: 50%; transform: translateX(-50%); }
 .tooltip-text.position-top { bottom: 115%; left: 50%; transform: translateX(-50%); }
-.contextual-help-icon { 
-  display: inline-flex; align-items: center; justify-content: center; 
-  width: 16px; height: 16px; border-radius: 50%; 
-  background-color: var(--text-tertiary); color: var(--panel-bg); 
-  font-size: 0.8em; font-weight: bold; font-family: 'Georgia', serif;
-  cursor: help; margin-left: 4px; user-select: none; 
-  transition: background-color 0.2s, transform 0.2s;
-  border: 1px solid rgba(0,0,0,0.1);
+.contextual-help-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background-color: transparent;
+  color: var(--text-tertiary);
+  font-size: 1em;
+  cursor: help;
+  margin-left: 6px;
+  user-select: none;
+  transition: color 0.2s, transform 0.2s;
+  border: none;
 }
-.contextual-help-icon:hover, .contextual-help-icon:focus-within { 
-  background-color: var(--primary-accent); transform: scale(1.1);
+.contextual-help-icon:hover, .contextual-help-icon:focus-within {
+  color: var(--primary-accent);
+  transform: scale(1.1);
+  background-color: transparent;
 }
 html[data-theme='light'] .contextual-help-icon,
 html[data-theme='sol'] .contextual-help-icon {
-  background-color: var(--border-color-strong);
+  color: var(--text-tertiary);
+  background-color: transparent;
 }
 html[data-theme='light'] .contextual-help-icon:hover, html[data-theme='light'] .contextual-help-icon:focus-within,
 html[data-theme='sol'] .contextual-help-icon:hover, html[data-theme='sol'] .contextual-help-icon:focus-within {
-  background-color: var(--primary-accent-dark);
+  color: var(--primary-accent-dark);
+  background-color: transparent;
 }
 .contextual-help-icon .tooltip-text { 
   white-space: normal; line-height: 1.4; padding: 8px 10px; 
@@ -482,9 +493,9 @@ html[data-theme='sol'] .contextual-help-icon:hover, html[data-theme='sol'] .cont
 
 /* AI Suggestion Diff Preview Item */
 .diff-list-item {
-  padding: 6px 10px;
-  margin: 3px 0;
-  border-radius: var(--border-radius-lg);
+  padding: 4px 8px;
+  margin: 2px 0;
+  border-radius: var(--border-radius);
   border: 1px solid var(--border-color);
   position: relative;
   overflow: hidden;
@@ -565,7 +576,7 @@ html[data-theme='sol'] .contextual-help-icon:hover, html[data-theme='sol'] .cont
 .diff-list-item-desc {
   font-size: 0.8em;
   color: var(--text-secondary);
-  margin: 4px 0 2px 24px;
+  margin: 2px 0 2px 20px;
   white-space: pre-wrap;
   word-break: break-word;
   opacity: 0.9;
@@ -576,14 +587,14 @@ html[data-theme='sol'] .contextual-help-icon:hover, html[data-theme='sol'] .cont
 .diff-details-list {
   list-style: none;
   padding: 0;
-  margin: 5px 0 0 18px;
+  margin: 4px 0 0 16px;
   font-size: 0.8em;
   color: var(--text-tertiary);
 }
 .diff-details-item {
   line-height: 1.4;
-  margin-bottom: 3px;
-  padding: 3px 5px;
+  margin-bottom: 2px;
+  padding: 2px 4px;
   border-radius: var(--border-radius);
   background-color: rgba(var(--panel-bg-rgb), 0.2);
 }

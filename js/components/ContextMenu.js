@@ -18,7 +18,7 @@ const ContextMenu = ({
   const [focusedItemIndex, setFocusedItemIndex] = useState(0); 
   const [focusedImportanceIndex, setFocusedImportanceIndex] = useState(0);
   const [menuStyle, setMenuStyle] = useState({});
-  const [copyFeedback, setCopyFeedback] = useState({ id: '', name: '', json: '' });
+  const [copyFeedback, setCopyFeedback] = useState({});
 
   const baseMenuStyle = {
     background: 'var(--panel-bg)', color: 'var(--text-primary)', border: '1px solid var(--border-color-strong)', 
@@ -41,7 +41,7 @@ const ContextMenu = ({
 
   const handleCopy = useCallback((type) => {
     if (!node) return;
-    
+
     let textToCopy = '';
     switch (type) {
       case 'id': textToCopy = node.id; break;
@@ -62,11 +62,9 @@ const ContextMenu = ({
     }
 
     navigator.clipboard.writeText(textToCopy).then(() => {
-      setCopyFeedback(prev => ({ ...prev, [type]: 'Copied!' }));
-      setTimeout(() => setCopyFeedback(prev => ({ ...prev, [type]: '' })), 1500);
+      setCopyFeedback(prev => ({ ...prev, [type]: true }));
+      setTimeout(() => setCopyFeedback(prev => ({ ...prev, [type]: false })), 1500);
     }).catch(err => {
-      setCopyFeedback(prev => ({ ...prev, [type]: 'Failed!' }));
-      setTimeout(() => setCopyFeedback(prev => ({ ...prev, [type]: '' })), 1500);
       console.error(`Failed to copy ${type}:`, err);
     });
   }, [node]);
@@ -146,12 +144,15 @@ const ContextMenu = ({
         }
         
         items.push(React.createElement("li", { role: "none", key: "sep2" }, React.createElement("hr", null)));
-        addItemToLists(() => handleCopy('name'), `Copy Name ${copyFeedback.name ? `(${copyFeedback.name})` : ''}`, {id: 'copy-name', icon: '📋'});
-        addItemToLists(() => handleCopy('id'), `Copy ID ${copyFeedback.id ? `(${copyFeedback.id})` : ''}`, {id: 'copy-id', icon: '🆔'});
-        addItemToLists(() => handleCopy('json'), `Copy as JSON ${copyFeedback.json ? `(${copyFeedback.json})` : ''}`, {id: 'copy-json', icon: '📦'});
-        if (onDeleteNode) addItemToLists(() => onDeleteNode(), "Delete Node...", {isDestructive: true, id: 'delete-node', icon: '🗑️'});
+        addItemToLists(() => handleCopy('name'), `Copy Name`, {id: 'copy-name', icon: copyFeedback.name ? '✅' : '📋'});
+        addItemToLists(() => handleCopy('id'), `Copy ID`, {id: 'copy-id', icon: copyFeedback.id ? '✅' : '🆔'});
+        addItemToLists(() => handleCopy('json'), `Copy as JSON`, {id: 'copy-json', icon: copyFeedback.json ? '✅' : '📦'});
+        if (onDeleteNode) {
+            items.push(React.createElement("li", { role: "none", key: "sep-delete" }, React.createElement("hr", null)));
+            addItemToLists(() => onDeleteNode(), "Delete Node...", {isDestructive: true, id: 'delete-node', icon: '🗑️'});
+        }
     }
-    return { menuItemsJsx: items, menuActions: actions.filter(a => a !== null) }; 
+    return { menuItemsJsx: items, menuActions: actions.filter(a => a !== null) };
   }, [node, onEditName, onAddChild, onToggleLock, onSetFocus, onLinkToProject, onGoToLinkedProject, onUnlinkProject, onDeleteNode, handleCopy, copyFeedback, isImportanceSubMenuOpen, focusedItemIndex, onClose, incomingLink, handleNavigateToSourceNode]);
 
 
@@ -168,11 +169,11 @@ const ContextMenu = ({
 
 
   useEffect(() => {
-    if (!isOpen) { 
-      setIsImportanceSubMenuOpen(false); 
-      setFocusedItemIndex(0); 
-      setCopyFeedback({ id: '', name: '', json: '' }); 
-      return; 
+    if (!isOpen) {
+      setIsImportanceSubMenuOpen(false);
+      setFocusedItemIndex(0);
+      setCopyFeedback({});
+      return;
     }
     const menuItemsToFocus = menuRef.current?.querySelectorAll('button[role="menuitem"]:not([disabled])');
     if (menuItemsToFocus && menuItemsToFocus.length > focusedItemIndex) {

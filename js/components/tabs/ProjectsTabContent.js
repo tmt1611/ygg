@@ -84,7 +84,10 @@ const ProjectsTabContent = ({
                   userProjects.map((project) => (
                     React.createElement("li", { key: project.id, className: `project-list-item ${project.id === activeProjectId && !project.isExample ? 'active' : ''}`},
                       React.createElement("div", { className: "project-info", onClick: () => project.id !== activeProjectId && onLoadProject(project.id), style: {cursor: project.id !== activeProjectId ? 'pointer' : 'default'}, title: project.id !== activeProjectId ? `Load project: ${project.name}` : `Project: ${project.name} (Active)`},
-                        React.createElement("span", { className: "project-name" }, project.name),
+                        React.createElement("span", { className: "project-name" },
+                            React.createElement("span", { style: { marginRight: '8px', opacity: 0.7 }, "aria-hidden": "true" }, "📁"),
+                            project.name
+                        ),
                         React.createElement("span", { className: "project-last-modified" },
                           "Last Modified: ", new Date(project.lastModified).toLocaleDateString(), " ", new Date(project.lastModified).toLocaleTimeString()
                         )
@@ -107,12 +110,15 @@ const ProjectsTabContent = ({
                   exampleProjects.map((project) => (
                     React.createElement("li", { key: project.id, className: `project-list-item example-project ${project.id === activeProjectId && project.isExample ? 'active' : ''}`},
                       React.createElement("div", { className: "project-info" },
-                        React.createElement("span", { className: "project-name" }, project.name),
+                        React.createElement("span", { className: "project-name" },
+                            React.createElement("span", { style: { marginRight: '8px', opacity: 0.7 }, "aria-hidden": "true" }, "⭐"),
+                            project.name
+                        ),
                          React.createElement("span", { className: "project-last-modified" }, "Example Template")
                       ),
                       React.createElement("div", { className: "project-actions" },
-                        React.createElement("button", { 
-                            onClick: () => onLoadAndGoToGraph(project.id), 
+                        React.createElement("button", {
+                            onClick: () => onLoadAndGoToGraph(project.id),
                             disabled: isAppBusy, 
                             title: `Start a new project using "${project.name}" as a template and view graph. You will be prompted to save it as your own.`, 
                             className: "secondary panel-button", 
