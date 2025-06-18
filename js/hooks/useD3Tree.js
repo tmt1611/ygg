@@ -2,9 +2,9 @@ import { useEffect, useMemo, useRef, useCallback, useState } from 'react';
 import { select, zoom, hierarchy, tree, zoomIdentity, linkHorizontal } from 'd3';
 
 const defaultTreeConfig = {
-  nodeRadius: 8,
-  horizontalSpacing: 100, 
-  verticalSpacing: 35,    
+  nodeRadius: 10,
+  horizontalSpacing: 180, 
+  verticalSpacing: 90,    
   margin: { top: 20, right: 120, bottom: 20, left: 120 },
 };
 

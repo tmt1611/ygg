@@ -38,10 +38,6 @@ const ConfirmModal = ({
   if (!isOpen) {
     return null;
   }
-  
-  if (!isOpen) {
-    return null;
-  }
 
   return (
     React.createElement("div", {

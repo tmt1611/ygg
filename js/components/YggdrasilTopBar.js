@@ -15,7 +15,8 @@ const YggdrasilTopBar = ({
   onDownloadActiveProject, 
   isAppBusy, hasTechTreeData,
   yggdrasilViewMode, activeOverlayPanel, setYggdrasilViewMode, setActiveOverlayPanel,
-  focusNodeId
+  focusNodeId,
+  globalSearchTerm, setGlobalSearchTerm
 }) => {
   const [saveFeedback, setSaveFeedback] = useState(false);
   const [downloadFeedback, setDownloadFeedback] = useState(false);
@@ -97,7 +98,7 @@ const YggdrasilTopBar = ({
             value: globalSearchTerm,
             onChange: (e) => setGlobalSearchTerm(e.target.value),
             "aria-label": "Search nodes in the current project",
-            disabled: !hasTechTreeData || isAppBusy
+            disabled: !hasTechTreeData || isAppBusy || yggdrasilViewMode === 'workspace'
           })
         ),
         activeProjectName && (

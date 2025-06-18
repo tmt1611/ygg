@@ -236,7 +236,8 @@ export const useProjectManagement = ({
     closeProjectNameModal();
     if (viewStates && savedProject && savedProject.treeData.id) {
         viewStates.setYggdrasilViewMode('treeView');
-        viewStates.handleSwitchToFocusView(savedProject.treeData.id);
+        viewStates.setActiveOverlayPanel(null); // Ensure graph view is active
+        viewStates.setSelectedGraphNodeId(savedProject.treeData.id); // Select the root node
     }
   }, [resetTreeForNewProjectContext, setTechTreeData, setContextText, setInitialPromptFromHook, saveCurrentTreeAsProject, closeProjectNameModal, viewStates]);
 

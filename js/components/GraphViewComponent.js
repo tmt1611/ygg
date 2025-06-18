@@ -26,11 +26,7 @@ const GraphViewComponent = ({
   const svgContainerDivRef = useRef(null); 
   const svgRef = useRef(null); 
   
-  const { g, nodes, links, config, resetZoom, zoomIn, zoomOut } = useD3Tree(svgRef, treeData, { 
-    nodeRadius: 10,
-    horizontalSpacing: 220, 
-    verticalSpacing: 90,
-  });
+  const { g, nodes, links, config, resetZoom, zoomIn, zoomOut } = useD3Tree(svgRef, treeData);
 
   const { nodeRadius } = config; 
 
@@ -44,7 +40,7 @@ const GraphViewComponent = ({
     const proxyNodes = [];
     const projectLinks = [];
     const PROXY_OFFSET_X = 10;
-    const PROXY_DISTANCE_Y = 45;  // Much shorter line
+    const PROXY_DISTANCE_Y = 55;  // Give a bit more space
     let proxyIndex = 0;
 
     nodes.forEach(node => {
