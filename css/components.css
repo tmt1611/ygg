@@ -133,7 +133,7 @@ html[data-theme='sol'] .yggdrasil-top-bar-active-project {
 .yggdrasil-top-bar-action-item { font-size: 0.85em; padding: 7px 10px; border-radius: var(--border-radius); }
 .yggdrasil-top-bar-action-item.yggdrasil-top-bar-save-button,
 .yggdrasil-top-bar-action-item.yggdrasil-top-bar-download-button {
-  font-size: 1.1em; /* Make icons slightly larger */
+  font-size: 1.2em; /* Make icons slightly larger */
   padding: 6px;     /* Adjust padding for square-ish button */
   width: 34px;      /* Fixed width */
   height: 34px;     /* Fixed height */
@@ -151,7 +151,6 @@ html[data-theme='sol'] .yggdrasil-top-bar-active-project {
   background-color: var(--success-color) !important;
   border-color: var(--success-color) !important;
   color: var(--button-primary-text) !important;
-  font-size: 1.2em; /* Ensure checkmark is a good size */
   font-weight: bold;
 }
 .yggdrasil-top-bar-download-button {
