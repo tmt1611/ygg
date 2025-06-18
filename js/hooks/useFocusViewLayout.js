@@ -66,47 +66,63 @@ export const useFocusViewLayout = (
     }
     positions.set(focusNodeData.id, { x: centerX, y: focusY, width: focusSize.width * FOCUS_NODE_SCALE, height: scaledFocusHeight });
 
-    // Position Children Nodes (with wrapping)
+    // Position Children Nodes (with wrapping logic)
     if (childrenNodeData && childrenNodeData.length > 0) {
         let currentY = focusY + scaledFocusHeight / 2 + VERTICAL_SPACING;
         const maxRowWidth = viewportSize.width * 0.9;
-        let currentRow = [];
-        let currentRowWidth = 0;
-
-        const placeRow = (row, yPos) => {
-            const totalRowWidth = row.reduce((sum, child) => sum + NODE_SIZES_PX[child.importance || 'common'].width, 0) + (row.length - 1) * HORIZONTAL_CHILD_GAP;
-            let currentX = centerX - totalRowWidth / 2;
-            let maxChildHeightInRow = 0;
-
-            row.forEach(child => {
+        
+        // Special case for 1-3 children: stack them vertically for a cleaner look
+        if (childrenNodeData.length <= 3 && viewportSize.width > 400) { // Check width to avoid on mobile
+            childrenNodeData.forEach(child => {
                 const childSize = NODE_SIZES_PX[child.importance || 'common'];
-                maxChildHeightInRow = Math.max(maxChildHeightInRow, childSize.height);
                 positions.set(child.id, {
-                    x: currentX + childSize.width / 2, y: yPos + childSize.height / 2,
+                    x: centerX, y: currentY + childSize.height / 2,
                     width: childSize.width, height: childSize.height
                 });
-                currentX += childSize.width + HORIZONTAL_CHILD_GAP;
+                currentY += childSize.height + VERTICAL_SPACING / 2;
             });
-            return maxChildHeightInRow;
-        };
+            const lastChild = childrenNodeData[childrenNodeData.length - 1];
+            const lastChildSize = NODE_SIZES_PX[lastChild.importance || 'common'];
+            totalHeight = currentY - VERTICAL_SPACING / 2 + VERTICAL_SPACING;
+        } else { // Original wrapping logic for more than 3 children
+            let currentRow = [];
+            let currentRowWidth = 0;
 
-        for (const child of childrenNodeData) {
-            const childSize = NODE_SIZES_PX[child.importance || 'common'];
-            const potentialRowWidth = currentRowWidth + (currentRow.length > 0 ? HORIZONTAL_CHILD_GAP : 0) + childSize.width;
-            
-            if (currentRow.length > 0 && potentialRowWidth > maxRowWidth) {
-                const rowHeight = placeRow(currentRow, currentY);
-                currentY += rowHeight + CHILD_ROW_VERTICAL_GAP;
-                currentRow = [child];
-                currentRowWidth = childSize.width;
-            } else {
-                currentRow.push(child);
-                currentRowWidth = potentialRowWidth;
+            const placeRow = (row, yPos) => {
+                const totalRowWidth = row.reduce((sum, child) => sum + NODE_SIZES_PX[child.importance || 'common'].width, 0) + (row.length - 1) * HORIZONTAL_CHILD_GAP;
+                let currentX = centerX - totalRowWidth / 2;
+                let maxChildHeightInRow = 0;
+
+                row.forEach(child => {
+                    const childSize = NODE_SIZES_PX[child.importance || 'common'];
+                    maxChildHeightInRow = Math.max(maxChildHeightInRow, childSize.height);
+                    positions.set(child.id, {
+                        x: currentX + childSize.width / 2, y: yPos + childSize.height / 2,
+                        width: childSize.width, height: childSize.height
+                    });
+                    currentX += childSize.width + HORIZONTAL_CHILD_GAP;
+                });
+                return maxChildHeightInRow;
+            };
+
+            for (const child of childrenNodeData) {
+                const childSize = NODE_SIZES_PX[child.importance || 'common'];
+                const potentialRowWidth = currentRowWidth + (currentRow.length > 0 ? HORIZONTAL_CHILD_GAP : 0) + childSize.width;
+                
+                if (currentRow.length > 0 && potentialRowWidth > maxRowWidth) {
+                    const rowHeight = placeRow(currentRow, currentY);
+                    currentY += rowHeight + CHILD_ROW_VERTICAL_GAP;
+                    currentRow = [child];
+                    currentRowWidth = childSize.width;
+                } else {
+                    currentRow.push(child);
+                    currentRowWidth = potentialRowWidth;
+                }
             }
-        }
-        if (currentRow.length > 0) {
-            const lastRowHeight = placeRow(currentRow, currentY);
-            totalHeight = currentY + lastRowHeight + VERTICAL_SPACING;
+            if (currentRow.length > 0) {
+                const lastRowHeight = placeRow(currentRow, currentY);
+                totalHeight = currentY + lastRowHeight + VERTICAL_SPACING;
+            }
         }
     }
 

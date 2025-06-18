@@ -6,8 +6,9 @@ class ErrorBoundary extends Component {
     super(props);
     this.state = {
       hasError: false,
-      error: undefined,
-      errorInfo: undefined
+      error: null,
+      errorInfo: null,
+      copyFeedback: ''
     };
   }
 
@@ -20,9 +21,33 @@ class ErrorBoundary extends Component {
     this.setState({ error, errorInfo });
   }
 
+  handleCopyError = () => {
+    const { error, errorInfo } = this.state;
+    if (!error) return;
+
+    const errorText = `
+--- YGGDRASIL ERROR REPORT ---
+Date: ${new Date().toISOString()}
+Error: ${error.toString()}
+Stack Trace:
+${error.stack}
+Component Stack:
+${errorInfo?.componentStack || 'Not available'}
+------------------------------
+    `;
+    navigator.clipboard.writeText(errorText.trim())
+      .then(() => {
+        this.setState({ copyFeedback: 'Copied!' });
+        setTimeout(() => this.setState({ copyFeedback: '' }), 2000);
+      })
+      .catch(err => {
+        this.setState({ copyFeedback: 'Failed to copy.' });
+        console.error('Failed to copy error report:', err);
+      });
+  };
+
   render() {
     if (this.state.hasError) {
-      const isDev = typeof process !== 'undefined' && process.env.NODE_ENV === 'development';
       return (
         React.createElement("div", { style: { 
             height: '100vh', 
@@ -66,14 +91,23 @@ class ErrorBoundary extends Component {
             }},
               "Reloading the application may fix the issue. Your work should be auto-saved up to the last successful action."
             ),
-            React.createElement("button", {
-              onClick: () => window.location.reload(),
-              className: "danger", 
-              style: { padding: '12px 25px', fontSize: '1.1em', fontWeight: 600 }
-            },
-              "Reload Application"
+            React.createElement("div", { style: { display: 'flex', justifyContent: 'center', gap: '15px', flexWrap: 'wrap' }},
+              React.createElement("button", {
+                onClick: () => window.location.reload(),
+                className: "danger", 
+                style: { padding: '12px 25px', fontSize: '1.1em', fontWeight: 600 }
+              },
+                "Reload Application"
+              ),
+              this.state.error && React.createElement("button", {
+                onClick: this.handleCopyError,
+                className: "secondary",
+                style: { padding: '12px 25px', fontSize: '1.1em', fontWeight: 500 }
+              },
+                this.state.copyFeedback || "Copy Error Details"
+              )
             ),
-            isDev && this.state.error && (
+            this.state.error && (
               React.createElement("details", { style: { 
                   marginTop: '30px', 
                   textAlign: 'left', 
@@ -85,7 +119,7 @@ class ErrorBoundary extends Component {
                   maxHeight: '250px', 
                   overflowY: 'auto' 
               }},
-                React.createElement("summary", { style: { cursor: 'pointer', fontWeight: 600, color: 'var(--text-primary, #E0E0E0)' }}, "Error Details (Development)"),
+                React.createElement("summary", { style: { cursor: 'pointer', fontWeight: 600, color: 'var(--text-primary, #E0E0E0)' }}, "Technical Details"),
                 React.createElement("pre", { style: { marginTop: '10px', whiteSpace: 'pre-wrap', wordBreak: 'break-all', lineHeight: '1.5', color: 'var(--text-secondary, #B0B0B0)' }},
                   this.state.error.toString(),
                   this.state.errorInfo?.componentStack

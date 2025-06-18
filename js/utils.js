@@ -451,21 +451,28 @@ export const countNodesByImportance = (node) => {
 
 export const getAncestorIds = (nodeId, tree) => {
   if (!tree || !nodeId) return [];
-  const path = [];
-  
-  function findPath(currentNode, targetId, currentPath) {
-    if (currentNode.id === targetId) return true; 
+  const nodeMap = getAllNodesAsMap(tree);
+  const ancestors = [];
+  let currentId = nodeId;
 
-    if (currentNode.children) {
-      for (const child of currentNode.children) {
-        if (findPath(child, targetId, currentPath)) {
-          currentPath.unshift(currentNode.id); 
-          return true;
-        }
-      }
-    }
-    return false;
+  // We are looking for ancestors of nodeId, so we don't include nodeId itself in the path.
+  const startNode = nodeMap.get(currentId);
+  if (!startNode) {
+    return []; // Node not in tree
   }
-  findPath(tree, nodeId, path);
-  return path; 
+  
+  // Start walking up from the node's parent.
+  currentId = startNode._parentId;
+
+  while (currentId) {
+    const node = nodeMap.get(currentId);
+    if (node) {
+      ancestors.unshift(node.id);
+      currentId = node._parentId;
+    } else {
+      break; // Should not happen in a consistent tree
+    }
+  }
+  
+  return ancestors; 
 };
