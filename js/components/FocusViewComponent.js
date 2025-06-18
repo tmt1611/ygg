@@ -40,10 +40,10 @@ const FocusViewComponent = ({
   }, [isFocusNodeRoot, activeProjectId, projects, findLinkSource]);
 
   const layoutRef = useRef(null); 
-  const allNodePositions = useFocusViewLayout(layoutRef, focusNodeData, parentNodeData, childrenNodeData);
+  const { positions: allNodePositions, height: contentHeight } = useFocusViewLayout(layoutRef, focusNodeData, parentNodeData, childrenNodeData);
 
   const connectorLines = useMemo(() => {
-    if (allNodePositions.size === 0) return [];
+    if (!allNodePositions || allNodePositions.size === 0) return [];
     const lines = [];
     const focusPos = allNodePositions.get(focusNodeId);
 
@@ -96,8 +96,8 @@ const FocusViewComponent = ({
   return (
     React.createElement("div", { className: "focus-view-container" },
       React.createElement("div", { className: "focus-view-main-area" },
-        React.createElement("div", { ref: layoutRef, className: "focus-view-layout" },
-          React.createElement("svg", { className: "focus-view-svg-overlay" },
+        React.createElement("div", { ref: layoutRef, className: "focus-view-layout", style: { height: contentHeight ? `${contentHeight}px` : '100%' } },
+          React.createElement("svg", { className: "focus-view-svg-overlay", style: { height: contentHeight ? `${contentHeight}px` : '100%' } },
             React.createElement("defs", null,
               React.createElement("marker", { id: "warp-arrow", viewBox: "0 0 10 10", refX: "8", refY: "5", markerWidth: "6", markerHeight: "6", orient: "auto-start-reverse"},
                 React.createElement("path", { d: "M 0 0 L 10 5 L 0 10 z", fill: "var(--focus-connector-stroke)" })

@@ -32,7 +32,7 @@ export const useD3Tree = (
     // Make radius dependent on depth to avoid clutter
     return tree()
       .size([2 * Math.PI, depth * radialRadiusFactor])
-      .separation((a, b) => (a.parent === b.parent ? 1 : 2) / (a.depth || 1));
+      .separation((a, b) => (a.parent === b.parent ? 1 : 2));
   }, [rootHierarchy, radialRadiusFactor]);
 
   useEffect(() => {
