@@ -95,13 +95,13 @@ const YggdrasilTopBar = ({
           disabled: isAppBusy || !hasTechTreeData || saveFeedback, 
           className: `yggdrasil-top-bar-action-item primary yggdrasil-top-bar-save-button ${saveFeedback ? 'saved' : ''}`,
           title: hasTechTreeData ? "Save the current state of the active project." : "No active project data to save."
-        }, saveFeedback ? 'Saved ✓' : 'Save'),
+        }, saveFeedback ? 'Saved ✓' : '💾'),
         React.createElement("button", { 
           onClick: handleDownloadClick, 
           disabled: isAppBusy || !hasTechTreeData || downloadFeedback, 
           className: `yggdrasil-top-bar-action-item primary yggdrasil-top-bar-download-button ${downloadFeedback ? 'saved' : ''}`,
           title: hasTechTreeData ? "Save active project and download as .project.json" : "No active project data to download."
-        }, downloadFeedback ? 'Downloaded ✓' : '💾⇩'), 
+        }, downloadFeedback ? 'Downloaded ✓' : '📥'), 
         React.createElement("button", {
           onClick: onToggleTheme,
           className: "yggdrasil-top-bar-action-item base-icon-button",

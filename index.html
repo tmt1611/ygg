@@ -352,6 +352,22 @@
 
 
       .yggdrasil-top-bar-action-item { font-size: 0.85em; padding: 7px 10px; border-radius: var(--border-radius); }
+      .yggdrasil-top-bar-action-item.yggdrasil-top-bar-save-button,
+      .yggdrasil-top-bar-action-item.yggdrasil-top-bar-download-button {
+        font-size: 1.1em; /* Make icons slightly larger */
+        padding: 6px;     /* Adjust padding for square-ish button */
+        width: 34px;      /* Fixed width */
+        height: 34px;     /* Fixed height */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        line-height: 1;
+      }
+      .yggdrasil-top-bar-save-button.saved,
+      .yggdrasil-top-bar-download-button.saved {
+        font-size: 0.8em !important; /* Smaller font for "Saved ✓" text */
+      }
+
       .yggdrasil-top-bar-action-item.api-status { padding: 3px 6px; }
       .yggdrasil-top-bar-action-item.api-status.success { background-color: var(--success-bg); color: var(--success-color); }
       .yggdrasil-top-bar-action-item.api-status.error { background-color: var(--error-bg); color: var(--error-color); }
@@ -363,7 +379,7 @@
         color: var(--button-primary-text) !important; 
       }
       .yggdrasil-top-bar-download-button {
-        margin-left: -4px; /* Slight adjustment if too close to save button */
+        /* margin-left: -4px; No longer needed with fixed width buttons */
       }
 
 
