@@ -62,18 +62,16 @@ const AiSuggestionModal = ({
 
   const netChangeStyle = { color: netChange > 0 ? 'var(--success-color)' : netChange < 0 ? 'var(--error-color)' : 'var(--text-secondary)'};
 
-  const renderSummaryItem = (label, count, color) => {
+  const renderSummaryItem = (label, count, color, icon) => {
     if (count <= 0) return null;
-    const iconMatch = label.match(/^(.\s)/);
-    const icon = iconMatch ? iconMatch[1] : '';
-    const textLabel = label.replace(/^(.\s)/, '');
     return (
-        React.createElement(React.Fragment, { key: label },
-            React.createElement("div", { style: {color, display: 'flex', alignItems: 'center', gap: '5px'}},
-                React.createElement("span", {style:{fontSize: '1.1em', opacity: 0.8}}, icon), textLabel
-            ),
-            React.createElement("div", { style: { fontWeight: 'bold', color }, className: "summary-value" }, count)
-        )
+      React.createElement("div", { key: label, className: "ai-suggestion-modal-summary-item", style: { backgroundColor: color ? `${color}1A` : 'transparent' } },
+        React.createElement("span", { className: "summary-label" },
+          React.createElement("span", { className: "summary-icon", style: { color: color || 'var(--text-secondary)'} }, icon),
+          label
+        ),
+        React.createElement("span", { className: "summary-value", style: { color: color || 'var(--text-primary)' } }, count)
+      )
     );
   };
 
@@ -133,11 +131,11 @@ const AiSuggestionModal = ({
                   React.createElement("div", null, React.createElement("strong", null, "Node Count:")),
                   React.createElement("div", { className: "summary-value" }, currentTotalNodes, " → ", suggestedTotalNodes, " (", React.createElement("span", { style: netChangeStyle, className: "ai-suggestion-modal-summary-net-change" }, netChange >= 0 ? '+' : '', netChange), ")"),
 
-                  renderSummaryItem("➕ Added", newNodes.length, 'var(--success-color)'),
-                  renderSummaryItem("➖ Removed", removedNodes.length, 'var(--error-color)'),
-                  renderSummaryItem("✏️ Modified", modifiedContentNodes.length, 'var(--primary-accent)'),
-                  renderSummaryItem("📂 Structure", structureModifiedNodes.length, 'var(--secondary-accent-dark)'),
-                  renderSummaryItem("↪️ Moved", reparentedNodes.length, 'var(--warning-color)')
+                  renderSummaryItem("Added", newNodes.length, 'var(--success-color)', '➕'),
+                  renderSummaryItem("Removed", removedNodes.length, 'var(--error-color)', '➖'),
+                  renderSummaryItem("Content Modified", modifiedContentNodes.length, 'var(--primary-accent)', '✏️'),
+                  renderSummaryItem("Structure Modified", structureModifiedNodes.length, 'var(--secondary-accent-dark)', '📂'),
+                  renderSummaryItem("Moved / Reparented", reparentedNodes.length, 'var(--warning-color)', '↪️')
                 )
               ) : (
                 React.createElement("p", { style: { fontStyle: 'italic', color: 'var(--text-secondary)'} }, "Summary unavailable due to suggestion error.")
