@@ -109,7 +109,7 @@ const AiSuggestionModal = ({
                   )
                 )
               ),
-              removedNodes.length > 0 && !annotatedTree?._isErrorNode && (
+              removedNodes.length > 0 && (
                 React.createElement("div", { className: "ai-suggestion-modal-removed-nodes-section" },
                     React.createElement("h4", { className: "ai-suggestion-modal-removed-nodes-title" }, "Nodes To Be Removed (", removedNodes.length, "):"),
                     React.createElement("ul", { className: "ai-suggestion-modal-removed-nodes-list" },
@@ -154,7 +154,7 @@ const AiSuggestionModal = ({
                     setPrompt: setFollowUpPrompt,
                     onModify: handleInternalRefine,
                     isLoading: isRefining,
-                    disabled: !apiKeyIsSet || isRefining || annotatedTree?._isErrorNode,
+                    disabled: !apiKeyIsSet || isRefining,
                     isApiKeySet: apiKeyIsSet,
                     hasTreeData: !!suggestion,
                     labelOverride: "Refine This Suggestion:"
@@ -172,7 +172,7 @@ const AiSuggestionModal = ({
         React.createElement("div", { className: "ai-suggestion-modal-footer-actions" },
           React.createElement("button", { type: "button", onClick: onCancel, className: "secondary" }, "Reject Suggestion"),
           React.createElement("button", { ref: applyButtonRef, type: "button", onClick: onConfirm, className: "success",
-            disabled: annotatedTree?._isErrorNode || isRefining
+            disabled: !!annotatedTree?._isErrorNode || isRefining
             },
             isRefining ? "Refining..." : "Apply Changes to Project"
           )

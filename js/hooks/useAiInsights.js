@@ -54,7 +54,7 @@ export const useAiInsights = ({
         }
         return prevTree;
     });
-    // No longer clearing the suggestion, the user can see it matches the new description.
+    // The suggestion is intentionally not cleared, allowing the user to see what they applied.
   }, [setTechTreeData, addHistoryEntry]);
 
   const handleUseAlternativeName = useCallback((nodeId, alternativeName) => {
@@ -69,7 +69,7 @@ export const useAiInsights = ({
         }
         return prevTree;
     });
-    // No longer removing the name from the list. If the user undoes, the suggestion is still there.
+    // The suggestion is intentionally not cleared, allowing the user to see what they applied.
   }, [setTechTreeData, addHistoryEntry]);
 
   const handleAddSuggestedChildFromInsight = useCallback((parentNodeId, childName, childDescription) => {
