@@ -938,13 +938,7 @@
       .workspace-sub-nav button.active { color: var(--primary-accent); border-bottom-color: var(--primary-accent); font-weight: 600; }
       .workspace-sub-nav button:disabled { color: var(--disabled-text); cursor: not-allowed; border-bottom-color: transparent; }
       .workspace-content-area { flex-grow: 1; overflow-y: auto; }
-      .workspace-content-area > div > fieldset {
-          border: 1px solid var(--border-color); border-radius: var(--border-radius-lg);
-          padding: 12px 18px; margin-bottom: 15px; background-color: var(--panel-bg); 
-      }
-      .workspace-content-area > div > fieldset legend {
-          font-weight: 600; color: var(--primary-accent); padding: 0 6px; font-size: 1.05em; 
-      }
+      /* fieldset styles removed as they are replaced by CollapsiblePanel in the workspace view */
       .project-list { list-style: none; padding: 0; margin: 0; }
       .project-list-item { display: flex; justify-content: space-between; align-items: center; padding: 8px; border-bottom: 1px solid var(--border-color); transition: background-color 0.15s; } 
       .project-list-item:last-child { border-bottom: none; }

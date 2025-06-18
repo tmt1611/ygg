@@ -63,13 +63,13 @@ const AiSuggestionModal = ({
 
   const netChangeStyle = { color: netChange > 0 ? 'var(--success-color)' : netChange < 0 ? 'var(--error-color)' : 'var(--text-secondary)', fontWeight: 'bold' };
   
-  const summarySectionStyle = { fontSize: '0.95em', padding: '12px', background: 'var(--panel-alt-bg)', border: '1px solid var(--border-color)', borderRadius: 'var(--border-radius)' };
+  const summarySectionStyle = { fontSize: '0.9em', padding: '10px', background: 'var(--panel-alt-bg)', border: '1px solid var(--border-color)', borderRadius: 'var(--border-radius)' };
   const refinementSectionStyle = { paddingTop: '0px' }; 
 
-  const renderSummaryItem = (label, count, color, boldValue = true) => count > 0 && (
-    React.createElement("li", null,
-      React.createElement("strong", { style: color ? {color} : {} }, label, ":"), ' ',
-      React.createElement("span", { style: { fontWeight: boldValue ? 'bold' : 'normal', ...(color && {color})}}, count), " node(s)"
+  const renderSummaryItem = (label, count, color) => count > 0 && (
+    React.createElement(React.Fragment, { key: label },
+      React.createElement("div", { style: {color} }, label),
+      React.createElement("div", { style: { fontWeight: 'bold', color, textAlign: 'right'}}, count)
     )
   );
 
@@ -117,18 +117,20 @@ const AiSuggestionModal = ({
 
           React.createElement("div", { style: { flex: '1 1 40%', display: 'flex', flexDirection: 'column', gap: '15px', overflowY: 'auto', padding: '0 5px 5px 0' }},
             React.createElement("div", { id: "ai-suggestion-summary", style: summarySectionStyle },
-              React.createElement("p", { style: { fontWeight: '600', fontSize: '1.05em', marginBottom: '8px', color: 'var(--text-primary)' }}, "Summary of Changes (vs Previous):"),
-              React.createElement("ul", { style: { listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '5px' }},
-                React.createElement("li", null, React.createElement("strong", null, "Node Count:"), " ", currentTotalNodes, " → ", suggestedTotalNodes, " (Net: ", React.createElement("span", { style: netChangeStyle }, netChange >= 0 ? '+' : '', netChange), ")"),
-                renderSummaryItem("Added", newNodes.length, 'var(--success-color)'),
-                renderSummaryItem("Removed", removedNodes.length, 'var(--error-color)'),
-                renderSummaryItem("Unlocked Content Modified", modifiedContentNodes.length, 'var(--primary-accent)'),
-                renderSummaryItem("Structure Modified", structureModifiedNodes.length, 'var(--secondary-accent-dark)'),
-                renderSummaryItem("Moved/Re-parented", reparentedNodes.length, 'var(--warning-color)')
+              React.createElement("p", { style: { fontWeight: '600', fontSize: '1.0em', marginBottom: '8px', color: 'var(--text-primary)' }}, "Summary of Changes:"),
+              React.createElement("div", { style: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4px 10px', alignItems: 'center' }},
+                React.createElement("div", null, React.createElement("strong", null, "Node Count:")),
+                React.createElement("div", { style: {textAlign: 'right'} }, currentTotalNodes, " → ", suggestedTotalNodes, " (", React.createElement("span", { style: netChangeStyle }, netChange >= 0 ? '+' : '', netChange), ")"),
+
+                renderSummaryItem("➕ Added", newNodes.length, 'var(--success-color)'),
+                renderSummaryItem("➖ Removed", removedNodes.length, 'var(--error-color)'),
+                renderSummaryItem("✏️ Modified", modifiedContentNodes.length, 'var(--primary-accent)'),
+                renderSummaryItem("📂 Structure", structureModifiedNodes.length, 'var(--secondary-accent-dark)'),
+                renderSummaryItem("↪️ Moved", reparentedNodes.length, 'var(--warning-color)')
               ),
               lockedContentChangedNodes.length > 0 && 
                 React.createElement("p", { style: { fontWeight: 'bold', color: 'var(--error-color)', padding: '8px', background: 'var(--error-bg)', border: '1px solid var(--error-color)', borderRadius: 'var(--border-radius)', marginTop: '10px' }},
-                  "CRITICAL: Locked Node Content Modified: ", React.createElement("span", { style: { fontSize: '1.1em', marginLeft:'5px' }}, lockedContentChangedNodes.length), " node(s)"
+                  "CRITICAL: Locked Node Content Modified: ", React.createElement("span", { style: { fontSize: '1.1em', marginLeft:'5px' }}, lockedContentChangedNodes.length)
                 )
             ),
             

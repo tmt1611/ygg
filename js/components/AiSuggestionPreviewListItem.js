@@ -4,25 +4,25 @@ import React from 'react';
 
 const AiSuggestionPreviewListItem = ({ node, level, isVisualDiff = false }) => {
   let itemStyle = { 
-    padding: '6px 8px', 
-    margin: '3px 0',
+    padding: '4px 6px', // Reduced padding
+    margin: '2px 0',    // Reduced margin
     borderRadius: 'var(--border-radius)',
     border: '1px solid transparent',
-    marginLeft: isVisualDiff ? `${level * 20}px` : `${level * 18}px`, 
+    marginLeft: isVisualDiff ? `${level * 18}px` : `${level * 16}px`, // Reduced indent
     position: 'relative', 
     overflow: 'hidden', 
   };
-  let changeStatusText = "";
   let changeStatusTextStyle = { color: 'var(--text-primary)', fontWeight: 'normal' };
   let titleText = node.description || node.name;
+  let changeStatusIcon = { icon: '', color: 'var(--text-tertiary)'};
 
-  let nodeNameStyle = { fontWeight: 500, fontSize: '0.95em' };
+  let nodeNameStyle = { fontWeight: 500, fontSize: '0.9em' }; // Slightly smaller font
 
   switch (node._changeStatus) {
     case 'new':
       itemStyle.backgroundColor = 'var(--success-bg)';
       itemStyle.borderColor = 'var(--success-color)';
-      changeStatusText = " (New)";
+      changeStatusIcon = { icon: '➕', color: 'var(--success-color)' };
       changeStatusTextStyle.color = 'var(--success-color)';
       nodeNameStyle.color = 'var(--success-color)';
       titleText = "This node is newly added.";
@@ -30,7 +30,7 @@ const AiSuggestionPreviewListItem = ({ node, level, isVisualDiff = false }) => {
     case 'content_modified':
       itemStyle.backgroundColor = 'var(--primary-accent-hover-bg)'; 
       itemStyle.borderColor = 'var(--primary-accent-light)';
-      changeStatusText = " (Content Modified)";
+      changeStatusIcon = { icon: '✏️', color: 'var(--primary-accent)' };
       changeStatusTextStyle.color = 'var(--primary-accent)';
       nodeNameStyle.color = 'var(--primary-accent-dark)';
       titleText = "Name, description, importance, or link of this unlocked node has changed.";
@@ -38,14 +38,14 @@ const AiSuggestionPreviewListItem = ({ node, level, isVisualDiff = false }) => {
     case 'structure_modified':
       itemStyle.backgroundColor = 'var(--panel-alt-bg)'; 
       itemStyle.borderColor = 'var(--secondary-accent-dark)';
-      changeStatusText = " (Children Changed)"; 
+      changeStatusIcon = { icon: '📂', color: 'var(--secondary-accent-dark)' };
       changeStatusTextStyle.color = 'var(--secondary-accent-dark)';
       titleText = "The direct children of this node have changed (added, removed, or reordered).";
       break;
     case 'reparented':
       itemStyle.backgroundColor = 'var(--warning-bg)';
       itemStyle.borderColor = 'var(--warning-color)';
-      changeStatusText = " (Moved)";
+      changeStatusIcon = { icon: '↪️', color: 'var(--warning-color)' };
       changeStatusTextStyle.color = 'var(--warning-color)';
       nodeNameStyle.color = 'var(--text-primary)'; 
       titleText = `This node has been moved. Original parent ID: ${node._oldParentId || 'root'}.`;
@@ -53,7 +53,7 @@ const AiSuggestionPreviewListItem = ({ node, level, isVisualDiff = false }) => {
     case 'locked_content_changed':
       itemStyle.backgroundColor = 'var(--error-bg)';
       itemStyle.borderColor = 'var(--error-color)';
-      changeStatusText = " (ERROR: Locked Content Modified!)";
+      changeStatusIcon = { icon: '❗', color: 'var(--error-color)' };
       changeStatusTextStyle.color = 'var(--error-color)';
       nodeNameStyle.color = 'var(--error-color)';
       nodeNameStyle.fontWeight = 'bold';
@@ -63,10 +63,9 @@ const AiSuggestionPreviewListItem = ({ node, level, isVisualDiff = false }) => {
       itemStyle.backgroundColor = 'rgba(220, 53, 69, 0.1)'; 
       itemStyle.borderColor = 'var(--error-color)';
       itemStyle.opacity = 0.7;
+      changeStatusIcon = { icon: '➖', color: 'var(--error-color)' };
       nodeNameStyle.textDecoration = 'line-through';
       nodeNameStyle.color = 'var(--error-color)';
-      changeStatusText = " (Error: Should Be Removed)";
-      changeStatusTextStyle.color = 'var(--error-color)';
       titleText = "This node was marked for removal but still appears in suggested tree structure (potential error).";
       break;
     case 'unchanged':
@@ -74,25 +73,25 @@ const AiSuggestionPreviewListItem = ({ node, level, isVisualDiff = false }) => {
       itemStyle.border = '1px solid var(--border-color)'; 
       break;
   }
-  const nodeImportanceText = node.importance ? ` (Importance: ${node.importance.charAt(0).toUpperCase() + node.importance.slice(1)})` : '';
-  const linkedProjectText = node.linkedProjectId && node.linkedProjectName ? ` (🔗 ${node.linkedProjectName})` : '';
+  const nodeImportanceText = node.importance ? ` (${node.importance.charAt(0).toUpperCase()})` : '';
+  const linkedProjectText = node.linkedProjectId && node.linkedProjectName ? ` (🔗)` : '';
 
   return (
     React.createElement("li", { style: { listStyle: 'none' }, "aria-label": `Node: ${node.name}, Change Status: ${node._changeStatus || 'Unchanged'}`}, 
       React.createElement("div", { style: itemStyle, title: titleText },
-        React.createElement("div", { style: { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'nowrap', gap: '5px' }},
-            React.createElement("span", { style: { ...nodeNameStyle, flexShrink: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }},
-              node.isLocked && React.createElement("span", { style: { marginRight: '4px', color: node._changeStatus === 'locked_content_changed' ? 'var(--error-color)' : 'var(--text-tertiary)'}, title: "Locked" }, "🔒"),
+        React.createElement("div", { style: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'nowrap', gap: '5px' }},
+            React.createElement("span", { style: { ...nodeNameStyle, flexShrink: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: '5px' }},
+              changeStatusIcon.icon && React.createElement("span", { style: { color: changeStatusIcon.color, fontSize: '1.1em'}, "aria-hidden": "true" }, changeStatusIcon.icon),
+              node.isLocked && React.createElement("span", { style: { color: node._changeStatus === 'locked_content_changed' ? 'var(--error-color)' : 'var(--text-tertiary)'}, title: "Locked" }, "🔒"),
               node.name
             ),
-            React.createElement("span", { style: { fontSize: '0.85em', color: 'var(--text-secondary)', marginLeft: 'auto', whiteSpace: 'nowrap', flexShrink: 0 }},
+            React.createElement("span", { style: { fontSize: '0.8em', color: 'var(--text-secondary)', marginLeft: 'auto', whiteSpace: 'nowrap', flexShrink: 0 }},
                 nodeImportanceText,
-                linkedProjectText,
-                changeStatusText && React.createElement("span", { style: { marginLeft: '8px', ...changeStatusTextStyle, fontWeight: '500' }}, changeStatusText)
+                linkedProjectText
             )
         ),
         node.description && (
-          React.createElement("p", { style: { fontSize: '0.9em', color: 'var(--text-secondary)', marginTop: '3px', marginBottom: '2px', whiteSpace: 'pre-wrap', wordBreak: 'break-word', paddingLeft: '15px' }},
+          React.createElement("p", { style: { fontSize: '0.8em', color: 'var(--text-secondary)', marginTop: '2px', marginBottom: '1px', whiteSpace: 'pre-wrap', wordBreak: 'break-word', paddingLeft: '25px', opacity: 0.9 }},
             node.description
           )
         ),
