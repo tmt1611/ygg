@@ -373,6 +373,136 @@ html[data-theme='light'] .contextual-help-icon:hover, html[data-theme='light'] .
 .modal-content-basic { background-color: var(--panel-bg); padding: 18px 22px; border-radius: var(--border-radius-lg); box-shadow: var(--box-shadow-lg); max-width: 90vw; max-height: 90vh; overflow-y: auto; animation: modalFadeIn 0.3s ease-out; border-top: 3px solid var(--primary-accent); } /* Reduced padding and added top border */
 @keyframes modalFadeIn { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
 
+/* AI Suggestion Diff Preview Item */
+.diff-list-item {
+  padding: 6px 10px;
+  margin: 3px 0;
+  border-radius: var(--border-radius-lg);
+  border: 1px solid var(--border-color);
+  position: relative;
+  overflow: hidden;
+  transition: background-color 0.2s, border-color 0.2s;
+}
+.diff-list-item.status-new {
+  background-color: var(--success-bg);
+  border-color: var(--success-color);
+}
+.diff-list-item.status-content_modified {
+  background-color: var(--primary-accent-hover-bg); 
+  border-color: var(--primary-accent-light);
+}
+.diff-list-item.status-structure_modified {
+  background-color: var(--panel-alt-bg);
+  border-color: var(--secondary-accent-dark);
+}
+.diff-list-item.status-reparented {
+  background-color: var(--warning-bg);
+  border-color: var(--warning-color);
+}
+.diff-list-item.status-locked_content_changed {
+  background-color: var(--error-bg);
+  border-color: var(--error-color);
+}
+.diff-list-item.status-removed {
+  background-color: rgba(220, 53, 69, 0.1); 
+  border-color: var(--error-color);
+  opacity: 0.7;
+}
+
+.diff-list-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: nowrap;
+  gap: 5px;
+}
+.diff-list-item-name-section {
+  flex-shrink: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-weight: 500;
+  font-size: 0.9em;
+}
+.status-new .diff-list-item-name-section { color: var(--success-color); }
+.status-content_modified .diff-list-item-name-section { color: var(--primary-accent-dark); }
+.status-locked_content_changed .diff-list-item-name-section { color: var(--error-color); font-weight: bold; }
+.status-removed .diff-list-item-name-section { text-decoration: line-through; color: var(--error-color); }
+
+.diff-change-icon { font-size: 1.1em; }
+.status-new .diff-change-icon { color: var(--success-color); }
+.status-content_modified .diff-change-icon { color: var(--primary-accent); }
+.status-structure_modified .diff-change-icon { color: var(--secondary-accent-dark); }
+.status-reparented .diff-change-icon { color: var(--warning-color); }
+.status-locked_content_changed .diff-change-icon { color: var(--error-color); }
+.status-removed .diff-change-icon { color: var(--error-color); }
+
+.diff-lock-icon {
+  color: var(--text-tertiary);
+}
+.status-locked_content_changed .diff-lock-icon {
+  color: var(--error-color);
+}
+
+.diff-list-item-meta {
+  font-size: 0.8em;
+  color: var(--text-secondary);
+  margin-left: auto;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.diff-list-item-desc {
+  font-size: 0.8em;
+  color: var(--text-secondary);
+  margin: 4px 0 2px 24px;
+  white-space: pre-wrap;
+  word-break: break-word;
+  opacity: 0.9;
+  line-height: 1.4;
+}
+.diff-details-list {
+  list-style: none;
+  padding: 0;
+  margin: 5px 0 0 18px;
+  font-size: 0.8em;
+  color: var(--text-tertiary);
+}
+.diff-details-item {
+  line-height: 1.4;
+  margin-bottom: 3px;
+  padding: 3px 5px;
+  border-radius: var(--border-radius);
+  background-color: rgba(var(--panel-bg-rgb), 0.2);
+}
+.diff-details-item strong {
+  color: var(--text-primary);
+  margin-right: 5px;
+}
+.diff-details-item .diff-from {
+  text-decoration: line-through;
+  color: var(--error-color);
+  opacity: 0.8;
+  word-break: break-all;
+}
+.diff-details-item .diff-to {
+  color: var(--success-color);
+  word-break: break-all;
+}
+.diff-details-item .diff-arrow {
+  margin: 0 4px;
+}
+
+.diff-list-child-container {
+  margin-top: 0;
+  padding-left: 0;
+  list-style: none;
+}
+
+
 .error-message-wrapper { margin-top: 8px; }
 .error-message-animated { animation: errorAppear 0.3s ease-out; }
 @keyframes errorAppear { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
@@ -526,23 +656,30 @@ html[data-theme='dark'] .graph-view-node text.node-label {
 .graph-view-node .node-rune-icon { font-size: 0.7em; dominant-baseline: middle; text-anchor: middle; fill: var(--text-primary); }
 .graph-view-node .node-icon { font-size: 0.6em; }
 
-.graph-view-node.proxy circle {
-  stroke-width: 2.5px;
-  fill: rgba(var(--primary-accent-rgb), 0.05);
+.graph-view-node.proxy rect {
+  stroke-width: 2px;
+  fill: rgba(var(--primary-accent-rgb), 0.1);
   stroke: var(--primary-accent);
+  stroke-dasharray: 4 2;
   filter: drop-shadow(0px 1px 4px rgba(var(--primary-accent-rgb), 0.3));
   transition: transform 0.2s ease-out, stroke 0.2s ease-out, fill 0.2s ease-out, filter 0.2s ease-out;
+  animation: proxy-portal-pulse 4s ease-in-out infinite alternate;
 }
-html[data-theme='dark'] .graph-view-node.proxy circle {
-  stroke: var(--primary-accent-light);
-  fill: rgba(var(--primary-accent-rgb), 0.1);
-  filter: drop-shadow(0px 0px 5px rgba(var(--primary-accent-rgb), 0.5));
+@keyframes proxy-portal-pulse {
+  from { stroke-dashoffset: 0; }
+  to { stroke-dashoffset: 12; }
 }
-.graph-view-node.proxy:hover circle {
-  transform: scale(1.15);
+html[data-theme='dark'] .graph-view-node.proxy rect {
   stroke: var(--primary-accent-light);
-  fill: rgba(var(--primary-accent-rgb), 0.2);
-  filter: drop-shadow(0px 0px 8px var(--primary-accent));
+  fill: rgba(var(--primary-accent-rgb), 0.15);
+  filter: drop-shadow(0px 0px 6px rgba(var(--primary-accent-rgb), 0.5));
+}
+.graph-view-node.proxy:hover rect {
+  transform: scale(1.1);
+  stroke: var(--primary-accent-light);
+  fill: rgba(var(--primary-accent-rgb), 0.25);
+  filter: drop-shadow(0px 0px 10px var(--primary-accent));
+  stroke-dasharray: none;
 }
 .graph-view-node.proxy .node-label {
   fill: var(--text-secondary);
@@ -707,7 +844,7 @@ html[data-theme='dark'] .ai-insights-section h4 { color: var(--primary-accent-li
   margin-top: 0; /* Remove top margin, rely on parent li padding */
   margin-left: 15px; 
   border-left: 1px solid var(--border-color); /* Thinner border */
-} 
+}
 mark.search-highlight { background-color: var(--warning-bg); color: var(--text-primary); font-weight: 600; padding: 1px 0; }
 
 

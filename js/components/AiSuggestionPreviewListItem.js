@@ -1,110 +1,100 @@
-
 import React from 'react';
 
-const AiSuggestionPreviewListItem = ({ node, level, isVisualDiff = false }) => {
-  let itemStyle = { 
-    padding: '6px 10px',
-    margin: '3px 0',
-    borderRadius: 'var(--border-radius-lg)',
-    border: '1px solid transparent',
-    marginLeft: `${level * 18}px`, // Increased indent
-    position: 'relative', 
-    overflow: 'hidden',
-    transition: 'background-color 0.2s',
+const DiffDetail = ({ detail }) => {
+  const renderValue = (value) => {
+    if (value === null || value === undefined || value === '') {
+      return React.createElement("i", null, "(empty)");
+    }
+    const strValue = String(value);
+    return strValue.length > 70 ? `${strValue.substring(0, 67)}...` : strValue;
   };
-  let changeStatusTextStyle = { color: 'var(--text-primary)', fontWeight: 'normal' };
-  let titleText = node.description || node.name;
-  let changeStatusIcon = { icon: '', color: 'var(--text-tertiary)'};
 
-  let nodeNameStyle = { fontWeight: 500, fontSize: '0.9em' }; // Slightly larger font
+  return (
+    React.createElement("li", { className: "diff-details-item" },
+      React.createElement("strong", null, detail.label, ":"),
+      detail.type === 'critical' ? (
+        React.createElement("span", { className: "diff-to" }, detail.to)
+      ) : (
+        React.createElement(React.Fragment, null,
+          React.createElement("span", { className: "diff-from" }, renderValue(detail.from)),
+          React.createElement("span", { className: "diff-arrow" }, "→"),
+          React.createElement("span", { className: "diff-to" }, renderValue(detail.to))
+        )
+      )
+    )
+  );
+};
+
+
+const AiSuggestionPreviewListItem = ({ node, level, isVisualDiff = false }) => {
+  let titleText = node.description || node.name;
+  let changeStatusIcon = '';
 
   switch (node._changeStatus) {
     case 'new':
-      itemStyle.backgroundColor = 'var(--success-bg)';
-      itemStyle.borderColor = 'var(--success-color)';
-      changeStatusIcon = { icon: '➕', color: 'var(--success-color)' };
-      changeStatusTextStyle.color = 'var(--success-color)';
-      nodeNameStyle.color = 'var(--success-color)';
+      changeStatusIcon = '➕';
       titleText = "This node is newly added.";
       break;
     case 'content_modified':
-      itemStyle.backgroundColor = 'var(--primary-accent-hover-bg)'; 
-      itemStyle.borderColor = 'var(--primary-accent-light)';
-      changeStatusIcon = { icon: '✏️', color: 'var(--primary-accent)' };
-      changeStatusTextStyle.color = 'var(--primary-accent)';
-      nodeNameStyle.color = 'var(--primary-accent-dark)';
+      changeStatusIcon = '✏️';
       titleText = "Name, description, importance, or link of this unlocked node has changed.";
       break;
     case 'structure_modified':
-      itemStyle.backgroundColor = 'var(--panel-alt-bg)'; 
-      itemStyle.borderColor = 'var(--secondary-accent-dark)';
-      changeStatusIcon = { icon: '📂', color: 'var(--secondary-accent-dark)' };
-      changeStatusTextStyle.color = 'var(--secondary-accent-dark)';
+      changeStatusIcon = '📂';
       titleText = "The direct children of this node have changed (added, removed, or reordered).";
       break;
     case 'reparented':
-      itemStyle.backgroundColor = 'var(--warning-bg)';
-      itemStyle.borderColor = 'var(--warning-color)';
-      changeStatusIcon = { icon: '↪️', color: 'var(--warning-color)' };
-      changeStatusTextStyle.color = 'var(--warning-color)';
-      nodeNameStyle.color = 'var(--text-primary)'; 
+      changeStatusIcon = '↪️';
       titleText = `This node has been moved. Original parent ID: ${node._oldParentId || 'root'}.`;
       break;
     case 'locked_content_changed':
-      itemStyle.backgroundColor = 'var(--error-bg)';
-      itemStyle.borderColor = 'var(--error-color)';
-      changeStatusIcon = { icon: '❗', color: 'var(--error-color)' };
-      changeStatusTextStyle.color = 'var(--error-color)';
-      nodeNameStyle.color = 'var(--error-color)';
-      nodeNameStyle.fontWeight = 'bold';
+      changeStatusIcon = '❗';
       titleText = "CRITICAL: Content of this LOCKED node was modified by AI!";
       break;
     case 'removed': 
-      itemStyle.backgroundColor = 'rgba(220, 53, 69, 0.1)'; 
-      itemStyle.borderColor = 'var(--error-color)';
-      itemStyle.opacity = 0.7;
-      changeStatusIcon = { icon: '➖', color: 'var(--error-color)' };
-      nodeNameStyle.textDecoration = 'line-through';
-      nodeNameStyle.color = 'var(--error-color)';
+      changeStatusIcon = '➖';
       titleText = "This node was marked for removal but still appears in suggested tree structure (potential error).";
       break;
-    case 'unchanged':
     default:
-      itemStyle.border = '1px solid var(--border-color)'; 
       break;
   }
   const nodeImportanceText = node.importance ? ` (${node.importance.charAt(0).toUpperCase()})` : '';
   const linkedProjectText = node.linkedProjectId && node.linkedProjectName ? ` (🔗)` : '';
+  
+  const itemClassName = `diff-list-item status-${node._changeStatus || 'unchanged'}`;
+  const itemStyle = {
+    marginLeft: `${level * 18}px`,
+  };
 
   return (
     React.createElement("li", { style: { listStyle: 'none' }, "aria-label": `Node: ${node.name}, Change Status: ${node._changeStatus || 'Unchanged'}`}, 
-      React.createElement("div", { style: itemStyle, title: titleText },
-        React.createElement("div", { style: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'nowrap', gap: '5px' }},
-            React.createElement("span", { style: { ...nodeNameStyle, flexShrink: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: '5px' }},
-              changeStatusIcon.icon && React.createElement("span", { style: { color: changeStatusIcon.color, fontSize: '1.1em'}, "aria-hidden": "true" }, changeStatusIcon.icon),
-              node.isLocked && React.createElement("span", { style: { color: node._changeStatus === 'locked_content_changed' ? 'var(--error-color)' : 'var(--text-tertiary)'}, title: "Locked" }, "🔒"),
+      React.createElement("div", { style: itemStyle, className: itemClassName, title: titleText },
+        React.createElement("div", { className: "diff-list-item-header" },
+            React.createElement("span", { className: "diff-list-item-name-section" },
+              changeStatusIcon && React.createElement("span", { className: "diff-change-icon", "aria-hidden": "true" }, changeStatusIcon),
+              node.isLocked && React.createElement("span", { className: "diff-lock-icon", title: "Locked" }, "🔒"),
               node.name
             ),
-            React.createElement("span", { style: { fontSize: '0.8em', color: 'var(--text-secondary)', marginLeft: 'auto', whiteSpace: 'nowrap', flexShrink: 0 }},
+            React.createElement("span", { className: "diff-list-item-meta" },
                 nodeImportanceText,
                 linkedProjectText
             )
         ),
         node.description && (
-          React.createElement("p", { style: { fontSize: '0.8em', color: 'var(--text-secondary)', marginTop: '4px', marginBottom: '2px', whiteSpace: 'pre-wrap', wordBreak: 'break-word', paddingLeft: '24px', opacity: 0.9, lineHeight: 1.4 }},
+          React.createElement("p", { className: "diff-list-item-desc" },
             node.description
           )
         ),
         node._modificationDetails && node._modificationDetails.length > 0 && isVisualDiff && (
-          React.createElement("ul", { style: { listStyle: 'disc', listStylePosition: 'inside', marginLeft: '18px', marginTop: '5px', fontSize: '0.8em', color: 'var(--text-tertiary)' }},
+          React.createElement("ul", { className: "diff-details-list" },
             node._modificationDetails.map((detail, index) => (
-              React.createElement("li", { key: index, style: { lineHeight: '1.4', marginBottom: '3px' }}, detail)
+              React.createElement(DiffDetail, { key: index, detail: detail })
             ))
           )
         )
       ),
       isVisualDiff && node.children && node.children.length > 0 && (
-        React.createElement("ul", { style: { marginTop: '0px', paddingLeft: '0px' }},
+        React.createElement("ul", { className: "diff-list-child-container" },
           node.children.map(child => (
             React.createElement(AiSuggestionPreviewListItem, {
               key: `${child.id}-${child._changeStatus || 'child'}-${level+1}`,

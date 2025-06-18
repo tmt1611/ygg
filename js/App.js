@@ -258,6 +258,7 @@ const App = () => {
           isAiModifying: isModifying,
           canUndoAiMod: canUndoAiModForSidebar,
           onUndoAiModification: treeOperationsAI.handleUndoAiModification,
+          isAiSuggestionModalOpen: modalManager.isAiSuggestionModalOpen,
           initialPromptForStrategy: initialPrompt,
           techTreeDataForStrategy: techTreeData,
           strategicSuggestions: strategicSuggestions,

@@ -22,6 +22,7 @@ const KnowledgeBranchSidebar = ({
   setActiveSidebarTab,
   themeMode,
   modificationPrompt, setModificationPrompt, onModifyAiTree, isAiModifying, canUndoAiMod, onUndoAiModification,
+  isAiSuggestionModalOpen,
   initialPromptForStrategy, techTreeDataForStrategy, strategicSuggestions, isFetchingStrategicSuggestions, strategicSuggestionsError, onGenerateStrategicSuggestions,
   apiKeyIsSet, hasTechTreeData, isAppBusy,
   selectedNodeForInsights, aiInsightsData, aiInsightsIsLoading, aiInsightsError, onGenerateAiNodeInsights,
@@ -115,7 +116,13 @@ const KnowledgeBranchSidebar = ({
                     labelOverride: null
                   }),
                   hasTechTreeData && canUndoAiMod && (
-                    React.createElement("button", { onClick: onUndoAiModification, disabled: isAiModifying || isAppBusy, className: "secondary", style: { width: '100%', marginTop: '8px' }},
+                    React.createElement("button", {
+                      onClick: onUndoAiModification,
+                      disabled: isAiModifying || isAppBusy || isAiSuggestionModalOpen,
+                      className: "secondary",
+                      style: { width: '100%', marginTop: '8px' },
+                      title: isAiSuggestionModalOpen ? "A suggestion preview is open. Please resolve it first." : "Revert the last AI modification or cancel the current suggestion chain."
+                    },
                       "Undo Last AI Mod"
                     )
                   )

@@ -267,17 +267,19 @@ export const compareAndAnnotateTree = (
                              (cNodeData.linkedProjectName || null) !== (sNode.linkedProjectName || null);
 
       if (contentChanged) {
+        const addDetail = (type, from, to, label) => details.push({ type, from, to, label });
+        
         if (cNodeData.isLocked) { 
           primaryChangeType = primaryChangeType === 'reparented' ? 'reparented' : 'locked_content_changed'; 
-          details.push('CRITICAL: Locked node content (name/desc/importance/link) was modified!');
+          addDetail('critical', null, 'Content of a locked node was modified by the AI.', 'CRITICAL');
           if (!result.lockedContentChangedNodes.find(n => n.id === annotatedSNode.id)) result.lockedContentChangedNodes.push(annotatedSNode);
         } else { 
           primaryChangeType = primaryChangeType === 'reparented' ? 'reparented' : 'content_modified';
-          if (cNodeData.name !== sNode.name) details.push(`Name changed: "${cNodeData.name}" -> "${sNode.name}".`);
-          if (cNodeData.description !== sNode.description) details.push(`Description updated.`);
-          if (cNodeData.importance !== sNode.importance) details.push(`Importance changed: "${cNodeData.importance || 'N/A'}" -> "${sNode.importance || 'N/A'}".`);
-          if ((cNodeData.linkedProjectId || null) !== (sNode.linkedProjectId || null) || (cNodeData.linkedProjectName || null) !== (sNode.linkedProjectName || null)) {
-            details.push(`Project link changed from "${cNodeData.linkedProjectName || 'None'}" to "${sNode.linkedProjectName || 'None'}".`);
+          if (cNodeData.name !== sNode.name) addDetail('name', cNodeData.name, sNode.name, 'Name');
+          if (cNodeData.description !== sNode.description) addDetail('description', cNodeData.description, sNode.description, 'Description');
+          if (cNodeData.importance !== sNode.importance) addDetail('importance', cNodeData.importance || 'common', sNode.importance || 'common', 'Importance');
+          if ((cNodeData.linkedProjectId || null) !== (sNode.linkedProjectId || null)) {
+             addDetail('link', cNodeData.linkedProjectName || 'None', sNode.linkedProjectName || 'None', 'Link');
           }
           if (!result.modifiedContentNodes.find(n => n.id === annotatedSNode.id)) result.modifiedContentNodes.push(annotatedSNode);
         }

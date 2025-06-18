@@ -183,10 +183,24 @@ const GraphViewComponent = ({
           
           group.append("title"); // For tooltips
 
-          group.append("circle")
-            .attr("r", nodeRadius)
-            .attr("stroke-width", 1.5)
-            .style("cursor", "pointer");
+          group.each(function(d) {
+            const el = select(this);
+            if (d.isProxy) {
+                el.append("rect")
+                    .attr("width", nodeRadius * 2.5)
+                    .attr("height", nodeRadius * 2.5)
+                    .attr("x", -nodeRadius * 1.25)
+                    .attr("y", -nodeRadius * 1.25)
+                    .attr("rx", 3)
+                    .attr("ry", 3)
+                    .style("cursor", "pointer");
+            } else {
+                el.append("circle")
+                    .attr("r", nodeRadius)
+                    .attr("stroke-width", 1.5)
+                    .style("cursor", "pointer");
+            }
+          });
 
           group.append("text")
             .attr("class", "node-label")
@@ -227,15 +241,15 @@ const GraphViewComponent = ({
 
     nodeGroups.select("title").text(d => d.isProxy ? `Project: ${d.data.fullName}\n(Click to navigate)` : `${d.data.name}\n(Double-click for Focus View)`);
 
-    nodeGroups.select("circle")
+    nodeGroups.select("circle, rect")
       .attr("fill", (d_node) => {
-          if (d_node.isProxy) return null;
+          if (d_node.isProxy) return null; // Uses CSS for fill
           if (d_node.data.importance === 'minor') return 'var(--importance-minor-bg)';
           if (d_node.data.importance === 'major') return 'var(--importance-major-bg)';
           return 'var(--importance-common-bg)';
       })
       .attr("stroke", (d_node) => {
-          if (d_node.isProxy) return null;
+          if (d_node.isProxy) return null; // Uses CSS for stroke
           return d_node.data.id === activeNodeId ? 'var(--graph-node-selected-stroke)' : 'var(--graph-node-stroke)';
       });
 
