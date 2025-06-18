@@ -1294,46 +1294,21 @@ html[data-theme='nebula'] .history-item-summary strong {
   padding-top: 3px;
 }
 
-.history-item-summary .history-keyword-created,
-.history-item-summary .history-keyword-added,
-.history-item-summary .history-keyword-imported { color: var(--success-color); font-weight: 600; }
+.history-item-summary .history-keyword {
+  font-weight: 600;
+  color: var(--text-secondary); /* A more subtle keyword color */
+}
 
-.history-item-summary .history-keyword-deleted,
-.history-item-summary .history-keyword-removed,
-.history-item-summary .history-keyword-rejected,
-.history-item-summary .history-keyword-failed,
-.history-item-summary .history-keyword-discarded { color: var(--error-color); font-weight: 600; }
+/* For quoted parts, make them stand out slightly */
+.history-item-summary strong:not(.history-keyword) {
+    color: var(--text-primary);
+    font-weight: 600;
+}
 
-.history-item-summary .history-keyword-updated,
-.history-item-summary .history-keyword-changed,
-.history-item-summary .history-keyword-renamed,
-.history-item-summary .history-keyword-proposed { color: var(--secondary-accent-dark); font-weight: 600; }
-
-.history-item-summary .history-keyword-locked,
-.history-item-summary .history-keyword-unlocked { color: var(--warning-color); font-weight: 600; }
-
-html[data-theme='dark'] .history-item-summary .history-keyword-updated,
-html[data-theme='nebula'] .history-item-summary .history-keyword-updated,
-html[data-theme='dark'] .history-item-summary .history-keyword-renamed,
-html[data-theme='nebula'] .history-item-summary .history-keyword-renamed,
-html[data-theme='dark'] .history-item-summary .history-keyword-proposed,
-html[data-theme='nebula'] .history-item-summary .history-keyword-proposed { color: var(--secondary-accent); }
-
-html[data-theme='dark'] .history-item-summary .history-keyword-locked,
-html[data-theme='nebula'] .history-item-summary .history-keyword-unlocked { color: var(--warning-color); }
-
-.history-item-summary .history-keyword-saved,
-.history-item-summary .history-keyword-loaded,
-.history-item-summary .history-keyword-activated,
-.history-item-summary .history-keyword-switched,
-.history-item-summary .history-keyword-downloaded { color: var(--text-primary); font-weight: 600; }
-
-.history-item-summary .history-keyword-generated,
-.history-item-summary .history-keyword-applied { color: var(--primary-accent-dark); font-weight: 600; }
-html[data-theme='dark'] .history-item-summary .history-keyword-generated,
-html[data-theme='nebula'] .history-item-summary .history-keyword-generated,
-html[data-theme='dark'] .history-item-summary .history-keyword-applied,
-html[data-theme='nebula'] .history-item-summary .history-keyword-applied { color: var(--primary-accent-light); }
+html[data-theme='dark'] .history-item-summary .history-keyword,
+html[data-theme='nebula'] .history-item-summary .history-keyword {
+  color: var(--text-tertiary);
+}
 
 
 @media (max-width: 768px) {

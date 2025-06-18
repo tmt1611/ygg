@@ -54,26 +54,18 @@ const HistoryItem = ({ entry }) => {
 
     const summaryWithHighlights = useMemo(() => {
         if (!entry.summary) return '';
-        const keywords = [
-            'created', 'deleted', 'updated', 'locked', 'unlocked', 'saved', 'loaded',
-            'imported', 'generated', 'applied', 'rejected', 'undone', 'cleared',
-            'failed', 'added', 'removed', 'changed', 'renamed', 'activated', 'switched',
-            'proposed', 'discarded', 'downloaded'
-        ];
-        // This regex will match quoted strings or any of the keywords
-        const regex = new RegExp(`("(.*?)"|\\b(${keywords.join('|')})\\b)`, 'gi');
+        // This regex will match quoted strings or known keywords
+        const regex = /"([^"]*)"|\b(created|deleted|updated|locked|unlocked|saved|loaded|imported|generated|applied|rejected|undone|cleared|failed|added|removed|changed|renamed|activated|switched|proposed|discarded|downloaded)\b/gi;
         
-        return entry.summary.replace(regex, (match, fullMatch, quotedContent, keyword) => {
-            if (keyword) {
-                // It's a keyword, wrap it
-                const keywordClass = `history-keyword-${keyword.toLowerCase()}`;
-                return `<strong class="${keywordClass}">${keyword}</strong>`;
-            }
-            if (quotedContent) {
-                // It's a quoted string
+        return entry.summary.replace(regex, (match, quotedContent, keyword) => {
+            // Both `quotedContent` and `keyword` are captured. One will be defined, the other undefined.
+            if (quotedContent !== undefined) {
                 return `<strong>"${quotedContent}"</strong>`;
             }
-            return match; // Should not happen with this regex, but for safety
+            if (keyword !== undefined) {
+                return `<strong class="history-keyword">${keyword}</strong>`;
+            }
+            return match;
         });
     }, [entry.summary]);
 

@@ -16,13 +16,19 @@ const KEY_EVENT_TYPES = [
 
 const HistoryViewTabContent = ({ history }) => {
   const [filterMode, setFilterMode] = useState('key');
+  const [searchTerm, setSearchTerm] = useState('');
 
   const filteredHistory = useMemo(() => {
+    let tempHistory = history;
     if (filterMode === 'key') {
-      return history.filter(entry => KEY_EVENT_TYPES.includes(entry.type));
+      tempHistory = tempHistory.filter(entry => KEY_EVENT_TYPES.includes(entry.type));
     }
-    return history;
-  }, [history, filterMode]);
+    if (searchTerm.trim()) {
+      const lowerSearchTerm = searchTerm.toLowerCase();
+      tempHistory = tempHistory.filter(entry => entry.summary.toLowerCase().includes(lowerSearchTerm));
+    }
+    return tempHistory;
+  }, [history, filterMode, searchTerm]);
 
   const keyEventsCount = useMemo(() => history.filter(entry => KEY_EVENT_TYPES.includes(entry.type)).length, [history]);
 
@@ -45,6 +51,16 @@ const HistoryViewTabContent = ({ history }) => {
             title: `Show Key Events Only (${keyEventsCount})`
           }, "Key")
         )
+      ),
+      React.createElement("div", { className: "history-controls", style: { padding: '0 4px 8px 4px', borderBottom: '1px solid var(--border-color)', marginBottom: '5px' } },
+        React.createElement("input", {
+          type: "search",
+          placeholder: `Search ${filteredHistory.length} events...`,
+          value: searchTerm,
+          onChange: (e) => setSearchTerm(e.target.value),
+          style: { width: '100%', fontSize: '0.9em' },
+          "aria-label": "Search history log"
+        })
       ),
       React.createElement(HistoryPanel, { history: filteredHistory })
     )
