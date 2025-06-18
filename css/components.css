@@ -1092,19 +1092,18 @@ html[data-theme='light'] .ai-insights-list-item-name, html[data-theme='sol'] .ai
 .celestial-body .celestial-body-name { 
   font-size: 0.8em; 
   font-weight: bold; 
-  padding: 2px 5px; 
+  padding: 0 5px; /* Vertical padding handled by flex centering */
   word-break: break-word; 
-  /* max-height: 3.2em; Removed to allow full name display */
-  /* overflow: hidden; Removed to allow full name display */
-  white-space: normal; /* Allow wrapping */
-  line-height: 1.2; /* Adjusted for better multi-line readability */
-  display: -webkit-box; /* For webkit ellipsis if still needed for extreme cases, but primarily for wrapping */
-  -webkit-line-clamp: 4; /* Allow up to 4 lines */
+  white-space: normal;
+  line-height: 1.2;
+  display: -webkit-box;
+  -webkit-line-clamp: 4; /* Limit to 4 lines */
   -webkit-box-orient: vertical;
-  overflow-wrap: break-word; /* Ensure long words break */
-  hyphens: auto; /* Allow hyphenation for better flow */
-  max-height: 4.8em; /* Approx 4 lines with 1.2 line height */
-  overflow-y: auto; /* Add scroll for very very long names if they exceed max-height */
+  overflow: hidden; /* Hide overflow instead of scrolling */
+  text-overflow: ellipsis;
+  hyphens: auto;
+  max-height: 4.8em; /* 4 lines * 1.2em line-height */
+  text-align: center;
 } 
 /* .celestial-body-desc removed from FocusNodeDisplay, style is no longer needed */
 

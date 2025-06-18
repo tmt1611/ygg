@@ -70,11 +70,34 @@ const GraphViewComponent = ({
     if (rootNode) {
         const linkSource = findLinkSource(activeProjectId, projects);
         if (linkSource) {
+            let proxyAngle = Math.PI; // Default to bottom
+            const childrenOfRoot = rootNode.children;
+            if (childrenOfRoot && childrenOfRoot.length > 0) {
+                const childAngles = childrenOfRoot.map(c => c.x).sort((a,b) => a-b);
+                if (childAngles.length === 1) {
+                    proxyAngle = (childAngles[0] + Math.PI) % (2 * Math.PI); // Opposite
+                } else {
+                    let maxGap = 0;
+                    let angleForMaxGap = 0;
+                    // Check gap between last and first child (crossing the 0/2PI line)
+                    maxGap = (childAngles[0] + 2 * Math.PI) - childAngles[childAngles.length - 1];
+                    angleForMaxGap = (childAngles[childAngles.length - 1] + maxGap / 2) % (2* Math.PI);
+
+                    for (let i = 0; i < childAngles.length - 1; i++) {
+                        const gap = childAngles[i+1] - childAngles[i];
+                        if (gap > maxGap) {
+                            maxGap = gap;
+                            angleForMaxGap = childAngles[i] + gap / 2;
+                        }
+                    }
+                    proxyAngle = angleForMaxGap;
+                }
+            }
+
             const proxyNode = {
                 id: `proxy-source-${linkSource.sourceProjectId}`,
-                // Place it "behind" the root node
-                x: Math.PI, // angle (180 degrees)
-                y: PROXY_DISTANCE_R, // radius
+                x: proxyAngle,
+                y: PROXY_DISTANCE_R,
                 isProxy: true,
                 data: {
                     name: createAcronym(linkSource.sourceProjectName),

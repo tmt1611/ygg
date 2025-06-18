@@ -1,5 +1,14 @@
 import React, { useMemo } from 'react';
 
+const escapeHtml = (unsafe) => {
+  return unsafe
+       .replace(/&/g, "&")
+       .replace(/</g, "<")
+       .replace(/>/g, ">")
+       .replace(/"/g, """)
+       .replace(/'/g, "'");
+};
+
 const EVENT_TYPE_INFO = {
     // AI
     'TREE_INIT_AI': { icon: '🧠', color: 'var(--primary-accent)' },
@@ -60,12 +69,13 @@ const HistoryItem = ({ entry }) => {
         return entry.summary.replace(regex, (match, quotedContent, keyword) => {
             // Both `quotedContent` and `keyword` are captured. One will be defined, the other undefined.
             if (quotedContent !== undefined) {
-                return `<strong class="history-entity">"${quotedContent}"</strong>`;
+                // Escape user-provided content to prevent XSS.
+                return `<strong class="history-entity">"${escapeHtml(quotedContent)}"</strong>`;
             }
             if (keyword !== undefined) {
                 return `<strong class="history-keyword">${keyword}</strong>`;
             }
-            return match;
+            return match; // Should not happen with this regex, but for safety.
         });
     }, [entry.summary]);
 
