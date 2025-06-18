@@ -9,7 +9,9 @@ const KEY_EVENT_TYPES = [
   'TREE_LOCK_ALL', 'TREE_UNLOCK_ALL', 'PROJECT_CREATED', 'PROJECT_LOADED',
   'PROJECT_SAVED', 'PROJECT_RENAMED', 'PROJECT_DELETED', 'PROJECT_IMPORTED',
   'PROJECT_EXAMPLE_LOADED', 'TREE_DOWNLOADED', 'API_KEY_STATUS_CHANGED',
-  'APP_ERROR_ENCOUNTERED', 
+  'APP_ERROR_ENCOUNTERED',
+  'THEME_CHANGED', 
+  'VIEW_CHANGED'
 ];
 
 const HistoryViewTabContent = ({ history }) => {
@@ -22,24 +24,26 @@ const HistoryViewTabContent = ({ history }) => {
     return history;
   }, [history, filterMode]);
 
+  const keyEventsCount = useMemo(() => history.filter(entry => KEY_EVENT_TYPES.includes(entry.type)).length, [history]);
+
   return (
-    React.createElement("div", { style: { display: 'flex', flexDirection: 'column', gap: '10px' }},
-      React.createElement("div", { style: { display: 'flex', justifyContent: 'center', gap: '10px', paddingBottom: '10px', borderBottom: '1px solid var(--border-color)' }},
-        React.createElement("button", {
-          onClick: () => setFilterMode('all'),
-          className: filterMode === 'all' ? 'primary' : 'secondary',
-          disabled: filterMode === 'all',
-          style: {fontSize: '0.9em', padding: '6px 10px'}
-        },
-          "Show All (", history.length, ")"
-        ),
-        React.createElement("button", {
-          onClick: () => setFilterMode('key'),
-          className: filterMode === 'key' ? 'primary' : 'secondary',
-          disabled: filterMode === 'key',
-          style: {fontSize: '0.9em', padding: '6px 10px'}
-        },
-          "Key Events Only (", history.filter(entry => KEY_EVENT_TYPES.includes(entry.type)).length, ")"
+    React.createElement("div", { style: { display: 'flex', flexDirection: 'column', gap: '10px', height: '100%' }},
+      React.createElement("div", { className: "panel-header" },
+        React.createElement("span", { className: "panel-header-icon", style: { fontSize: '1.2em' } }, "📜"),
+        React.createElement("h3", { style: { fontSize: '1.05em' } }, "Action History"),
+        React.createElement("div", { className: "panel-header-actions", style: { display: 'flex', gap: '4px' }},
+          React.createElement("button", {
+            onClick: () => setFilterMode('all'),
+            className: `base-icon-button ${filterMode === 'all' ? 'active' : ''}`,
+            disabled: filterMode === 'all',
+            title: `Show All Events (${history.length})`
+          }, "All"),
+          React.createElement("button", {
+            onClick: () => setFilterMode('key'),
+            className: `base-icon-button ${filterMode === 'key' ? 'active' : ''}`,
+            disabled: filterMode === 'key',
+            title: `Show Key Events Only (${keyEventsCount})`
+          }, "Key")
         )
       ),
       React.createElement(HistoryPanel, { history: filteredHistory })

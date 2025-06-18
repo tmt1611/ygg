@@ -21,11 +21,18 @@ export const useHistoryManager = () => {
   }, []);
 
   useEffect(() => {
-    if (history.length > 0) { 
+    // Debounce localStorage update to avoid excessive writes.
+    const handler = setTimeout(() => {
+      if (history.length > 0) {
         localStorage.setItem(APP_STORAGE_KEYS.TECH_TREE_HISTORY, JSON.stringify(history));
-    } else { 
+      } else {
         localStorage.removeItem(APP_STORAGE_KEYS.TECH_TREE_HISTORY);
-    }
+      }
+    }, 500);
+
+    return () => {
+      clearTimeout(handler);
+    };
   }, [history]);
 
   const addHistoryEntry = useCallback((type, summary, details) => {

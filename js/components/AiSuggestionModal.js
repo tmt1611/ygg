@@ -93,7 +93,7 @@ const AiSuggestionModal = ({
         React.createElement("div", { className: "ai-suggestion-modal-layout" },
           React.createElement("div", { className: "ai-suggestion-modal-preview-panel" },
             React.createElement("h3", { className: "ai-suggestion-modal-header" },
-              "Suggested Structure (Visual Diff):"
+              "Preview of Changes"
             ),
             React.createElement("div", { className: "ai-suggestion-modal-content-area", "aria-live": "polite", "aria-atomic": "true" },
               annotatedTree && !annotatedTree.id.startsWith('error-root-') ? (
@@ -121,7 +121,7 @@ const AiSuggestionModal = ({
 
           React.createElement("div", { className: "ai-suggestion-modal-summary-panel" },
             React.createElement("div", { id: "ai-suggestion-summary", className: "ai-suggestion-modal-summary-section" },
-              React.createElement("p", { className: "ai-suggestion-modal-summary-title" }, "Summary of Changes:"),
+              React.createElement("h4", { className: "ai-suggestion-modal-summary-title" }, "Summary of Changes"),
               React.createElement("div", { className: "ai-suggestion-modal-summary-grid" },
                 React.createElement("div", null, React.createElement("strong", null, "Node Count:")),
                 React.createElement("div", { className: "summary-value" }, currentTotalNodes, " → ", suggestedTotalNodes, " (", React.createElement("span", { style: netChangeStyle, className: "ai-suggestion-modal-summary-net-change" }, netChange >= 0 ? '+' : '', netChange), ")"),
@@ -133,12 +133,12 @@ const AiSuggestionModal = ({
                 renderSummaryItem("↪️ Moved", reparentedNodes.length, 'var(--warning-color)')
               ),
               lockedContentChangedNodes.length > 0 &&
-                React.createElement("p", { className: "ai-suggestion-modal-critical-warning" },
-                  "CRITICAL: Locked Node Content Modified: ", React.createElement("span", { className: "count" }, lockedContentChangedNodes.length)
+                React.createElement("div", { className: "ai-suggestion-modal-critical-warning" },
+                  React.createElement("strong", null, "CRITICAL: Locked Node Content Modified: ", React.createElement("span", { className: "count" }, lockedContentChangedNodes.length))
                 )
             ),
 
-            React.createElement("div", { className: "ai-suggestion-modal-refinement-section" },
+            React.createElement("div", { className: "ai-suggestion-modal-refinement-section ai-suggestion-modal-summary-section" },
                 React.createElement(ModificationPromptInput, {
                     prompt: followUpPrompt,
                     setPrompt: setFollowUpPrompt,
@@ -162,7 +162,7 @@ const AiSuggestionModal = ({
           React.createElement("button", { ref: applyButtonRef, type: "button", onClick: onConfirm, className: "success",
             disabled: annotatedTree?.id.startsWith('error-root-') || isRefining
             },
-            "Apply Changes to Project"
+            isRefining ? "Refining..." : "Apply Changes to Project"
           )
         )
       )

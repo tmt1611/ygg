@@ -366,7 +366,7 @@ export const useProjectManagement = ({
     if (!projectToDelete) { setError("Project not found for deletion."); return; }
     openConfirmModal({
       title: `Delete ${projectToDelete.isExample ? 'Example' : ''} Project?`, message: `Delete "${projectToDelete.name}"? This cannot be undone.`,
-      confirmText: `Delete ${projectToDelete.isExample ? 'Example' : ''} Project`, cancelText: "Cancel", confirmButtonVariant: 'danger',
+      confirmText: `Delete ${projectToDelete.isExample ? 'Example' : ''} Project`, cancelText: "Cancel", confirmButtonStyle: 'danger',
       onConfirm: () => {
         const remainingProjects = projects.filter(p => p.id !== projectId);
         setProjects(remainingProjects);

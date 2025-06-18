@@ -9,7 +9,7 @@ const ConfirmModal = ({
   cancelText = "Cancel",
   onConfirm,
   onCancel,
-  confirmButtonVariant,
+  confirmButtonStyle,
 }) => {
   const confirmButtonRef = useRef(null);
 
@@ -48,11 +48,11 @@ const ConfirmModal = ({
       "aria-describedby": "confirm-modal-message"
     },
       React.createElement("div", { className: "modal-content-basic" },
-        React.createElement("h2", { id: "confirm-modal-title", style: { fontSize: '1.3em', color: 'var(--text-primary)', marginBottom: '12px' }},
+        React.createElement("h2", { id: "confirm-modal-title", className: "modal-title", style: { marginBottom: '12px' }},
           title
         ),
-        React.createElement("p", { id: "confirm-modal-message", style: { color: 'var(--text-secondary)', marginBottom: '25px', whiteSpace: 'pre-wrap', lineHeight: '1.5' }}, message),
-        React.createElement("div", { style: { display: 'flex', justifyContent: 'flex-end', gap: '10px' }},
+        React.createElement("div", { id: "confirm-modal-message", style: { color: 'var(--text-secondary)', marginBottom: '25px', whiteSpace: 'pre-wrap', lineHeight: '1.5', fontSize: '0.95em' }}, message),
+        React.createElement("div", { className: "modal-footer-actions", style: { display: 'flex', justifyContent: 'flex-end', gap: '10px' }},
           cancelText && onCancel && (
             React.createElement("button", {
               type: "button",
@@ -66,7 +66,7 @@ const ConfirmModal = ({
             ref: confirmButtonRef,
             type: "button",
             onClick: onConfirm,
-            className: confirmButtonVariant === 'danger' ? 'danger' : 'primary'
+            className: confirmButtonStyle === 'danger' ? 'danger' : 'primary'
           },
             confirmText
           )

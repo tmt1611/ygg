@@ -3,7 +3,7 @@ import React from 'react';
 const DiffDetail = ({ detail }) => {
   const renderValue = (value) => {
     if (value === null || value === undefined || value === '') {
-      return React.createElement("i", null, "(empty)");
+      return React.createElement("i", { style: { opacity: 0.7 } }, "(empty)");
     }
     const strValue = String(value);
     return strValue.length > 70 ? `${strValue.substring(0, 67)}...` : strValue;
@@ -13,11 +13,11 @@ const DiffDetail = ({ detail }) => {
     React.createElement("li", { className: "diff-details-item" },
       React.createElement("strong", null, detail.label, ":"),
       detail.type === 'critical' ? (
-        React.createElement("span", { className: "diff-to" }, detail.to)
+        React.createElement("span", { className: "diff-to", style: { fontWeight: 'bold' } }, detail.to)
       ) : (
-        React.createElement(React.Fragment, null,
+        React.createElement("span", null,
           React.createElement("span", { className: "diff-from" }, renderValue(detail.from)),
-          React.createElement("span", { className: "diff-arrow" }, "→"),
+          React.createElement("span", { className: "diff-arrow" }, " → "),
           React.createElement("span", { className: "diff-to" }, renderValue(detail.to))
         )
       )
@@ -27,37 +27,17 @@ const DiffDetail = ({ detail }) => {
 
 
 const AiSuggestionPreviewListItem = ({ node, level, isVisualDiff = false }) => {
-  let titleText = node.description || node.name;
-  let changeStatusIcon = '';
+  const changeStatusMap = {
+    new: { icon: '➕', title: "This node is newly added." },
+    content_modified: { icon: '✏️', title: "Name, description, importance, or link of this unlocked node has changed." },
+    structure_modified: { icon: '📂', title: "The direct children of this node have changed (added, removed, or reordered)." },
+    reparented: { icon: '↪️', title: `This node has been moved. Original parent ID: ${node._oldParentId || 'root'}.` },
+    locked_content_changed: { icon: '❗', title: "CRITICAL: Content of this LOCKED node was modified by AI!" },
+    removed: { icon: '➖', title: "This node was marked for removal but still appears in suggested tree structure (potential error)." },
+    unchanged: { icon: '', title: node.description || node.name }
+  };
 
-  switch (node._changeStatus) {
-    case 'new':
-      changeStatusIcon = '➕';
-      titleText = "This node is newly added.";
-      break;
-    case 'content_modified':
-      changeStatusIcon = '✏️';
-      titleText = "Name, description, importance, or link of this unlocked node has changed.";
-      break;
-    case 'structure_modified':
-      changeStatusIcon = '📂';
-      titleText = "The direct children of this node have changed (added, removed, or reordered).";
-      break;
-    case 'reparented':
-      changeStatusIcon = '↪️';
-      titleText = `This node has been moved. Original parent ID: ${node._oldParentId || 'root'}.`;
-      break;
-    case 'locked_content_changed':
-      changeStatusIcon = '❗';
-      titleText = "CRITICAL: Content of this LOCKED node was modified by AI!";
-      break;
-    case 'removed': 
-      changeStatusIcon = '➖';
-      titleText = "This node was marked for removal but still appears in suggested tree structure (potential error).";
-      break;
-    default:
-      break;
-  }
+  const { icon: changeStatusIcon, title: titleText } = changeStatusMap[node._changeStatus] || changeStatusMap.unchanged;
   const nodeImportanceText = node.importance ? ` (${node.importance.charAt(0).toUpperCase()})` : '';
   const linkedProjectText = node.linkedProjectId && node.linkedProjectName ? ` (🔗)` : '';
   

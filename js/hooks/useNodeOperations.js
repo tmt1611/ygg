@@ -106,7 +106,7 @@ export const useNodeOperations = ({
     if (!nodeToDelete) return;
     openConfirmModal({
       title: "Delete Node?", message: `Delete "${nodeToDelete.name}" and ALL its descendants? This cannot be undone.`,
-      confirmText: "Delete Node & Children", cancelText: "Cancel", confirmButtonVariant: 'danger',
+      confirmText: "Delete Node & Children", cancelText: "Cancel", confirmButtonStyle: 'danger',
       onConfirm: () => {
         const newTree = removeNodeAndChildrenFromTree(techTreeData, nodeIdToDelete);
         setTechTreeData(newTree); addHistoryEntry('NODE_DELETED', `Node "${nodeToDelete.name}" and children deleted.`);
