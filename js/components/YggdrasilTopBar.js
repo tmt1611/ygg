@@ -91,16 +91,16 @@ const YggdrasilTopBar = ({
         }, apiKeyIsSet ? '🔑' : '⚠️'),
         React.createElement("button", { 
           onClick: handleSaveClick, 
-          disabled: isAppBusy || !hasTechTreeData || saveFeedback, 
+          disabled: isAppBusy || !hasTechTreeData, 
           className: `yggdrasil-top-bar-action-item primary yggdrasil-top-bar-save-button ${saveFeedback ? 'saved' : ''}`,
           title: hasTechTreeData ? "Save the current state of the active project." : "No active project data to save."
-        }, saveFeedback ? 'Saved ✓' : '💾'),
+        }, saveFeedback ? '✓' : '💾'),
         React.createElement("button", { 
           onClick: handleDownloadClick, 
-          disabled: isAppBusy || !hasTechTreeData || downloadFeedback, 
+          disabled: isAppBusy || !hasTechTreeData, 
           className: `yggdrasil-top-bar-action-item primary yggdrasil-top-bar-download-button ${downloadFeedback ? 'saved' : ''}`,
           title: hasTechTreeData ? "Save active project and download as .project.json" : "No active project data to download."
-        }, downloadFeedback ? 'Downloaded ✓' : '📥'), 
+        }, downloadFeedback ? '✓' : '📥'), 
         React.createElement("button", {
           onClick: onToggleTheme,
           className: "yggdrasil-top-bar-action-item base-icon-button",

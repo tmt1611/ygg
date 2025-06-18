@@ -66,11 +66,11 @@ const FocusViewDetailPanel = ({
         React.createElement(ContextualHelpTooltip, { helpText: "Details and actions for the selected celestial object. Click parent, focus, or child objects to change selection here." })
       ),
       
-      React.createElement("div", { className: "form-group", style: { background: 'rgba(0,0,0,0.2)', padding: '8px', borderRadius: 'var(--border-radius)'} },
-        React.createElement("label", null, "Designation:"),
-        React.createElement("p", { style: { fontSize: '1em', fontWeight: 'bold', margin: '2px 0 8px 0', color: 'var(--focus-panel-text)' }}, node.name),
-        React.createElement("label", null, "Analysis:"),
-        React.createElement("p", { style: { fontSize: '0.9em', margin: '2px 0 0 0', whiteSpace: 'pre-wrap', maxHeight: '120px', overflowY: 'auto'}}, node.description || React.createElement("i", {style: {opacity: 0.7}}, "(No analysis data)") )
+      React.createElement("div", { className: "focus-view-info-block" },
+        React.createElement("label", null, "Designation"),
+        React.createElement("p", { className: "info-block-name" }, node.name),
+        React.createElement("label", null, "Analysis"),
+        React.createElement("p", { className: "info-block-description" }, node.description || React.createElement("i", null, "(No analysis data)"))
       ),
       
       node.isLocked && React.createElement("p", { style: { fontSize: '0.85em', color: 'var(--warning-color)', textAlign: 'center' }}, "System details locked. Unlock to edit."),

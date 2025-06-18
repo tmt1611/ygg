@@ -96,20 +96,17 @@ html[data-theme='light'] .yggdrasil-top-bar-active-project {
   justify-content: center;
   line-height: 1;
 }
-.yggdrasil-top-bar-save-button.saved,
-.yggdrasil-top-bar-download-button.saved {
-  font-size: 0.8em !important; /* Smaller font for "Saved ✓" text */
-}
-
 .yggdrasil-top-bar-action-item.api-status { padding: 3px 6px; }
 .yggdrasil-top-bar-action-item.api-status.success { background-color: var(--success-bg); color: var(--success-color); }
 .yggdrasil-top-bar-action-item.api-status.error { background-color: var(--error-bg); color: var(--error-color); }
 
 .yggdrasil-top-bar-save-button.saved,
-.yggdrasil-top-bar-download-button.saved { 
-  background-color: var(--success-color) !important; 
-  border-color: var(--success-color) !important; 
-  color: var(--button-primary-text) !important; 
+.yggdrasil-top-bar-download-button.saved {
+  background-color: var(--success-color) !important;
+  border-color: var(--success-color) !important;
+  color: var(--button-primary-text) !important;
+  font-size: 1.2em; /* Ensure checkmark is a good size */
+  font-weight: bold;
 }
 .yggdrasil-top-bar-download-button {
   /* margin-left: -4px; No longer needed with fixed width buttons */
@@ -251,8 +248,8 @@ html[data-theme='light'] .yggdrasil-app-body.sidebar-collapsed .knowledge-branch
   position: relative; 
   margin: 15px auto; /* Reduced margin */
   width: clamp(320px, 85%, 1200px); /* INCREASED clamp values for more horizontal space */
-  max-height: calc(100vh - var(--top-bar-height) - 30px); 
-  min-height: 280px; 
+  max-height: calc(100vh - var(--top-bar-height) - 30px);
+  min-height: 280px;
   background-color: var(--panel-bg);
   border: 1px solid var(--border-color-strong);
   border-radius: var(--border-radius-lg); 
@@ -263,13 +260,13 @@ html[data-theme='light'] .yggdrasil-app-body.sidebar-collapsed .knowledge-branch
 }
 .overlay-panel-header {
   display: flex; justify-content: space-between; align-items: center;
-  padding: 10px 15px; border-bottom: 1px solid var(--border-color); /* Reduced padding */
+  padding: 8px 12px; border-bottom: 1px solid var(--border-color); /* Reduced padding */
   background-color: var(--panel-alt-bg);
   border-top-left-radius: var(--border-radius-lg);
   border-top-right-radius: var(--border-radius-lg);
 }
 .overlay-panel-header h3 { margin: 0; font-size: 1.15em; color: var(--primary-accent); } /* Reduced font size */
-.overlay-panel-content { flex-grow: 1; padding: 15px; overflow-y: auto; } /* Reduced padding */
+.overlay-panel-content { flex-grow: 1; padding: 12px; overflow-y: auto; } /* Reduced padding */
 
 @keyframes runeAwakening { 0% { opacity: 0.7; transform: scale(0.95) translateY(5px); } 100% { opacity: 1; transform: scale(1) translateY(0); } }
 .whispering-runes-panel {
@@ -370,7 +367,7 @@ html[data-theme='light'] .contextual-help-icon:hover, html[data-theme='light'] .
 }
 
 .modal-overlay-basic { position: fixed; inset: 0; background-color: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 15px; backdrop-filter: blur(4px); } /* Reduced padding */
-.modal-content-basic { background-color: var(--panel-bg); padding: 18px 22px; border-radius: var(--border-radius-lg); box-shadow: var(--box-shadow-lg); max-width: 90vw; max-height: 90vh; overflow-y: auto; animation: modalFadeIn 0.3s ease-out; border-top: 3px solid var(--primary-accent); } /* Reduced padding and added top border */
+.modal-content-basic { background-color: var(--panel-bg); padding: 15px 20px; border-radius: var(--border-radius-lg); box-shadow: var(--box-shadow-lg); max-width: 90vw; max-height: 90vh; overflow-y: auto; animation: modalFadeIn 0.3s ease-out; border-top: 3px solid var(--primary-accent); } /* Reduced padding and added top border */
 @keyframes modalFadeIn { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
 
 /* AI Suggestion Diff Preview Item */
@@ -556,17 +553,11 @@ html[data-theme='light'] .contextual-help-icon:hover, html[data-theme='light'] .
 @keyframes warpPulse { 0% { stroke-dasharray: 10 200; stroke-dashoffset: 0; } 50% { stroke-dasharray: 50 160; stroke-dashoffset: -50; } 100% { stroke-dasharray: 10 200; stroke-dashoffset: -210; } }
 #warp-arrow path { fill: var(--focus-connector-stroke); }
 
-/* Removed fixed height and flex properties from focus-view-children-area. Child positioning is now fully absolute relative to focus-view-layout. */
-.overlay-panel-view .focus-view-parent-area, 
-.overlay-panel-view .focus-view-focus-node-area,
-.overlay-panel-view .focus-view-children-area { 
-  /* These area divs are no longer primary layout drivers in the new absolute positioning scheme */
-  /* They can be removed from FocusViewComponent.js if not needed for other semantic reasons */
-  width: 100%; 
-  display: flex; /* Kept for potential placeholder centering */
-  justify-content: center;
-  align-items: center;
-}
+/* 
+  The .focus-view-parent-area, .focus-view-focus-node-area, and .focus-view-children-area
+  divs have been removed from the layout in favor of a single .focus-view-layout container 
+  with absolutely positioned nodes. This CSS block is no longer needed.
+*/
 .overlay-panel-view .focus-node-placeholder { padding: 10px 15px; border-radius: var(--border-radius); background: var(--focus-placeholder-bg); color: var(--focus-placeholder-text); font-style: italic; text-align: center; min-width: 100px; } /* Reduced padding/min-width */
 
 .overlay-panel-view .focus-view-detail-panel { 
@@ -580,8 +571,44 @@ html[data-theme='light'] .contextual-help-icon:hover, html[data-theme='light'] .
   flex-direction: column; 
   gap: 15px; /* Increased gap */
 }
-.overlay-panel-view .focus-view-detail-panel .form-group { margin-bottom: 15px; } /* Increased margin */
-.overlay-panel-view .focus-view-detail-panel .form-group label { display: block; margin-bottom: 3px; font-weight: 500; font-size: 0.85em; color: var(--focus-panel-text); } /* Reduced font-size/margin */
+.overlay-panel-view .focus-view-detail-panel .form-group { margin-bottom: 15px; }
+.overlay-panel-view .focus-view-detail-panel .form-group > label { display: block; margin-bottom: 4px; font-weight: 500; font-size: 0.85em; color: var(--focus-panel-text); opacity: 0.9; }
+.overlay-panel-view .focus-view-detail-panel .focus-view-info-block {
+    background: rgba(0,0,0,0.2);
+    padding: 10px 12px;
+    border-radius: var(--border-radius);
+    border-left: 3px solid var(--focus-connector-stroke);
+    margin-bottom: 15px;
+}
+.overlay-panel-view .focus-view-detail-panel .focus-view-info-block label {
+    display: block;
+    margin-bottom: 2px;
+    font-weight: 500;
+    font-size: 0.8em;
+    color: var(--focus-connector-stroke);
+    text-transform: uppercase;
+    opacity: 0.9;
+}
+.overlay-panel-view .focus-view-detail-panel .focus-view-info-block .info-block-name {
+    font-size: 1.1em;
+    font-weight: bold;
+    margin: 2px 0 10px 0;
+    color: var(--focus-panel-text);
+}
+.overlay-panel-view .focus-view-detail-panel .focus-view-info-block .info-block-description {
+    font-size: 0.9em;
+    margin: 2px 0 0 0;
+    white-space: pre-wrap;
+    word-break: break-word;
+    max-height: 120px;
+    overflow-y: auto;
+    line-height: 1.4;
+    color: var(--focus-panel-text);
+    opacity: 0.9;
+}
+.overlay-panel-view .focus-view-detail-panel .focus-view-info-block .info-block-description i {
+    opacity: 0.6;
+}
 .overlay-panel-view .focus-view-detail-panel .form-group input[type="text"],
 .overlay-panel-view .focus-view-detail-panel .form-group textarea,
 .overlay-panel-view .focus-view-detail-panel .form-group select {
