@@ -110,7 +110,7 @@ const AiSuggestionModal = ({
                   )
                 )
               ),
-              removedNodes.length > 0 && (
+              removedNodes.length > 0 && !annotatedTree?._isErrorNode && (
                 React.createElement("div", { className: "ai-suggestion-modal-removed-nodes-section" },
                     React.createElement("h4", { className: "ai-suggestion-modal-removed-nodes-title" }, "Nodes To Be Removed (", removedNodes.length, "):"),
                     React.createElement("ul", { className: "ai-suggestion-modal-removed-nodes-list" },
@@ -129,15 +129,19 @@ const AiSuggestionModal = ({
           React.createElement("div", { className: "ai-suggestion-modal-summary-panel" },
             React.createElement("div", { id: "ai-suggestion-summary", className: "ai-suggestion-modal-summary-section" },
               React.createElement("h4", { className: "ai-suggestion-modal-summary-title" }, "Summary of Changes"),
-              React.createElement("div", { className: "ai-suggestion-modal-summary-grid" },
-                React.createElement("div", null, React.createElement("strong", null, "Node Count:")),
-                React.createElement("div", { className: "summary-value" }, currentTotalNodes, " → ", suggestedTotalNodes, " (", React.createElement("span", { style: netChangeStyle, className: "ai-suggestion-modal-summary-net-change" }, netChange >= 0 ? '+' : '', netChange), ")"),
+              !annotatedTree?._isErrorNode ? (
+                React.createElement("div", { className: "ai-suggestion-modal-summary-grid" },
+                  React.createElement("div", null, React.createElement("strong", null, "Node Count:")),
+                  React.createElement("div", { className: "summary-value" }, currentTotalNodes, " → ", suggestedTotalNodes, " (", React.createElement("span", { style: netChangeStyle, className: "ai-suggestion-modal-summary-net-change" }, netChange >= 0 ? '+' : '', netChange), ")"),
 
-                renderSummaryItem("➕ Added", newNodes.length, 'var(--success-color)'),
-                renderSummaryItem("➖ Removed", removedNodes.length, 'var(--error-color)'),
-                renderSummaryItem("✏️ Modified", modifiedContentNodes.length, 'var(--primary-accent)'),
-                renderSummaryItem("📂 Structure", structureModifiedNodes.length, 'var(--secondary-accent-dark)'),
-                renderSummaryItem("↪️ Moved", reparentedNodes.length, 'var(--warning-color)')
+                  renderSummaryItem("➕ Added", newNodes.length, 'var(--success-color)'),
+                  renderSummaryItem("➖ Removed", removedNodes.length, 'var(--error-color)'),
+                  renderSummaryItem("✏️ Modified", modifiedContentNodes.length, 'var(--primary-accent)'),
+                  renderSummaryItem("📂 Structure", structureModifiedNodes.length, 'var(--secondary-accent-dark)'),
+                  renderSummaryItem("↪️ Moved", reparentedNodes.length, 'var(--warning-color)')
+                )
+              ) : (
+                React.createElement("p", { style: { fontStyle: 'italic', color: 'var(--text-secondary)'} }, "Summary unavailable due to suggestion error.")
               ),
               lockedContentChangedNodes.length > 0 &&
                 React.createElement("div", { className: "ai-suggestion-modal-critical-warning" },
@@ -159,7 +163,9 @@ const AiSuggestionModal = ({
             ),
 
             React.createElement("p", { className: "ai-suggestion-modal-footer-note" },
-              "Review carefully. Applying overwrites the current state. Locked node content should NOT be changed."
+              annotatedTree?._isErrorNode
+                ? "An error occurred with the AI suggestion. Please refine your prompt or reject this suggestion."
+                : "Review carefully. Applying overwrites the current state. Locked node content should NOT be changed."
             )
           )
         ),

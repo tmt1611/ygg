@@ -54,7 +54,7 @@ export const useAiInsights = ({
         }
         return prevTree;
     });
-    setAiInsightsData(prev => prev ? { ...prev, suggested_description: "" } : null);
+    // No longer clearing the suggestion, the user can see it matches the new description.
   }, [setTechTreeData, addHistoryEntry]);
 
   const handleUseAlternativeName = useCallback((nodeId, alternativeName) => {
@@ -69,7 +69,7 @@ export const useAiInsights = ({
         }
         return prevTree;
     });
-    setAiInsightsData(prev => prev ? { ...prev, alternative_names: prev.alternative_names.filter(n => n !== alternativeName) } : null);
+    // No longer removing the name from the list. If the user undoes, the suggestion is still there.
   }, [setTechTreeData, addHistoryEntry]);
 
   const handleAddSuggestedChildFromInsight = useCallback((parentNodeId, childName, childDescription) => {

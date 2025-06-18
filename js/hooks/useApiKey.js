@@ -71,17 +71,28 @@ export const useApiKey = (addHistoryEntry) => {
     if (newMode === 'environment') {
       const result = await geminiService.attemptLoadEnvKey();
       _updateStatusFromService(result, 'mode_change_env');
-    } else { 
-      const currentServiceStatus = geminiService.getApiKeyStatus();
-      if (currentServiceStatus.available && currentServiceStatus.source === 'environment') {
-        setStatus({ message: "Manual input selected. Enter API Key to override active environment key, or clear the environment key if you wish to only use pasted keys.", type: 'info', isSet: true });
+    } else { // newMode is 'pasted'
+      const currentStatus = geminiService.getApiKeyStatus();
+      // If switching from a valid environment key, show an info message but keep it active until a pasted key is submitted.
+      if (currentStatus.available && currentStatus.source === 'environment') {
+          setStatus({
+              message: "Manual input selected. Enter a key below to override the active environment key for this session.",
+              type: 'info',
+              isSet: true
+          });
       } else if (inputKey.trim()) {
-        const result = await geminiService.setPastedApiKey(inputKey);
-        _updateStatusFromService(result, 'mode_change_pasted_with_key');
+          // If there's already text in the input, try validating it.
+          const result = await geminiService.setPastedApiKey(inputKey);
+          _updateStatusFromService(result, 'mode_change_pasted_with_key');
       } else {
-        geminiService.clearActiveApiKey(); 
-        const result = geminiService.getApiKeyStatus();
-         _updateStatusFromService({success: result.available, message: result.message || "Manual input selected. Enter API Key.", source: null}, 'mode_change_pasted_no_key');
+          // Otherwise, clear any existing pasted key and prompt for a new one.
+          geminiService.clearActiveApiKey();
+          const clearedStatus = geminiService.getApiKeyStatus();
+          _updateStatusFromService({
+              success: false,
+              message: clearedStatus.message || "Manual input selected. Enter API Key.",
+              source: null
+          }, 'mode_change_pasted_no_key');
       }
     }
     setIsProcessing(false);
