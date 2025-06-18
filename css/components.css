@@ -1544,53 +1544,7 @@ html[data-theme='nebula'] .history-item-summary strong {
   padding-top: 3px;
 }
 
-/* For quoted parts (node names), make them stand out */
-.history-item-summary strong.history-entity {
-    color: var(--primary-accent-dark);
-    font-weight: 600;
-    background-color: rgba(var(--primary-accent-rgb), 0.07);
-    padding: 1px 3px;
-    border-radius: var(--border-radius);
-}
-html[data-theme='dark'] .history-item-summary strong.history-entity,
-html[data-theme='nebula'] .history-item-summary strong.history-entity {
-    color: var(--primary-accent-light);
-}
 
-/* For action keywords, make them distinct but less prominent than names */
-.history-item-summary strong.history-keyword {
-  color: var(--text-secondary);
-  font-weight: 500;
-  font-style: normal;
-  text-transform: uppercase;
-  font-size: 0.9em;
-  letter-spacing: 0.5px;
-  opacity: 0.9;
-}
-
-/* For quoted parts (node names), make them stand out */
-.history-item-summary strong.history-entity {
-    color: var(--primary-accent-dark);
-    font-weight: 600;
-    background-color: rgba(var(--primary-accent-rgb), 0.07);
-    padding: 1px 3px;
-    border-radius: var(--border-radius);
-}
-html[data-theme='dark'] .history-item-summary strong.history-entity,
-html[data-theme='nebula'] .history-item-summary strong.history-entity {
-    color: var(--primary-accent-light);
-}
-
-/* For action keywords, make them distinct but less prominent than names */
-.history-item-summary strong.history-keyword {
-  color: var(--text-secondary);
-  font-weight: 500;
-  font-style: normal;
-  text-transform: uppercase;
-  font-size: 0.9em;
-  letter-spacing: 0.5px;
-  opacity: 0.9;
-}
 
 /* Context Menu */
 .context-menu {
@@ -1651,6 +1605,21 @@ html[data-theme='nebula'] .history-item-summary strong.history-entity {
 .context-menu-icon { width: 1.2em; text-align: center; font-size: 1.1em; }
 .context-menu-label { flex-grow: 1; }
 .context-menu-submenu-indicator { margin-left: auto; opacity: 0.7; }
+.context-menu .submenu {
+  position: absolute;
+  left: 100%;
+  top: 0;
+  margin-left: 2px;
+  animation: contextMenuAppear 0.15s ease-out;
+  background: var(--panel-bg);
+  border: 1px solid var(--border-color-strong);
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--box-shadow-md);
+  padding: 4px;
+  z-index: 1011;
+  min-width: 120px;
+}
+.context-menu .submenu button[aria-checked="true"] { font-weight: 600; color: var(--primary-accent-dark); }
 .context-menu .submenu {
   position: absolute;
   left: 100%;
