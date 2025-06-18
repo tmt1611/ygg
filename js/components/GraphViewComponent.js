@@ -35,7 +35,14 @@ const GraphViewComponent = ({
         return { proxyNodes: [], projectLinks: [] };
     }
 
-    const createAcronym = (name) => (name || '').split(' ').filter(Boolean).map(word => word[0]).join('').toUpperCase();
+    const createAcronym = (name) => {
+        if (!name) return '??';
+        const words = name.split(' ').filter(Boolean);
+        if (words.length > 1) {
+            return words.map(word => word[0]).join('').toUpperCase().substring(0, 3);
+        }
+        return name.substring(0, 3).toUpperCase();
+    };
 
     const proxyNodes = [];
     const projectLinks = [];

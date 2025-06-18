@@ -47,7 +47,7 @@ const NodeEditModal = ({
     if (nameValue.trim()) {
       onConfirm({
         name: nameValue,
-        description: mode === 'editName' ? descriptionValue : undefined,
+        description: descriptionValue,
       });
     } else {
       nameInputRef.current?.focus();
@@ -84,7 +84,7 @@ const NodeEditModal = ({
             })
           ),
 
-          mode === 'editName' && (
+          (mode === 'editName' || mode === 'addChild') && (
             React.createElement("div", { style: { marginBottom: '20px' }},
               React.createElement("label", { htmlFor: "node-edit-modal-description-input", style: { marginBottom: '5px', display: 'block' }},
                 "Description (Optional)"
