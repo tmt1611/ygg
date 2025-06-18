@@ -391,8 +391,7 @@
       .yggdrasil-app-body.sidebar-collapsed .knowledge-branch-sidebar .sidebar-header-title,
       .yggdrasil-app-body.sidebar-collapsed .knowledge-branch-sidebar .sidebar-header-subtitle,
       .yggdrasil-app-body.sidebar-collapsed .knowledge-branch-sidebar .sidebar-header-mode-icon,
-      .yggdrasil-app-body.sidebar-collapsed .knowledge-branch-sidebar .sidebar-tab-switcher, /* Hide tab switcher when collapsed */
-      .yggdrasil-app-body.sidebar-collapsed .knowledge-branch-sidebar .panel-content-wrapper { display: none; } /* Kept for general CollapsiblePanel */
+      .yggdrasil-app-body.sidebar-collapsed .knowledge-branch-sidebar .sidebar-tab-switcher { display: none; } /* Hide tab switcher when collapsed */
       
       .yggdrasil-app-body.sidebar-collapsed .knowledge-branch-sidebar .sidebar-header { padding: 8px 4px; } /* Reduced padding */
       .yggdrasil-app-body.sidebar-collapsed .knowledge-branch-sidebar .collapsible-panel-header { justify-content: center; padding-left: 0; padding-right: 0; }
@@ -453,28 +452,7 @@
       html[data-theme='light'] .sidebar-tools-area::-webkit-scrollbar-thumb { background-color: #B0A08C; } 
       html[data-theme='light'] .sidebar-tools-area::-webkit-scrollbar-thumb:hover { background-color: #C0B09C; }
       
-      /* General panel styling, if still used by CollapsiblePanel elsewhere, or for content directly in sidebar-tools-area */
-      .knowledge-branch-sidebar .panel { 
-        background: rgba(var(--panel-bg-rgb),0.05); 
-        border: 1px solid rgba(var(--primary-accent-rgb),0.15); 
-        padding: 10px; /* Further reduced padding if needed */
-        border-radius: var(--border-radius);
-      }
-      html[data-theme='dark'] .knowledge-branch-sidebar .panel { 
-        background: rgba(var(--panel-bg-rgb),0.1); 
-        border-color: rgba(var(--primary-accent-rgb),0.2); 
-      }
-      
-      /* If CollapsiblePanel is used *within* a tab, these would apply */
-      .knowledge-branch-sidebar .collapsible-panel-header { 
-        /* Styles for collapsible headers if they exist inside tabs */
-         border-bottom: 1px solid rgba(var(--primary-accent-rgb), 0.1); 
-         padding: 6px 8px; /* Reduced padding */
-      }
-      html[data-theme='dark'] .knowledge-branch-sidebar .collapsible-panel-header { border-bottom: 1px solid rgba(var(--primary-accent-rgb), 0.25); }
 
-      .knowledge-branch-sidebar .collapsible-panel-header h3 { color: var(--text-on-dark-bg); font-size: 0.9em; } /* Reduced font size */
-      html[data-theme='light'] .knowledge-branch-sidebar .collapsible-panel-header h3 { color: var(--primary-accent-dark); }
       
       .knowledge-branch-sidebar .panel-content-wrapper { color: var(--text-on-dark-bg); padding: 8px; } /* Reduced padding for CollapsiblePanel content */
       html[data-theme='light'] .knowledge-branch-sidebar .panel-content-wrapper { color: var(--text-secondary); }
@@ -573,11 +551,6 @@
       .whispering-runes-panel .action-feedback .rune-icon { transform: scale(1.3) rotate(15deg); color: var(--primary-accent-dark); }
       .whispering-runes-panel .no-node-message { padding: 8px; text-align: center; font-style: italic; color: var(--text-tertiary); font-size: 0.85em; } /* Reduced padding/font-size */
 
-      
-      .panel { background-color: var(--panel-bg); border: 1px solid var(--border-color); border-radius: var(--border-radius-lg); padding: 15px; box-shadow: var(--box-shadow-sm); } /* Default panel padding reduced */
-      .collapsible-panel-header { display: flex; justify-content: space-between; align-items: center; padding: 8px 10px; cursor: pointer; border-bottom: 1px solid transparent; transition: background-color 0.2s; } /* Reduced padding */
-      .collapsible-panel-header:hover { background-color: rgba(var(--primary-accent-rgb), 0.05); }
-      .collapsible-panel-header h3 { font-size: 1em; margin: 0; flex-grow: 1; } /* Reduced font size */
       .panel-header { font-size: 1.1em; font-weight: 600; color: var(--text-primary); margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; } /* Reduced font size/margin */
       .panel-sub-header { font-size: 0.95em; font-weight: 600; color: var(--text-secondary); margin-top: 12px; margin-bottom: 8px; border-bottom: 1px solid var(--border-color); padding-bottom: 4px; } /* Reduced font size/margins/padding */
       .panel-button-group { display: flex; flex-direction: column; gap: 8px; } /* Reduced gap */
@@ -611,7 +584,7 @@
       .contextual-help-icon .tooltip-text { white-space: normal; line-height: 1.4; padding: 6px 8px; }
 
       .modal-overlay-basic { position: fixed; inset: 0; background-color: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 15px; backdrop-filter: blur(4px); } /* Reduced padding */
-      .modal-content-basic { background-color: var(--panel-bg); padding: 20px 25px; border-radius: var(--border-radius-lg); box-shadow: var(--box-shadow-lg); max-width: 90vw; max-height: 90vh; overflow-y: auto; animation: modalFadeIn 0.3s ease-out; } /* Reduced padding */
+      .modal-content-basic { background-color: var(--panel-bg); padding: 18px 22px; border-radius: var(--border-radius-lg); box-shadow: var(--box-shadow-lg); max-width: 90vw; max-height: 90vh; overflow-y: auto; animation: modalFadeIn 0.3s ease-out; border-top: 3px solid var(--primary-accent); } /* Reduced padding and added top border */
       @keyframes modalFadeIn { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
 
       .error-message-wrapper { margin-top: 8px; }
@@ -854,23 +827,7 @@
       }
 
 
-      .panel-content-wrapper { 
-        transition: max-height 0.35s ease-in-out, opacity 0.2s ease-in-out 0.1s, padding 0.35s ease-in-out, margin 0.35s ease-in-out, border-width 0.35s ease-in-out; 
-        overflow: hidden; max-height: 100vh; 
-        border-top: 1px solid rgba(var(--primary-accent-rgb),0.15); 
-        padding: 8px; margin-top: 4px; 
-      }
-      .panel-content-wrapper.collapsed { 
-        max-height: 0 !important; opacity: 0; 
-        padding-top: 0 !important; padding-bottom: 0 !important; 
-        margin-top:0 !important; margin-bottom:0 !important; 
-        border-top-width:0 !important; 
-        transition-delay: opacity 0s, padding 0s, margin 0s, border-width 0s; 
-      }
-      .panel-toggle-button { transition: transform 0.3s ease-in-out; background: none; border: none; padding: 3px; line-height: 1; border-radius: 50%; } 
-      .panel-toggle-button svg { width: 1.1em; height: 1.1em; transition: transform 0.3s ease-in-out; fill: currentColor; display: block; } 
-      .panel-toggle-button.collapsed svg { transform: rotate(-90deg); }
-      .panel-toggle-button:hover { background-color: var(--primary-accent-hover-bg); }
+
 
       /* LIST VIEW MINIMALIST REDESIGN */
       .list-view-item {
@@ -938,7 +895,39 @@
       .workspace-sub-nav button.active { color: var(--primary-accent); border-bottom-color: var(--primary-accent); font-weight: 600; }
       .workspace-sub-nav button:disabled { color: var(--disabled-text); cursor: not-allowed; border-bottom-color: transparent; }
       .workspace-content-area { flex-grow: 1; overflow-y: auto; }
-      /* fieldset styles removed as they are replaced by CollapsiblePanel in the workspace view */
+      .workspace-content-area fieldset {
+        border: 1px solid var(--border-color);
+        border-radius: var(--border-radius-lg);
+        padding: 15px 20px;
+        margin: 0;
+      }
+      .workspace-content-area fieldset legend {
+        padding: 0 8px;
+        font-size: 1.1em;
+        font-weight: 600;
+        color: var(--text-primary);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .sidebar-fieldset {
+        border: 1px solid rgba(var(--primary-accent-rgb), 0.25);
+        border-radius: var(--border-radius);
+        padding: 8px 10px;
+        margin: 0;
+      }
+      .sidebar-fieldset legend {
+        padding: 0 5px;
+        font-size: 0.95em;
+        font-weight: 500;
+        color: var(--primary-accent-light);
+        display: flex;
+        align-items: center;
+        gap: 5px;
+      }
+      html[data-theme='light'] .sidebar-fieldset legend {
+        color: var(--primary-accent-dark);
+      }
       .project-list { list-style: none; padding: 0; margin: 0; }
       .project-list-item { display: flex; justify-content: space-between; align-items: center; padding: 8px; border-bottom: 1px solid var(--border-color); transition: background-color 0.15s; } 
       .project-list-item:last-child { border-bottom: none; }

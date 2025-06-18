@@ -21,6 +21,7 @@ const ContextMenu = ({
   const [focusedImportanceIndex, setFocusedImportanceIndex] = useState(0);
   const [menuStyle, setMenuStyle] = useState({});
   const [copyFeedback, setCopyFeedback] = useState(''); 
+  const [copyNameFeedback, setCopyNameFeedback] = useState(''); 
 
   const baseMenuStyle = {
     background: 'var(--panel-bg)', color: 'var(--text-primary)', border: '1px solid var(--border-color-strong)', 
@@ -48,6 +49,16 @@ const ContextMenu = ({
     }).catch(err => {
       setCopyFeedback('Copy Failed!'); setTimeout(() => setCopyFeedback(''), 1500);
       console.error('Failed to copy ID: ', err);
+    });
+  }, [node]);
+
+  const handleCopyNodeName = useCallback(() => {
+    if (!node) return;
+    navigator.clipboard.writeText(node.name).then(() => {
+      setCopyNameFeedback('Name Copied!'); setTimeout(() => setCopyNameFeedback(''), 1500);
+    }).catch(err => {
+      setCopyNameFeedback('Copy Failed!'); setTimeout(() => setCopyNameFeedback(''), 1500);
+      console.error('Failed to copy Name: ', err);
     });
   }, [node]);
 
@@ -124,11 +135,12 @@ const ContextMenu = ({
         }
         
         items.push(React.createElement("li", { role: "none", key: "sep2" }, React.createElement("hr", null)));
+        addItemToLists(handleCopyNodeName, `Copy Node Name ${copyNameFeedback ? `(${copyNameFeedback})` : ''}`, {id: 'copy-name'});
         addItemToLists(handleCopyNodeId, `Copy Node ID ${copyFeedback ? `(${copyFeedback})` : ''}`, {id: 'copy-id'});
         if (onDeleteNode) addItemToLists(() => onDeleteNode(), "Delete Node...", {isDestructive: true, id: 'delete-node'});
     }
     return { menuItemsJsx: items, menuActions: actions.filter(a => a !== null) }; 
-  }, [node, onEditName, onAddChild, onToggleLock, onSetFocus, onLinkToProject, onGoToLinkedProject, onUnlinkProject, onDeleteNode, handleCopyNodeId, copyFeedback, isSizeSubMenuOpen, focusedItemIndex, onClose, incomingLink, handleNavigateToSourceNode]);
+  }, [node, onEditName, onAddChild, onToggleLock, onSetFocus, onLinkToProject, onGoToLinkedProject, onUnlinkProject, onDeleteNode, handleCopyNodeId, handleCopyNodeName, copyFeedback, copyNameFeedback, isImportanceSubMenuOpen, focusedItemIndex, onClose, incomingLink, handleNavigateToSourceNode]);
 
 
   useEffect(() => {
@@ -144,7 +156,7 @@ const ContextMenu = ({
 
 
   useEffect(() => {
-    if (!isOpen) { setIsSizeSubMenuOpen(false); setFocusedItemIndex(0); setCopyFeedback(''); return; }
+    if (!isOpen) { setIsImportanceSubMenuOpen(false); setFocusedItemIndex(0); setCopyFeedback(''); setCopyNameFeedback(''); return; }
     const menuItemsToFocus = menuRef.current?.querySelectorAll('button[role="menuitem"]:not([disabled])');
     if (menuItemsToFocus && menuItemsToFocus.length > focusedItemIndex) {
         (menuItemsToFocus[focusedItemIndex])?.focus();
@@ -205,7 +217,7 @@ const ContextMenu = ({
         }
       }
     }
-  }, [isOpen, isSizeSubMenuOpen, focusedItemIndex, focusedSizeIndex]);
+  }, [isOpen, isImportanceSubMenuOpen, focusedItemIndex, focusedImportanceIndex]);
 
 
   if (!isOpen || !position || !node) return null;
