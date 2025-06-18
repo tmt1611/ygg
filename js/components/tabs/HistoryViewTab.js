@@ -1,6 +1,6 @@
 
 import React, { useState, useMemo } from 'react';
-import HistoryPanel from '../HistoryPanel.js';
+import HistoryItem from '../HistoryItem.js';
 import { EVENT_TYPE_INFO } from '../../constants.js';
 
 const KEY_EVENT_TYPES = Object.keys(EVENT_TYPE_INFO).filter(key => EVENT_TYPE_INFO[key].isKey);
@@ -53,7 +53,20 @@ const HistoryViewTabContent = ({ history }) => {
           "aria-label": "Search history log"
         })
       ),
-      React.createElement(HistoryPanel, { history: filteredHistory })
+      React.createElement("div", { style: { flexGrow: 1, overflowY: 'auto' }},
+        filteredHistory.length > 0 ? (
+          React.createElement("ul", { style: { listStyle: 'none', padding: 0, margin: 0 }, "aria-label": "History of actions" },
+            filteredHistory.map((entry) => (
+              React.createElement(HistoryItem, { key: entry.id, entry: entry })
+            ))
+          )
+        ) : (
+          React.createElement("div", { className: "placeholder-center-content", style: { minHeight: '100px', padding: '10px' }},
+            React.createElement("span", { className: "placeholder-icon", style: {fontSize: '2em', marginBottom: '8px'}}, "📜"),
+            React.createElement("p", { style: { color: 'var(--text-tertiary)', fontSize: '0.9em' }}, "No matching actions found.")
+          )
+        )
+      )
     )
   );
 };

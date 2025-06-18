@@ -20,8 +20,7 @@ const GraphViewComponent = ({
   activeProjectId,
   findLinkSource,
   onNavigateToLinkedProject,
-  handleNavigateToSourceNode,
-  searchTerm,
+  handleNavigateToSourceNode
 }) => {
   const svgContainerDivRef = useRef(null); 
   const svgRef = useRef(null); 
@@ -270,29 +269,19 @@ const GraphViewComponent = ({
   // Effect for dynamic styling (selection, search highlight)
   useEffect(() => {
     if (!g) return;
-    
-    const lowerSearchTerm = searchTerm?.toLowerCase().trim();
-    const isMatch = (d_node) => {
-        if (!lowerSearchTerm || d_node.isProxy) return false;
-        const data = d_node.data;
-        return (
-            data.name?.toLowerCase().includes(lowerSearchTerm) ||
-            data.description?.toLowerCase().includes(lowerSearchTerm)
-        );
-    };
 
     const nodeSelection = g.selectAll(".graph-view-node");
     
     nodeSelection
       .classed("selected", d => !d.isProxy && d.data.id === activeNodeId)
-      .classed("highlighted", isMatch);
+      .classed("highlighted", false); // No search term, so nothing is highlighted
 
     nodeSelection.select("circle")
       .attr("stroke", d => {
           return d.isProxy ? null : (d.data.id === activeNodeId ? 'var(--graph-node-selected-stroke)' : 'var(--graph-node-stroke)');
       });
 
-  }, [g, activeNodeId, searchTerm, nodes]); // Using 'nodes' to re-run on data change.
+  }, [g, activeNodeId, nodes]); // Using 'nodes' to re-run on data change.
 
 
   if (!treeData) {

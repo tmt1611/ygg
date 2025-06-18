@@ -49,7 +49,6 @@ const App = () => {
   const [strategicSuggestions, setStrategicSuggestions] = useState(null);
   const [isFetchingStrategicSuggestions, setIsFetchingStrategicSuggestions] = useState(false);
   const [strategicSuggestionsError, setStrategicSuggestionsError] = useState(null);
-  const [globalSearchTerm, setGlobalSearchTerm] = useState('');
 
 
   // --- HOOKS ---
@@ -255,9 +254,7 @@ const App = () => {
         activeOverlayPanel: activeOverlayPanel,
         setYggdrasilViewMode: setYggdrasilViewMode,
         setActiveOverlayPanel: setActiveOverlayPanel,
-        focusNodeId: focusNodeId,
-        globalSearchTerm: globalSearchTerm,
-        setGlobalSearchTerm: setGlobalSearchTerm
+        focusNodeId: focusNodeId
       }),
       React.createElement("div", { className: `yggdrasil-app-body theme-${themeMode} view-mode-${yggdrasilViewMode} ${isSidebarCollapsed ? 'sidebar-collapsed' : ''} ${activeOverlayPanel ? 'overlay-panel-active' : ''}` },
         React.createElement(KnowledgeBranchSidebar, {
@@ -306,8 +303,7 @@ const App = () => {
               techTreeData, isLoading, isModifying,
               isAppBusy: isLoading || isModifying || isFetchingStrategicSuggestions,
               initialPrompt, setInitialPrompt, currentTreeStats,
-              isSummarizing,
-              globalSearchTerm
+              isSummarizing
             },
             appHooks: {
               projectManager, nodeOperations, viewStates,
