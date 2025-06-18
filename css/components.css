@@ -911,13 +911,13 @@ html[data-theme='nebula'] .graph-view-node.highlighted text.node-label {
   /* Create a "cutout" effect for readability over lines */
   paint-order: stroke;
   stroke: var(--app-bg);
-  stroke-width: 4px; /* Adjust thickness of the "cutout" */
+  stroke-width: 2px; /* Adjust thickness of the "cutout" */
   stroke-linecap: round;
   stroke-linejoin: round;
   text-shadow: 0 0 3px var(--app-bg); /* Soften the edges a bit */
 } 
 html[data-theme='dark'] .graph-view-node text.node-label {
-  stroke-width: 5px;
+  stroke-width: 3px;
   text-shadow: 0 0 5px var(--app-bg), 0 0 8px rgba(var(--primary-accent-rgb), 0.3);
 }
 

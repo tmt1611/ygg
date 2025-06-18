@@ -127,10 +127,6 @@ const TechTreeListItemComponent = ({
     onOpenContextMenu(node.id, { x: event.clientX, y: event.clientY }, incomingLinkSource);
   }, [node.id, onOpenContextMenu, onSelectListItem, incomingLinkSource]);
 
-  const itemStyle = {
-    marginLeft: `${level * 8}px`, 
-  };
-
   const itemContentVisible = (node.description && isEffectivelyDescriptionVisible) || hasChildren;
 
   let nodeNameTitle = node.name;
@@ -144,7 +140,7 @@ const TechTreeListItemComponent = ({
 
 
   return (
-    React.createElement("li", { className: "list-view-item", style: itemStyle, "aria-labelledby": `node-name-${node.id}`, onContextMenu: handleContextMenu },
+    React.createElement("li", { className: "list-view-item", "aria-labelledby": `node-name-${node.id}`, onContextMenu: handleContextMenu },
       React.createElement("div", { className: `list-view-item-header ${itemContentVisible && !isCollapsed ? 'expanded' : ''}`},
         React.createElement("div", { className: "list-view-name-section" },
           hasChildren && (

@@ -56,10 +56,7 @@ const YggdrasilTopBar = ({
     setActiveOverlayPanel(overlay);
   };
 
-  const isFocusViewDisabled = !focusNodeId && yggdrasilViewMode === 'treeView' && activeOverlayPanel === 'focus';
-
-
-  return (
+    return (
     React.createElement("header", { className: "yggdrasil-top-bar" },
       React.createElement("div", { className: "yggdrasil-top-bar-section left" },
         React.createElement("h1", { className: "yggdrasil-top-bar-title" }, "Yggdrasil")
@@ -86,8 +83,8 @@ const YggdrasilTopBar = ({
         }, "List"),
         React.createElement("button", {
           className: `yggdrasil-top-bar-nav-button ${yggdrasilViewMode === 'treeView' && activeOverlayPanel === 'focus' ? 'active' : ''}`,
-          onClick: () => focusNodeId ? handleNavClick('treeView', 'focus') : alert("Select a node from Graph or List view to enter Focus View."),
-          disabled:(isAppBusy && !(yggdrasilViewMode === 'treeView' && activeOverlayPanel === 'focus')) || (isFocusViewDisabled && !focusNodeId),
+          onClick: () => focusNodeId ? handleNavClick('treeView', 'focus') : undefined,
+          disabled: (isAppBusy && !(yggdrasilViewMode === 'treeView' && activeOverlayPanel === 'focus')) || !focusNodeId,
           title: focusNodeId ? "Detailed view of the currently focused node" : "Select a node to enable Focus View"
         }, "Focus"),
         React.createElement("div", { className: "yggdrasil-top-bar-search-wrapper" },

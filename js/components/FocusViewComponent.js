@@ -88,7 +88,7 @@ const FocusViewComponent = ({
             isAppBusy: isAppBusy,
             isRootNode: nodeData.id === treeData.id,
             linkSourceInfo: nodeData.id === treeData.id ? incomingLinkInfoForFocusNode : null,
-            style: { position: 'absolute', left: `${pos.x}px`, top: `${pos.y}px`, transform: 'translate(-50%, -50%)', width: `${pos.width}px`, height: `${pos.height}px` }
+            style: { position: 'absolute', left: `${pos.x}px`, top: `${pos.y}px`, transform: 'translate(-50%, -50%)' }
         })
     );
   };
