@@ -10,7 +10,7 @@ export const useNodeOperations = ({
   projectManager,
   viewStates,
 }) => {
-  const { openNodeEditModal, nodeEditModalConfig, closeNodeEditModal, openConfirmModal } = modalManager;
+  const { nodeEditModalConfig, closeNodeEditModal } = modalManager;
   const { addHistoryEntry } = historyManager;
   const { handleSaveActiveProject } = projectManager;
   const { focusNodeId, setFocusNodeId, selectedNodeInFocusPanelId, setSelectedNodeInFocusPanelId } = viewStates;
@@ -74,20 +74,7 @@ export const useNodeOperations = ({
     closeNodeEditModal();
   }, [techTreeData, setTechTreeData, nodeEditModalConfig, closeNodeEditModal, handleSaveActiveProject, addHistoryEntry]);
   
-  const handleToggleAllLocks = useCallback(() => {
-    if (!techTreeData) return;
-    const allLocked = areAllNodesLocked(techTreeData); const action = allLocked ? 'unlock' : 'lock';
-    openConfirmModal({
-        title: `${action.charAt(0).toUpperCase() + action.slice(1)} All Nodes?`, message: `Are you sure you want to ${action} all nodes?`,
-        confirmText: action.charAt(0).toUpperCase() + action.slice(1) + " All", cancelText: "Cancel",
-        onConfirm: () => {
-            const updatedTree = allLocked ? unlockAllNodesInTree(techTreeData) : lockAllNodesInTree(techTreeData);
-            setTechTreeData(updatedTree); handleSaveActiveProject(false);
-            addHistoryEntry(allLocked ? 'TREE_UNLOCK_ALL' : 'TREE_LOCK_ALL', `All nodes ${action}ed.`);
-            modalManager.closeConfirmModal();
-        },
-    });
-  }, [techTreeData, setTechTreeData, handleSaveActiveProject, addHistoryEntry, openConfirmModal, modalManager]);
+
 
   const handleQuickAddChild = useCallback((parentId) => {
     if (!techTreeData) return;
@@ -100,41 +87,33 @@ export const useNodeOperations = ({
     }
   }, [techTreeData, setTechTreeData, handleSaveActiveProject, addHistoryEntry]);
 
-  const handleDeleteNodeAndChildren = useCallback((nodeIdToDelete) => {
+  const deleteNodeAndChildren = useCallback((nodeIdToDelete) => {
     if (!techTreeData) return;
     const nodeToDelete = findNodeById(techTreeData, nodeIdToDelete);
-    if (!nodeToDelete) return;
-
-    if (nodeToDelete.isLocked) {
-      modalManager.openConfirmModal({
-        title: "Deletion Blocked",
-        message: `The node "${nodeToDelete.name}" is locked and cannot be deleted. Please unlock it first.`,
-        confirmText: "OK",
-        cancelText: null, 
-      });
-      return;
+    if (!nodeToDelete) {
+        console.error(`deleteNodeAndChildren: Node with ID ${nodeIdToDelete} not found.`);
+        return;
     }
+    
+    const newTree = removeNodeAndChildrenFromTree(techTreeData, nodeIdToDelete);
+    setTechTreeData(newTree);
+    addHistoryEntry('NODE_DELETED', `Node "${nodeToDelete.name}" and children deleted.`);
+    handleSaveActiveProject(false);
 
-    openConfirmModal({
-      title: "Delete Node?", message: `Delete "${nodeToDelete.name}" and ALL its descendants? This cannot be undone.`,
-      confirmText: "Delete Node & Children", cancelText: "Cancel", confirmButtonStyle: 'danger',
-      onConfirm: () => {
-        const newTree = removeNodeAndChildrenFromTree(techTreeData, nodeIdToDelete);
-        setTechTreeData(newTree); addHistoryEntry('NODE_DELETED', `Node "${nodeToDelete.name}" and children deleted.`);
-        handleSaveActiveProject(false);
-        if (focusNodeId === nodeIdToDelete || (newTree && !findNodeById(newTree, focusNodeId))) setFocusNodeId(null);
-        if (selectedNodeInFocusPanelId === nodeIdToDelete || (newTree && !findNodeById(newTree, selectedNodeInFocusPanelId))) setSelectedNodeInFocusPanelId(null);
-        modalManager.closeConfirmModal();
-      }
-    });
-  }, [techTreeData, setTechTreeData, addHistoryEntry, handleSaveActiveProject, openConfirmModal, modalManager, focusNodeId, setFocusNodeId, selectedNodeInFocusPanelId, setSelectedNodeInFocusPanelId]);
+    // Reset focus if the focused node or its ancestor was deleted
+    if (focusNodeId === nodeIdToDelete || (newTree && !findNodeById(newTree, focusNodeId))) {
+        setFocusNodeId(null);
+    }
+    if (selectedNodeInFocusPanelId === nodeIdToDelete || (newTree && !findNodeById(newTree, selectedNodeInFocusPanelId))) {
+        setSelectedNodeInFocusPanelId(null);
+    }
+  }, [techTreeData, setTechTreeData, addHistoryEntry, handleSaveActiveProject, focusNodeId, selectedNodeInFocusPanelId, setFocusNodeId, setSelectedNodeInFocusPanelId]);
 
   return {
     handleToggleNodeLock,
     handleNodeImportanceChange,
     handleConfirmNodeEdit,
-    handleToggleAllLocks,
-    handleDeleteNodeAndChildren,
+    deleteNodeAndChildren,
     handleQuickAddChild,
   };
 };

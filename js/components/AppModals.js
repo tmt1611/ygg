@@ -24,9 +24,12 @@ const AppModals = ({
   projectLinkingHook,
   techTreeData,
   nodeOperations,
+  onDeleteNodeWithConfirmation,
   handleSwitchToFocusView,
   projects,
   activeProjectId,
+  yggdrasilViewMode,
+  activeOverlayPanel,
 }) => {
   const {
     isProjectNameModalOpen, projectModalConfig, closeProjectNameModal,
