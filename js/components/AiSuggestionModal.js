@@ -27,7 +27,7 @@ const AiSuggestionModal = ({
         const errorNode = { 
             id: 'error-root-' + Date.now(), name: 'Invalid AI Suggestion Structure', 
             description: 'AI returned data that is malformed or not a valid tree structure. Cannot display detailed preview.',
-            children: [], isLocked: false, status: 'medium', _changeStatus: 'unchanged', 
+            children: [], isLocked: false, importance: 'common', _changeStatus: 'unchanged', 
             _modificationDetails: ["The AI's suggestion was not a valid tree object."] 
         };
         return { 

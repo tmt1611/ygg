@@ -1,4 +1,3 @@
-
 // import { TechTreeNode, NodeStatus } from './types.js'; // This import will be present but TechTreeNode is not a runtime value
 
 export const generateUUID = () => {
@@ -14,7 +13,7 @@ export const initializeNodes = (node, parentId = null) => {
     return { 
       id: generateUUID(), name: "Error: Invalid Node Data", 
       description: "The original data provided to initialize this node was not a valid object.", 
-      children: [], isLocked: false, status: 'medium',
+      children: [], isLocked: false, importance: 'common',
       _changeStatus: 'unchanged'
     };
   }
@@ -35,9 +34,9 @@ export const initializeNodes = (node, parentId = null) => {
     name: newName,
     description: newDescription,
     isLocked: typeof node.isLocked === 'boolean' ? node.isLocked : false,
-    status: (typeof node.status === 'string' && ['small', 'medium', 'large'].includes(node.status)) 
-              ? node.status 
-              : 'medium',
+    importance: (typeof node.importance === 'string' && ['minor', 'common', 'major'].includes(node.importance)) 
+              ? node.importance 
+              : 'common',
     children: [], 
     linkedProjectId: node.linkedProjectId || null, 
     linkedProjectName: node.linkedProjectName || null, 
@@ -265,20 +264,20 @@ export const compareAndAnnotateTree = (
 
       const contentChanged = cNodeData.name !== sNode.name || 
                              cNodeData.description !== sNode.description ||
-                             cNodeData.status !== sNode.status ||
+                             cNodeData.importance !== sNode.importance ||
                              (cNodeData.linkedProjectId || null) !== (sNode.linkedProjectId || null) ||
                              (cNodeData.linkedProjectName || null) !== (sNode.linkedProjectName || null);
 
       if (contentChanged) {
         if (cNodeData.isLocked) { 
           primaryChangeType = primaryChangeType === 'reparented' ? 'reparented' : 'locked_content_changed'; 
-          details.push('CRITICAL: Locked node content (name/desc/status/link) was modified!');
+          details.push('CRITICAL: Locked node content (name/desc/importance/link) was modified!');
           if (!result.lockedContentChangedNodes.find(n => n.id === annotatedSNode.id)) result.lockedContentChangedNodes.push(annotatedSNode);
         } else { 
           primaryChangeType = primaryChangeType === 'reparented' ? 'reparented' : 'content_modified';
           if (cNodeData.name !== sNode.name) details.push(`Name changed: "${cNodeData.name}" -> "${sNode.name}".`);
           if (cNodeData.description !== sNode.description) details.push(`Description updated.`);
-          if (cNodeData.status !== sNode.status) details.push(`Status changed: "${cNodeData.status || 'N/A'}" -> "${sNode.status || 'N/A'}".`);
+          if (cNodeData.importance !== sNode.importance) details.push(`Importance changed: "${cNodeData.importance || 'N/A'}" -> "${sNode.importance || 'N/A'}".`);
           if ((cNodeData.linkedProjectId || null) !== (sNode.linkedProjectId || null) || (cNodeData.linkedProjectName || null) !== (sNode.linkedProjectName || null)) {
             details.push(`Project link changed from "${cNodeData.linkedProjectName || 'None'}" to "${sNode.linkedProjectName || 'None'}".`);
           }
@@ -320,13 +319,13 @@ export const filterTree = (node, searchTerm) => {
 
   const nameMatch = node.name.toLowerCase().includes(lowerSearchTerm);
   const descriptionMatch = node.description?.toLowerCase().includes(lowerSearchTerm) ?? false;
-  const statusMatch = node.status?.toLowerCase().includes(lowerSearchTerm) ?? false;
+  const importanceMatch = node.importance?.toLowerCase().includes(lowerSearchTerm) ?? false;
 
   const filteredChildren = (node.children ?? [])
       .map(child => filterTree(child, searchTerm)) 
       .filter((child) => child !== null); 
 
-  if (nameMatch || descriptionMatch || statusMatch || filteredChildren.length > 0) {
+  if (nameMatch || descriptionMatch || importanceMatch || filteredChildren.length > 0) {
     return { ...node, children: filteredChildren };
   }
   return null;
@@ -340,7 +339,7 @@ export const findNodesByTerm = (rootNode, searchTerm) => {
   function recurse(node) {
     if (node.name.toLowerCase().includes(lowerSearchTerm) ||
         node.description?.toLowerCase().includes(lowerSearchTerm) ||
-        node.status?.toLowerCase().includes(lowerSearchTerm)) {
+        node.importance?.toLowerCase().includes(lowerSearchTerm)) {
       results.push(node);
     }
     node.children?.forEach(recurse);
@@ -417,12 +416,12 @@ export const getTreeDepth = (node) => {
   return 1 + Math.max(...node.children.map(child => getTreeDepth(child)));
 };
 
-export const countNodesByStatus = (node) => {
-  const counts = { small: 0, medium: 0, large: 0 };
+export const countNodesByImportance = (node) => {
+  const counts = { minor: 0, common: 0, major: 0 };
   if (!node) return counts;
 
   function recurse(currentNode) {
-    counts[currentNode.status || 'medium']++;
+    counts[currentNode.importance || 'common']++;
     currentNode.children?.forEach(recurse);
   }
   recurse(node);
