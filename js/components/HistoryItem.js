@@ -50,50 +50,23 @@ const EVENT_TYPE_INFO = {
 const HistoryItem = ({ entry }) => {
     const { icon, color } = EVENT_TYPE_INFO[entry.type] || EVENT_TYPE_INFO.default;
 
-    const itemStyle = {
-        padding: '6px 4px',
-        borderBottom: '1px dotted var(--border-color)',
-        display: 'flex',
-        alignItems: 'flex-start',
-        gap: '8px',
-        transition: 'background-color 0.1s ease',
-    };
-
-    const iconStyle = {
-        fontSize: '1.1em',
-        color: color,
-        flexShrink: 0,
-        width: '20px',
-        textAlign: 'center',
-        paddingTop: '1px',
-    };
-
-    const summaryStyle = {
-        fontSize: '0.9em',
-        color: 'var(--text-primary)',
-        flexGrow: 1,
-        wordBreak: 'break-word',
-        lineHeight: 1.4,
-    };
-
-    const timeStyle = {
-        fontSize: '0.75em',
-        color: 'var(--text-tertiary)',
-        whiteSpace: 'nowrap',
-        flexShrink: 0,
-        paddingTop: '3px',
-    };
-    
     const title = `Type: ${entry.type}\nTimestamp: ${new Date(entry.timestamp).toLocaleString()}${entry.details ? `\nDetails: ${JSON.stringify(entry.details)}` : ''}`;
 
+    // Highlight keywords in the summary
+    const summaryWithHighlights = entry.summary.replace(/"(.*?)"/g, (match, p1) => `<strong>"${p1}"</strong>`);
+
     return (
-        React.createElement("li", {
-            style: itemStyle,
-            title: title
-        },
-            React.createElement("span", { style: iconStyle, "aria-hidden": "true" }, icon),
-            React.createElement("span", { style: summaryStyle }, entry.summary),
-            React.createElement("span", { style: timeStyle },
+        React.createElement("li", { className: "history-item", title: title },
+            React.createElement("span", { 
+                className: "history-item-icon", 
+                style: { color: color }, 
+                "aria-hidden": "true" 
+            }, icon),
+            React.createElement("span", { 
+                className: "history-item-summary", 
+                dangerouslySetInnerHTML: { __html: summaryWithHighlights } 
+            }),
+            React.createElement("span", { className: "history-item-time" },
                 new Date(entry.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })
             )
         )

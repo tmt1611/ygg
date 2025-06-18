@@ -225,37 +225,37 @@
 
       /* Sol Theme (Warm Paper) */
       html[data-theme='sol'] {
-        --app-bg: #FDFBF6;
+        --app-bg: #FAF8F3; /* Slightly less yellow */
         --panel-bg: #FFFFFF;
         --panel-bg-rgb: 255,255,255;
-        --panel-alt-bg: #F9F5EF;
-        --panel-alt-bg-rgb: 249,245,239;
+        --panel-alt-bg: #FBF9F6;
+        --panel-alt-bg-rgb: 251,249,246;
 
-        --text-primary: #4E443B;
-        --text-secondary: #716A63;
-        --text-tertiary: #968F8A;
-        --text-on-dark-bg: #4E443B;
+        --text-primary: #4A413A; /* Darker brown for text */
+        --text-secondary: #797068;
+        --text-tertiary: #9F978F;
+        --text-on-dark-bg: var(--text-primary);
         --text-on-accent: #FFFFFF;
         --text-on-bark: var(--text-primary);
         
-        --primary-accent: #D95D39; /* Warm Rust */
-        --primary-accent-rgb: 217,93,57;
-        --primary-accent-dark: #C04A27;
-        --primary-accent-light: #F28C6B;
-        --primary-accent-hover-bg: rgba(217,93,57, 0.08);
+        --primary-accent: #E57373; /* Softer, warm red */
+        --primary-accent-rgb: 229,115,115;
+        --primary-accent-dark: #D32F2F; /* Stronger red for hover/active */
+        --primary-accent-light: #FFCDD2; /* Very light red for backgrounds */
+        --primary-accent-hover-bg: rgba(229,115,115, 0.08);
 
-        --secondary-accent: #7E8D85; /* Muted Sage Green */
-        --secondary-accent-dark: #63716A;
+        --secondary-accent: #81C784; /* Sage Green */
+        --secondary-accent-dark: #4CAF50;
         
-        --border-color: #DCD6CF;
-        --border-color-strong: #B8AF9E;
-        --input-border-color: #CEC5BB;
+        --border-color: #EAE3DC;
+        --border-color-strong: #CFC5BB;
+        --input-border-color: #D6CFC7;
         
-        --success-color: #558B2F; /* Olive Green */
-        --success-bg: #F1F8E9;
-        --error-color: #C62828; /* Deep Red */
+        --success-color: #4CAF50; /* Green */
+        --success-bg: #E8F5E9;
+        --error-color: #F44336; /* Red */
         --error-bg: #FFEBEE;
-        --warning-color: #E65100; /* Amber */
+        --warning-color: #FF9800; /* Amber */
         --warning-bg: #FFF3E0;
 
         --disabled-bg: #F5F5F5;
@@ -265,43 +265,43 @@
         --button-primary-bg: var(--primary-accent);
         --button-primary-hover-bg: var(--primary-accent-dark);
         
-        --button-secondary-text: var(--primary-accent);
+        --button-secondary-text: var(--primary-accent-dark);
         --button-secondary-border: var(--primary-accent-light);
         --button-secondary-hover-bg: var(--primary-accent-hover-bg);
         --button-secondary-hover-border: var(--primary-accent);
         --button-secondary-hover-text: var(--primary-accent-dark);
 
         --graph-node-stroke: var(--border-color-strong);
-        --graph-link-stroke-ecosystem: #8C7853; /* Sepia */
-        --graph-node-highlight-stroke: var(--secondary-accent-dark);
+        --graph-link-stroke-ecosystem: #A1887F; /* Sepia */
+        --graph-node-highlight-stroke: var(--warning-color);
         
-        --importance-minor-bg: rgba(126, 141, 133, 0.15); /* Sage bg */
-        --importance-minor-text: #33691E;
+        --importance-minor-bg: rgba(var(--secondary-accent-dark), 0.1); 
+        --importance-minor-text: #2E7D32;
         --importance-minor-border: #A5D6A7; 
-        --importance-common-bg: rgba(217, 93, 57, 0.1); /* Rust bg */
-        --importance-common-text: #BF360C;
-        --importance-common-border: #FFCC80;
-        --importance-major-bg: rgba(69, 90, 100, 0.15); /* Slate bg */
-        --importance-major-text: #263238;
-        --importance-major-border: #B0BEC5;
+        --importance-common-bg: rgba(255, 152, 0, 0.1); /* Amber bg */
+        --importance-common-text: #E65100;
+        --importance-common-border: #FFB74D;
+        --importance-major-bg: rgba(var(--primary-accent-dark), 0.1); 
+        --importance-major-text: #B71C1C;
+        --importance-major-border: #EF9A9A;
 
-        --yggdrasil-bark-bg: #F4EFE3; /* Parchment */
-        --yggdrasil-bark-border: #D2B48C;
+        --yggdrasil-bark-bg: #F6F2EC; /* Lighter Parchment */
+        --yggdrasil-bark-border: #E0D8CE;
 
         /* Focus View override for Sol Theme */
-        --focus-stellar-bg: #e6e2d9; 
+        --focus-stellar-bg: #F0EBE4; 
         --focus-connector-stroke: var(--primary-accent-dark); 
-        --focus-node-asteroid-bg: #b0a99a; 
-        --focus-node-asteroid-glow: #c7c1b5;
-        --focus-node-planet-bg: #7E8D85; 
-        --focus-node-planet-glow: #96a39c;
-        --focus-node-star-bg: #D95D39; 
-        --focus-node-star-glow: #e07f61;
-        --focus-node-shield-color: #5d8eac; 
-        --focus-node-beacon-color: #E65100;
+        --focus-node-asteroid-bg: #BCAAA4; 
+        --focus-node-asteroid-glow: #D7CCC8;
+        --focus-node-planet-bg: #81C784; 
+        --focus-node-planet-glow: #A5D6A7;
+        --focus-node-star-bg: #E57373; 
+        --focus-node-star-glow: #EF9A9A;
+        --focus-node-shield-color: #64B5F6; 
+        --focus-node-beacon-color: #FFB74D;
         --focus-panel-text: var(--text-primary);
         --focus-panel-bg: rgba(255, 255, 255, 0.85);
-        --focus-placeholder-bg: rgba(249,245,239, 0.8);
+        --focus-placeholder-bg: rgba(251,249,246, 0.8);
         --focus-placeholder-text: var(--text-tertiary);
       }
 

@@ -135,12 +135,17 @@ const isValidTechTreeNodeShape = (data) => {
     return true;
 };
 
+const extractJsonFromMarkdown = (text) => {
+  if (!text) return null;
+  const fenceRegex = /^```(?:json|JSON)?\s*\n?(.*?)\n?\s*```$/s;
+  const match = text.trim().match(fenceRegex);
+  return match ? match[1].trim() : text.trim();
+};
+
 const parseGeminiJsonResponse = (responseText, forModification = false) => {
-  let jsonStr = responseText.trim();
-  const fenceRegex = /^```(?:json|JSON)?\s*\n?(.*?)\n?\s*```$/s; 
-  const match = jsonStr.match(fenceRegex);
-  if (match?.[1]) { 
-    jsonStr = match[1].trim(); 
+  const jsonStr = extractJsonFromMarkdown(responseText);
+  if (!jsonStr) {
+    throw new Error("AI returned an empty response.");
   }
 
   try {
@@ -166,11 +171,11 @@ const parseGeminiJsonResponse = (responseText, forModification = false) => {
 };
 
 const parseGeminiJsonResponseForInsights = (responseText) => {
-    let jsonStr = responseText.trim();
-    const fenceRegex = /^```(?:json|JSON)?\s*\n?(.*?)\n?\s*```$/s;
-    const match = jsonStr.match(fenceRegex);
-    if (match?.[1]) { jsonStr = match[1].trim(); }
-
+    const jsonStr = extractJsonFromMarkdown(responseText);
+    if (!jsonStr) {
+      throw new Error("AI returned an empty response for insights.");
+    }
+    
     try {
         const parsed = JSON.parse(jsonStr);
         if (typeof parsed !== 'object' || parsed === null ||

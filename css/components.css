@@ -612,8 +612,29 @@ html[data-theme='sol'] .contextual-help-icon:hover, html[data-theme='sol'] .cont
 }
 
 
+/* Error Message - Compact Inline Style */
 .error-message-wrapper { margin-top: 8px; }
-.error-message-animated { animation: errorAppear 0.3s ease-out; }
+.error-message-inline {
+  padding: 8px 12px;
+  margin: 1em 0;
+  border-radius: var(--border-radius);
+  background-color: var(--error-bg);
+  border: 1px solid var(--error-color);
+  color: var(--error-color);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9em;
+  font-weight: 500;
+  animation: errorAppear 0.3s ease-out;
+}
+.error-message-inline .error-icon {
+  font-size: 1.2em;
+  line-height: 1;
+}
+.error-message-inline strong {
+  margin-right: 4px;
+}
 @keyframes errorAppear { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
 .api-key-status-message { padding: 7px 10px; margin-top: 8px; border-radius: var(--border-radius); font-size: 0.85em; text-align: center; } /* Reduced padding/font-size */
 .api-key-status-message.success { background-color: var(--success-bg); color: var(--success-color); border: 1px solid var(--success-color); }
@@ -1069,15 +1090,36 @@ mark.search-highlight { background-color: var(--warning-bg); color: var(--text-p
 
 .workspace-tab-container { padding: 12px; background-color: var(--app-bg); height: 100%; overflow-y: auto; } 
 .workspace-sub-nav { display: flex; margin-bottom: 12px; border-bottom: 2px solid var(--border-color); } 
+/* Segmented Control style for workspace nav */
+.workspace-sub-nav { 
+  display: flex; 
+  margin-bottom: 15px; 
+  border-bottom: none; /* Remove border from container */
+  background-color: var(--panel-alt-bg);
+  border-radius: var(--border-radius-lg);
+  padding: 4px;
+  border: 1px solid var(--border-color);
+} 
 .workspace-sub-nav button {
-    padding: 8px 15px; font-size: 0.95em; font-weight: 500; 
-    border: none; border-bottom: 3px solid transparent;
+    flex-grow: 1;
+    padding: 7px 12px; font-size: 0.9em; font-weight: 500; 
+    border: 1px solid transparent; /* Border for button itself */
+    border-bottom: none; /* Remove bottom border */
     background: none; color: var(--text-secondary);
-    cursor: pointer; margin-right: 4px; transition: color 0.2s, border-color 0.2s; 
+    cursor: pointer; margin-right: 0; 
+    transition: all 0.2s ease-in-out; 
+    border-radius: var(--border-radius);
 }
-.workspace-sub-nav button:hover { color: var(--text-primary); border-bottom-color: var(--border-color-strong); }
-.workspace-sub-nav button.active { color: var(--primary-accent); border-bottom-color: var(--primary-accent); font-weight: 600; }
-.workspace-sub-nav button:disabled { color: var(--disabled-text); cursor: not-allowed; border-bottom-color: transparent; }
+.workspace-sub-nav button:hover { color: var(--text-primary); background-color: var(--button-default-hover-bg); border-color: transparent; }
+.workspace-sub-nav button.active { 
+  color: var(--button-primary-text); 
+  border-color: var(--primary-accent-dark); 
+  font-weight: 600;
+  background-color: var(--primary-accent);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+html[data-theme='dark'] .workspace-sub-nav button.active { color: var(--panel-bg); }
+.workspace-sub-nav button:disabled { color: var(--disabled-text); cursor: not-allowed; background: none; border-color: transparent; }
 .workspace-content-area { flex-grow: 1; overflow-y: auto; }
 .workspace-content-area fieldset {
   border: 1px solid var(--border-color);
@@ -1194,6 +1236,52 @@ html[data-theme='sol'] .knowledge-branch-sidebar .panel-toggle-button {
 .stat-value.importance-minor { color: var(--importance-minor-text); }
 .stat-value.importance-common { color: var(--importance-common-text); }
 .stat-value.importance-major { color: var(--importance-major-text); }
+
+
+/* History Log Styles */
+.history-item {
+  padding: 6px 4px;
+  border-bottom: 1px dotted var(--border-color);
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  transition: background-color 0.1s ease;
+}
+.history-item:hover {
+  background-color: rgba(var(--primary-accent-rgb), 0.04);
+}
+.history-item:last-child {
+  border-bottom: none;
+}
+.history-item-icon {
+  font-size: 1.1em;
+  flex-shrink: 0;
+  width: 20px;
+  text-align: center;
+  padding-top: 1px;
+}
+.history-item-summary {
+  font-size: 0.9em;
+  color: var(--text-primary);
+  flex-grow: 1;
+  word-break: break-word;
+  line-height: 1.4;
+}
+.history-item-summary strong {
+  color: var(--primary-accent-dark);
+  font-weight: 600;
+}
+html[data-theme='dark'] .history-item-summary strong,
+html[data-theme='nebula'] .history-item-summary strong {
+  color: var(--primary-accent-light);
+}
+.history-item-time {
+  font-size: 0.75em;
+  color: var(--text-tertiary);
+  white-space: nowrap;
+  flex-shrink: 0;
+  padding-top: 3px;
+}
 
 
 @media (max-width: 768px) {

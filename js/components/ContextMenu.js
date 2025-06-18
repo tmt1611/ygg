@@ -18,9 +18,7 @@ const ContextMenu = ({
   const [focusedItemIndex, setFocusedItemIndex] = useState(0); 
   const [focusedImportanceIndex, setFocusedImportanceIndex] = useState(0);
   const [menuStyle, setMenuStyle] = useState({});
-  const [copyFeedback, setCopyFeedback] = useState(''); 
-  const [copyNameFeedback, setCopyNameFeedback] = useState(''); 
-  const [copyJsonFeedback, setCopyJsonFeedback] = useState('');
+  const [copyFeedback, setCopyFeedback] = useState({ id: '', name: '', json: '' });
 
   const baseMenuStyle = {
     background: 'var(--panel-bg)', color: 'var(--text-primary)', border: '1px solid var(--border-color-strong)', 
@@ -41,42 +39,35 @@ const ContextMenu = ({
     setFocusedImportanceIndex(NODE_IMPORTANCE_OPTIONS.findIndex(opt => opt.value === (node?.importance || 'common'))); 
   });
 
-  const handleCopyNodeId = useCallback(() => {
+  const handleCopy = useCallback((type) => {
     if (!node) return;
-    navigator.clipboard.writeText(node.id).then(() => {
-      setCopyFeedback('ID Copied!'); setTimeout(() => setCopyFeedback(''), 1500); 
-    }).catch(err => {
-      setCopyFeedback('Copy Failed!'); setTimeout(() => setCopyFeedback(''), 1500);
-      console.error('Failed to copy ID: ', err);
-    });
-  }, [node]);
+    
+    let textToCopy = '';
+    switch (type) {
+      case 'id': textToCopy = node.id; break;
+      case 'name': textToCopy = node.name; break;
+      case 'json': {
+        const cleanNodeForExport = (nodeToClean) => {
+            const { _parentId, _changeStatus, _modificationDetails, _oldParentId, ...rest } = nodeToClean;
+            const cleanedNode = { ...rest };
+            if (cleanedNode.children) {
+                cleanedNode.children = cleanedNode.children.map(cleanNodeForExport);
+            }
+            return cleanedNode;
+        };
+        textToCopy = JSON.stringify(cleanNodeForExport(node), null, 2);
+        break;
+      }
+      default: return;
+    }
 
-  const handleCopyNodeName = useCallback(() => {
-    if (!node) return;
-    navigator.clipboard.writeText(node.name).then(() => {
-      setCopyNameFeedback('Name Copied!'); setTimeout(() => setCopyNameFeedback(''), 1500);
+    navigator.clipboard.writeText(textToCopy).then(() => {
+      setCopyFeedback(prev => ({ ...prev, [type]: 'Copied!' }));
+      setTimeout(() => setCopyFeedback(prev => ({ ...prev, [type]: '' })), 1500);
     }).catch(err => {
-      setCopyNameFeedback('Copy Failed!'); setTimeout(() => setCopyNameFeedback(''), 1500);
-      console.error('Failed to copy Name: ', err);
-    });
-  }, [node]);
-
-  const handleCopyNodeAsJson = useCallback(() => {
-    if (!node) return;
-    const cleanNodeForExport = (nodeToClean) => {
-        const { _parentId, _changeStatus, _modificationDetails, _oldParentId, ...rest } = nodeToClean;
-        const cleanedNode = { ...rest };
-        if (cleanedNode.children) {
-            cleanedNode.children = cleanedNode.children.map(cleanNodeForExport);
-        }
-        return cleanedNode;
-    };
-    const nodeJson = JSON.stringify(cleanNodeForExport(node), null, 2);
-    navigator.clipboard.writeText(nodeJson).then(() => {
-        setCopyJsonFeedback('Copied!'); setTimeout(() => setCopyJsonFeedback(''), 1500);
-    }).catch(err => {
-        setCopyJsonFeedback('Failed!'); setTimeout(() => setCopyJsonFeedback(''), 1500);
-        console.error('Failed to copy node as JSON: ', err);
+      setCopyFeedback(prev => ({ ...prev, [type]: 'Failed!' }));
+      setTimeout(() => setCopyFeedback(prev => ({ ...prev, [type]: '' })), 1500);
+      console.error(`Failed to copy ${type}:`, err);
     });
   }, [node]);
 
@@ -155,13 +146,13 @@ const ContextMenu = ({
         }
         
         items.push(React.createElement("li", { role: "none", key: "sep2" }, React.createElement("hr", null)));
-        addItemToLists(handleCopyNodeName, `Copy Name ${copyNameFeedback ? `(${copyNameFeedback})` : ''}`, {id: 'copy-name', icon: '📋'});
-        addItemToLists(handleCopyNodeId, `Copy ID ${copyFeedback ? `(${copyFeedback})` : ''}`, {id: 'copy-id', icon: '🆔'});
-        addItemToLists(handleCopyNodeAsJson, `Copy as JSON ${copyJsonFeedback ? `(${copyJsonFeedback})` : ''}`, {id: 'copy-json', icon: '📦'});
+        addItemToLists(() => handleCopy('name'), `Copy Name ${copyFeedback.name ? `(${copyFeedback.name})` : ''}`, {id: 'copy-name', icon: '📋'});
+        addItemToLists(() => handleCopy('id'), `Copy ID ${copyFeedback.id ? `(${copyFeedback.id})` : ''}`, {id: 'copy-id', icon: '🆔'});
+        addItemToLists(() => handleCopy('json'), `Copy as JSON ${copyFeedback.json ? `(${copyFeedback.json})` : ''}`, {id: 'copy-json', icon: '📦'});
         if (onDeleteNode) addItemToLists(() => onDeleteNode(), "Delete Node...", {isDestructive: true, id: 'delete-node', icon: '🗑️'});
     }
     return { menuItemsJsx: items, menuActions: actions.filter(a => a !== null) }; 
-  }, [node, onEditName, onAddChild, onToggleLock, onSetFocus, onLinkToProject, onGoToLinkedProject, onUnlinkProject, onDeleteNode, handleCopyNodeId, handleCopyNodeName, handleCopyNodeAsJson, copyFeedback, copyNameFeedback, copyJsonFeedback, isImportanceSubMenuOpen, focusedItemIndex, onClose, incomingLink, handleNavigateToSourceNode]);
+  }, [node, onEditName, onAddChild, onToggleLock, onSetFocus, onLinkToProject, onGoToLinkedProject, onUnlinkProject, onDeleteNode, handleCopy, copyFeedback, isImportanceSubMenuOpen, focusedItemIndex, onClose, incomingLink, handleNavigateToSourceNode]);
 
 
   useEffect(() => {
@@ -177,7 +168,12 @@ const ContextMenu = ({
 
 
   useEffect(() => {
-    if (!isOpen) { setIsImportanceSubMenuOpen(false); setFocusedItemIndex(0); setCopyFeedback(''); setCopyNameFeedback(''); setCopyJsonFeedback(''); return; }
+    if (!isOpen) { 
+      setIsImportanceSubMenuOpen(false); 
+      setFocusedItemIndex(0); 
+      setCopyFeedback({ id: '', name: '', json: '' }); 
+      return; 
+    }
     const menuItemsToFocus = menuRef.current?.querySelectorAll('button[role="menuitem"]:not([disabled])');
     if (menuItemsToFocus && menuItemsToFocus.length > focusedItemIndex) {
         (menuItemsToFocus[focusedItemIndex])?.focus();
