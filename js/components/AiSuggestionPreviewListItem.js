@@ -3,19 +3,20 @@ import React from 'react';
 
 const AiSuggestionPreviewListItem = ({ node, level, isVisualDiff = false }) => {
   let itemStyle = { 
-    padding: '4px 6px', // Reduced padding
-    margin: '2px 0',    // Reduced margin
-    borderRadius: 'var(--border-radius)',
+    padding: '6px 10px',
+    margin: '3px 0',
+    borderRadius: 'var(--border-radius-lg)',
     border: '1px solid transparent',
-    marginLeft: `${level * 15}px`,
+    marginLeft: `${level * 18}px`, // Increased indent
     position: 'relative', 
-    overflow: 'hidden', 
+    overflow: 'hidden',
+    transition: 'background-color 0.2s',
   };
   let changeStatusTextStyle = { color: 'var(--text-primary)', fontWeight: 'normal' };
   let titleText = node.description || node.name;
   let changeStatusIcon = { icon: '', color: 'var(--text-tertiary)'};
 
-  let nodeNameStyle = { fontWeight: 500, fontSize: '0.85em' }; // Even smaller font
+  let nodeNameStyle = { fontWeight: 500, fontSize: '0.9em' }; // Slightly larger font
 
   switch (node._changeStatus) {
     case 'new':
@@ -90,14 +91,14 @@ const AiSuggestionPreviewListItem = ({ node, level, isVisualDiff = false }) => {
             )
         ),
         node.description && (
-          React.createElement("p", { style: { fontSize: '0.75em', color: 'var(--text-secondary)', marginTop: '2px', marginBottom: '1px', whiteSpace: 'pre-wrap', wordBreak: 'break-word', paddingLeft: '22px', opacity: 0.9 }},
+          React.createElement("p", { style: { fontSize: '0.8em', color: 'var(--text-secondary)', marginTop: '4px', marginBottom: '2px', whiteSpace: 'pre-wrap', wordBreak: 'break-word', paddingLeft: '24px', opacity: 0.9, lineHeight: 1.4 }},
             node.description
           )
         ),
         node._modificationDetails && node._modificationDetails.length > 0 && isVisualDiff && (
-          React.createElement("ul", { style: { listStyle: 'disc', listStylePosition: 'inside', marginLeft: '15px', marginTop: '4px', fontSize: '0.75em', color: 'var(--text-tertiary)' }},
+          React.createElement("ul", { style: { listStyle: 'disc', listStylePosition: 'inside', marginLeft: '18px', marginTop: '5px', fontSize: '0.8em', color: 'var(--text-tertiary)' }},
             node._modificationDetails.map((detail, index) => (
-              React.createElement("li", { key: index, style: { lineHeight: '1.3', marginBottom: '2px' }}, detail)
+              React.createElement("li", { key: index, style: { lineHeight: '1.4', marginBottom: '3px' }}, detail)
             ))
           )
         )

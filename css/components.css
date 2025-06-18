@@ -440,13 +440,17 @@ html[data-theme='light'] .contextual-help-icon:hover, html[data-theme='light'] .
 .overlay-panel-view .focus-node-placeholder { padding: 10px 15px; border-radius: var(--border-radius); background: var(--focus-placeholder-bg); color: var(--focus-placeholder-text); font-style: italic; text-align: center; min-width: 100px; } /* Reduced padding/min-width */
 
 .overlay-panel-view .focus-view-detail-panel { 
-  width: 300px; /* Slightly reduced width */
+  width: 320px; /* Restored width */
   flex-shrink: 0; 
   background-color: var(--focus-panel-bg); 
   border-left: 1px solid rgba(var(--focus-panel-text), 0.2); 
-  padding: 12px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; /* Reduced padding/gap */
+  padding: 15px; /* Increased padding */
+  overflow-y: auto; 
+  display: flex; 
+  flex-direction: column; 
+  gap: 15px; /* Increased gap */
 }
-.overlay-panel-view .focus-view-detail-panel .form-group { margin-bottom: 10px; } /* Reduced margin */
+.overlay-panel-view .focus-view-detail-panel .form-group { margin-bottom: 15px; } /* Increased margin */
 .overlay-panel-view .focus-view-detail-panel .form-group label { display: block; margin-bottom: 3px; font-weight: 500; font-size: 0.85em; color: var(--focus-panel-text); } /* Reduced font-size/margin */
 .overlay-panel-view .focus-view-detail-panel .form-group input[type="text"],
 .overlay-panel-view .focus-view-detail-panel .form-group textarea,
@@ -458,8 +462,16 @@ html[data-theme='light'] .contextual-help-icon:hover, html[data-theme='light'] .
 .overlay-panel-view .focus-view-detail-panel .form-group select:focus {
    border-color: var(--focus-connector-stroke); box-shadow: 0 0 0 2px rgba(77, 208, 225, 0.3);
 }
-.overlay-panel-view .focus-view-detail-panel .panel-button-group button { 
-  background-color: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.3); color: var(--focus-panel-text);
+.overlay-panel-view .focus-view-detail-panel .panel-button-group button {
+  background-color: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.3);
+  color: var(--focus-panel-text);
+  padding: 9px 12px; /* Increased padding */
+  font-size: 0.9em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
 }
 .overlay-panel-view .focus-view-detail-panel .panel-button-group button:hover { background-color: rgba(255,255,255,0.2); }
 .overlay-panel-view .focus-view-detail-panel .panel-button-group button.primary { background-color: var(--focus-connector-stroke); color: var(--focus-stellar-bg); border-color: var(--focus-connector-stroke);}
@@ -494,8 +506,19 @@ html[data-theme='light'] .graph-view-svg-container {
   filter: drop-shadow(0px 3px 6px rgba(var(--primary-accent-rgb), 0.4));
 }
 .graph-view-node.selected circle { stroke: var(--graph-node-selected-stroke); stroke-width: 3px; filter: drop-shadow(0 0 8px var(--graph-node-selected-stroke)); }
-.graph-view-node text.node-label { text-shadow: 0 0 3px var(--app-bg), 0 0 3px var(--app-bg), 0 0 3px var(--app-bg); } 
-html[data-theme='dark'] .graph-view-node text.node-label { text-shadow: 0 0 3px var(--app-bg), 0 0 3px var(--app-bg), 0 0 3px var(--app-bg), 0 0 5px var(--primary-accent-light); }
+.graph-view-node text.node-label {
+  /* Create a "cutout" effect for readability over lines */
+  paint-order: stroke;
+  stroke: var(--app-bg);
+  stroke-width: 4px; /* Adjust thickness of the "cutout" */
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  text-shadow: 0 0 3px var(--app-bg); /* Soften the edges a bit */
+} 
+html[data-theme='dark'] .graph-view-node text.node-label {
+  stroke-width: 5px;
+  text-shadow: 0 0 5px var(--app-bg), 0 0 8px rgba(var(--primary-accent-rgb), 0.3);
+}
 
 .graph-view-link { stroke: var(--graph-link-stroke-ecosystem); stroke-linecap: round; }
 .graph-view-project-link { stroke: var(--primary-accent); stroke-linecap: round; }

@@ -63,124 +63,127 @@ export const useProjectManagement = ({
     }
   }, [activeProjectId, setTechTreeData, setContextText, setInitialPromptFromHook]);
 
-
-  const initializeDefaultProjects = useCallback(() => {
-    const startupLogged = localStorage.getItem(APP_STORAGE_KEYS.STARTUP_LOAD_LOGGED);
-    const logId = `startup-project-load-${new Date().toISOString()}`;
-    let loadedProjects = [];
-    let activeProjectHasBeenSet = false;
-
+  const _loadProjectsFromStorage = useCallback(() => {
     try {
       const storedProjects = localStorage.getItem(APP_STORAGE_KEYS.PROJECT_COLLECTION);
       if (storedProjects) {
         const parsed = JSON.parse(storedProjects);
         if (Array.isArray(parsed) && parsed.every(p => p.id && p.name && p.treeData && p.lastModified)) {
-          loadedProjects = parsed.map(p => ({ ...p, treeData: initializeNodes(p.treeData) }));
-        } else {
-          if (!startupLogged) addHistoryEntry('PROJECT_LOADED', 'Invalid project collection found, reset.', { source: 'localStorage-error', logId });
-        }
-      }
-
-      const elfDataParsed = JSON.parse(ELF_WARFARE_STRUCTURE_JSON_STRING);
-      const natureMagicDataParsed = JSON.parse(ADVANCED_NATURE_MAGIC_JSON_STRING);
-
-      let elfWarfareProject = loadedProjects.find(p => p.treeData.id === elfDataParsed.tree.id && p.isExample);
-      if (!elfWarfareProject) {
-        elfWarfareProject = {
-          id: generateUUID(), name: elfDataParsed.tree.name || "Elven Warfare Doctrines",
-          treeData: initializeNodes(elfDataParsed.tree), lastModified: new Date().toISOString(), isExample: true,
-        };
-        loadedProjects.push(elfWarfareProject);
-        if (!startupLogged) addHistoryEntry('PROJECT_CREATED', `Initialized example: "${elfWarfareProject.name}".`, { source: 'auto-init', logId });
-      }
-
-      let natureMagicProject = loadedProjects.find(p => p.treeData.id === natureMagicDataParsed.tree.id && p.isExample);
-      if (!natureMagicProject) {
-        natureMagicProject = {
-          id: generateUUID(), name: natureMagicDataParsed.tree.name || "Advanced Nature Magic",
-          treeData: initializeNodes(natureMagicDataParsed.tree), lastModified: new Date().toISOString(), isExample: true,
-        };
-        loadedProjects.push(natureMagicProject);
-        if (!startupLogged) addHistoryEntry('PROJECT_CREATED', `Initialized example: "${natureMagicProject.name}".`, { source: 'auto-init', logId });
-      }
-      
-      let finalLoadedProjects = [...loadedProjects]; 
-
-      const ewProject = finalLoadedProjects.find(p => p.id === elfWarfareProject.id);
-      const anmProject = finalLoadedProjects.find(p => p.id === natureMagicProject.id);
-
-      if (ewProject && anmProject) {
-        const nodeToLinkInEW = findNodeById(ewProject.treeData, "natures-embrace");
-        if (nodeToLinkInEW) {
-          if (nodeToLinkInEW.linkedProjectId !== anmProject.id || nodeToLinkInEW.linkedProjectName !== anmProject.name) {
-            const updatedEWTree = updateNodeInTree(ewProject.treeData, "natures-embrace", {
-              linkedProjectId: anmProject.id,
-              linkedProjectName: anmProject.name,
-            });
-            const ewIndex = finalLoadedProjects.findIndex(p => p.id === ewProject.id);
-            finalLoadedProjects[ewIndex] = { ...ewProject, treeData: updatedEWTree, lastModified: new Date().toISOString() };
-          }
-        }
-
-        if (anmProject.treeData.linkedProjectId !== ewProject.id || anmProject.treeData.linkedProjectName !== ewProject.name) {
-            const updatedANMRootTree = {
-                ...anmProject.treeData,
-                linkedProjectId: ewProject.id,
-                linkedProjectName: ewProject.name,
-            };
-            const anmIndex = finalLoadedProjects.findIndex(p => p.id === anmProject.id);
-            finalLoadedProjects[anmIndex] = { ...anmProject, treeData: updatedANMRootTree, lastModified: new Date().toISOString() };
-        }
-        
-        const currentEWProjectForRootUpdate = finalLoadedProjects.find(p => p.id === ewProject.id);
-        if (currentEWProjectForRootUpdate && (currentEWProjectForRootUpdate.treeData.linkedProjectId !== anmProject.id || currentEWProjectForRootUpdate.treeData.linkedProjectName !== anmProject.name)) {
-            const updatedEWRootTree = {
-                ...currentEWProjectForRootUpdate.treeData,
-                linkedProjectId: anmProject.id,
-                linkedProjectName: anmProject.name,
-            };
-            const ewIndex = finalLoadedProjects.findIndex(p => p.id === ewProject.id);
-            finalLoadedProjects[ewIndex] = { ...currentEWProjectForRootUpdate, treeData: updatedEWRootTree, lastModified: new Date().toISOString() };
-        }
-      }
-
-      setProjects(finalLoadedProjects); 
-
-      const storedActiveId = localStorage.getItem(APP_STORAGE_KEYS.ACTIVE_PROJECT_ID);
-      if (storedActiveId) {
-        const activeProj = finalLoadedProjects.find(p => p.id === storedActiveId && !p.isExample);
-        if (activeProj) {
-          setActiveProjectId(activeProj.id); setTechTreeData(activeProj.treeData);
-          setContextText(activeProj.name); setInitialPromptFromHook(activeProj.name);
-          if (!startupLogged) addHistoryEntry('PROJECT_LOADED', `Loaded project "${activeProj.name}".`, { source: 'localStorage-active', logId, projectId: activeProj.id });
-          activeProjectHasBeenSet = true;
-        }
-      }
-
-      if (!activeProjectHasBeenSet) {
-        const firstUserProject = finalLoadedProjects.find(p => !p.isExample);
-        if (firstUserProject) {
-          setActiveProjectId(firstUserProject.id); setTechTreeData(firstUserProject.treeData);
-          setContextText(firstUserProject.name); setInitialPromptFromHook(firstUserProject.name);
-          if (!startupLogged) addHistoryEntry('PROJECT_LOADED', `Loaded first available project "${firstUserProject.name}".`, { source: 'localStorage-fallback', logId, projectId: firstUserProject.id });
-          activeProjectHasBeenSet = true;
-        }
-      }
-      if (!activeProjectHasBeenSet && finalLoadedProjects.some(p => p.isExample)) {
-        const exampleToLoad = finalLoadedProjects.find(p => p.isExample && p.name === "Elven Warfare Doctrines"); 
-        if (exampleToLoad) {
-          viewStates?.commonViewResetLogic(false); setTechTreeData(exampleToLoad.treeData);
-          setContextText(exampleToLoad.name); setInitialPromptFromHook(exampleToLoad.name); setActiveProjectId(null);
-          if (!startupLogged) addHistoryEntry('PROJECT_EXAMPLE_LOADED', `Started with example: "${exampleToLoad.name}".`, { source: 'auto-example-load', logId, exampleProjectId: exampleToLoad.id });
+          return parsed.map(p => ({ ...p, treeData: initializeNodes(p.treeData) }));
         }
       }
     } catch (e) {
-      console.error("Error loading projects:", e); setError("Failed to load projects.");
-      if (!startupLogged) addHistoryEntry('PROJECT_LOADED', 'Error loading projects.', { error: e.message, logId });
-    } finally {
-      if (!startupLogged) localStorage.setItem(APP_STORAGE_KEYS.STARTUP_LOAD_LOGGED, 'true');
+      console.error("Error loading projects from storage:", e);
+      addHistoryEntry('PROJECT_LOADED', 'Failed to load projects from storage.', { error: e.message });
     }
-  }, [addHistoryEntry, viewStates, setContextText, setError, setInitialPromptFromHook, setTechTreeData]);
+    return [];
+  }, [addHistoryEntry]);
+
+  const _ensureAndLinkExampleProjects = useCallback((existingProjects) => {
+    let newProjects = [...existingProjects];
+    const elfDataParsed = JSON.parse(ELF_WARFARE_STRUCTURE_JSON_STRING);
+    const natureMagicDataParsed = JSON.parse(ADVANCED_NATURE_MAGIC_JSON_STRING);
+
+    const examples = [
+      { parsedData: elfDataParsed, name: "Elven Warfare Doctrines" },
+      { parsedData: natureMagicDataParsed, name: "Advanced Nature Magic" },
+    ];
+
+    examples.forEach(example => {
+      let project = newProjects.find(p => p.isExample && p.treeData.id === example.parsedData.tree.id);
+      if (!project) {
+        project = {
+          id: generateUUID(),
+          name: example.parsedData.tree.name || example.name,
+          treeData: initializeNodes(example.parsedData.tree),
+          lastModified: new Date().toISOString(),
+          isExample: true,
+        };
+        newProjects.push(project);
+      }
+    });
+
+    const ewProject = newProjects.find(p => p.isExample && p.treeData.id === elfDataParsed.tree.id);
+    const anmProject = newProjects.find(p => p.isExample && p.treeData.id === natureMagicDataParsed.tree.id);
+
+    if (ewProject && anmProject) {
+      let isEwModified = false;
+      let isAnmModified = false;
+      let ewTree = ewProject.treeData;
+      let anmTree = anmProject.treeData;
+      
+      const nodeToLinkInEW = findNodeById(ewTree, "natures-embrace");
+      if (nodeToLinkInEW && nodeToLinkInEW.linkedProjectId !== anmProject.id) {
+        ewTree = updateNodeInTree(ewTree, "natures-embrace", { linkedProjectId: anmProject.id, linkedProjectName: anmProject.name });
+        isEwModified = true;
+      }
+      
+      if (anmTree.linkedProjectId !== ewProject.id) {
+        anmTree = { ...anmTree, linkedProjectId: ewProject.id, linkedProjectName: ewProject.name };
+        isAnmModified = true;
+      }
+
+      if (isEwModified || isAnmModified) {
+          newProjects = newProjects.map(p => {
+              if (p.id === ewProject.id && isEwModified) return { ...p, treeData: ewTree, lastModified: new Date().toISOString() };
+              if (p.id === anmProject.id && isAnmModified) return { ...p, treeData: anmTree, lastModified: new Date().toISOString() };
+              return p;
+          });
+      }
+    }
+    return newProjects;
+  }, []);
+
+  const _setActiveInitialProject = useCallback((allProjects) => {
+    const startupLogged = localStorage.getItem(APP_STORAGE_KEYS.STARTUP_LOAD_LOGGED);
+    const logId = `startup-project-load-${new Date().toISOString()}`;
+    const storedActiveId = localStorage.getItem(APP_STORAGE_KEYS.ACTIVE_PROJECT_ID);
+
+    const loadProjectState = (project, source) => {
+      setActiveProjectId(project.isExample ? null : project.id);
+      setTechTreeData(initializeNodes(project.treeData));
+      setContextText(project.name);
+      setInitialPromptFromHook(project.name);
+      if (!startupLogged) addHistoryEntry('PROJECT_LOADED', `Loaded project "${project.name}".`, { source, logId, projectId: project.id });
+    };
+
+    if (storedActiveId) {
+      const activeProj = allProjects.find(p => p.id === storedActiveId && !p.isExample);
+      if (activeProj) {
+        loadProjectState(activeProj, 'localStorage-active');
+        return;
+      }
+    }
+
+    const firstUserProject = allProjects.find(p => !p.isExample);
+    if (firstUserProject) {
+      loadProjectState(firstUserProject, 'fallback-first-user');
+      return;
+    }
+    
+    const elfExample = allProjects.find(p => p.isExample && p.treeData.id === 'elf-warfare-root-example-v1');
+    if (elfExample) {
+        viewStates?.commonViewResetLogic(false);
+        loadProjectState(elfExample, 'fallback-example');
+    }
+  }, [setTechTreeData, setContextText, setInitialPromptFromHook, viewStates, addHistoryEntry]);
+
+
+  const initializeDefaultProjects = useCallback(() => {
+    const startupLogged = localStorage.getItem(APP_STORAGE_KEYS.STARTUP_LOAD_LOGGED);
+    try {
+      let projectsFromStorage = _loadProjectsFromStorage();
+      let allProjects = _ensureAndLinkExampleProjects(projectsFromStorage);
+      setProjects(allProjects);
+      _setActiveInitialProject(allProjects);
+    } catch (e) {
+      console.error("Error initializing projects:", e);
+      setError("A critical error occurred while initializing projects.");
+      addHistoryEntry('APP_ERROR_ENCOUNTERED', 'Project initialization failed.', { error: e.message });
+    } finally {
+        if (!startupLogged) localStorage.setItem(APP_STORAGE_KEYS.STARTUP_LOAD_LOGGED, 'true');
+    }
+  }, [_loadProjectsFromStorage, _ensureAndLinkExampleProjects, _setActiveInitialProject, setError, addHistoryEntry]);
 
 
   const handleSetActiveProject = useCallback((projectId, fromExample = false) => {

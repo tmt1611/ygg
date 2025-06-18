@@ -22,9 +22,9 @@ const ConfirmModal = ({
 
     const handleEscape = (event) => {
       if (event.key === 'Escape') {
+        // Only trigger cancel if a cancel action/button is available.
         if (onCancel && cancelText) { 
           onCancel();
-        } else if (onConfirm && !cancelText) { 
         }
       }
     };
@@ -32,7 +32,7 @@ const ConfirmModal = ({
     return () => {
       document.removeEventListener('keydown', handleEscape);
     };
-  }, [isOpen, onConfirm, onCancel, cancelText]);
+  }, [isOpen, onCancel, cancelText]);
 
 
   if (!isOpen) {
