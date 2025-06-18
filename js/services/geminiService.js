@@ -305,7 +305,7 @@ Output the complete, modified JSON for the tech tree, adhering to ALL rules abov
                 id: 'NEW_NODE_ROOT_WRAPPER', 
                 name: `${currentTree.name || 'Modified Tree'} (Wrapped Multi-Root)`,
                 description: "AI suggested multiple root nodes; this is an auto-generated wrapper.",
-                isLocked: false, status: 'medium', children: parsedData
+                isLocked: false, importance: 'common', children: parsedData
             };
         } else { 
             console.error("Gemini modification resulted in an un-wrappable array or array with invalid items:", parsedData);

@@ -106,26 +106,27 @@ const ContextMenu = ({
         const menuWidth = menuRef.current.offsetWidth || 220;
         const menuHeight = menuRef.current.offsetHeight || 200;
         const submenuWidth = 120; // Estimated width of submenu
-        let { x, y } = position;
+        let finalX = position.x;
+        let finalY = position.y;
 
-        // Main menu positioning
-        const flipsSubmenu = (x + menuWidth + submenuWidth) > window.innerWidth - 10;
-        if (x + menuWidth > window.innerWidth - 10 && !flipsSubmenu) {
-            x = window.innerWidth - menuWidth - 10;
-        } else if (flipsSubmenu) {
-            x = window.innerWidth - menuWidth - 10;
-        }
-        
-        if (y + menuHeight > window.innerHeight - 10) {
-            y = window.innerHeight - menuHeight - 10;
+        // Adjust Y position
+        if (finalY + menuHeight > window.innerHeight - 10) {
+            finalY = window.innerHeight - menuHeight - 10;
         }
 
-        setMenuStyle({ top: `${Math.max(5, y)}px`, left: `${Math.max(5, x)}px` });
+        // Adjust X position
+        if (finalX + menuWidth > window.innerWidth - 10) {
+            finalX = window.innerWidth - menuWidth - 10;
+        }
 
-        // Submenu positioning
-        if (flipsSubmenu) {
+        setMenuStyle({ top: `${Math.max(5, finalY)}px`, left: `${Math.max(5, finalX)}px` });
+
+        // Decide submenu position based on final menu position
+        if ((finalX + menuWidth + submenuWidth) > window.innerWidth - 10 && finalX > submenuWidth) {
+            // Not enough space on the right, but enough on the left to flip
             setSubmenuStyle({ right: '100%', left: 'auto', marginRight: '2px' });
         } else {
+            // Default to the right
             setSubmenuStyle({ left: '100%', right: 'auto', marginLeft: '2px' });
         }
     }
