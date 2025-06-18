@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useRef, useCallback, useState } from 'react';
-import { select, zoom, hierarchy, tree, zoomIdentity, linkHorizontal } from 'd3';
+import { select, zoom, hierarchy, tree, zoomIdentity } from 'd3';
 
 const defaultTreeConfig = {
   nodeRadius: 10,
-  horizontalSpacing: 180, 
-  verticalSpacing: 90,    
-  margin: { top: 20, right: 120, bottom: 20, left: 120 },
+  // New config for radial layout
+  radialRadiusFactor: 120, 
+  margin: { top: 20, right: 20, bottom: 20, left: 20 },
 };
 
 export const useD3Tree = (
@@ -14,7 +14,7 @@ export const useD3Tree = (
   config = {}
 ) => {
   const finalConfig = { ...defaultTreeConfig, ...config };
-  const { margin, horizontalSpacing, verticalSpacing } = finalConfig;
+  const { margin, radialRadiusFactor } = finalConfig;
 
   const svgSelectionRef = useRef(null);
   const gSelectionRef = useRef(null);
@@ -27,10 +27,13 @@ export const useD3Tree = (
   }, [treeData]);
 
   const treeLayout = useMemo(() => {
+    const depth = rootHierarchy ? rootHierarchy.height : 1;
+    // The size is [angle, radius]. 2 * Math.PI is a full circle.
+    // Make radius dependent on depth to avoid clutter
     return tree()
-      .nodeSize([verticalSpacing, horizontalSpacing]) 
-      .separation((a, b) => (a.parent === b.parent ? 1 : 1.25));
-  }, [verticalSpacing, horizontalSpacing]);
+      .size([2 * Math.PI, depth * radialRadiusFactor])
+      .separation((a, b) => (a.parent === b.parent ? 1 : 2) / (a.depth || 1));
+  }, [rootHierarchy, radialRadiusFactor]);
 
   useEffect(() => {
     if (!svgRef.current) return;
@@ -44,8 +47,8 @@ export const useD3Tree = (
       if (!containerDiv) return;
       const { clientWidth, clientHeight } = containerDiv;
 
-      const gElement = svg.append("g")
-        .attr("transform", `translate(${margin.left},${margin.top})`);
+      // The 'g' element will be centered, and nodes will be positioned relative to it.
+      const gElement = svg.append("g");
       gSelectionRef.current = gElement;
       setG(gElement);
 
@@ -59,18 +62,19 @@ export const useD3Tree = (
       svg.call(zoomBehaviorRef.current);
       
       if (clientWidth > 0 && clientHeight > 0) {
-        const initialTransform = zoomIdentity.translate(clientWidth / 4, clientHeight / 2).scale(0.8);
+        // Center the graph
+        const initialTransform = zoomIdentity.translate(clientWidth / 2, clientHeight / 2).scale(0.8);
         svg.call(zoomBehaviorRef.current.transform, initialTransform);
       }
     }
-  }, [svgRef, margin.left, margin.top]); 
+  }, [svgRef]); 
 
   const nodesAndLinks = useMemo(() => {
     if (!rootHierarchy) return { nodes: [], links: [] };
     const treeRoot = treeLayout(rootHierarchy);
     const nodes = treeRoot.descendants();
     const links = treeRoot.links();
-    nodes.forEach(node => { const temp = node.x; node.x = node.y; node.y = temp; });
+    // For radial, x is angle, y is radius. No swap needed.
     return { nodes, links };
   }, [rootHierarchy, treeLayout]);
 
@@ -78,7 +82,7 @@ export const useD3Tree = (
     if (svgSelectionRef.current && zoomBehaviorRef.current && svgRef.current && svgRef.current.parentElement) {
       const { clientWidth, clientHeight } = svgRef.current.parentElement;
       if (clientWidth > 0 && clientHeight > 0) {
-        const initialTransform = zoomIdentity.translate(clientWidth / 4, clientHeight / 2).scale(0.8);
+        const initialTransform = zoomIdentity.translate(clientWidth / 2, clientHeight / 2).scale(0.8);
         svgSelectionRef.current.transition().duration(750).call(zoomBehaviorRef.current.transform, initialTransform);
       }
     }

@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useMemo, useCallback } from 'react';
-import { linkHorizontal, select } from 'd3'; // Assuming d3 is globally available or managed by import map
+import { linkRadial, select } from 'd3';
 import { useD3Tree } from '../hooks/useD3Tree.js';
 
 const NODE_IMPORTANCE_RUNES = {
@@ -40,19 +40,17 @@ const GraphViewComponent = ({
     const proxyNodes = [];
     const projectLinks = [];
     const PROXY_OFFSET_X = 10;
-    const PROXY_DISTANCE_Y = 55;  // Give a bit more space
-    let proxyIndex = 0;
+    const PROXY_DISTANCE_R = 60; // Radial distance for proxy nodes
 
     nodes.forEach(node => {
         if (node.data.linkedProjectId) {
             const targetProject = projects.find(p => p.id === node.data.linkedProjectId);
             if (targetProject) {
-                // Alternate placing proxy nodes above and below the source node
-                const yDirection = (proxyIndex % 2 === 0) ? -1 : 1;
+                // For radial, we just extend the radius and keep the angle
                 const proxyNode = {
                     id: `proxy-target-${node.data.id}`,
-                    x: node.x + PROXY_OFFSET_X, 
-                    y: node.y + (yDirection * PROXY_DISTANCE_Y),
+                    x: node.x, // angle
+                    y: node.y + PROXY_DISTANCE_R, // radius
                     isProxy: true,
                     data: {
                         name: createAcronym(targetProject.name),
@@ -60,11 +58,10 @@ const GraphViewComponent = ({
                         id: `proxy-data-${targetProject.id}`, importance: 'common',
                         isOutgoingLink: true, realProjectId: targetProject.id, realNodeId: targetProject.treeData.id,
                     },
-                    parent: node 
+                    parent: node
                 };
                 proxyNodes.push(proxyNode);
                 projectLinks.push({ source: node, target: proxyNode, isProjectLink: true });
-                proxyIndex++;
             }
         }
     });
@@ -75,8 +72,9 @@ const GraphViewComponent = ({
         if (linkSource) {
             const proxyNode = {
                 id: `proxy-source-${linkSource.sourceProjectId}`,
-                x: rootNode.x - PROXY_OFFSET_X, // To the left of the root
-                y: rootNode.y - PROXY_DISTANCE_Y, // Above the root
+                // Place it "behind" the root node
+                x: Math.PI, // angle (180 degrees)
+                y: PROXY_DISTANCE_R, // radius
                 isProxy: true,
                 data: {
                     name: createAcronym(linkSource.sourceProjectName),
@@ -165,9 +163,9 @@ const GraphViewComponent = ({
         (update) => update,
         (exit) => exit.remove()
       )
-      .attr("d", linkHorizontal()
-        .x((d_node) => d_node.x)
-        .y((d_node) => d_node.y)
+      .attr("d", linkRadial()
+          .angle(d_node => d_node.x)
+          .radius(d_node => d_node.y)
       );
 
     const nodeGroups = g
@@ -241,7 +239,7 @@ const GraphViewComponent = ({
     };
 
     nodeGroups
-      .attr("transform", (d_node) => `translate(${d_node.x},${d_node.y})`)
+      .attr("transform", (d_node) => `translate(${d_node.y * Math.cos(d_node.x - Math.PI / 2)}, ${d_node.y * Math.sin(d_node.x - Math.PI / 2)})`)
       .classed("selected", (d_node) => !d_node.isProxy && d_node.data.id === activeNodeId)
       .classed("highlighted", isMatch)
       .on("click", handleNodeClick) 
@@ -265,13 +263,21 @@ const GraphViewComponent = ({
     nodeGroups.select(".node-label")
       .text((d_node) => d_node.data.name) 
       .attr("fill", d => d.isProxy ? null : "var(--graph-node-text)")
+      .attr("transform", d_node => {
+          if (d_node.isProxy) return null;
+          const angle = d_node.x * 180 / Math.PI;
+          const rotate = angle > 90 && angle < 270 ? angle + 180 : angle;
+          return `rotate(${rotate})`;
+      })
       .attr("x", (d_node) => {
         if (d_node.isProxy) return 0;
-        return d_node.children ? -(nodeRadius + 5) : (nodeRadius + 5);
+        const angle = d_node.x * 180 / Math.PI;
+        return (angle > 90 && angle < 270) ? -(nodeRadius + 5) : (nodeRadius + 5);
       })
       .attr("text-anchor", (d_node) => {
         if (d_node.isProxy) return "middle";
-        return d_node.children ? "end" : "start";
+        const angle = d_node.x * 180 / Math.PI;
+        return (angle > 90 && angle < 270) ? "end" : "start";
       });
     
     nodeGroups.select(".node-rune-icon")

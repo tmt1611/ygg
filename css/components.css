@@ -789,6 +789,10 @@ html[data-theme='sol'] .graph-view-svg-container {
     font-weight: bold;
     fill: var(--graph-node-highlight-stroke);
 }
+html[data-theme='dark'] .graph-view-node.highlighted text.node-label,
+html[data-theme='nebula'] .graph-view-node.highlighted text.node-label {
+    text-shadow: 0 0 5px var(--graph-node-highlight-stroke);
+}
 .graph-view-node text.node-label {
   /* Create a "cutout" effect for readability over lines */
   paint-order: stroke;
