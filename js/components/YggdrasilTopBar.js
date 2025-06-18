@@ -101,7 +101,7 @@ const YggdrasilTopBar = ({
         ),
         activeProjectName && (
           React.createElement("div", { className: "yggdrasil-top-bar-active-project", title: `Currently active project: ${activeProjectName}`},
-            React.createElement("span", null, "🌲 Active:"), " ", activeProjectName
+            React.createElement("span", { className: "yggdrasil-top-bar-project-icon" }, "🌲"), activeProjectName
           )
         )
       ),

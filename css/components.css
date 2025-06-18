@@ -115,18 +115,23 @@ html[data-theme='dark'] .yggdrasil-top-bar-search-input:focus {
   overflow: hidden;
   text-overflow: ellipsis;
   max-width: 180px; /* Adjust as needed */
-  font-style: italic;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 500;
 }
-.yggdrasil-top-bar-active-project span {
+.yggdrasil-top-bar-project-icon {
   font-style: normal;
-  opacity: 0.8;
-  margin-right: 4px;
+  opacity: 0.9;
+  font-size: 1.1em;
+  line-height: 1;
 }
 html[data-theme='light'] .yggdrasil-top-bar-active-project,
 html[data-theme='sol'] .yggdrasil-top-bar-active-project {
   color: var(--primary-accent-dark);
   border-color: var(--yggdrasil-bark-border);
   background-color: var(--panel-alt-bg);
+  font-weight: 600;
 }
 
 
@@ -1261,6 +1266,10 @@ html[data-theme='dark'] .workspace-sub-nav button.active { color: var(--panel-bg
   align-items: center;
   gap: 5px;
   user-select: none;
+  transition: background-color 0.2s ease;
+}
+.knowledge-branch-sidebar .collapsible-panel-header:hover {
+  background-color: rgba(var(--primary-accent-rgb), 0.08);
 }
 
 .knowledge-branch-sidebar .collapsible-panel-header h3 {
