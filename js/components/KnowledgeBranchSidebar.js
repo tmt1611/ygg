@@ -1,6 +1,7 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 // import { ThemeMode, SidebarTabId, HistoryEntry, TechTreeNode, AiInsightData } from '../types.js'; // Types removed
+import CollapsiblePanel from './CollapsiblePanel.js';
 import ModificationPromptInput from './ModificationPromptInput.js';
 import AiInsightsPanel from './AiInsightsPanel.js';
 import HistoryViewTabContent from './tabs/HistoryViewTab.js';
@@ -28,6 +29,19 @@ const KnowledgeBranchSidebar = ({
   onUseSuggestedDescription, onUseAlternativeName, onAddSuggestedChildFromInsight,
   history,
 }) => {
+  const [collapsedPanels, setCollapsedPanels] = useState(new Set());
+
+  const handleTogglePanel = (panelId) => {
+    setCollapsedPanels(prev => {
+        const newSet = new Set(prev);
+        if (newSet.has(panelId)) {
+            newSet.delete(panelId);
+        } else {
+            newSet.add(panelId);
+        }
+        return newSet;
+    });
+  };
 
   const canGenerateStrategicSuggestions = apiKeyIsSet && !!initialPromptForStrategy?.trim() && !isAppBusy && !isFetchingStrategicSuggestions;
 
@@ -83,9 +97,14 @@ const KnowledgeBranchSidebar = ({
           ),
           React.createElement("div", { className: "sidebar-tools-area" },
             activeSidebarTab === 'ai-tools' && (
-              React.createElement("div", {style: {display: 'flex', flexDirection: 'column', gap: '15px'}},
-                React.createElement("fieldset", { className: "sidebar-fieldset" },
-                  React.createElement("legend", null, "🌳 Tree Modifier AI"),
+              React.createElement("div", {style: {display: 'flex', flexDirection: 'column', gap: '12px'}},
+                React.createElement(CollapsiblePanel, {
+                  panelId: 'tree-modifier',
+                  title: 'Tree Modifier AI',
+                  icon: '🌳',
+                  isCollapsed: collapsedPanels.has('tree-modifier'),
+                  onToggle: handleTogglePanel,
+                },
                   React.createElement(ModificationPromptInput, {
                     prompt: modificationPrompt,
                     setPrompt: setModificationPrompt,
@@ -103,11 +122,14 @@ const KnowledgeBranchSidebar = ({
                   )
                 ),
 
-                React.createElement("fieldset", { className: "sidebar-fieldset" },
-                  React.createElement("legend", null, 
-                    "✨ Strategic Advisor AI",
-                    React.createElement(ContextualHelpTooltip, { helpText: "Get AI-powered suggestions for high-level next steps or new development pathways for your project based on its current context and structure." })
-                  ),
+                React.createElement(CollapsiblePanel, {
+                  panelId: 'strategic-advisor',
+                  title: 'Strategic Advisor AI',
+                  icon: '✨',
+                  isCollapsed: collapsedPanels.has('strategic-advisor'),
+                  onToggle: handleTogglePanel,
+                  headerActions: React.createElement(ContextualHelpTooltip, { helpText: "Get AI-powered suggestions for high-level next steps or new development pathways for your project based on its current context and structure." })
+                },
                   React.createElement("button", {
                     onClick: onGenerateStrategicSuggestions,
                     disabled: !canGenerateStrategicSuggestions,

@@ -10,10 +10,6 @@ const ContextualHelpTooltip = ({
           role: "tooltip", 
           "aria-label": "Help", 
           tabIndex: 0,
-          onKeyDown: (e) => {
-            if (e.key === 'Enter' || e.key === ' ') {
-            }
-          },
           style: { position: 'relative' } 
           },
       "?",

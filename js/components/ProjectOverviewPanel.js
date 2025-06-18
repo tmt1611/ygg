@@ -15,12 +15,6 @@ const StatDisplay = ({ label, value, valueClassName }) => (
 const ProjectOverviewPanel = ({
   stats,
   projectName,
-  strategicSuggestions, 
-  isFetchingStrategicSuggestions, 
-  strategicSuggestionsError, 
-  onGenerateStrategicSuggestions, 
-  isApiKeySet, 
-  isAppBusy,   
 }) => {
   const showStats = !!stats;
 

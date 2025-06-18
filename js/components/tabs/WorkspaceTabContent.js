@@ -66,12 +66,6 @@ const WorkspaceTabContent = ({
           React.createElement(ProjectOverviewPanel, {
             stats: currentTreeStats,
             projectName: contextText,
-            strategicSuggestions: null, 
-            isFetchingStrategicSuggestions: false,
-            strategicSuggestionsError: null,
-            onGenerateStrategicSuggestions: () => {}, 
-            isApiKeySet: apiKeyHook.status.isSet, 
-            isAppBusy: isAppBusy 
           })
         )
       )
