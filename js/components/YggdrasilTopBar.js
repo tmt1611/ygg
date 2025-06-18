@@ -1,5 +1,14 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
+
+const getNextThemeInfo = (currentTheme) => {
+    switch (currentTheme) {
+        case 'dark': return { next: 'Light', icon: '☀️' };
+        case 'light': return { next: 'Nebula', icon: '🌌' };
+        case 'nebula': return { next: 'Dark', icon: '🌙' };
+        default: return { next: 'Light', icon: '☀️' };
+    }
+};
 
 const YggdrasilTopBar = ({
   themeMode, onToggleTheme, apiKeyIsSet, activeProjectName, onSaveActiveProject, 
@@ -10,6 +19,8 @@ const YggdrasilTopBar = ({
 }) => {
   const [saveFeedback, setSaveFeedback] = useState(false);
   const [downloadFeedback, setDownloadFeedback] = useState(false);
+
+  const nextThemeInfo = useMemo(() => getNextThemeInfo(themeMode), [themeMode]);
 
   const handleSaveClick = () => {
     onSaveActiveProject();
@@ -104,10 +115,10 @@ const YggdrasilTopBar = ({
         React.createElement("button", {
           onClick: onToggleTheme,
           className: "yggdrasil-top-bar-action-item base-icon-button",
-          title: `Switch to ${themeMode === 'light' ? 'Dark' : 'Light'} Mode`,
-          "aria-label": `Toggle theme to ${themeMode === 'light' ? 'Dark' : 'Light'} Mode`,
+          title: `Switch to ${nextThemeInfo.next} Mode`,
+          "aria-label": `Toggle theme to ${nextThemeInfo.next} Mode`,
           disabled: isAppBusy
-        }, themeMode === 'light' ? '🌙' : '☀️')
+        }, nextThemeInfo.icon)
       )
     )
   );

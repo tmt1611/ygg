@@ -2,10 +2,12 @@
 import { useState, useCallback, useEffect } from 'react';
 import { APP_STORAGE_KEYS } from '../constants.js';
 
+const THEME_CYCLE = ['dark', 'light', 'nebula'];
+
 export const useAppThemeAndLayout = (addHistoryEntry) => {
   const [themeMode, setThemeMode] = useState(() => {
     const savedTheme = localStorage.getItem(APP_STORAGE_KEYS.THEME_MODE);
-    return savedTheme || 'dark';
+    return THEME_CYCLE.includes(savedTheme) ? savedTheme : 'dark';
   });
 
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(() => {
@@ -44,7 +46,9 @@ export const useAppThemeAndLayout = (addHistoryEntry) => {
 
   const toggleTheme = useCallback(() => {
     setThemeMode(prevMode => {
-        const newMode = prevMode === 'light' ? 'dark' : 'light';
+        const currentIndex = THEME_CYCLE.indexOf(prevMode);
+        const nextIndex = (currentIndex + 1) % THEME_CYCLE.length;
+        const newMode = THEME_CYCLE[nextIndex];
         addHistoryEntry('THEME_CHANGED', `Theme switched to ${newMode} mode.`);
         return newMode;
     });
