@@ -2,11 +2,11 @@ import React, { useMemo } from 'react';
 
 const escapeHtml = (unsafe) => {
   return unsafe
-       .replace(/&/g, "&")
-       .replace(/</g, "<")
-       .replace(/>/g, ">")
-       .replace(/"/g, """)
-       .replace(/'/g, "'");
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
 };
 
 const EVENT_TYPE_INFO = {

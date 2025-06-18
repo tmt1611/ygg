@@ -122,7 +122,8 @@ const constructApiError = (error, baseMessage) => {
 const extractJsonFromMarkdown = (text) => {
   if (!text) return null;
   const trimmedText = text.trim();
-  const fenceRegex = /^```(?:json|JSON)?\s*\n?([\s\S]*?)\n?\s*```$/;
+  // This regex finds a JSON code block even if it's not at the start/end of the string.
+  const fenceRegex = /```(?:json|JSON)?\s*\n?([\s\S]*?)\n?\s*```/m;
   const match = trimmedText.match(fenceRegex);
   if (match && match[1]) {
       return match[1].trim();
@@ -352,13 +353,7 @@ Concise Summary (100-150 words, plain text only):`;
 
     const result = await model.generateContent(prompt);
     const response = result.response;
-    let summaryText = response.text.trim();
-    const fenceRegex = /^```(?:[\w\W]+?)?\s*\n?([\w\W]*?)\n?\s*```$/s;
-    const match = summaryText.match(fenceRegex);
-    if (match?.[1]) {
-      summaryText = match[1].trim();
-    }
-    return summaryText;
+    return response.text().trim();
   } catch (error) {
     console.error("Error generating summary from Gemini API:", error);
     throw constructApiError(error, "Failed to generate AI summary.");

@@ -148,7 +148,7 @@ const TechTreeListItemComponent = ({
               isCollapsed ? '▶' : '▼'
             )
           ),
-          !hasChildren && React.createElement("span", { style: { display: 'inline-block', width: '26px', height: '26px', marginRight: '2px' }}, " "),
+          !hasChildren && React.createElement("span", { style: { display: 'inline-block', width: '28px' }}),
           
           node.linkedProjectId && (
             React.createElement("span", { style: { fontSize: '1em', marginRight: '4px', color: 'var(--primary-accent)' }, title: `Links to project: ${node.linkedProjectName || 'Unknown'}`}, "🔗")

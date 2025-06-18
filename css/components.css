@@ -1158,7 +1158,16 @@ html[data-theme='light'] .ai-insights-list-item-name, html[data-theme='sol'] .ai
 .list-view-node-name.clickable:hover { color: var(--primary-accent); text-decoration: underline; }
 
 .list-view-actions { display: flex; align-items: center; gap: 2px; flex-shrink: 0; } /* Reduced gap */
-.list-item-chevron-icon { padding: 2px; font-size: 0.75em; line-height: 1; } /* Reduced padding */
+.list-item-chevron-icon { 
+  padding: 0; 
+  font-size: 0.8em; 
+  line-height: 1; 
+  width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
 .list-item-action-icon { font-size: 0.9em; padding: 3px; } /* Reduced padding & font-size */
 .list-item-action-icon.locked { color: var(--warning-color); }
 .list-item-action-icon.primary-action { color: var(--primary-accent); }

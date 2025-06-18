@@ -56,27 +56,27 @@ const ContextMenu = ({
     if (!node) return [];
     
     const items = [
-        { id: 'edit', label: "Edit Details...", icon: '✏️', action: onEditName },
-        { id: 'add-child', label: "Add Child Node...", icon: '➕', action: onAddChild },
+        { id: 'edit', label: "Edit Details...", icon: '✏️', action: () => onEditName(node) },
+        { id: 'add-child', label: "Add Child Node...", icon: '➕', action: () => onAddChild(node) },
         { type: 'separator' },
-        { id: 'toggle-lock', label: node.isLocked ? 'Unlock Node' : 'Lock Node', icon: node.isLocked ? '🔓' : '🔒', action: onToggleLock },
+        { id: 'toggle-lock', label: node.isLocked ? 'Unlock Node' : 'Lock Node', icon: node.isLocked ? '🔓' : '🔒', action: () => onToggleLock(node.id) },
         {
             id: 'change-importance', label: "Change Importance", icon: '⚖️',
             action: () => {
                 setIsImportanceSubMenuOpen(true);
-                setFocusedImportanceIndex(NODE_IMPORTANCE_OPTIONS.findIndex(opt => opt.value === (node?.importance || 'common')));
+                setFocusedImportanceIndex(NODE_IMPORTANCE_OPTIONS.findIndex(opt => opt.value === (node.importance || 'common')));
             },
             hasSubmenu: true
         },
     ];
 
-    if (onSetFocus) items.push({ id: 'set-focus', label: "Set as Focus Node", icon: '🎯', action: onSetFocus });
+    if (onSetFocus) items.push({ id: 'set-focus', label: "Set as Focus Node", icon: '🎯', action: () => onSetFocus(node.id) });
 
     if (node.linkedProjectId) {
-        if (onGoToLinkedProject) items.push({ id: 'go-to-link', label: `Go to: ${node.linkedProjectName || '...'}`, icon: '↪️', title: `Go to project: ${node.linkedProjectName || 'Linked Project'}`, action: onGoToLinkedProject });
-        if (onUnlinkProject) items.push({ id: 'unlink-outgoing', label: "Unlink Outgoing Project", icon: '🚫', isDestructive: true, action: onUnlinkProject });
+        if (onGoToLinkedProject) items.push({ id: 'go-to-link', label: `Go to: ${node.linkedProjectName || '...'}`, icon: '↪️', title: `Go to project: ${node.linkedProjectName || 'Linked Project'}`, action: () => onGoToLinkedProject(node.linkedProjectId) });
+        if (onUnlinkProject) items.push({ id: 'unlink-outgoing', label: "Unlink Outgoing Project", icon: '🚫', isDestructive: true, action: () => onUnlinkProject(node.id) });
     } else if (!incomingLink) {
-        if (onLinkToProject) items.push({ id: 'link-project', label: "Link to Project...", icon: '🔗', action: onLinkToProject });
+        if (onLinkToProject) items.push({ id: 'link-project', label: "Link to Project...", icon: '🔗', action: () => onLinkToProject(node.id) });
     }
 
     if (incomingLink) {
@@ -93,7 +93,7 @@ const ContextMenu = ({
 
     if (onDeleteNode) {
         items.push({ type: 'separator' });
-        items.push({ id: 'delete-node', label: "Delete Node...", icon: '🗑️', isDestructive: true, action: onDeleteNode });
+        items.push({ id: 'delete-node', label: "Delete Node...", icon: '🗑️', isDestructive: true, action: () => onDeleteNode(node.id) });
     }
 
     return items;
@@ -158,7 +158,7 @@ const ContextMenu = ({
         switch (event.key) {
             case 'ArrowUp': setFocusedImportanceIndex(prev => Math.max(0, prev - 1)); break;
             case 'ArrowDown': setFocusedImportanceIndex(prev => Math.min(NODE_IMPORTANCE_OPTIONS.length - 1, prev + 1)); break;
-            case 'Enter': case ' ': onChangeImportance(NODE_IMPORTANCE_OPTIONS[focusedImportanceIndex].value); onClose(); break;
+            case 'Enter': case ' ': onChangeImportance(node.id, NODE_IMPORTANCE_OPTIONS[focusedImportanceIndex].value); onClose(); break;
             case 'Escape': case 'ArrowLeft': setIsImportanceSubMenuOpen(false); break;
         }
     } else {
@@ -223,7 +223,7 @@ const ContextMenu = ({
               role: "menuitemradio",
               className: `context-menu-item ${focusedImportanceIndex === index ? 'focused' : ''}`,
               "aria-checked": node.importance === opt.value,
-              onClick: () => { onChangeImportance(opt.value); onClose(); },
+              onClick: () => { onChangeImportance(node.id, opt.value); onClose(); },
             }, opt.label)
           ))
         )
