@@ -120,13 +120,17 @@ const constructApiError = (error, baseMessage) => {
 const isValidTechTreeNodeShape = (data) => {
     if (typeof data !== 'object' || data === null) return false;
     if (typeof data.name !== 'string' || data.name.trim() === '') return false;
-    if (data.description !== undefined && typeof data.description !== 'string') return false;
-    if (data.isLocked !== undefined && typeof data.isLocked !== 'boolean') return false;
-    if (data.importance !== undefined && !(typeof data.importance === 'string' && ['minor', 'common', 'major'].includes(data.importance))) return false;
-    if (data.children !== undefined && data.children !== null) {
-        if (!Array.isArray(data.children)) return false;
-        if (!data.children.every((child) => isValidTechTreeNodeShape(child))) return false;
-    }
+    // Description must be a string.
+    if (typeof data.description !== 'string') return false; 
+    // isLocked must be a boolean.
+    if (typeof data.isLocked !== 'boolean') return false;
+    // importance must be one of the three valid values.
+    if (typeof data.importance !== 'string' || !['minor', 'common', 'major'].includes(data.importance)) return false;
+    // children must be an array.
+    if (!Array.isArray(data.children)) return false;
+    // every child must also be valid.
+    if (!data.children.every((child) => isValidTechTreeNodeShape(child))) return false;
+    // id can be a string, or undefined for new nodes. If present, must be string.
     if (data.id !== undefined && typeof data.id !== 'string') return false;
     return true;
 };

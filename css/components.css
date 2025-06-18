@@ -860,7 +860,6 @@ html[data-theme='dark'] .graph-view-node.proxy rect {
   transform: scale(1.05);
   box-shadow: var(--box-shadow-sm);
 }
-.graph-view-selected-node-panel { display: none; }
 
 /* AI Insights Tab Styles */
 .ai-insights-panel {
