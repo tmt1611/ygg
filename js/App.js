@@ -345,7 +345,8 @@ const App = () => {
             },
             appCallbacks: {
               handleExtractData, handleNodeSelectedForInsightsOrActions,
-              toggleNodeActionsPanelVisibility
+              toggleNodeActionsPanelVisibility,
+              handleDeleteNodeWithConfirmation
             },
             viewControls: {
               yggdrasilViewMode, activeOverlayPanel, setActiveOverlayPanel

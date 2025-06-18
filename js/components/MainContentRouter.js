@@ -14,6 +14,7 @@ const MainContentRouter = ({
   onExtractData, extractionMode, setExtractionMode, isSummarizing,
   projectLinkingHook, handleNodeSelectedForInsightsOrActions, onToggleNodeActionsPanel,
   modalManager,
+  handleDeleteNodeWithConfirmation,
 }) => {
 
   if (yggdrasilViewMode === 'workspace' && !isLoading && !isModifying) {
@@ -128,7 +129,7 @@ const MainContentRouter = ({
                 onUnlinkProjectFromNode: projectLinkingHook.handleUnlinkProjectFromNode,
                 onOpenContextMenu: modalManager.openContextMenu,
                 onOpenLinkProjectModal: projectLinkingHook.handleOpenLinkProjectModal,
-                onDeleteNode: nodeOperations.handleDeleteNodeAndChildren,
+                onDeleteNode: handleDeleteNodeWithConfirmation,
                 projects: projectManager.projects,
                 activeProjectId: projectManager.activeProjectId,
                 findLinkSource: projectLinkingHook.findLinkSource,

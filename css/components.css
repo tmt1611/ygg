@@ -1536,6 +1536,15 @@ html[data-theme='dark'] .history-item-summary strong,
 html[data-theme='nebula'] .history-item-summary strong {
   color: var(--primary-accent-light);
 }
+.history-item-summary strong.history-entity {
+  color: var(--secondary-accent-dark);
+  font-weight: 500;
+  font-style: italic;
+}
+html[data-theme='dark'] .history-item-summary strong.history-entity,
+html[data-theme='nebula'] .history-item-summary strong.history-entity {
+    color: var(--secondary-accent);
+}
 .history-item-time {
   font-size: 0.75em;
   color: var(--text-tertiary);
