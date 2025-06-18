@@ -121,9 +121,31 @@ const constructApiError = (error, baseMessage) => {
 
 const extractJsonFromMarkdown = (text) => {
   if (!text) return null;
-  const fenceRegex = /^```(?:json|JSON)?\s*\n?(.*?)\n?\s*```$/s;
-  const match = text.trim().match(fenceRegex);
-  return match ? match[1].trim() : text.trim();
+  const trimmedText = text.trim();
+  const fenceRegex = /^```(?:json|JSON)?\s*\n?([\s\S]*?)\n?\s*```$/;
+  const match = trimmedText.match(fenceRegex);
+  if (match && match[1]) {
+      return match[1].trim();
+  }
+
+  // Fallback for cases where the AI doesn't use a markdown fence correctly
+  // or includes extra text. It finds the first '{' or '[' and the last '}' or ']'.
+  const firstBrace = trimmedText.indexOf('{');
+  const lastBrace = trimmedText.lastIndexOf('}');
+  const firstBracket = trimmedText.indexOf('[');
+  const lastBracket = trimmedText.lastIndexOf(']');
+
+  // Determine if the content is primarily an object or an array
+  if (firstBrace !== -1 && lastBrace > firstBrace && (firstBracket === -1 || firstBrace < firstBracket)) {
+      // It's likely an object
+      return trimmedText.substring(firstBrace, lastBrace + 1);
+  }
+  if (firstBracket !== -1 && lastBracket > firstBracket && (firstBrace === -1 || firstBracket < firstBrace)) {
+      // It's likely an array
+      return trimmedText.substring(firstBracket, lastBracket + 1);
+  }
+
+  return trimmedText; // Return as-is if no clear JSON object/array is found
 };
 
 const parseGeminiJsonResponse = (responseText, forModification = false) => {
@@ -191,6 +213,7 @@ Strict JSON Rules:
 2. Valid importances: "minor", "common", "major". Default: "common" for new nodes.
 3. Output ONLY the single JSON object (for new tree) or the complete modified tree's root JSON object. NO extra text/markdown.
 4. ALL nodes MUST have: "id", "name", "description" (use "" if empty), "isLocked" (boolean), "importance" (string), "children" (array, can be empty []).
+5. Ensure all string values are properly escaped for JSON.
 `;
 
 export const generateTechTree = async (userPrompt) => {
@@ -198,21 +221,27 @@ export const generateTechTree = async (userPrompt) => {
     throw new Error("Gemini API client not initialized. Set a valid API Key in 'Workspace' -> 'Project Management'.");
   }
 
-  const fullPrompt = `
-Topic: "${userPrompt}".
-Generate a structured technology tree as a single JSON object for the root node.
+  try {
+    const model = apiClientState.client.getGenerativeModel({ 
+      model: "gemini-1.5-flash-latest",
+      systemInstruction: {
+        parts: [{ text: `
+You are an AI assistant that generates structured technology trees.
+You MUST respond with a single, valid JSON object representing the root node.
 Node format example: ${COMMON_NODE_FORMAT_INSTRUCTION}
 ${COMMON_JSON_SYNTAX_RULES}
 Ensure: Logical hierarchy, 2-4 levels deep, 2-5 children per parent. Prioritize clarity and key items.
-`;
-
-  try {
-    const response = await apiClientState.client.models.generateContent({
-      model: "gemini-2.5-flash-preview-04-17",
-      contents: fullPrompt,
-      config: { responseMimeType: "application/json", temperature: 0.25, topK: 40, topP: 0.92 },
+`}],
+        role: "model"
+      },
+      generationConfig: { 
+        responseMimeType: "application/json", 
+        temperature: 0.25, topK: 40, topP: 0.92 
+      },
     });
 
+    const result = await model.generateContent( `Topic: "${userPrompt}"` );
+    const response = result.response;
     const parsedData = parseGeminiJsonResponse(response.text, false); 
      if (Array.isArray(parsedData) || !isValidTechTreeNodeShape(parsedData)) { 
         console.error("Generated JSON root structure error after parsing for new tree:", parsedData);
@@ -234,18 +263,15 @@ export const modifyTechTreeByGemini = async (
     throw new Error("Gemini API client not initialized. Set a valid API Key in 'Workspace' -> 'Project Management'.");
   }
 
-  const systemInstruction = `You are an AI assistant modifying a JSON tech tree.
+  const systemInstruction = `You are an AI assistant that modifies a JSON tech tree based on user instructions.
 **MANDATORY RULES:**
-1.  Node Importance: Must be "minor", "common", "major". New nodes default to "common".
-2.  Locked Nodes: For nodes listed in 'Locked Node IDs', their 'id', 'name', 'description', 'importance', and 'isLocked: true' properties MUST NOT CHANGE.
-3.  Children of Locked Nodes: Adding NEW children TO locked nodes IS PERMITTED.
-4.  Re-parenting Locked Nodes: Moving locked nodes (changing their parent) IS PERMITTED, but their core properties (name, desc, importance, id, isLocked) must be preserved as per rule 2.
-5.  Unlocked Nodes: Nodes NOT in 'Locked Node IDs' are fully modifiable (name, description, importance, children). Their 'isLocked' should remain false unless explicitly told to lock.
-6.  ID Preservation: RETAIN existing IDs for all nodes that are kept or modified (unless it's a new node). New nodes should get "NEW_NODE" as their 'id' field value (it will be replaced automatically later).
-7.  New Node Defaults: New nodes must have 'isLocked: false', an empty string "" for 'description' if none is specified, and 'importance: "common"'.
-8.  Mandatory Fields: ALL nodes in the output MUST have 'id', 'name', 'isLocked' (boolean), 'importance' (string), and 'children' (array, can be empty []). 'description' (string, can be "") is also mandatory.
-9.  Output: Respond ONLY with a single, valid JSON object representing the MODIFIED tree's root node. NO EXTRA TEXT, explanations, or markdown fences.
-10. JSON Syntax: Strictly follow JSON rules. Example node structure: ${COMMON_NODE_FORMAT_INSTRUCTION}
+1.  **Node Importance:** Must be one of "minor", "common", or "major".
+2.  **Locked Nodes:** If a node's ID is in the 'Locked Node IDs' list, you MUST NOT change its 'name', 'description', 'importance', or 'isLocked: true' status. You CAN add new children to it or move it to a new parent.
+3.  **Unlocked Nodes:** Nodes not in the 'Locked Node IDs' list are fully modifiable. Their 'isLocked' must remain false.
+4.  **ID Preservation:** RETAIN existing 'id' values for all nodes. For NEW nodes you create, use "NEW_NODE" as the 'id' value.
+5.  **Mandatory Fields:** ALL nodes in your output MUST have these fields: 'id', 'name', 'description' (use "" if empty), 'isLocked' (boolean), 'importance' (string), and 'children' (array, can be empty []).
+6.  **Output Format:** Respond ONLY with a single, valid JSON object for the modified tree's root node. NO EXTRA TEXT, explanations, or markdown fences.
+7.  **JSON Syntax:** Strictly follow JSON rules. Example node: ${COMMON_NODE_FORMAT_INSTRUCTION}
 `;
 
   const fullPrompt = `
@@ -259,11 +285,17 @@ User instruction: "${modificationPrompt}"
 Output the complete, modified JSON for the tech tree, adhering to ALL rules above. Respond ONLY with the JSON.
 `;
   try {
-    const response = await apiClientState.client.models.generateContent({
-      model: "gemini-2.5-flash-preview-04-17",
-      contents: fullPrompt,
-      config: { systemInstruction, responseMimeType: "application/json", temperature: 0.35, topK: 45, topP: 0.90 },
+    const model = apiClientState.client.getGenerativeModel({ 
+      model: "gemini-1.5-flash-latest",
+      systemInstruction: { parts: [{ text: systemInstruction }], role: "model" },
+      generationConfig: { 
+        responseMimeType: "application/json", 
+        temperature: 0.35, topK: 45, topP: 0.90 
+      },
     });
+
+    const result = await model.generateContent(fullPrompt);
+    const response = result.response;
     
     let parsedData = parseGeminiJsonResponse(response.text, true); 
 
@@ -311,13 +343,17 @@ ${textToSummarize.substring(0, 30000)}
 Concise Summary (100-150 words, plain text only):`;
 
   try {
-    const response = await apiClientState.client.models.generateContent({
-      model: "gemini-2.5-flash-preview-04-17", 
-      contents: prompt,
-      config: { temperature: 0.5, topK: 40, topP: 0.95 }
+    const model = apiClientState.client.getGenerativeModel({ 
+      model: "gemini-1.5-flash-latest",
+      generationConfig: { 
+        temperature: 0.5, topK: 40, topP: 0.95 
+      },
     });
+
+    const result = await model.generateContent(prompt);
+    const response = result.response;
     let summaryText = response.text.trim();
-    const fenceRegex = /^```(?:[\w\W]+?)?\s*\n?([\w\W]*?)\n?\s*```$/s; 
+    const fenceRegex = /^```(?:[\w\W]+?)?\s*\n?([\w\W]*?)\n?\s*```$/s;
     const match = summaryText.match(fenceRegex);
     if (match?.[1]) {
       summaryText = match[1].trim();
@@ -381,11 +417,16 @@ Respond ONLY with the JSON object. No extra text or markdown.
 `;
 
     try {
-        const response = await apiClientState.client.models.generateContent({
-            model: "gemini-2.5-flash-preview-04-17",
-            contents: prompt,
-            config: { responseMimeType: "application/json", temperature: 0.45, topK: 50, topP: 0.93 },
+        const model = apiClientState.client.getGenerativeModel({ 
+          model: "gemini-1.5-flash-latest",
+          generationConfig: { 
+            responseMimeType: "application/json", 
+            temperature: 0.45, topK: 50, topP: 0.93 
+          },
         });
+        
+        const result = await model.generateContent(prompt);
+        const response = result.response;
         return parseGeminiJsonResponseForInsights(response.text);
     } catch (error) {
         console.error("Error generating node insights from Gemini API:", error);
@@ -412,11 +453,16 @@ Respond ONLY with the JSON array. No extra text or markdown.
 `;
 
   try {
-    const response = await apiClientState.client.models.generateContent({
-      model: "gemini-2.5-flash-preview-04-17",
-      contents: prompt,
-      config: { responseMimeType: "application/json", temperature: 0.6, topK: 50, topP: 0.95 },
+    const model = apiClientState.client.getGenerativeModel({ 
+      model: "gemini-1.5-flash-latest",
+      generationConfig: { 
+        responseMimeType: "application/json", 
+        temperature: 0.6, topK: 50, topP: 0.95 
+      },
     });
+    
+    const result = await model.generateContent(prompt);
+    const response = result.response;
 
     let jsonStr = response.text.trim();
     const fenceRegex = /^```(?:json|JSON)?\s*\n?(.*?)\n?\s*```$/s;

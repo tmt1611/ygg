@@ -104,7 +104,8 @@ const FocusViewDetailPanel = ({
         React.createElement("button", {
           onClick: () => handleDetailPanelNodeAction(() => onOpenNodeEditModal({
             mode: 'addChild', targetNodeId: node.id, parentNodeName: node.name,
-            title: `Add Subsystem to: ${node.name}`, label: 'New Subsystem Name', placeholder: 'Enter name'
+            title: `Add Subsystem to: ${node.name}`, label: 'New Subsystem Name', placeholder: 'Enter name',
+            initialValue: '', initialDescription: ''
           })),
           disabled: isAppBusy, title: "Add a new child object"
         },
