@@ -246,11 +246,16 @@ export const compareAndAnnotateTree = (
     annotatedTree: { ...initializedSuggestionTree }, 
     removedNodes: [], newNodes: [], modifiedContentNodes: [],
     lockedContentChangedNodes: [], structureModifiedNodes: [], reparentedNodes: [],
+    lockedNodesRemoved: [],
   };
 
   currentNodesMap.forEach((cNode, id) => {
      if (!suggestionNodesMap.has(id)) { 
-        result.removedNodes.push({...cNode, _changeStatus: 'removed', _modificationDetails: ['Node removed from tree.']});
+        const removedNodeData = {...cNode, _changeStatus: 'removed', _modificationDetails: ['Node removed from tree.']};
+        result.removedNodes.push(removedNodeData);
+        if (cNode.isLocked) {
+            result.lockedNodesRemoved.push(removedNodeData);
+        }
      }
   });
 

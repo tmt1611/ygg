@@ -54,7 +54,7 @@ const AiSuggestionModal = ({
 
   if (!isOpen || !comparisonResult) return null;
 
-  const { annotatedTree, removedNodes, newNodes, modifiedContentNodes, lockedContentChangedNodes, structureModifiedNodes, reparentedNodes } = comparisonResult;
+  const { annotatedTree, removedNodes, newNodes, modifiedContentNodes, lockedContentChangedNodes, structureModifiedNodes, reparentedNodes, lockedNodesRemoved } = comparisonResult;
 
   const currentTotalNodes = currentTreeForDiff ? countNodesInTree(currentTreeForDiff) : 0;
   const suggestedTotalNodes = annotatedTree ? countNodesInTree(annotatedTree) : 0;
@@ -145,6 +145,10 @@ const AiSuggestionModal = ({
               lockedContentChangedNodes.length > 0 &&
                 React.createElement("div", { className: "ai-suggestion-modal-critical-warning" },
                   React.createElement("strong", null, "CRITICAL: Locked Node Content Modified: ", React.createElement("span", { className: "count" }, lockedContentChangedNodes.length))
+                ),
+              lockedNodesRemoved && lockedNodesRemoved.length > 0 &&
+                React.createElement("div", { className: "ai-suggestion-modal-critical-warning" },
+                  React.createElement("strong", null, "CRITICAL: Locked Nodes REMOVED: ", React.createElement("span", { className: "count" }, lockedNodesRemoved.length))
                 )
             ),
 
