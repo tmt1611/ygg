@@ -18,6 +18,7 @@ const ContextMenu = ({
   const [focusedIndex, setFocusedIndex] = useState(0);
   const [focusedImportanceIndex, setFocusedImportanceIndex] = useState(0);
   const [menuStyle, setMenuStyle] = useState({});
+  const [submenuStyle, setSubmenuStyle] = useState({});
   const [copyFeedback, setCopyFeedback] = useState('');
 
   const handleCopy = useCallback((type) => {
@@ -104,12 +105,31 @@ const ContextMenu = ({
     if (isOpen && position && menuRef.current) {
         const menuWidth = menuRef.current.offsetWidth || 220;
         const menuHeight = menuRef.current.offsetHeight || 200;
+        const submenuWidth = 120; // Estimated width of submenu
         let { x, y } = position;
-        if (x + menuWidth > window.innerWidth - 10) x = window.innerWidth - menuWidth - 10;
-        if (y + menuHeight > window.innerHeight - 10) y = window.innerHeight - menuHeight - 10;
+
+        // Main menu positioning
+        const flipsSubmenu = (x + menuWidth + submenuWidth) > window.innerWidth - 10;
+        if (x + menuWidth > window.innerWidth - 10 && !flipsSubmenu) {
+            x = window.innerWidth - menuWidth - 10;
+        } else if (flipsSubmenu) {
+            x = window.innerWidth - menuWidth - 10;
+        }
+        
+        if (y + menuHeight > window.innerHeight - 10) {
+            y = window.innerHeight - menuHeight - 10;
+        }
+
         setMenuStyle({ top: `${Math.max(5, y)}px`, left: `${Math.max(5, x)}px` });
+
+        // Submenu positioning
+        if (flipsSubmenu) {
+            setSubmenuStyle({ right: '100%', left: 'auto', marginRight: '2px' });
+        } else {
+            setSubmenuStyle({ left: '100%', right: 'auto', marginLeft: '2px' });
+        }
     }
-  }, [isOpen, position]);
+  }, [isOpen, position, isImportanceSubMenuOpen]);
 
   useEffect(() => {
     if (!isOpen) {
@@ -195,7 +215,7 @@ const ContextMenu = ({
         })
       ),
       isImportanceSubMenuOpen && (
-        React.createElement("div", { className: "context-menu submenu", role: "menu" },
+        React.createElement("div", { className: "context-menu submenu", role: "menu", style: submenuStyle },
           NODE_IMPORTANCE_OPTIONS.map((opt, index) => (
             React.createElement("button", {
               key: opt.value,

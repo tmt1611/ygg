@@ -65,7 +65,7 @@ export const initializeNodes = (node, parentId = null) => {
       .filter(child => typeof child === 'object' && child !== null) 
       .map(child => initializeNodes(child, newNode.id));
   } else if (node.children !== undefined && node.children !== null) {
-     // console.warn(`Node "${newNode.name}" (ID: ${newNode.id}) has non-array 'children' property. Treating as empty. Children:`, node.children);
+     // Non-array children are ignored.
   }
   
   return newNode;
