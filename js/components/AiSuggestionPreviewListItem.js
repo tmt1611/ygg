@@ -8,7 +8,7 @@ const AiSuggestionPreviewListItem = ({ node, level, isVisualDiff = false }) => {
     margin: '2px 0',    // Reduced margin
     borderRadius: 'var(--border-radius)',
     border: '1px solid transparent',
-    marginLeft: isVisualDiff ? `${level * 18}px` : `${level * 16}px`, // Reduced indent
+    marginLeft: isVisualDiff ? `${level * 15}px` : `${level * 16}px`, // Further reduced indent for visual diff
     position: 'relative', 
     overflow: 'hidden', 
   };
@@ -16,7 +16,7 @@ const AiSuggestionPreviewListItem = ({ node, level, isVisualDiff = false }) => {
   let titleText = node.description || node.name;
   let changeStatusIcon = { icon: '', color: 'var(--text-tertiary)'};
 
-  let nodeNameStyle = { fontWeight: 500, fontSize: '0.9em' }; // Slightly smaller font
+  let nodeNameStyle = { fontWeight: 500, fontSize: '0.85em' }; // Even smaller font
 
   switch (node._changeStatus) {
     case 'new':
@@ -91,12 +91,12 @@ const AiSuggestionPreviewListItem = ({ node, level, isVisualDiff = false }) => {
             )
         ),
         node.description && (
-          React.createElement("p", { style: { fontSize: '0.8em', color: 'var(--text-secondary)', marginTop: '2px', marginBottom: '1px', whiteSpace: 'pre-wrap', wordBreak: 'break-word', paddingLeft: '25px', opacity: 0.9 }},
+          React.createElement("p", { style: { fontSize: '0.75em', color: 'var(--text-secondary)', marginTop: '2px', marginBottom: '1px', whiteSpace: 'pre-wrap', wordBreak: 'break-word', paddingLeft: '22px', opacity: 0.9 }},
             node.description
           )
         ),
         node._modificationDetails && node._modificationDetails.length > 0 && isVisualDiff && (
-          React.createElement("ul", { style: { listStyle: 'disc', listStylePosition: 'inside', marginLeft: '15px', marginTop: '4px', fontSize: '0.8em', color: 'var(--text-tertiary)' }},
+          React.createElement("ul", { style: { listStyle: 'disc', listStylePosition: 'inside', marginLeft: '15px', marginTop: '4px', fontSize: '0.75em', color: 'var(--text-tertiary)' }},
             node._modificationDetails.map((detail, index) => (
               React.createElement("li", { key: index, style: { lineHeight: '1.3', marginBottom: '2px' }}, detail)
             ))

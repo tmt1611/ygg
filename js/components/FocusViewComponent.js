@@ -52,7 +52,6 @@ const FocusViewComponent = ({
   }, [isFocusNodeRoot, activeProjectId, projects, findLinkSource]);
 
   const layoutRef = useRef(null); 
-  const svgRef = useRef(null);
 
   useEffect(() => {
     if (!layoutRef.current || !focusNodeData) return;
@@ -115,37 +114,22 @@ const FocusViewComponent = ({
     setAllNodePositions(positions);
   }, [focusNodeData, parentNodeData, childrenNodeData, layoutRef]);
 
-  useEffect(() => {
-    if (!svgRef.current || allNodePositions.size === 0) {
-        if(svgRef.current) svgRef.current.innerHTML = ''; 
-        return;
-    }
-    const svg = svgRef.current;
-    const linesData = [];
+  const connectorLines = useMemo(() => {
+    if (allNodePositions.size === 0) return [];
+    const lines = [];
     const focusPos = allNodePositions.get(focusNodeId);
 
     if (focusPos && parentNodeData) {
         const parentPos = allNodePositions.get(parentNodeData.id);
-        if (parentPos) linesData.push({ x1: parentPos.x, y1: parentPos.y, x2: focusPos.x, y2: focusPos.y, id: `line-parent-${parentNodeData.id}-to-${focusNodeId}` });
+        if (parentPos) lines.push({ x1: parentPos.x, y1: parentPos.y, x2: focusPos.x, y2: focusPos.y, id: `line-parent-${parentNodeData.id}-to-${focusNodeId}` });
     }
     if (focusPos) {
         childrenNodeData.forEach(child => {
             const childPos = allNodePositions.get(child.id);
-            if (childPos) linesData.push({ x1: focusPos.x, y1: focusPos.y, x2: childPos.x, y2: childPos.y, id: `line-${focusNodeId}-to-child-${child.id}` });
+            if (childPos) lines.push({ x1: focusPos.x, y1: focusPos.y, x2: childPos.x, y2: childPos.y, id: `line-${focusNodeId}-to-child-${child.id}` });
         });
     }
-    svg.innerHTML = ''; 
-    const markerDef = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
-    markerDef.innerHTML = `<marker id="warp-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="var(--focus-connector-stroke)" /></marker>`;
-    svg.appendChild(markerDef);
-    linesData.forEach(line => {
-      const lineEl = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-      lineEl.setAttribute('x1', String(line.x1)); lineEl.setAttribute('y1', String(line.y1));
-      lineEl.setAttribute('x2', String(line.x2)); lineEl.setAttribute('y2', String(line.y2));
-      lineEl.setAttribute('class', 'focus-view-connector-line');
-      lineEl.setAttribute('marker-end', 'url(#warp-arrow)');
-      svg.appendChild(lineEl);
-    });
+    return lines;
   }, [allNodePositions, focusNodeId, parentNodeData, childrenNodeData]);
 
   const handleNodeClick = useCallback((nodeId, isFocusTarget = false) => {
@@ -186,7 +170,21 @@ const FocusViewComponent = ({
       React.createElement(PathToRootDisplay, { treeData: treeData, currentNodeId: focusNodeId, onSelectPathNode: onChangeFocusNode, pathContext: "stellar" }),
       React.createElement("div", { className: "focus-view-main-area" },
         React.createElement("div", { ref: layoutRef, className: "focus-view-layout" },
-          React.createElement("svg", { ref: svgRef, className: "focus-view-svg-overlay" }),
+          React.createElement("svg", { className: "focus-view-svg-overlay" },
+            React.createElement("defs", null,
+              React.createElement("marker", { id: "warp-arrow", viewBox: "0 0 10 10", refX: "8", refY: "5", markerWidth: "6", markerHeight: "6", orient: "auto-start-reverse"},
+                React.createElement("path", { d: "M 0 0 L 10 5 L 0 10 z", fill: "var(--focus-connector-stroke)" })
+              )
+            ),
+            connectorLines.map(line => 
+              React.createElement("line", { 
+                key: line.id,
+                x1: line.x1, y1: line.y1, x2: line.x2, y2: line.y2, 
+                className: "focus-view-connector-line", 
+                markerEnd: "url(#warp-arrow)" 
+              })
+            )
+          ),
           parentNodeData && renderNode(parentNodeData, 'parent'),
           !parentNodeData && allNodePositions.get(focusNodeData.id) && ( 
              React.createElement("div", { className: "focus-node-placeholder", style: { position: 'absolute', top: `${(allNodePositions.get(focusNodeData.id)?.y || 0) - (allNodePositions.get(focusNodeData.id)?.height || 0)/2 - VERTICAL_SPACING - 20}px`, left: '50%', transform: 'translateX(-50%)' }}, "Sector Core (Root)")

@@ -48,15 +48,28 @@ const WhisperingRunesPanel = ({
     return React.createElement("div", { className: "whispering-runes-panel hidden" }); 
   }
   
-
   const handleEdit = () => onOpenNodeEditModal({ mode: 'editName', targetNodeId: node.id, currentNodeName: node.name, currentNodeDescription: node.description, title: `Edit Properties: ${node.name}`, label: "Node Name", placeholder: "Enter new node name", initialValue: node.name, initialDescription: node.description });
   const handleAddChild = () => onOpenNodeEditModal({ mode: 'addChild', targetNodeId: node.id, parentNodeName: node.name, title: `Add Child to: ${node.name}`, label: "New Child Name", placeholder: "Enter new child name" });
 
-  const importanceOptions = [
-    { value: 'minor', label: 'Minor', rune: '🌱' },
-    { value: 'common', label: 'Common', rune: '🌿' },
-    { value: 'major', label: 'Major', rune: '🌳' },
-  ];
+  const importanceCycle = ['common', 'major', 'minor'];
+  const importanceLabels = {
+    minor: { label: 'Minor', rune: '🌱' },
+    common: { label: 'Common', rune: '🌿' },
+    major: { label: 'Major', rune: '🌳' },
+  };
+
+  const currentImportance = node.importance || 'common';
+  const currentImportanceIndex = importanceCycle.indexOf(currentImportance);
+  const nextImportanceValue = importanceCycle[(currentImportanceIndex + 1) % importanceCycle.length];
+
+  const handleCycleImportance = () => {
+    if (node) {
+      onNodeImportanceChange(node.id, nextImportanceValue);
+    }
+  };
+
+  const currentImportanceInfo = importanceLabels[currentImportance];
+  const nextImportanceInfo = importanceLabels[nextImportanceValue];
 
   const lockIcon = node.isLocked ? (lockButtonFeedback ? '🔓' : '🔒') : (lockButtonFeedback ? '🔒' : '🔓');
 
@@ -76,20 +89,14 @@ const WhisperingRunesPanel = ({
        },
         React.createElement("span", { className: "rune-icon" }, lockIcon), " ", node.isLocked ? 'Unlock' : 'Lock'
       ),
-
-      React.createElement("div", { style: { margin: '5px 0' }},
-        React.createElement("label", { htmlFor: `rune-importance-select-${node.id}`, style: {fontSize: '0.85em', color: 'var(--text-tertiary)', display: 'block', marginBottom: '3px'}}, "Importance:"),
-        React.createElement("select", {
-          id: `rune-importance-select-${node.id}`,
-          value: node.importance || 'common',
-          onChange: (e) => onNodeImportanceChange(node.id, e.target.value),
-          disabled: isAppBusy,
-          className: `importance-select importance-${node.importance || 'common'}`,
-          style: {width: '100%', padding: '6px 8px', fontSize: '0.9em'},
-          "aria-label": `Current importance: ${node.importance || 'common'}. Change importance.`
-        },
-          importanceOptions.map(opt => React.createElement("option", { key: opt.value, value: opt.value }, opt.rune, " ", opt.label))
-        )
+      React.createElement("button", {
+        onClick: handleCycleImportance,
+        disabled: isAppBusy,
+        title: `Cycle Importance (current: ${currentImportanceInfo.label}, next: ${nextImportanceInfo.label})`,
+        className: `importance-cycle-button importance-${currentImportance}`
+      },
+        React.createElement("span", { className: "rune-icon" }, currentImportanceInfo.rune),
+        ` ${currentImportanceInfo.label}`
       ),
 
       activeOverlayPanel !== 'focus' && onSetFocusNode && (

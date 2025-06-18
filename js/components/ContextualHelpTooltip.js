@@ -8,7 +8,7 @@ const ContextualHelpTooltip = ({
   return (
     React.createElement("span", { className: "tooltip-container contextual-help-icon", 
           role: "tooltip", 
-          "aria-label": "Help", 
+          "aria-label": `Help: ${helpText}`, 
           tabIndex: 0,
           style: { position: 'relative' } 
           },
