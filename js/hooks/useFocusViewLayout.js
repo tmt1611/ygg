@@ -1,4 +1,4 @@
-import { useState, useEffect }from 'react';
+import { useState, useEffect } from 'react';
 
 const NODE_SIZES_PX = {
     minor: { width: 60, height: 60 },
@@ -6,9 +6,9 @@ const NODE_SIZES_PX = {
     major: { width: 130, height: 130 },
 };
 const FOCUS_NODE_SCALE = 1.15;
-const VERTICAL_SPACING = 40; // Increased spacing
-const HORIZONTAL_CHILD_GAP = 25; // Increased spacing
-const CHILD_ROW_VERTICAL_GAP = 30; // Increased spacing
+const VERTICAL_SPACING = 40;
+const HORIZONTAL_CHILD_GAP = 25;
+const CHILD_ROW_VERTICAL_GAP = 30;
 
 export const useFocusViewLayout = (
   layoutRef,
@@ -16,8 +16,8 @@ export const useFocusViewLayout = (
   parentNodeData,
   childrenNodeData
 ) => {
-  const [allNodePositions, setAllNodePositions] = useState(new Map());
-  const [layoutSize, setLayoutSize] = useState({ width: 0, height: 0 });
+  const [layoutMetrics, setLayoutMetrics] = useState({ positions: new Map(), width: 0, height: 0 });
+  const [viewportSize, setViewportSize] = useState({ width: 0, height: 0 });
 
   useEffect(() => {
     const element = layoutRef.current;
@@ -25,54 +25,59 @@ export const useFocusViewLayout = (
     
     const resizeObserver = new ResizeObserver(entries => {
         for (let entry of entries) {
-            setLayoutSize({ width: entry.contentRect.width, height: entry.contentRect.height });
+            setViewportSize({ width: entry.contentRect.width, height: entry.contentRect.height });
         }
     });
     
     resizeObserver.observe(element);
     
+    // Set initial size
+    setViewportSize({ width: element.clientWidth, height: element.clientHeight });
+
     return () => {
-        resizeObserver.unobserve(element);
+        if (element) {
+            resizeObserver.unobserve(element);
+        }
     };
   }, [layoutRef]);
 
   useEffect(() => {
-    if (!focusNodeData || layoutSize.width === 0 || layoutSize.height === 0) {
-        setAllNodePositions(new Map()); // Clear positions if container is not ready
+    if (!focusNodeData || viewportSize.width === 0) {
+        setLayoutMetrics({ positions: new Map(), width: 0, height: 0 });
         return;
     };
 
-    const layoutWidth = layoutSize.width;
-    const layoutHeight = layoutSize.height;
     const positions = new Map();
-
-    // Position Focus Node
+    
+    // Calculate vertical starting points
+    const parentSize = parentNodeData ? NODE_SIZES_PX[parentNodeData.importance || 'common'] : { width: 0, height: 0 };
     const focusSize = NODE_SIZES_PX[focusNodeData.importance || 'common'];
-    const scaledFocusWidth = focusSize.width * FOCUS_NODE_SCALE;
-    const scaledFocusHeight = focusSize.height * FOCUS_NODE_SCALE;
-    const focusX = layoutWidth / 2;
-    const focusY = layoutHeight * 0.35;
-    positions.set(focusNodeData.id, { x: focusX, y: focusY, width: scaledFocusWidth, height: scaledFocusHeight });
 
-    // Position Parent Node
+    const parentY = parentNodeData ? VERTICAL_SPACING + parentSize.height / 2 : 0;
+    const scaledFocusHeight = focusSize.height * FOCUS_NODE_SCALE;
+    const focusY = parentY + (parentNodeData ? parentSize.height / 2 + VERTICAL_SPACING : VERTICAL_SPACING) + scaledFocusHeight / 2;
+    
+    let totalHeight = focusY + scaledFocusHeight / 2 + VERTICAL_SPACING;
+
+    // Position parent and focus nodes
+    const centerX = viewportSize.width / 2;
     if (parentNodeData) {
-        const parentSize = NODE_SIZES_PX[parentNodeData.importance || 'common'];
-        const parentX = focusX;
-        const parentY = focusY - (scaledFocusHeight / 2) - (parentSize.height / 2) - VERTICAL_SPACING;
-        positions.set(parentNodeData.id, { x: parentX, y: parentY, width: parentSize.width, height: parentSize.height });
+        positions.set(parentNodeData.id, { x: centerX, y: parentY, width: parentSize.width, height: parentSize.height });
     }
+    positions.set(focusNodeData.id, { x: centerX, y: focusY, width: focusSize.width * FOCUS_NODE_SCALE, height: scaledFocusHeight });
 
     // Position Children Nodes (with wrapping)
-    if (childrenNodeData.length > 0) {
-        let currentY = focusY + (scaledFocusHeight / 2) + VERTICAL_SPACING;
-        const maxRowWidth = layoutWidth * 0.9;
+    if (childrenNodeData && childrenNodeData.length > 0) {
+        let currentY = focusY + scaledFocusHeight / 2 + VERTICAL_SPACING;
+        const maxRowWidth = viewportSize.width * 0.9;
         let currentRow = [];
         let currentRowWidth = 0;
 
         const placeRow = (row, yPos) => {
             const totalRowWidth = row.reduce((sum, child) => sum + NODE_SIZES_PX[child.importance || 'common'].width, 0) + (row.length - 1) * HORIZONTAL_CHILD_GAP;
-            let currentX = focusX - totalRowWidth / 2;
+            let currentX = centerX - totalRowWidth / 2;
             let maxChildHeightInRow = 0;
+
             row.forEach(child => {
                 const childSize = NODE_SIZES_PX[child.importance || 'common'];
                 maxChildHeightInRow = Math.max(maxChildHeightInRow, childSize.height);
@@ -88,6 +93,7 @@ export const useFocusViewLayout = (
         for (const child of childrenNodeData) {
             const childSize = NODE_SIZES_PX[child.importance || 'common'];
             const potentialRowWidth = currentRowWidth + (currentRow.length > 0 ? HORIZONTAL_CHILD_GAP : 0) + childSize.width;
+            
             if (currentRow.length > 0 && potentialRowWidth > maxRowWidth) {
                 const rowHeight = placeRow(currentRow, currentY);
                 currentY += rowHeight + CHILD_ROW_VERTICAL_GAP;
@@ -99,12 +105,17 @@ export const useFocusViewLayout = (
             }
         }
         if (currentRow.length > 0) {
-            placeRow(currentRow, currentY);
+            const lastRowHeight = placeRow(currentRow, currentY);
+            totalHeight = currentY + lastRowHeight + VERTICAL_SPACING;
         }
     }
 
-    setAllNodePositions(positions);
-  }, [focusNodeData, parentNodeData, childrenNodeData, layoutSize]);
+    setLayoutMetrics({
+        positions,
+        width: viewportSize.width,
+        height: Math.max(totalHeight, viewportSize.height),
+    });
+  }, [focusNodeData, parentNodeData, childrenNodeData, viewportSize]);
   
-  return allNodePositions;
+  return layoutMetrics;
 };
