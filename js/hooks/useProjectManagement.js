@@ -209,10 +209,10 @@ export const useProjectManagement = ({
     }
   }, [projects, viewStates, setTechTreeData, setContextText, setInitialPromptFromHook, addHistoryEntry, setError]);
 
-  const saveCurrentTreeAsProject = useCallback((name, isExample = false) => {
-    if (!currentTechTreeData) { setError("No tree data to save as project."); return null; }
+  const saveNewProject = useCallback((treeToSave, name, isExample = false) => {
+    if (!treeToSave) { setError("No tree data to save as project."); return null; }
     const newProject = {
-      id: generateUUID(), name: name, treeData: currentTechTreeData,
+      id: generateUUID(), name: name, treeData: treeToSave,
       lastModified: new Date().toISOString(), isExample: isExample,
     };
     setProjects(prev => [...prev, newProject]);
@@ -223,7 +223,7 @@ export const useProjectManagement = ({
     }
     addHistoryEntry('PROJECT_CREATED', `${isExample ? 'Example p' : 'P'}roject "${name}" saved.`);
     return newProject;
-  }, [currentTechTreeData, addHistoryEntry, setError, setContextText, setInitialPromptFromHook]);
+  }, [addHistoryEntry, setError, setContextText, setInitialPromptFromHook]);
 
   const internalCreateNewProject = useCallback((name) => {
     resetTreeForNewProjectContext();
@@ -234,14 +234,14 @@ export const useProjectManagement = ({
     setContextText(name);
     setInitialPromptFromHook(name);
     
-    const savedProject = saveCurrentTreeAsProject(name, false);
+    const savedProject = saveNewProject(newEmptyTree, name, false);
     closeProjectNameModal();
     if (viewStates && savedProject && savedProject.treeData.id) {
         viewStates.setYggdrasilViewMode('treeView');
         viewStates.setActiveOverlayPanel(null); // Ensure graph view is active
         viewStates.setSelectedGraphNodeId(savedProject.treeData.id); // Select the root node
     }
-  }, [resetTreeForNewProjectContext, setTechTreeData, setContextText, setInitialPromptFromHook, saveCurrentTreeAsProject, closeProjectNameModal, viewStates]);
+  }, [resetTreeForNewProjectContext, setTechTreeData, setContextText, setInitialPromptFromHook, saveNewProject, closeProjectNameModal, viewStates]);
 
   const handleCreateNewProject = useCallback(() => {
     openProjectNameModal({ mode: 'create', onConfirm: internalCreateNewProject });
@@ -296,7 +296,7 @@ export const useProjectManagement = ({
         mode: 'create', currentName: currentContextText || "New Project",
         onConfirm: (nameFromModal) => {
           setContextText(nameFromModal); setInitialPromptFromHook(nameFromModal);
-          const newSavedProject = saveCurrentTreeAsProject(nameFromModal, false);
+          const newSavedProject = saveNewProject(currentTechTreeData, nameFromModal, false);
           if (newSavedProject && andDownload) { 
             const filename = `${newSavedProject.name.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.project.json`;
             const jsonStr = JSON.stringify(newSavedProject, null, 2);
@@ -393,9 +393,9 @@ export const useProjectManagement = ({
   
   const internalSaveAsExample = useCallback((name) => {
     if (!currentTechTreeData) { setError("No tree data to save as example."); return; }
-    saveCurrentTreeAsProject(name, true);
+    saveNewProject(currentTechTreeData, name, true);
     closeProjectNameModal();
-  }, [currentTechTreeData, saveCurrentTreeAsProject, closeProjectNameModal, setError]);
+  }, [currentTechTreeData, saveNewProject, closeProjectNameModal, setError]);
 
   const handleSaveCurrentTreeAsExampleProject = useCallback(() => {
     if (!currentTechTreeData) { setError("No active tree data to save as an example."); return; }
@@ -417,7 +417,7 @@ export const useProjectManagement = ({
 
   return {
     projects, activeProjectId, setActiveProjectId,
-    handleSetActiveProject, saveCurrentTreeAsProject, handleCreateNewProject,
+    handleSetActiveProject, saveNewProject, handleCreateNewProject,
     handleAddNewProjectFromFile, handleSaveActiveProject, handleRenameActiveProject, handleRenameProject,
     handleDeleteProject, handleSaveCurrentTreeAsExampleProject, handleLoadAndGoToGraph,
     resetTreeForNewProjectContext, initializeDefaultProjects, saveProjectsToLocalStorage, internalRenameProject,

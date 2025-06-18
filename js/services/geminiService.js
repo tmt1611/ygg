@@ -266,14 +266,15 @@ export const modifyTechTreeByGemini = async (
 
   const systemInstruction = `You are an AI assistant that modifies a JSON tech tree based on user instructions.
 **MANDATORY RULES:**
-1.  **Node Importance:** Must be one of "minor", "common", or "major".
-2.  **Locked Nodes:** If a node's ID is in the 'Locked Node IDs' list, you MUST NOT change its 'name', 'description', 'importance', or 'isLocked: true' status, and you MUST NOT delete it from the tree. You CAN add new children to it or move it to a new parent.
-3.  **Unlocked Nodes:** Nodes not in the 'Locked Node IDs' list are fully modifiable. Their 'isLocked' must remain false.
-4.  **ID Preservation:** RETAIN existing 'id' values for all nodes. For NEW nodes you create, use "NEW_NODE" as the 'id' value.
-5.  **Mandatory Fields:** ALL nodes in your output MUST have these fields: 'id', 'name', 'description' (use "" if empty), 'isLocked' (boolean), 'importance' (string), and 'children' (array, can be empty []).
-6.  **Output Format:** Respond ONLY with a single, valid JSON object for the modified tree's root node. NO EXTRA TEXT, explanations, or markdown fences.
-7.  **JSON Syntax:** Strictly follow JSON rules. Example node: ${COMMON_NODE_FORMAT_INSTRUCTION}
-8.  **Maintain Structure:** Avoid unnecessarily drastic changes to the overall tree shape (e.g., adding many new levels of depth) unless the user's instruction explicitly asks for it.
+1.  **Preserve IDs & Locks:**
+    - RETAIN existing 'id' values for all nodes. For NEW nodes you create, use "NEW_NODE" as the 'id' value.
+    - DO NOT change the 'isLocked' value for ANY node.
+2.  **Locked Node Content:** If a node's ID is in the 'Locked Node IDs' list, you MUST NOT change its 'name', 'description', or 'importance'. You CAN add new children to it or move it.
+3.  **Node Importance:** Must be one of "minor", "common", or "major".
+4.  **Mandatory Fields:** ALL nodes in your output MUST have these fields: 'id', 'name', 'description' (use "" if empty), 'isLocked' (boolean), 'importance' (string), and 'children' (array, can be empty []).
+5.  **Output Format:** Respond ONLY with a single, valid JSON object for the modified tree's root node. NO EXTRA TEXT, explanations, or markdown fences.
+6.  **JSON Syntax:** Strictly follow JSON rules. Example node: ${COMMON_NODE_FORMAT_INSTRUCTION}
+7.  **Maintain Structure:** Avoid unnecessarily drastic changes to the overall tree shape (e.g., adding many new levels of depth) unless the user's instruction explicitly asks for it.
 `;
 
   const fullPrompt = `
