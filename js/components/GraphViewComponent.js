@@ -139,98 +139,120 @@ const GraphViewComponent = ({
     }
   }, [isAppBusy, onOpenContextMenu, treeData.id, activeProjectId, projects, findLinkSource]);
 
+  // Effect for drawing the main graph structure
   useEffect(() => {
     if (!g || !nodes || !links) return;
 
     const allNodes = [...nodes, ...projectLinksAndProxyNodes.proxyNodes];
     const allLinks = [...links, ...projectLinksAndProxyNodes.projectLinks];
 
-    g.selectAll(".graph-view-link, .graph-view-project-link").remove(); 
-    g.selectAll(".graph-view-node").remove(); 
-
-    g.selectAll(".graph-view-all-links")
+    // Draw links
+    g.selectAll(".graph-view-link, .graph-view-project-link")
       .data(allLinks, (d) => `${d.source.id}-${d.target.id}`)
       .join(
         (enter) =>
-          enter
-            .append("path")
+          enter.append("path")
             .attr("class", d => d.isProjectLink ? "graph-view-project-link" : "graph-view-link")
             .attr("fill", "none")
-            .attr("stroke", d => d.isProjectLink ? null : "var(--graph-link-stroke)")
             .attr("stroke-width", d => d.isProjectLink ? 2 : 1.5)
-            .attr("stroke-opacity", 0.7) // Unified opacity
+            .attr("stroke-opacity", 0.7)
             .attr("stroke-dasharray", d => d.isProjectLink ? "4,4" : "none"),
         (update) => update,
         (exit) => exit.remove()
       )
-      .attr("d", linkRadial()
-          .angle(d_node => d_node.x)
-          .radius(d_node => d_node.y)
-      );
+      .attr("d", linkRadial().angle(d => d.x).radius(d => d.y));
 
+    // Draw node groups
     const nodeGroups = g
       .selectAll(".graph-view-node")
-      .data(allNodes, (d_node) => d_node.id) 
+      .data(allNodes, (d) => d.id)
       .join(
         (enter) => {
           const group = enter.append("g")
             .attr("class", d => d.isProxy ? "graph-view-node proxy" : "graph-view-node");
           
-          group.append("title"); // For tooltips
+          group.append("title");
 
           group.each(function(d) {
             const el = select(this);
             if (d.isProxy) {
-                el.append("rect")
-                    .attr("width", nodeRadius * 2.5)
-                    .attr("height", nodeRadius * 2.5)
-                    .attr("x", -nodeRadius * 1.25)
-                    .attr("y", -nodeRadius * 1.25)
-                    .attr("rx", 3)
-                    .attr("ry", 3)
-                    .style("cursor", "pointer");
+              el.append("rect").attr("width", nodeRadius * 2.5).attr("height", nodeRadius * 2.5)
+                .attr("x", -nodeRadius * 1.25).attr("y", -nodeRadius * 1.25)
+                .attr("rx", 3).attr("ry", 3).style("cursor", "pointer");
             } else {
-                el.append("circle")
-                    .attr("r", nodeRadius)
-                    .attr("stroke-width", 1.5)
-                    .style("cursor", "pointer");
+              el.append("circle").attr("r", nodeRadius).attr("stroke-width", 1.5).style("cursor", "pointer");
             }
           });
 
-          group.append("text")
-            .attr("class", "node-label")
-            .attr("dy", "0.31em")
-            .attr("text-anchor", "middle")
-            .attr("font-size", "10px")
-            .style("pointer-events", "none")
-            .style("user-select", "none");
+          group.append("text").attr("class", "node-label").attr("dy", "0.31em").attr("font-size", "10px")
+            .style("pointer-events", "none").style("user-select", "none");
           
-          group.append("text")
-            .attr("class", "node-rune-icon")
-            .attr("dy", "0.35em") 
-            .attr("text-anchor", "middle")
-            .attr("font-size", `${nodeRadius * 1.2}px`) 
-            .style("pointer-events", "none")
-            .style("user-select", "none");
+          group.append("text").attr("class", "node-rune-icon").attr("dy", "0.35em")
+            .attr("font-size", `${nodeRadius * 1.2}px`).style("pointer-events", "none").style("user-select", "none");
 
-          group.append("text")
-            .attr("class", "node-icon node-lock-icon")
-            .attr("dy", `${nodeRadius * 0.4}px`) 
-            .attr("dx", `${-nodeRadius * 0.9}px`)
-            .attr("text-anchor", "middle")
-            .attr("font-size", `${nodeRadius * 0.8}px`)
-            .attr("fill", "var(--text-tertiary)")
-            .style("pointer-events", "none");
+          group.append("text").attr("class", "node-icon node-lock-icon").attr("dy", `${nodeRadius * 0.4}px`)
+            .attr("dx", `${-nodeRadius * 0.9}px`).attr("font-size", `${nodeRadius * 0.8}px`)
+            .attr("fill", "var(--text-tertiary)").style("pointer-events", "none");
+
           return group;
-        },
-        (update) => update,
-        (exit) => exit.remove()
+        }
       );
 
+    // Apply static attributes and event handlers
+    nodeGroups
+      .attr("transform", d => `translate(${d.y * Math.cos(d.x - Math.PI / 2)}, ${d.y * Math.sin(d.x - Math.PI / 2)})`)
+      .on("click", handleNodeClick)
+      .on("dblclick", handleNodeDoubleClick)
+      .on("contextmenu", handleNodeContextMenu);
+
+    nodeGroups.select("title").text(d => d.isProxy ? `Project: ${d.data.fullName}\n(Click to navigate)` : `${d.data.name}\n(Double-click for Focus View)`);
+
+    nodeGroups.select("circle").attr("fill", d => {
+        if (d.data.importance === 'minor') return 'var(--importance-minor-bg)';
+        if (d.data.importance === 'major') return 'var(--importance-major-bg)';
+        return 'var(--importance-common-bg)';
+    });
+
+    nodeGroups.select(".node-label")
+      .text(d => d.data.name)
+      .attr("fill", d => d.isProxy ? null : "var(--graph-node-text)")
+      .attr("transform", d => {
+          if (d.isProxy) return null;
+          const angle = d.x * 180 / Math.PI;
+          const rotate = angle > 90 && angle < 270 ? angle + 180 : angle;
+          return `rotate(${rotate})`;
+      })
+      .attr("x", d => {
+        if (d.isProxy) return 0;
+        const angle = d.x * 180 / Math.PI;
+        return (angle > 90 && angle < 270) ? -(nodeRadius + 5) : (nodeRadius + 5);
+      })
+      .attr("text-anchor", d => {
+        if (d.isProxy) return "middle";
+        const angle = d.x * 180 / Math.PI;
+        return (angle > 90 && angle < 270) ? "end" : "start";
+      });
+
+    nodeGroups.select(".node-rune-icon")
+      .text(d => d.isProxy ? '' : NODE_IMPORTANCE_RUNES[d.data.importance || 'common'])
+      .attr("fill", d => {
+        if (d.isProxy) return null;
+        if (d.data.importance === 'minor') return 'var(--importance-minor-text)';
+        if (d.data.importance === 'major') return 'var(--importance-major-text)';
+        return 'var(--importance-common-text)';
+      });
+
+    nodeGroups.select(".node-lock-icon").text(d => (d.data.isLocked && !d.isProxy ? "🔒" : ""));
+
+  }, [g, nodes, links, nodeRadius, handleNodeClick, handleNodeDoubleClick, handleNodeContextMenu, projectLinksAndProxyNodes]);
+
+  // Effect for dynamic styling (selection, search highlight)
+  useEffect(() => {
+    if (!g) return;
+    
     const lowerSearchTerm = searchTerm?.toLowerCase().trim();
     const isMatch = (d_node) => {
-        if (!lowerSearchTerm) return false;
-        if (d_node.isProxy) return false;
+        if (!lowerSearchTerm || d_node.isProxy) return false;
         const data = d_node.data;
         return (
             data.name?.toLowerCase().includes(lowerSearchTerm) ||
@@ -238,60 +260,18 @@ const GraphViewComponent = ({
         );
     };
 
-    nodeGroups
-      .attr("transform", (d_node) => `translate(${d_node.y * Math.cos(d_node.x - Math.PI / 2)}, ${d_node.y * Math.sin(d_node.x - Math.PI / 2)})`)
-      .classed("selected", (d_node) => !d_node.isProxy && d_node.data.id === activeNodeId)
-      .classed("highlighted", isMatch)
-      .on("click", handleNodeClick) 
-      .on("dblclick", handleNodeDoubleClick)
-      .on("contextmenu", handleNodeContextMenu);
-
-    nodeGroups.select("title").text(d => d.isProxy ? `Project: ${d.data.fullName}\n(Click to navigate)` : `${d.data.name}\n(Double-click for Focus View)`);
-
-    nodeGroups.select("circle, rect")
-      .attr("fill", (d_node) => {
-          if (d_node.isProxy) return null; // Uses CSS for fill
-          if (d_node.data.importance === 'minor') return 'var(--importance-minor-bg)';
-          if (d_node.data.importance === 'major') return 'var(--importance-major-bg)';
-          return 'var(--importance-common-bg)';
-      })
-      .attr("stroke", (d_node) => {
-          if (d_node.isProxy) return null; // Uses CSS for stroke
-          return d_node.data.id === activeNodeId ? 'var(--graph-node-selected-stroke)' : 'var(--graph-node-stroke)';
-      });
-
-    nodeGroups.select(".node-label")
-      .text((d_node) => d_node.data.name) 
-      .attr("fill", d => d.isProxy ? null : "var(--graph-node-text)")
-      .attr("transform", d_node => {
-          if (d_node.isProxy) return null;
-          const angle = d_node.x * 180 / Math.PI;
-          const rotate = angle > 90 && angle < 270 ? angle + 180 : angle;
-          return `rotate(${rotate})`;
-      })
-      .attr("x", (d_node) => {
-        if (d_node.isProxy) return 0;
-        const angle = d_node.x * 180 / Math.PI;
-        return (angle > 90 && angle < 270) ? -(nodeRadius + 5) : (nodeRadius + 5);
-      })
-      .attr("text-anchor", (d_node) => {
-        if (d_node.isProxy) return "middle";
-        const angle = d_node.x * 180 / Math.PI;
-        return (angle > 90 && angle < 270) ? "end" : "start";
-      });
+    const nodeSelection = g.selectAll(".graph-view-node");
     
-    nodeGroups.select(".node-rune-icon")
-        .text((d_node) => d_node.isProxy ? '' : NODE_IMPORTANCE_RUNES[d_node.data.importance || 'common'])
-        .attr("fill", (d_node) => {
-            if (d_node.isProxy) return null;
-            if (d_node.data.importance === 'minor') return 'var(--importance-minor-text)';
-            if (d_node.data.importance === 'major') return 'var(--importance-major-text)';
-            return 'var(--importance-common-text)';
-        });
+    nodeSelection
+      .classed("selected", d => !d.isProxy && d.data.id === activeNodeId)
+      .classed("highlighted", isMatch);
 
-    nodeGroups.select(".node-lock-icon").text((d_node) => (d_node.data.isLocked && !d_node.isProxy ? "🔒" : ""));
+    nodeSelection.select("circle")
+      .attr("stroke", d => {
+          return d.isProxy ? null : (d.data.id === activeNodeId ? 'var(--graph-node-selected-stroke)' : 'var(--graph-node-stroke)');
+      });
 
-  }, [g, nodes, links, nodeRadius, activeNodeId, searchTerm, handleNodeClick, handleNodeDoubleClick, handleNodeContextMenu, treeData.id, activeProjectId, projects, findLinkSource, projectLinksAndProxyNodes]);
+  }, [g, activeNodeId, searchTerm, nodes]); // Using 'nodes' to re-run on data change.
 
 
   if (!treeData) {

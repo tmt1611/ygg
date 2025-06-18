@@ -1,3 +1,20 @@
+export const isValidTechTreeNodeShape = (data) => {
+    if (typeof data !== 'object' || data === null) return false;
+    if (typeof data.name !== 'string' || data.name.trim() === '') return false;
+    if (typeof data.description !== 'string') return false; 
+    if (typeof data.isLocked !== 'boolean') return false;
+    if (typeof data.importance !== 'string' || !['minor', 'common', 'major'].includes(data.importance)) return false;
+    if (!Array.isArray(data.children)) return false;
+    if (data.id !== undefined && typeof data.id !== 'string') return false;
+    // Optional linking properties
+    if (data.linkedProjectId !== undefined && data.linkedProjectId !== null && typeof data.linkedProjectId !== 'string') return false;
+    if (data.linkedProjectName !== undefined && data.linkedProjectName !== null && typeof data.linkedProjectName !== 'string') return false;
+
+    if (!data.children.every((child) => isValidTechTreeNodeShape(child))) return false;
+    
+    return true;
+};
+
 export const generateUUID = () => {
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
     const r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
