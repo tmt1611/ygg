@@ -1,5 +1,6 @@
 import React from 'react';
 import LoadingSpinner from '../LoadingSpinner.js';
+import ErrorMessage from '../ErrorMessage.js';
 
 const AiInsightsTab = ({
   node,
@@ -40,7 +41,7 @@ const AiInsightsTab = ({
       ),
 
       isLoading && !insightsData && React.createElement(LoadingSpinner, { message: "Fetching Insights..." }),
-      error && React.createElement("p", { className: "error-message-inline", style: { color: 'var(--error-color)', padding: '5px', background: 'var(--error-bg)', borderRadius: 'var(--border-radius)' } }, `Error: ${error}`),
+      error && React.createElement(ErrorMessage, { message: error }),
 
       insightsData ? (
         React.createElement("div", { className: "ai-insights-content-sections" },

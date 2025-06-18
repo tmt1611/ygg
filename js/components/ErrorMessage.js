@@ -12,7 +12,7 @@ const ErrorMessage = ({ message }) => {
     },
       React.createElement("span", { className: "error-icon", "aria-hidden": "true" }, "⚠️"),
       React.createElement("div", null, 
-        React.createElement("strong", null, "Error:"), 
+        React.createElement("strong", null, "Error:"), " ",
         formattedMessage
       )
     )
