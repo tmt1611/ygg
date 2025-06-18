@@ -66,7 +66,7 @@ export const useTreeOperationsAI = ({
       openConfirmModal({
         title: "Overwrite Current Tree?", message: `Generating a new tree for "${initialPrompt}" will replace the current structure in project "${contextText}". Are you sure?`,
         confirmText: "Overwrite", cancelText: "Cancel", onConfirm: performGeneration,
-        confirmButtonStyle: { backgroundColor: 'var(--error-color)', borderColor: 'var(--error-color)' }
+        confirmButtonVariant: 'danger'
       });
     } else { performGeneration(); }
   }, [

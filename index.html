@@ -358,6 +358,21 @@
       html[data-theme='dark'] button.primary { background-image: linear-gradient(to bottom, rgba(255,255,255,0.1), rgba(0,0,0,0.1)); }
       button.primary:hover { background-color: var(--button-primary-hover-bg); border-color: var(--button-primary-hover-bg); }
       button.primary:active { background-color: var(--button-primary-active-bg); }
+      
+      button.success { 
+        background-color: var(--success-color); color: var(--text-on-accent); border-color: var(--success-color); 
+        background-image: linear-gradient(to bottom, rgba(255,255,255,0.08), rgba(0,0,0,0.08));
+      }
+      button.success:hover { background-color: #218838; border-color: #1e7e34; }
+      button.success:active { background-color: #1e7e34; }
+      
+      button.danger { 
+        background-color: var(--error-color); color: var(--text-on-accent); border-color: var(--error-color); 
+        background-image: linear-gradient(to bottom, rgba(255,255,255,0.08), rgba(0,0,0,0.08));
+      }
+      button.danger:hover { background-color: #b02a37; border-color: #a02531; }
+      button.danger:active { background-color: #a02531; }
+
       button.secondary { background-color: var(--button-secondary-bg); color: var(--button-secondary-text); border: 1px solid var(--button-secondary-border); }
       button.secondary:hover { background-color: var(--button-secondary-hover-bg); border-color: var(--button-secondary-hover-border); color: var(--button-secondary-hover-text); }
       button.base-icon-button { background: none; border: none; padding: 5px; font-size: 1.1em; line-height: 1; border-radius: 50%; box-shadow: none; } /* Reduced padding */

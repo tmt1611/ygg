@@ -400,7 +400,34 @@ html[data-theme='light'] .contextual-help-icon:hover, html[data-theme='light'] .
 
 .modal-overlay-basic { position: fixed; inset: 0; background-color: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 15px; backdrop-filter: blur(4px); } /* Reduced padding */
 .modal-content-basic { background-color: var(--panel-bg); padding: 15px 20px; border-radius: var(--border-radius-lg); box-shadow: var(--box-shadow-lg); max-width: 90vw; max-height: 90vh; overflow-y: auto; animation: modalFadeIn 0.3s ease-out; border-top: 3px solid var(--primary-accent); } /* Reduced padding and added top border */
+.modal-content-basic.large { width: clamp(600px, 80vw, 1000px); max-height: 85vh; display: flex; flex-direction: column; }
+.modal-content-basic .modal-title { font-size: 1.4em; color: var(--text-primary); margin-bottom: 15px; flex-shrink: 0; }
 @keyframes modalFadeIn { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+
+
+/* AI Suggestion Modal Styles */
+.ai-suggestion-modal-layout { display: flex; flex-grow: 1; gap: 20px; overflow: hidden; }
+.ai-suggestion-modal-preview-panel { flex: 0 0 60%; display: flex; flex-direction: column; overflow: hidden; border: 1px solid var(--border-color); border-radius: var(--border-radius); background: var(--app-bg); }
+.ai-suggestion-modal-summary-panel { flex: 1 1 40%; display: flex; flex-direction: column; gap: 15px; overflow-y: auto; padding: 0 5px 5px 0; }
+.ai-suggestion-modal-header { font-size: 1.15em; font-weight: 600; color: var(--text-primary); padding: 10px; margin: 0; border-bottom: 1px solid var(--border-color); flex-shrink: 0; }
+.ai-suggestion-modal-content-area { flex-grow: 1; overflow-y: auto; padding: 10px; }
+.ai-suggestion-modal-summary-section { font-size: 0.9em; padding: 10px; background: var(--panel-alt-bg); border: 1px solid var(--border-color); border-radius: var(--border-radius); }
+.ai-suggestion-modal-summary-title { font-weight: 600; font-size: 1.0em; margin-bottom: 8px; color: var(--text-primary); }
+.ai-suggestion-modal-summary-grid { display: grid; grid-template-columns: 1fr auto; gap: 4px 10px; align-items: center; }
+.ai-suggestion-modal-summary-grid .summary-value { text-align: right; }
+.ai-suggestion-modal-summary-net-change { font-weight: bold; }
+.ai-suggestion-modal-critical-warning { font-weight: bold; color: var(--error-color); padding: 8px; background: var(--error-bg); border: 1px solid var(--error-color); border-radius: var(--border-radius); margin-top: 10px; }
+.ai-suggestion-modal-critical-warning .count { font-size: 1.1em; margin-left: 5px; }
+.ai-suggestion-modal-refinement-section { padding-top: 0px; }
+.ai-suggestion-modal-footer-note { font-size: 0.85em; color: var(--text-secondary); margin-top: auto; flex-shrink: 0; }
+.ai-suggestion-modal-footer-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; padding-top: 15px; border-top: 1px solid var(--border-color); flex-shrink: 0; }
+.ai-suggestion-modal-removed-nodes-section { margin-top: 15px; padding-top: 10px; border-top: 1px solid var(--border-color); }
+.ai-suggestion-modal-removed-nodes-title { font-size: 0.95em; font-weight: 600; color: var(--error-color); margin-bottom: 8px; }
+.ai-suggestion-modal-removed-nodes-list { font-size: 0.85em; color: var(--text-secondary); list-style: none; padding: 0; max-height: 120px; overflow-y: auto; }
+.ai-suggestion-modal-removed-nodes-list li { padding: 3px 0; border-bottom: 1px dotted var(--border-color); text-decoration: line-through; }
+.ai-suggestion-modal-removed-nodes-list li strong { text-decoration: none; color: var(--text-primary); }
+.ai-suggestion-modal-removed-nodes-list .node-id { color: var(--error-color); font-size: 0.8em; }
+
 
 /* AI Suggestion Diff Preview Item */
 .diff-list-item {
@@ -492,6 +519,8 @@ html[data-theme='light'] .contextual-help-icon:hover, html[data-theme='light'] .
   word-break: break-word;
   opacity: 0.9;
   line-height: 1.4;
+  max-height: 6em; /* Limit height of long descriptions */
+  overflow: hidden;
 }
 .diff-details-list {
   list-style: none;
@@ -585,11 +614,7 @@ html[data-theme='light'] .contextual-help-icon:hover, html[data-theme='light'] .
 @keyframes warpPulse { 0% { stroke-dasharray: 10 200; stroke-dashoffset: 0; } 50% { stroke-dasharray: 50 160; stroke-dashoffset: -50; } 100% { stroke-dasharray: 10 200; stroke-dashoffset: -210; } }
 #warp-arrow path { fill: var(--focus-connector-stroke); }
 
-/* 
-  The .focus-view-parent-area, .focus-view-focus-node-area, and .focus-view-children-area
-  divs have been removed from the layout in favor of a single .focus-view-layout container 
-  with absolutely positioned nodes. This CSS block is no longer needed.
-*/
+/* The old .focus-view-*-area divs have been removed from the layout. */
 .overlay-panel-view .focus-node-placeholder { padding: 10px 15px; border-radius: var(--border-radius); background: var(--focus-placeholder-bg); color: var(--focus-placeholder-text); font-style: italic; text-align: center; min-width: 100px; } /* Reduced padding/min-width */
 
 .overlay-panel-view .focus-view-detail-panel { 
@@ -828,7 +853,7 @@ html[data-theme='dark'] .ai-insights-section h4 { color: var(--primary-accent-li
   max-height: 4.8em; /* Approx 4 lines with 1.2 line height */
   overflow-y: auto; /* Add scroll for very very long names if they exceed max-height */
 } 
-.celestial-body .celestial-body-desc { font-size: 0.65em; opacity: 0.8; padding: 0 4px; max-height: 1.5em; overflow:hidden;} 
+/* .celestial-body-desc removed from FocusNodeDisplay, style is no longer needed */
 
 .celestial-body.importance-minor { 
   background: radial-gradient(circle, var(--focus-node-asteroid-bg) 60%, var(--focus-node-asteroid-glow)); 

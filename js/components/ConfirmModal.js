@@ -9,7 +9,7 @@ const ConfirmModal = ({
   cancelText = "Cancel",
   onConfirm,
   onCancel,
-  confirmButtonStyle, 
+  confirmButtonVariant,
 }) => {
   const confirmButtonRef = useRef(null);
 
@@ -39,13 +39,12 @@ const ConfirmModal = ({
     return null;
   }
   
-  const finalConfirmButtonStyle = confirmButtonStyle 
-    ? confirmButtonStyle 
-    : { };
-
+  if (!isOpen) {
+    return null;
+  }
 
   return (
-    React.createElement("div", { 
+    React.createElement("div", {
       className: "modal-overlay-basic",
       role: "dialog",
       "aria-modal": "true",
@@ -58,11 +57,11 @@ const ConfirmModal = ({
         ),
         React.createElement("p", { id: "confirm-modal-message", style: { color: 'var(--text-secondary)', marginBottom: '25px', whiteSpace: 'pre-wrap', lineHeight: '1.5' }}, message),
         React.createElement("div", { style: { display: 'flex', justifyContent: 'flex-end', gap: '10px' }},
-          cancelText && onCancel && ( 
+          cancelText && onCancel && (
             React.createElement("button", {
               type: "button",
               onClick: onCancel,
-              className: "secondary" 
+              className: "secondary"
             },
               cancelText
             )
@@ -71,8 +70,7 @@ const ConfirmModal = ({
             ref: confirmButtonRef,
             type: "button",
             onClick: onConfirm,
-            className: !confirmButtonStyle ? "primary" : "", 
-            style: finalConfirmButtonStyle
+            className: confirmButtonVariant === 'danger' ? 'danger' : 'primary'
           },
             confirmText
           )
