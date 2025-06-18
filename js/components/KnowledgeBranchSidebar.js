@@ -83,41 +83,46 @@ const KnowledgeBranchSidebar = ({
           ),
           React.createElement("div", { className: "sidebar-tools-area" },
             activeSidebarTab === 'ai-tools' && (
-              React.createElement("div", {style: {display: 'flex', flexDirection: 'column', gap: '20px'}},
-                React.createElement(ModificationPromptInput, {
-                  prompt: modificationPrompt,
-                  setPrompt: setModificationPrompt,
-                  onModify: onModifyAiTree,
-                  isLoading: isAiModifying,
-                  disabled: !hasTechTreeData || !apiKeyIsSet || isAiModifying || isAppBusy,
-                  isApiKeySet: apiKeyIsSet,
-                  hasTreeData: hasTechTreeData
-                }),
-                hasTechTreeData && canUndoAiMod && (
-                  React.createElement("button", { onClick: onUndoAiModification, disabled: isAiModifying || isAppBusy, className: "secondary", style: { width: '100%'}},
-                    "Undo Last AI Mod"
+              React.createElement("div", {style: {display: 'flex', flexDirection: 'column', gap: '15px'}},
+                React.createElement("fieldset", { className: "sidebar-fieldset" },
+                  React.createElement("legend", null, "🌳 Tree Modifier AI"),
+                  React.createElement(ModificationPromptInput, {
+                    prompt: modificationPrompt,
+                    setPrompt: setModificationPrompt,
+                    onModify: onModifyAiTree,
+                    isLoading: isAiModifying,
+                    disabled: !hasTechTreeData || !apiKeyIsSet || isAiModifying || isAppBusy,
+                    isApiKeySet: apiKeyIsSet,
+                    hasTreeData: hasTechTreeData,
+                    labelOverride: null
+                  }),
+                  hasTechTreeData && canUndoAiMod && (
+                    React.createElement("button", { onClick: onUndoAiModification, disabled: isAiModifying || isAppBusy, className: "secondary", style: { width: '100%', marginTop: '8px' }},
+                      "Undo Last AI Mod"
+                    )
                   )
                 ),
 
-                React.createElement("div", { className: "panel", style:{padding: '10px'}},
-                   React.createElement("h3", { className: "panel-header", style:{fontSize: '1em', marginBottom: '10px'}},
-                      "Project AI",
-                      React.createElement(ContextualHelpTooltip, { helpText: "Get AI-powered suggestions for high-level next steps or new development pathways for your project based on its current context and structure." })
-                    ),
+                React.createElement("fieldset", { className: "sidebar-fieldset" },
+                  React.createElement("legend", null, 
+                    "✨ Strategic Advisor AI",
+                    React.createElement(ContextualHelpTooltip, { helpText: "Get AI-powered suggestions for high-level next steps or new development pathways for your project based on its current context and structure." })
+                  ),
                   React.createElement("button", {
                     onClick: onGenerateStrategicSuggestions,
                     disabled: !canGenerateStrategicSuggestions,
                     className: "primary panel-button",
+                    style: { width: '100%' },
                      title:
                       !apiKeyIsSet ? "API Key required for AI suggestions." :
                       !initialPromptForStrategy?.trim() ? "Project context (name/topic) must be set." :
                       isAppBusy || isFetchingStrategicSuggestions ? "Processing another task..." :
                       "Generate AI suggestions for project development"
                   },
-                    "✨ Generate Strategic Ideas"
+                    isFetchingStrategicSuggestions ? "Analyzing..." : "✨ Generate Strategic Ideas"
                   ),
 
-                  isFetchingStrategicSuggestions && React.createElement(LoadingSpinner, { message: "Analyzing Project..." }),
+                  isFetchingStrategicSuggestions && React.createElement(LoadingSpinner, { message: null }),
                   strategicSuggestionsError && React.createElement(ErrorMessage, { message: strategicSuggestionsError }),
 
                   strategicSuggestions && strategicSuggestions.length > 0 && (
@@ -146,20 +151,20 @@ const KnowledgeBranchSidebar = ({
                       )
                     )
                   ),
-                  !isFetchingStrategicSuggestions && !strategicSuggestionsError && !strategicSuggestions && (
-                     React.createElement(React.Fragment, null,
+                   !isFetchingStrategicSuggestions && !strategicSuggestionsError && !strategicSuggestions && (
+                     React.createElement("div", {style: {marginTop: '8px'}},
                         !apiKeyIsSet && (
-                            React.createElement("p", { style: { textAlign: 'center', fontSize: '0.8em', color: 'var(--warning-color)', marginTop: '8px' }},
+                            React.createElement("p", { style: { textAlign: 'center', fontSize: '0.8em', color: 'var(--warning-color)'}},
                             "API Key not set."
                             )
                         ),
                         apiKeyIsSet && !initialPromptForStrategy?.trim() && (
-                            React.createElement("p", { style: { textAlign: 'center', fontSize: '0.8em', color: 'var(--warning-color)', marginTop: '8px' }},
+                            React.createElement("p", { style: { textAlign: 'center', fontSize: '0.8em', color: 'var(--warning-color)'}},
                             "Project context empty."
                             )
                         ),
                         canGenerateStrategicSuggestions && (
-                            React.createElement("p", { style: { textAlign: 'center', fontSize: '0.8em', color: 'var(--text-tertiary)', fontStyle: 'italic', marginTop: '8px' }},
+                            React.createElement("p", { style: { textAlign: 'center', fontSize: '0.8em', color: 'var(--text-tertiary)', fontStyle: 'italic'}},
                             "Click button to get ideas."
                             )
                         )
