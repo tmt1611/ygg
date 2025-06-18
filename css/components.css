@@ -700,7 +700,7 @@ html[data-theme='sol'] .contextual-help-icon:hover, html[data-theme='sol'] .cont
   border-radius: 0 0 var(--border-radius-lg) var(--border-radius-lg); 
 }
 .overlay-panel-view .focus-view-header { display: none; }
-.overlay-panel-view .focus-view-main-area { flex-grow: 1; display: flex; position: relative; padding: 12px; gap: 12px; overflow: hidden; }
+.overlay-panel-view .focus-view-main-area { flex-grow: 1; display: flex; position: relative; padding: 12px; gap: 12px; }
 
 .overlay-panel-view .focus-view-layout { 
   flex-grow: 1; 
@@ -708,7 +708,7 @@ html[data-theme='sol'] .contextual-help-icon:hover, html[data-theme='sol'] .cont
   display: flex; /* For overall centering if needed, but nodes are absolute */
   align-items: center; /* Center placeholder text if no nodes */
   justify-content: center; /* Center placeholder text if no nodes */
-  overflow-y: auto; /* Allow scrolling for tall layouts */
+  /* overflow-y is now handled by .overlay-panel-content */
   overflow-x: hidden;
   min-height: 350px;
 }
