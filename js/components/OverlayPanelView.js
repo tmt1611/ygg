@@ -1,5 +1,6 @@
 
 import React, { useEffect, useRef } from 'react';
+import PathToRootDisplay from './PathToRootDisplay.js';
 
 const OverlayPanelView = ({
   title,
@@ -9,6 +10,7 @@ const OverlayPanelView = ({
   isResizable = true, 
   showCloseButton = true,
   customHeaderActions,
+  pathDisplayProps,
   onRestoreFocus, 
 }) => {
   const panelRef = useRef(null);
@@ -45,7 +47,10 @@ const OverlayPanelView = ({
       tabIndex: isOpen ? -1 : undefined 
     },
       React.createElement("div", { className: "overlay-panel-header" },
-        React.createElement("h3", { id: "overlay-panel-title", style: { color: 'var(--primary-accent)', margin: 0 }}, title),
+        React.createElement("div", { className: "overlay-panel-header-main" },
+            React.createElement("h3", { id: "overlay-panel-title", style: { color: 'var(--primary-accent)', margin: 0 }}, title),
+            pathDisplayProps && React.createElement(PathToRootDisplay, { ...pathDisplayProps })
+        ),
         React.createElement("div", { className: "overlay-panel-header-actions", style: {display: 'flex', gap: '8px', alignItems: 'center'}},
             customHeaderActions,
             showCloseButton && (

@@ -35,29 +35,25 @@ const PathToRootDisplay = ({
     return React.createElement("div", { className: "path-to-root-display" }, React.createElement("span", null, title));
   }
 
-  const pathTitle = pathContext === 'stellar' ? "Route to Sector Core:" : "Path:";
+  const pathTitle = pathContext === 'stellar' ? "Route:" : "Path:";
 
   return (
     React.createElement("div", { className: "path-to-root-display", "aria-label": "Navigation path to current object" },
-      React.createElement("strong", { style: { marginRight: '5px', color: 'var(--focus-panel-text)' }}, pathTitle),
+      React.createElement("strong", { style: { marginRight: '5px', color: 'var(--text-secondary)', flexShrink: 0 }}, pathTitle),
       pathNodes.map((node, index) => (
         React.createElement(React.Fragment, { key: node.id },
           React.createElement("span", {
-            className: "path-segment",
             onClick: () => onSelectPathNode(node.id),
             onKeyDown: (e) => { if (e.key === 'Enter' || e.key === ' ') onSelectPathNode(node.id); },
             role: "button",
             tabIndex: 0,
             title: `Navigate to: ${node.name}`,
-            style: { 
-                fontWeight: node.id === currentNodeId ? 'bold' : 'normal', 
-                color: node.id === currentNodeId ? 'var(--focus-node-beacon-color)' : 'var(--primary-accent-light)', 
-                textDecoration: node.id !== currentNodeId ? 'underline' : 'none'
-            }
+            "aria-current": node.id === currentNodeId ? "page" : undefined,
+            className: `path-segment ${node.id === currentNodeId ? 'current-focus-path-node' : ''}`
           },
             node.name
           ),
-          index < pathNodes.length - 1 && React.createElement("span", { className: "path-separator", "aria-hidden": "true", style: {color: 'var(--text-tertiary)'}}, ">")
+          index < pathNodes.length - 1 && React.createElement("span", { className: "path-separator", "aria-hidden": "true" }, ">")
         )
       ))
     )

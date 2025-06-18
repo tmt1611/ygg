@@ -312,6 +312,14 @@ html[data-theme='sol'] .yggdrasil-app-body.sidebar-collapsed .knowledge-branch-s
   background-color: var(--panel-alt-bg);
   border-top-left-radius: var(--border-radius-lg);
   border-top-right-radius: var(--border-radius-lg);
+  gap: 12px;
+}
+.overlay-panel-header-main {
+  flex-grow: 1;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0; /* For flexbox truncation */
 }
 .overlay-panel-header h3 { margin: 0; font-size: 1.15em; color: var(--primary-accent); } /* Reduced font size */
 .overlay-panel-content { flex-grow: 1; padding: 12px; overflow-y: auto; } /* Reduced padding */
@@ -686,7 +694,7 @@ html[data-theme='sol'] .contextual-help-icon:hover, html[data-theme='sol'] .cont
   border-radius: 0 0 var(--border-radius-lg) var(--border-radius-lg); 
 }
 .overlay-panel-view .focus-view-header { display: none; }
-.overlay-panel-view .focus-view-main-area { flex-grow: 1; display: flex; position: relative; padding: 12px; gap: 12px; overflow: hidden; } /* Reduced padding/gap */
+.overlay-panel-view .focus-view-main-area { flex-grow: 1; display: flex; position: relative; padding: 12px; gap: 12px; overflow: hidden; }
 
 .overlay-panel-view .focus-view-layout { 
   flex-grow: 1; 
@@ -1328,6 +1336,9 @@ html[data-theme='nebula'] .history-item-summary strong {
 .history-item-summary strong.history-entity {
     color: var(--primary-accent-dark);
     font-weight: 600;
+    background-color: rgba(var(--primary-accent-rgb), 0.07);
+    padding: 1px 3px;
+    border-radius: var(--border-radius);
 }
 html[data-theme='dark'] .history-item-summary strong.history-entity,
 html[data-theme='nebula'] .history-item-summary strong.history-entity {
@@ -1338,7 +1349,11 @@ html[data-theme='nebula'] .history-item-summary strong.history-entity {
 .history-item-summary strong.history-keyword {
   color: var(--text-secondary);
   font-weight: 500;
-  font-style: italic;
+  font-style: normal;
+  text-transform: uppercase;
+  font-size: 0.9em;
+  letter-spacing: 0.5px;
+  opacity: 0.9;
 }
 
 

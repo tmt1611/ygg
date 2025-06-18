@@ -102,8 +102,20 @@ const MainContentRouter = ({
     }
 
     if (activeOverlayPanel === 'focus' && viewStates.focusNodeId) {
+      const pathProps = {
+          treeData: techTreeData,
+          currentNodeId: viewStates.focusNodeId,
+          onSelectPathNode: (nodeId) => { viewStates.setFocusNodeId(nodeId); viewStates.setSelectedNodeInFocusPanelId(nodeId); if(nodeId) {handleNodeSelectedForInsightsOrActions(nodeId);}},
+          pathContext: 'stellar',
+      };
       return (
-        React.createElement(OverlayPanelView, { title: "Focus View", isOpen: true, onClosePanel: () => setActiveOverlayPanel(null), onRestoreFocus: modalManager.restoreFocus },
+        React.createElement(OverlayPanelView, { 
+            title: "Focus View", 
+            isOpen: true, 
+            onClosePanel: () => setActiveOverlayPanel(null), 
+            onRestoreFocus: modalManager.restoreFocus,
+            pathDisplayProps: pathProps 
+        },
             React.createElement(FocusViewComponent, {
                 treeData: techTreeData,
                 focusNodeId: viewStates.focusNodeId,

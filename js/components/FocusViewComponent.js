@@ -2,7 +2,7 @@
 import React, { useMemo, useCallback, useRef } from 'react';
 import { getAllNodesAsMap } from '../utils.js'; 
 import FocusNodeDisplay from './FocusNodeDisplay.js';
-import PathToRootDisplay from './PathToRootDisplay.js';
+// PathToRootDisplay is now rendered in OverlayPanelView
 import FocusViewDetailPanel from './FocusViewDetailPanel.js'; 
 import { useFocusViewLayout } from '../hooks/useFocusViewLayout.js';
 
