@@ -380,30 +380,29 @@ export const getAllDescendantNodeIds = (rootNode, parentNodeId) => {
 };
 
 export const removeNodeAndChildrenFromTree = (rootNode, nodeIdToRemove) => {
-  if (!rootNode) return null;
-  if (rootNode.id === nodeIdToRemove) return null; 
+  if (!rootNode || rootNode.id === nodeIdToRemove) return null;
 
   function filterRecursive(node) {
-    if (node.id === nodeIdToRemove) return null; 
+    // Base case for recursion: if the current node is the one to remove, return null.
+    // This will cause it to be filtered out by its parent.
+    if (node.id === nodeIdToRemove) {
+      return null;
+    }
 
-    let newChildren = undefined;
+    // If the node has children, recursively filter them.
     if (Array.isArray(node.children) && node.children.length > 0) {
-      const filtered = node.children
-        .map(child => filterRecursive(child))
-        .filter((child) => child !== null); 
-      
-      if (filtered.length !== node.children.length || filtered.some((child, idx) => child.id !== node.children[idx].id)) {
-        newChildren = filtered.length > 0 ? filtered : null; 
-      } else {
-        newChildren = node.children; 
+      const newChildren = node.children
+        .map(child => filterRecursive(child)) // Recursively call on each child
+        .filter(child => child !== null); // Filter out any nulls returned from recursion (i.e., removed nodes)
+
+      // If the children array has changed, it means a descendant was removed.
+      // Return a new node object with the new children array.
+      if (newChildren.length !== node.children.length) {
+        return { ...node, children: newChildren };
       }
-    } else {
-      newChildren = node.children; 
     }
 
-    if (newChildren !== node.children) {
-      return { ...node, children: newChildren };
-    }
+    // If no changes to this node or its children, return the original node to avoid unnecessary object recreation.
     return node;
   }
 

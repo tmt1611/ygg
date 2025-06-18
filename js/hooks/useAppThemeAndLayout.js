@@ -2,7 +2,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import { APP_STORAGE_KEYS } from '../constants.js';
 
-const THEME_CYCLE = ['dark', 'light', 'nebula'];
+const THEME_CYCLE = ['dark', 'light', 'sol', 'nebula'];
 
 export const useAppThemeAndLayout = (addHistoryEntry) => {
   const [themeMode, setThemeMode] = useState(() => {

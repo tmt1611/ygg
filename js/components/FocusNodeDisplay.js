@@ -46,14 +46,6 @@ const FocusNodeDisplay = React.forwardRef(
             displayLinkIcon && (
                 React.createElement("span", { 
                     className: "celestial-body-link-indicator", 
-                    style: {
-                        position: 'absolute', 
-                        top: '4px', 
-                        right: '4px', 
-                        fontSize: '1em', 
-                        color: 'var(--focus-node-beacon-color)', 
-                        filter: 'drop-shadow(0 0 3px var(--focus-node-beacon-color))'
-                    },
                     "aria-hidden": "true"
                 },
                     displayLinkIcon

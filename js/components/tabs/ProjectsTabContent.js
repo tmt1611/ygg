@@ -91,7 +91,7 @@ const ProjectsTabContent = ({
                       ),
                       React.createElement("div", { className: "project-actions" },
                         React.createElement("button", { className: "base-icon-button", onClick: () => onLoadProject(project.id), disabled: isAppBusy || (project.id === activeProjectId && !project.isExample), title: `Load project: ${project.name}`}, "🔄"),
-                        React.createElement("button", { className: "base-icon-button", onClick: () => onLoadAndGoToGraph(project.id), disabled: isAppBusy, title: `Load "${project.name}" and view graph`}, "👁️"),
+                        React.createElement("button", { className: "base-icon-button", onClick: () => onLoadAndGoToGraph(project.id), disabled: isAppBusy, title: `Load "${project.name}" and view graph`}, "🚀"),
                         React.createElement("button", { className: "base-icon-button", onClick: () => onRenameProject(project.id, project.name), disabled: isAppBusy, title: `Rename project: ${project.name}`}, "✏️"),
                         React.createElement("button", { className: "base-icon-button delete-action", onClick: () => onDeleteProject(project.id), disabled: isAppBusy, title: `Delete project: ${project.name}`}, "🗑️")
                       )

@@ -223,6 +223,88 @@
         --focus-placeholder-text: #a0a8c0;
       }
 
+      /* Sol Theme (Warm Paper) */
+      html[data-theme='sol'] {
+        --app-bg: #FDFBF6;
+        --panel-bg: #FFFFFF;
+        --panel-bg-rgb: 255,255,255;
+        --panel-alt-bg: #F9F5EF;
+        --panel-alt-bg-rgb: 249,245,239;
+
+        --text-primary: #4E443B;
+        --text-secondary: #716A63;
+        --text-tertiary: #968F8A;
+        --text-on-dark-bg: #4E443B;
+        --text-on-accent: #FFFFFF;
+        --text-on-bark: var(--text-primary);
+        
+        --primary-accent: #D95D39; /* Warm Rust */
+        --primary-accent-rgb: 217,93,57;
+        --primary-accent-dark: #C04A27;
+        --primary-accent-light: #F28C6B;
+        --primary-accent-hover-bg: rgba(217,93,57, 0.08);
+
+        --secondary-accent: #7E8D85; /* Muted Sage Green */
+        --secondary-accent-dark: #63716A;
+        
+        --border-color: #DCD6CF;
+        --border-color-strong: #B8AF9E;
+        --input-border-color: #CEC5BB;
+        
+        --success-color: #558B2F; /* Olive Green */
+        --success-bg: #F1F8E9;
+        --error-color: #C62828; /* Deep Red */
+        --error-bg: #FFEBEE;
+        --warning-color: #E65100; /* Amber */
+        --warning-bg: #FFF3E0;
+
+        --disabled-bg: #F5F5F5;
+        --disabled-text: #BDBDBD;
+        --disabled-border: #E0E0E0;
+
+        --button-primary-bg: var(--primary-accent);
+        --button-primary-hover-bg: var(--primary-accent-dark);
+        
+        --button-secondary-text: var(--primary-accent);
+        --button-secondary-border: var(--primary-accent-light);
+        --button-secondary-hover-bg: var(--primary-accent-hover-bg);
+        --button-secondary-hover-border: var(--primary-accent);
+        --button-secondary-hover-text: var(--primary-accent-dark);
+
+        --graph-node-stroke: var(--border-color-strong);
+        --graph-link-stroke-ecosystem: #8C7853; /* Sepia */
+        --graph-node-highlight-stroke: var(--secondary-accent-dark);
+        
+        --importance-minor-bg: rgba(126, 141, 133, 0.15); /* Sage bg */
+        --importance-minor-text: #33691E;
+        --importance-minor-border: #A5D6A7; 
+        --importance-common-bg: rgba(217, 93, 57, 0.1); /* Rust bg */
+        --importance-common-text: #BF360C;
+        --importance-common-border: #FFCC80;
+        --importance-major-bg: rgba(69, 90, 100, 0.15); /* Slate bg */
+        --importance-major-text: #263238;
+        --importance-major-border: #B0BEC5;
+
+        --yggdrasil-bark-bg: #F4EFE3; /* Parchment */
+        --yggdrasil-bark-border: #D2B48C;
+
+        /* Focus View override for Sol Theme */
+        --focus-stellar-bg: #e6e2d9; 
+        --focus-connector-stroke: var(--primary-accent-dark); 
+        --focus-node-asteroid-bg: #b0a99a; 
+        --focus-node-asteroid-glow: #c7c1b5;
+        --focus-node-planet-bg: #7E8D85; 
+        --focus-node-planet-glow: #96a39c;
+        --focus-node-star-bg: #D95D39; 
+        --focus-node-star-glow: #e07f61;
+        --focus-node-shield-color: #5d8eac; 
+        --focus-node-beacon-color: #E65100;
+        --focus-panel-text: var(--text-primary);
+        --focus-panel-bg: rgba(255, 255, 255, 0.85);
+        --focus-placeholder-bg: rgba(249,245,239, 0.8);
+        --focus-placeholder-text: var(--text-tertiary);
+      }
+
       /* Nebula Theme */
       html[data-theme='nebula'] {
         --app-bg: #0d1117;
@@ -342,6 +424,7 @@
       select { appearance: none; background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%232E7D32%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E'); background-repeat: no-repeat; background-position: right 8px center; background-size: 9px; padding-right: 25px; } /* Adjusted select arrow */
       html[data-theme='dark'] select { background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23B0B0B0%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E'); }
       html[data-theme='nebula'] select { background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%238b949e%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E'); }
+      html[data-theme='sol'] select { background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23716A63%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E'); }
 
       button, input[type="submit"], input[type="button"] {
         padding: 8px 12px; border: 1px solid var(--button-default-border); border-radius: var(--border-radius); /* Reduced padding */

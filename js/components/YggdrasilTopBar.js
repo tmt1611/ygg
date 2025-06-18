@@ -4,7 +4,8 @@ import React, { useState, useEffect, useMemo } from 'react';
 const getNextThemeInfo = (currentTheme) => {
     switch (currentTheme) {
         case 'dark': return { next: 'Light', icon: '☀️' };
-        case 'light': return { next: 'Nebula', icon: '🌌' };
+        case 'light': return { next: 'Sol', icon: '📜' };
+        case 'sol': return { next: 'Nebula', icon: '🌌' };
         case 'nebula': return { next: 'Dark', icon: '🌙' };
         default: return { next: 'Light', icon: '☀️' };
     }

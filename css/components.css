@@ -27,7 +27,8 @@
   color: var(--primary-accent-light);
   text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
 }
-html[data-theme='light'] .yggdrasil-top-bar-title { color: var(--primary-accent-dark); text-shadow: 1px 1px 1px rgba(0,0,0,0.05); }
+html[data-theme='light'] .yggdrasil-top-bar-title,
+html[data-theme='sol'] .yggdrasil-top-bar-title { color: var(--primary-accent-dark); text-shadow: 1px 1px 1px rgba(0,0,0,0.05); }
 
 .yggdrasil-top-bar-nav-button {
   padding: 7px 10px; /* Reduced padding */
@@ -39,13 +40,15 @@ html[data-theme='light'] .yggdrasil-top-bar-title { color: var(--primary-accent-
   background-color: transparent;
   transition: background-color 0.2s, color 0.2s, border-color 0.2s;
 }
-html[data-theme='light'] .yggdrasil-top-bar-nav-button { color: var(--primary-accent-dark); }
+html[data-theme='light'] .yggdrasil-top-bar-nav-button,
+html[data-theme='sol'] .yggdrasil-top-bar-nav-button { color: var(--primary-accent-dark); }
 .yggdrasil-top-bar-nav-button:hover {
   background-color: rgba(var(--primary-accent-rgb), 0.15);
   border-color: var(--primary-accent-light);
   color: var(--primary-accent-light);
 }
-html[data-theme='light'] .yggdrasil-top-bar-nav-button:hover {
+html[data-theme='light'] .yggdrasil-top-bar-nav-button:hover,
+html[data-theme='sol'] .yggdrasil-top-bar-nav-button:hover {
   background-color: var(--primary-accent-hover-bg);
   border-color: var(--primary-accent);
   color: var(--primary-accent-dark);
@@ -119,10 +122,11 @@ html[data-theme='dark'] .yggdrasil-top-bar-search-input:focus {
   opacity: 0.8;
   margin-right: 4px;
 }
-html[data-theme='light'] .yggdrasil-top-bar-active-project {
+html[data-theme='light'] .yggdrasil-top-bar-active-project,
+html[data-theme='sol'] .yggdrasil-top-bar-active-project {
   color: var(--primary-accent-dark);
   border-color: var(--yggdrasil-bark-border);
-  background-color: #fbf5e9;
+  background-color: var(--panel-alt-bg);
 }
 
 
@@ -206,12 +210,14 @@ html[data-theme='light'] .yggdrasil-top-bar-active-project {
   align-items: center;
   gap: 2px; /* Reduced gap for icon and label */
 }
-html[data-theme='light'] .sidebar-tab-button { color: var(--primary-accent-dark); }
+html[data-theme='light'] .sidebar-tab-button,
+html[data-theme='sol'] .sidebar-tab-button { color: var(--primary-accent-dark); }
 .sidebar-tab-button:hover {
   background-color: rgba(var(--primary-accent-rgb), 0.1);
   border-color: rgba(var(--primary-accent-rgb), 0.3);
 }
-html[data-theme='light'] .sidebar-tab-button:hover {
+html[data-theme='light'] .sidebar-tab-button:hover,
+html[data-theme='sol'] .sidebar-tab-button:hover {
   background-color: var(--primary-accent-hover-bg);
   border-color: var(--primary-accent-light);
 }
@@ -230,20 +236,24 @@ html[data-theme='dark'] .sidebar-tab-button.active { color: var(--yggdrasil-bark
 .sidebar-tools-area::-webkit-scrollbar-track { background: rgba(var(--panel-bg-rgb),0.05); border-radius: 3px; }
 .sidebar-tools-area::-webkit-scrollbar-thumb { background-color: var(--secondary-accent-dark); border-radius: 3px; border: 1px solid transparent; background-clip: content-box;}
 .sidebar-tools-area::-webkit-scrollbar-thumb:hover { background-color: var(--secondary-accent); }
-html[data-theme='light'] .sidebar-tools-area::-webkit-scrollbar-thumb { background-color: var(--border-color-strong); } 
-html[data-theme='light'] .sidebar-tools-area::-webkit-scrollbar-thumb:hover { background-color: #a99a93; }
+html[data-theme='light'] .sidebar-tools-area::-webkit-scrollbar-thumb,
+html[data-theme='sol'] .sidebar-tools-area::-webkit-scrollbar-thumb { background-color: var(--border-color-strong); } 
+html[data-theme='light'] .sidebar-tools-area::-webkit-scrollbar-thumb:hover,
+html[data-theme='sol'] .sidebar-tools-area::-webkit-scrollbar-thumb:hover { background-color: var(--secondary-accent-dark); }
 
 
 
 .knowledge-branch-sidebar .panel-content-wrapper { color: var(--text-on-dark-bg); padding: 4px 10px 10px 10px; } /* Reduced padding for CollapsiblePanel content */
-html[data-theme='light'] .knowledge-branch-sidebar .panel-content-wrapper { color: var(--text-secondary); }
+html[data-theme='light'] .knowledge-branch-sidebar .panel-content-wrapper,
+html[data-theme='sol'] .knowledge-branch-sidebar .panel-content-wrapper { color: var(--text-secondary); }
 
 
 .sidebar-header-logo { display: none; margin: 10px auto 4px auto; } 
 .yggdrasil-app-body.sidebar-collapsed .knowledge-branch-sidebar .sidebar-header-logo {
     display: block; width: 32px; height: 32px; fill: var(--primary-accent-light); 
 }
-html[data-theme='light'] .yggdrasil-app-body.sidebar-collapsed .knowledge-branch-sidebar .sidebar-header-logo {
+html[data-theme='light'] .yggdrasil-app-body.sidebar-collapsed .knowledge-branch-sidebar .sidebar-header-logo,
+html[data-theme='sol'] .yggdrasil-app-body.sidebar-collapsed .knowledge-branch-sidebar .sidebar-header-logo {
     fill: var(--primary-accent-dark);
 }
 
@@ -390,7 +400,8 @@ html[data-theme='light'] .yggdrasil-app-body.sidebar-collapsed .knowledge-branch
   font-size: 1.1em; margin-right: 8px; color: var(--primary-accent); /* Reduced size/margin */
   filter: drop-shadow(0 0 2px rgba(var(--primary-accent-rgb), 0.3));
 }
-html[data-theme='light'] .panel-header-icon { color: var(--primary-accent-dark); filter: none; }
+html[data-theme='light'] .panel-header-icon,
+html[data-theme='sol'] .panel-header-icon { color: var(--primary-accent-dark); filter: none; }
 .panel-header-actions { display: flex; align-items: center; gap: 4px; margin-left: auto; } /* Reduced gap */
 .panel-header-actions .base-icon-button { font-size: 0.9em; padding: 3px; } /* Reduced size/padding */
 
@@ -422,10 +433,12 @@ html[data-theme='light'] .panel-header-icon { color: var(--primary-accent-dark);
 .contextual-help-icon:hover, .contextual-help-icon:focus-within { 
   background-color: var(--primary-accent); transform: scale(1.1);
 }
-html[data-theme='light'] .contextual-help-icon {
+html[data-theme='light'] .contextual-help-icon,
+html[data-theme='sol'] .contextual-help-icon {
   background-color: var(--border-color-strong);
 }
-html[data-theme='light'] .contextual-help-icon:hover, html[data-theme='light'] .contextual-help-icon:focus-within {
+html[data-theme='light'] .contextual-help-icon:hover, html[data-theme='light'] .contextual-help-icon:focus-within,
+html[data-theme='sol'] .contextual-help-icon:hover, html[data-theme='sol'] .contextual-help-icon:focus-within {
   background-color: var(--primary-accent-dark);
 }
 .contextual-help-icon .tooltip-text { 
@@ -749,6 +762,15 @@ html[data-theme='light'] .graph-view-svg-container {
   background-size: 25px 25px, 25px 25px, auto, auto;
 }
 
+html[data-theme='sol'] .graph-view-svg-container { 
+  --grid-line-color: rgba(184, 175, 158, 0.4);
+  background: 
+    linear-gradient(var(--grid-line-color) 1px, transparent 1px),
+    linear-gradient(to right, var(--grid-line-color) 1px, transparent 1px),
+    radial-gradient(ellipse at center, rgba(217, 93, 57, 0.03) 0%, rgba(126, 141, 133, 0.02) 40%, transparent 75%), var(--app-bg);
+  background-size: 25px 25px, 25px 25px, auto, auto;
+}
+
 .graph-view-node circle {
   transition: transform 0.2s ease-out, filter 0.2s ease-out;
   filter: drop-shadow(0px 2px 3px rgba(0,0,0,0.15));
@@ -852,7 +874,8 @@ html[data-theme='dark'] .graph-view-node.proxy rect {
   border-bottom: 1px solid rgba(var(--primary-accent-rgb),0.2); 
   padding-bottom: 4px;
 }
-html[data-theme='dark'] .ai-insights-section h4 { color: var(--primary-accent-light); }
+html[data-theme='dark'] .ai-insights-section h4,
+html[data-theme='nebula'] .ai-insights-section h4 { color: var(--primary-accent-light); }
 
 .ai-insights-panel textarea { font-size: 0.85em; padding: 6px 8px; }
 
@@ -916,6 +939,11 @@ html[data-theme='dark'] .ai-insights-section h4 { color: var(--primary-accent-li
 .celestial-body.has-link .celestial-body-link-indicator { animation: pulseBeacon 1.5s infinite alternate; }
 /* .celestial-body.has-link::before { content: '🔗'; position: absolute; top: 4px; right: 4px; font-size: 1em; color: var(--focus-node-beacon-color); animation: pulseBeacon 1.5s infinite alternate; filter: drop-shadow(0 0 3px var(--focus-node-beacon-color)); } */
 @keyframes pulseBeacon { from { opacity: 0.6; transform: scale(1); } to { opacity: 1; transform: scale(1.2); } }
+.celestial-body-link-indicator { /* Shared style for link indicators */
+  position: absolute; top: 4px; right: 4px; font-size: 1em; 
+  color: var(--focus-node-beacon-color); 
+  filter: drop-shadow(0 0 3px var(--focus-node-beacon-color));
+}
 .celestial-body-link-indicator { /* Shared style for link indicators */
   position: absolute; top: 4px; right: 4px; font-size: 1em; 
   color: var(--focus-node-beacon-color); 
@@ -1032,7 +1060,8 @@ mark.search-highlight { background-color: var(--warning-bg); color: var(--text-p
   flex-grow: 1;
 }
 
-html[data-theme='light'] .knowledge-branch-sidebar .collapsible-panel-header h3 {
+html[data-theme='light'] .knowledge-branch-sidebar .collapsible-panel-header h3,
+html[data-theme='sol'] .knowledge-branch-sidebar .collapsible-panel-header h3 {
   color: var(--primary-accent-dark);
 }
 
@@ -1042,7 +1071,8 @@ html[data-theme='light'] .knowledge-branch-sidebar .collapsible-panel-header h3 
   font-size: 1.1em;
 }
 
-html[data-theme='light'] .knowledge-branch-sidebar .panel-header-icon {
+html[data-theme='light'] .knowledge-branch-sidebar .panel-header-icon,
+html[data-theme='sol'] .knowledge-branch-sidebar .panel-header-icon {
   color: var(--primary-accent-dark);
 }
 
@@ -1063,7 +1093,8 @@ html[data-theme='light'] .knowledge-branch-sidebar .panel-header-icon {
   cursor: pointer;
 }
 
-html[data-theme='light'] .knowledge-branch-sidebar .panel-toggle-button {
+html[data-theme='light'] .knowledge-branch-sidebar .panel-toggle-button,
+html[data-theme='sol'] .knowledge-branch-sidebar .panel-toggle-button {
     color: var(--primary-accent-dark);
 }
 
@@ -1086,8 +1117,8 @@ html[data-theme='light'] .knowledge-branch-sidebar .panel-toggle-button {
 .project-name { font-weight: 500; font-size: 1em; color: var(--text-primary); } 
 .project-list-item.active .project-name { color: var(--primary-accent-dark); }
 .project-last-modified { font-size: 0.75em; color: var(--text-tertiary); } 
-.project-actions { display: flex; gap: 4px; } 
-.project-actions .base-icon-button { font-size: 1em; padding: 5px; } 
+.project-actions { display: flex; gap: 6px; } 
+.project-actions .base-icon-button { font-size: 1.1em; padding: 7px; } 
 .project-actions .delete-action { color: var(--error-color); }
 .project-actions .delete-action:hover { background-color: var(--error-bg); }
 .project-list-item.example-project .project-name { font-style: italic; color: var(--text-secondary); }
