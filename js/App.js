@@ -226,6 +226,17 @@ const App = () => {
     }
   }, [apiKeyHook.status.isSet, initialPrompt, techTreeData, addHistoryEntry]);
 
+  const handleApplyStrategicSuggestion = useCallback((suggestion) => {
+    if (!techTreeData) {
+      setError("Cannot apply suggestion: No active tree.");
+      return;
+    }
+    const fullPrompt = `Based on the strategic idea "${suggestion}", please apply relevant modifications to the current tree structure. For example, consider creating new main branches, adding key technologies under existing nodes, or expanding on underdeveloped areas related to this idea.`;
+    setModificationPrompt(fullPrompt);
+    treeOperationsAI.handleApplyAiModification(fullPrompt);
+    setActiveSidebarTab('ai-tools');
+  }, [techTreeData, treeOperationsAI, setModificationPrompt, setActiveSidebarTab, setError]);
+
   const canUndoAiModForSidebar = !!previousTreeStateForUndo || !!pendingAiSuggestion;
 
   // --- RENDER ---
@@ -254,7 +265,7 @@ const App = () => {
           onToggleSidebar: toggleSidebar,
           activeSidebarTab: activeSidebarTab,
           setActiveSidebarTab: setActiveSidebarTab,
-          themeMode: themeMode, 
+          // AI Tools Tab Props
           modificationPrompt: modificationPrompt,
           setModificationPrompt: setModificationPrompt,
           onModifyAiTree: () => treeOperationsAI.handleApplyAiModification(modificationPrompt),
@@ -263,14 +274,12 @@ const App = () => {
           onUndoAiModification: treeOperationsAI.handleUndoAiModification,
           isAiSuggestionModalOpen: modalManager.isAiSuggestionModalOpen,
           initialPromptForStrategy: initialPrompt,
-          techTreeDataForStrategy: techTreeData,
           strategicSuggestions: strategicSuggestions,
           isFetchingStrategicSuggestions: isFetchingStrategicSuggestions,
           strategicSuggestionsError: strategicSuggestionsError,
           onGenerateStrategicSuggestions: handleGenerateStrategicSuggestions,
-          apiKeyIsSet: apiKeyHook.status.isSet,
-          hasTechTreeData: !!techTreeData,
-          isAppBusy: isLoading || isModifying || isFetchingStrategicSuggestions,
+          onApplyStrategicSuggestion: handleApplyStrategicSuggestion,
+          // AI Insights Tab Props
           selectedNodeForInsights: selectedNodeForInsights,
           aiInsightsData: aiInsightsData,
           aiInsightsIsLoading: aiInsightsIsLoading,
@@ -279,7 +288,12 @@ const App = () => {
           onUseSuggestedDescription: (desc) => aiInsightsHook.handleUseSuggestedDescription(selectedNodeForInsights.id, desc),
           onUseAlternativeName: (altName) => aiInsightsHook.handleUseAlternativeName(selectedNodeForInsights.id, altName),
           onAddSuggestedChildFromInsight: (name, desc) => aiInsightsHook.handleAddSuggestedChildFromInsight(selectedNodeForInsights.id, name, desc),
-          history: historyManager.history
+          // History Tab Props
+          history: historyManager.history,
+          // Common Props
+          apiKeyIsSet: apiKeyHook.status.isSet,
+          hasTechTreeData: !!techTreeData,
+          isAppBusy: isLoading || isModifying || isFetchingStrategicSuggestions
         }),
         
         React.createElement("main", { className: "yggdrasil-core-canvas" },
