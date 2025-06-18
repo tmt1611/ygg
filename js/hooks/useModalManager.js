@@ -1,6 +1,5 @@
 
 import { useState, useCallback, useRef } from 'react';
-// import { NodeEditModalConfig, LinkProjectModalConfig, TechTreeNode, ConfirmModalConfig, ProjectModalConfig } from '../types.js'; // Types removed
 
 export const useModalManager = () => {
   const lastFocusedElementRef = useRef(null);

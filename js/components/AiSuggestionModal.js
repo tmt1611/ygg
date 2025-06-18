@@ -1,6 +1,5 @@
 
 import React, { useMemo, useEffect, useRef, useState } from 'react';
-// import { TechTreeNode } from '../types.js'; // Types removed
 import { compareAndAnnotateTree, countNodesInTree } from '../utils.js';
 import AiSuggestionPreviewListItem from './AiSuggestionPreviewListItem.js';
 import ModificationPromptInput from './ModificationPromptInput.js'; 

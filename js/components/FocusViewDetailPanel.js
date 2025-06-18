@@ -1,8 +1,6 @@
 
 import React from 'react';
-// import { TechTreeNode, NodeStatus, NodeEditModalConfig, Project } from '../types.js'; // Types removed
 import ContextualHelpTooltip from './ContextualHelpTooltip.js';
-// import { LinkSourceInfo } from '../hooks/useProjectLinking.js'; // Types removed
 
 const NODE_IMPORTANCE_OPTIONS = [
     { value: 'minor', label: 'Minor', rune: '🌱' },

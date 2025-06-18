@@ -1,11 +1,7 @@
 
 import { useState, useCallback, useEffect } from 'react';
-// import { Project, TechTreeNode } from '../types.js'; // Types removed
 import { generateUUID, initializeNodes, findNodeById, updateNodeInTree } from '../utils.js';
 import { APP_STORAGE_KEYS, ELF_WARFARE_STRUCTURE_JSON_STRING, ADVANCED_NATURE_MAGIC_JSON_STRING } from '../constants.js';
-// import { UseModalManagerReturn } from './useModalManager.js'; // Types removed
-// import { UseHistoryManagerReturn } from './useHistoryManager.js'; // Types removed
-// import { UseViewStatesReturn } from './useViewStates.js'; // Types removed
 
 export const useProjectManagement = ({
   modalManager,

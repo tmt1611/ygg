@@ -1,5 +1,3 @@
-// import { TechTreeNode, NodeStatus } from './types.js'; // This import will be present but TechTreeNode is not a runtime value
-
 export const generateUUID = () => {
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
     const r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);

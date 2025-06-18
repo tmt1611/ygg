@@ -1,9 +1,7 @@
 
 import { useState, useCallback, useEffect } from 'react';
-// import { TechTreeNode, WorkspaceSubTab, YggdrasilViewMode, ActiveOverlayPanel, HistoryActionType } from '../types.js'; // Types removed
 import { findNodeById, getAllExpandableNodeIds, areAllNodesExpanded } from '../utils.js'; // Removed findNodesByTerm
 import { APP_STORAGE_KEYS } from '../constants.js';
-// import { UseModalManagerReturn } from './useModalManager.js'; // Type removed
 
 export const useViewStates = ({
   techTreeData,

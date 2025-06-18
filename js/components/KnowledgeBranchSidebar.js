@@ -1,6 +1,5 @@
 
 import React, { useState } from 'react';
-// import { ThemeMode, SidebarTabId, HistoryEntry, TechTreeNode, AiInsightData } from '../types.js'; // Types removed
 import CollapsiblePanel from './CollapsiblePanel.js';
 import ModificationPromptInput from './ModificationPromptInput.js';
 import AiInsightsPanel from './AiInsightsPanel.js';

@@ -1,6 +1,5 @@
 
 import React from 'react';
-// import { TechTreeNode } from '../types.js'; // Types removed
 
 const GraphSelectedNodePanel = ({ selectedNode }) => {
   if (!selectedNode) {

@@ -1,7 +1,5 @@
 
 import React, { useMemo, useCallback, useState, useEffect } from 'react';
-// import { TechTreeNode, NodeStatus, Project } from '../types.js'; // Types removed
-// import { LinkSourceInfo } from '../hooks/useProjectLinking.js'; // Types removed
 
 const RUNE_IMPORTANCE_OPTIONS = [
     { value: 'minor', label: 'Minor', rune: '🌱' },

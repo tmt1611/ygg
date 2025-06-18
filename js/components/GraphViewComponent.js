@@ -1,9 +1,6 @@
 import React, { useEffect, useRef, useMemo, useCallback } from 'react';
 import { linkHorizontal } from 'd3'; // Assuming d3 is globally available or managed by import map
-// import { TechTreeNode, D3GraphNode, D3GraphLink, NodeStatus, NodeEditModalConfig, Project } from '../types.js'; // Types removed
 import { useD3Tree } from '../hooks/useD3Tree.js';
-// import { findNodeById } from '../utils.js'; // Not directly used
-// import { LinkSourceInfo } from '../hooks/useProjectLinking.js'; // Types removed
 
 const NODE_IMPORTANCE_RUNES = {
   minor: '🌱',

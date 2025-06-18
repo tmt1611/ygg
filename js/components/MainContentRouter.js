@@ -1,8 +1,5 @@
 
 import React from 'react';
-// import { TechTreeNode, YggdrasilViewMode, ActiveOverlayPanel, NodeStatus, WorkspaceSubTab } from '../types.js'; // Types removed
-// Hooks are imported but their specific type definitions for return values are not part of the JS runtime.
-
 import WorkspaceTabContent from './tabs/WorkspaceTabContent.js';
 import GraphViewComponent from './GraphViewComponent.js';
 import ListViewTabContent from './tabs/ListViewTab.js';

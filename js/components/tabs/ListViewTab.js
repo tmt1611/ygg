@@ -1,9 +1,7 @@
 
 import React from 'react';
 import TechTreeListView from '../TechTreeListView.js';
-// import { TechTreeNode, NodeStatus, Project } from '../../types.js'; // Types removed
 import { filterTree, areAllNodesExpanded } from '../../utils.js'; 
-// import { LinkSourceInfo } from '../../hooks/useProjectLinking.js'; // Types removed
 
 const ListViewTabContent = ({
   techTreeData,

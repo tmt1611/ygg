@@ -1,7 +1,6 @@
 
 import { useState, useCallback, useEffect } from 'react';
 import { APP_STORAGE_KEYS } from '../constants.js';
-// import { ThemeMode, YggdrasilViewMode, ActiveOverlayPanel, HistoryActionType } from '../types.js'; // Types removed
 
 export const useAppThemeAndLayout = (addHistoryEntry) => {
   const [themeMode, setThemeMode] = useState(() => {

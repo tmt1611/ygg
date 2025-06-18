@@ -1,6 +1,5 @@
 
 import React from 'react';
-// import { TechTreeNode, AiInsightData } from '../types.js'; // Types removed
 import LoadingSpinner from './LoadingSpinner.js';
 
 const AiInsightsPanel = ({

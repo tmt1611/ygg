@@ -1,12 +1,7 @@
 
 import { useCallback } from 'react';
-// import { TechTreeNode } from '../types.js'; // Types removed
 import * as geminiService from '../services/geminiService.js';
 import { getLockedNodeIds, countNodesInTree } from '../utils.js';
-// import { UseModalManagerReturn } from './useModalManager.js'; // Types removed
-// import { UseHistoryManagerReturn } from './useHistoryManager.js'; // Types removed
-// import { UseProjectManagementReturn } from './useProjectManagement.js'; // Types removed
-// import { UseViewStatesReturn } from './useViewStates.js'; // Types removed
 
 export const useTreeOperationsAI = ({
   apiKeyIsSet,

@@ -1,11 +1,6 @@
 
 import { useCallback } from 'react';
-// import { TechTreeNode, NodeStatus } from '../types.js'; // Types removed
 import { findNodeById, updateNodeInTree, addNodeToParent, lockAllNodesInTree, unlockAllNodesInTree, areAllNodesLocked, removeNodeAndChildrenFromTree } from '../utils.js';
-// import { UseModalManagerReturn } from './useModalManager.js'; // Types removed
-// import { UseHistoryManagerReturn } from './useHistoryManager.js'; // Types removed
-// import { UseProjectManagementReturn } from './useProjectManagement.js'; // Types removed
-// import { UseViewStatesReturn } from './useViewStates.js'; // Types removed
 
 export const useNodeOperations = ({
   techTreeData, 

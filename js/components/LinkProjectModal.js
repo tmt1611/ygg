@@ -1,6 +1,5 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-// import { Project, LinkProjectModalConfig } from '../types.js'; // Types removed
 
 const LinkProjectModal = ({
   isOpen,

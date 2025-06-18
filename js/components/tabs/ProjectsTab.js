@@ -1,6 +1,5 @@
 
 import React from 'react';
-// Project type import removed as it's a type
 
 const ProjectsTabContent = ({
   projects,

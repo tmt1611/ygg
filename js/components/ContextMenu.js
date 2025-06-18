@@ -1,7 +1,5 @@
 
 import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react';
-// import { TechTreeNode, NodeStatus, Project } from '../types.js'; // Types removed
-// import { LinkSourceInfo } from '../hooks/useProjectLinking.js'; // Types removed
 
 const NODE_IMPORTANCE_OPTIONS = [
     { value: 'minor', label: 'Minor' },
@@ -102,7 +100,9 @@ const ContextMenu = ({
                     disabled: options.isDisabled,
                     title: options.title || label
                 },
-                    label, " ", options.hasSubmenu && React.createElement("span", { className: "context-menu-submenu-indicator" }, "➡️")
+                    options.icon && React.createElement("span", { style: { marginRight: '10px', display: 'inline-block', width: '1em', textAlign: 'center' }, "aria-hidden": "true" }, options.icon),
+                    label,
+                    options.hasSubmenu && React.createElement("span", { className: "context-menu-submenu-indicator" }, "➡️")
                 )
             )
         );
@@ -110,34 +110,34 @@ const ContextMenu = ({
     };
 
     if (node) {
-        addItemToLists(() => onEditName(), "Edit Details...", {id: 'edit'});
-        addItemToLists(() => onAddChild(), "Add Child Node...", {id: 'add-child'});
+        addItemToLists(() => onEditName(), "Edit Details...", {id: 'edit', icon: '✏️'});
+        addItemToLists(() => onAddChild(), "Add Child Node...", {id: 'add-child', icon: '➕'});
         items.push(React.createElement("li", { role: "none", key: "sep1" }, React.createElement("hr", null))); 
-        addItemToLists(() => onToggleLock(), node.isLocked ? 'Unlock Node' : 'Lock Node', {id: 'toggle-lock'});
-        addItemToLists(changeImportanceActionRef.current, "Change Importance", { hasSubmenu: true, isSubmenuOpen: isImportanceSubMenuOpen, id: 'change-importance' });
+        addItemToLists(() => onToggleLock(), node.isLocked ? 'Unlock Node' : 'Lock Node', {id: 'toggle-lock', icon: node.isLocked ? '🔓' : '🔒'});
+        addItemToLists(changeImportanceActionRef.current, "Change Importance", { hasSubmenu: true, isSubmenuOpen: isImportanceSubMenuOpen, id: 'change-importance', icon: '⚖️' });
         
-        if (onSetFocus) addItemToLists(() => onSetFocus(), "Set as Focus Node", {id: 'set-focus'});
+        if (onSetFocus) addItemToLists(() => onSetFocus(), "Set as Focus Node", {id: 'set-focus', icon: '🎯'});
 
         if (node.linkedProjectId) {
-            if (onGoToLinkedProject) addItemToLists(() => onGoToLinkedProject(), `🔗 Go to: ${node.linkedProjectName || 'Linked Project'}`, {id: 'go-to-link'});
-            if (onUnlinkProject) addItemToLists(() => onUnlinkProject(), "🚫 Unlink Outgoing Project", {isDestructive: true, id: 'unlink-outgoing'});
+            if (onGoToLinkedProject) addItemToLists(() => onGoToLinkedProject(), `Go to: ${node.linkedProjectName || '...'}`, {id: 'go-to-link', icon: '↪️', title: `Go to project: ${node.linkedProjectName || 'Linked Project'}`});
+            if (onUnlinkProject) addItemToLists(() => onUnlinkProject(), "Unlink Outgoing Project", {isDestructive: true, id: 'unlink-outgoing', icon: '🚫'});
         } else if (!incomingLink) { 
-            if (onLinkToProject) addItemToLists(() => onLinkToProject(), "🔗 Link to Project...", {id: 'link-project'});
+            if (onLinkToProject) addItemToLists(() => onLinkToProject(), "Link to Project...", {id: 'link-project', icon: '🔗'});
         }
 
         if (incomingLink) {
             addItemToLists(
                 () => handleNavigateToSourceNode(incomingLink.sourceProjectId, incomingLink.sourceNodeId),
-                `↩️ From: ${incomingLink.sourceProjectName.substring(0,12)}${incomingLink.sourceProjectName.length > 12 ? '...' : ''} / ${incomingLink.sourceNodeName.substring(0,10)}${incomingLink.sourceNodeName.length > 10 ? '...' : ''}`,
-                {id: 'go-to-source'}
+                `From: ${incomingLink.sourceProjectName.substring(0,12)}...`,
+                {id: 'go-to-source', icon: '↩️', title: `From: ${incomingLink.sourceProjectName} / ${incomingLink.sourceNodeName}`}
             );
-            addItemToLists(null, "🚫 Unlink (Incoming)", { id: 'unlink-incoming-disabled', isDisabled: true, title: "Remove link from source project to unlink." });
+            addItemToLists(null, "Unlink (Incoming)", { id: 'unlink-incoming-disabled', isDisabled: true, title: "Remove link from source project to unlink.", icon: '🚫' });
         }
         
         items.push(React.createElement("li", { role: "none", key: "sep2" }, React.createElement("hr", null)));
-        addItemToLists(handleCopyNodeName, `Copy Node Name ${copyNameFeedback ? `(${copyNameFeedback})` : ''}`, {id: 'copy-name'});
-        addItemToLists(handleCopyNodeId, `Copy Node ID ${copyFeedback ? `(${copyFeedback})` : ''}`, {id: 'copy-id'});
-        if (onDeleteNode) addItemToLists(() => onDeleteNode(), "Delete Node...", {isDestructive: true, id: 'delete-node'});
+        addItemToLists(handleCopyNodeName, `Copy Name ${copyNameFeedback ? `(${copyNameFeedback})` : ''}`, {id: 'copy-name', icon: '📋'});
+        addItemToLists(handleCopyNodeId, `Copy ID ${copyFeedback ? `(${copyFeedback})` : ''}`, {id: 'copy-id', icon: '🆔'});
+        if (onDeleteNode) addItemToLists(() => onDeleteNode(), "Delete Node...", {isDestructive: true, id: 'delete-node', icon: '🗑️'});
     }
     return { menuItemsJsx: items, menuActions: actions.filter(a => a !== null) }; 
   }, [node, onEditName, onAddChild, onToggleLock, onSetFocus, onLinkToProject, onGoToLinkedProject, onUnlinkProject, onDeleteNode, handleCopyNodeId, handleCopyNodeName, copyFeedback, copyNameFeedback, isImportanceSubMenuOpen, focusedItemIndex, onClose, incomingLink, handleNavigateToSourceNode]);

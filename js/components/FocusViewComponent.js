@@ -1,11 +1,9 @@
 
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
-// import { TechTreeNode, NodeStatus, NodeEditModalConfig, Project } from '../types.js'; // Types removed
 import { getAllNodesAsMap } from '../utils.js'; 
 import FocusNodeDisplay from './FocusNodeDisplay.js';
 import PathToRootDisplay from './PathToRootDisplay.js';
 import FocusViewDetailPanel from './FocusViewDetailPanel.js'; 
-// import { LinkSourceInfo } from '../hooks/useProjectLinking.js'; // Types removed
 
 const NODE_SIZES_PX = {
     minor: { width: 60, height: 60 },

@@ -5,20 +5,15 @@
 .yggdrasil-top-bar {
   height: var(--top-bar-height);
   background-color: var(--yggdrasil-bark-bg);
-  color: var(--text-on-dark-bg);
-  border-bottom: 2px solid var(--secondary-accent-dark);
+  color: var(--text-on-bark);
+  border-bottom: 2px solid var(--yggdrasil-bark-border);
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 0 12px; /* Reduced padding */
   flex-shrink: 0;
   box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-  z-index: 200; 
-}
-html[data-theme='light'] .yggdrasil-top-bar { 
-  background-color: #F5F0E1; 
-  color: var(--text-primary); 
-  border-bottom-color: #D2B48C;
+  z-index: 200;
 }
 
 .yggdrasil-top-bar-section { display: flex; align-items: center; gap: 8px; } /* Reduced gap */
@@ -124,22 +119,19 @@ html[data-theme='light'] .yggdrasil-top-bar-active-project {
 .knowledge-branch-sidebar {
   width: var(--sidebar-default-width);
   background-color: var(--yggdrasil-bark-bg);
-  border-right: 2px solid var(--secondary-accent-dark); 
+  border-right: 2px solid var(--yggdrasil-bark-border);
+  color: var(--text-on-bark);
   display: flex; flex-direction: column;
   transition: width 0.3s ease;
   flex-shrink: 0;
   box-shadow: 5px 0 15px rgba(0,0,0,0.2);
-  z-index: 100; 
+  z-index: 100;
 }
-html[data-theme='light'] .knowledge-branch-sidebar { 
-  background-color: #F5F0E1; 
+html[data-theme='light'] .knowledge-branch-sidebar {
   background-image: linear-gradient(45deg, rgba(210, 180, 140, 0.03) 25%, transparent 25%, transparent 75%, rgba(210, 180, 140, 0.03) 75%, rgba(210, 180, 140, 0.03)),
                     linear-gradient(-45deg, rgba(210, 180, 140, 0.03) 25%, transparent 25%, transparent 75%, rgba(210, 180, 140, 0.03) 75%, rgba(210, 180, 140, 0.03));
-  background-size: 18px 18px; 
-  color: var(--text-primary); 
-  border-right-color: #D2B48C; 
+  background-size: 18px 18px;
 }
-html[data-theme='dark'] .knowledge-branch-sidebar { background-color: var(--yggdrasil-bark-bg); color: var(--text-on-dark-bg); }
 
 .yggdrasil-app-body.sidebar-collapsed .knowledge-branch-sidebar { width: var(--sidebar-collapsed-width); }
 .yggdrasil-app-body.sidebar-collapsed .knowledge-branch-sidebar .sidebar-header-title,
@@ -172,7 +164,7 @@ html[data-theme='dark'] .knowledge-branch-sidebar { background-color: var(--yggd
   border: 1px solid transparent;
   border-radius: var(--border-radius);
   background-color: transparent;
-  color: var(--text-on-dark-bg);
+  color: inherit; /* Inherit from sidebar */
   transition: background-color 0.2s, color 0.2s, border-color 0.2s;
   display: flex;
   flex-direction: column;
@@ -540,12 +532,20 @@ html[data-theme='dark'] .graph-view-node.proxy circle {
 
 
 .graph-view-controls { position: absolute; top: 8px; right: 8px; display: flex; flex-direction: column; gap: 6px; z-index: 10; pointer-events: auto; } /* Reduced spacing/gap */
-.graph-view-controls button { 
-  background-color: rgba(var(--panel-bg-rgb), 0.8); backdrop-filter: blur(2px); border: 1px solid var(--border-color); 
+.graph-view-controls button {
+  background-color: rgba(var(--panel-bg-rgb), 0.8); backdrop-filter: blur(2px); border: 1px solid var(--border-color);
   padding: 6px; font-size: 1em; line-height: 1; /* Reduced padding/font-size */
   width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; /* Reduced size */
+  transition: background-color 0.2s, border-color 0.2s, color 0.2s, transform 0.2s, box-shadow 0.2s;
 }
-.graph-view-selected-node-panel { display: none; } 
+.graph-view-controls button:hover:not(:disabled) {
+  background-color: var(--primary-accent-hover-bg);
+  border-color: var(--primary-accent);
+  color: var(--primary-accent);
+  transform: scale(1.05);
+  box-shadow: var(--box-shadow-sm);
+}
+.graph-view-selected-node-panel { display: none; }
 
 /* Removed rule for .knowledge-branch-sidebar .ai-insights-panel .panel-header */
 .ai-insights-panel { /* Styling for the content area of AI insights tab */

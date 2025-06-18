@@ -1,6 +1,5 @@
 
 import React, { useState, useMemo } from 'react';
-// import { TechTreeNode } from '../types.js'; // Types removed
 import { findNodesByTerm } from '../utils.js';
 import CollapsiblePanel from './CollapsiblePanel.js'; 
 

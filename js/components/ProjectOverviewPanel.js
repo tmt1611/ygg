@@ -1,6 +1,5 @@
 
 import React from 'react';
-// import { NodeStatus } from '../types.js'; // Types removed
 import LoadingSpinner from './LoadingSpinner.js';
 import ErrorMessage from './ErrorMessage.js';
 import ContextualHelpTooltip from './ContextualHelpTooltip.js';

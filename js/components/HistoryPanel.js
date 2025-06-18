@@ -1,6 +1,5 @@
 
 import React from 'react';
-// import { HistoryEntry } from '../types.js'; // Types removed
 
 const HistoryPanel = ({ history }) => {
   if (history.length === 0) {

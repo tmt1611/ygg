@@ -1,7 +1,5 @@
 
 import { GoogleGenAI } from "@google/genai";
-// import type { GenerateContentResponse } from "@google/genai"; // Type import removed
-// import type { TechTreeNode, AiInsightData } from '../types.js'; // Type import removed
 import { initializeNodes } from "../utils.js";
 
 let apiClientState = {

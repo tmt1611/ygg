@@ -1,7 +1,5 @@
 
 import React from 'react';
-// import { TechTreeNode, NodeStatus } from '../types.js'; // Types removed
-// import { LinkSourceInfo } from '../hooks/useProjectLinking.js'; // Types removed
 
 const FocusNodeDisplay = React.forwardRef(
   ({ node, nodeType, onClick, onContextMenu, isAppBusy, isRootNode, linkSourceInfo, style }, ref) => {

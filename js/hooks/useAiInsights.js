@@ -1,11 +1,7 @@
 
 import { useState, useCallback } from 'react';
-// import { TechTreeNode, AiInsightData } from '../types.js'; // Types removed
 import * as geminiService from '../services/geminiService.js';
 import { getAllNodesAsMap, findNodeById, updateNodeInTree } from '../utils.js';
-// import { UseHistoryManagerReturn } from './useHistoryManager.js'; // Types removed
-// import { UseNodeOperationsReturn } from './useNodeOperations.js'; // Types removed
-// import { UseModalManagerReturn } from './useModalManager.js'; // Types removed
 
 export const useAiInsights = ({
   apiKeyIsSet,

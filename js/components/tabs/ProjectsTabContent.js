@@ -1,10 +1,6 @@
 
 import React from 'react';
-// import { Project } from '../../types.js'; 
-// import { ApiKeyMode as HookApiKeyMode, UseApiKeyReturn } from '../../hooks/useApiKey.js'; // Types removed
 import ContextualHelpTooltip from '../ContextualHelpTooltip.js'; 
-
-// type ExtractionMode = "raw" | "summary"; // Type removed
 
 const ProjectsTabContent = ({
   projects, activeProjectId, onLoadProject, onRenameProject, onDeleteProject, 

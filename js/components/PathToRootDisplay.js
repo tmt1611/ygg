@@ -1,6 +1,5 @@
 
 import React from 'react';
-// import { TechTreeNode } from '../types.js'; // Types removed
 import { getAncestorIds, findNodeById } from '../utils.js'; 
 
 const PathToRootDisplay = ({

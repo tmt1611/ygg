@@ -1,6 +1,5 @@
 
 import React from 'react';
-// import { TechTreeNode, Project } from '../types.js'; // Types removed
 import { findNodeById } from '../utils.js';
 
 // Modal Components

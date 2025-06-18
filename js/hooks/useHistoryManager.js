@@ -1,6 +1,5 @@
 
 import { useState, useCallback, useEffect } from 'react';
-// import { HistoryEntry, HistoryActionType } from '../types.js'; // Types removed
 import { generateUUID } from '../utils.js';
 import { APP_STORAGE_KEYS } from '../constants.js';
 

@@ -1,7 +1,6 @@
 
 import { useState, useCallback, useEffect } from 'react';
 import * as geminiService from '../services/geminiService.js';
-// import { HistoryActionType } from '../types.js'; // Type import removed
 
 export const useApiKey = (addHistoryEntry) => {
   const [selectedMode, setSelectedMode] = useState('environment');

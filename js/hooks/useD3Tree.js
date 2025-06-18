@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useRef, useCallback, useState } from 'react';
 import { select, zoom, hierarchy, tree, zoomIdentity, linkHorizontal } from 'd3';
-// import { TechTreeNode, D3GraphNode, D3GraphLink, D3TreeConfig } from '../types.js'; // Types removed
 
 const defaultTreeConfig = {
   nodeRadius: 8,

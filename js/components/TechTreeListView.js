@@ -1,8 +1,6 @@
 
 import React from 'react';
-// import { TechTreeNode, NodeStatus, Project } from '../types.js'; // Types removed
 import TechTreeListItem from './TechTreeListItem.js'; 
-// import { LinkSourceInfo } from '../hooks/useProjectLinking.js'; // Types removed
 
 const TechTreeListViewComponent = ({
     treeData, showDescriptions, onToggleLock, onAddQuickChild, onNodeImportanceChange,

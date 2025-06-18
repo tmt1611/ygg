@@ -27,8 +27,7 @@ import { useApiKey } from './hooks/useApiKey.js';
 import * as geminiService from './services/geminiService.js';
 import { findNodeById, countNodesInTree, getTreeDepth, getLockedNodeIds, countNodesByImportance } from './utils.js';
 
-// Types (imports will be preserved but types themselves are gone from types.js)
-// import { TechTreeNode, NodeStatus, Project, WorkspaceSubTab, YggdrasilViewMode, ActiveOverlayPanel, SidebarTabId } from './types.js';
+
 
 
 const App = () => {

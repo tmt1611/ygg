@@ -1,11 +1,7 @@
 
 import React from 'react';
-// Type imports are removed
 import ProjectsTabContent from './ProjectsTabContent.js'; 
 import ProjectOverviewPanel from '../ProjectOverviewPanel.js'; 
-
-// Type alias ExtractionMode removed
-// Interface WorkspaceTabContentProps removed
 
 const WorkspaceTabContent = ({
   activeSubTab, setActiveSubTab,

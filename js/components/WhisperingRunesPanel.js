@@ -1,8 +1,6 @@
 
 import React, { useMemo, useState, useEffect } from 'react';
-// import { TechTreeNode, NodeStatus, NodeEditModalConfig, Project } from '../types.js'; // Types removed
 import { findNodeById } from '../utils.js';
-// import { LinkSourceInfo } from '../hooks/useProjectLinking.js'; // Types removed
 
 const WhisperingRunesPanel = ({
   targetNodeId, treeData,

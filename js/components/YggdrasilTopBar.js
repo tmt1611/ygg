@@ -1,6 +1,5 @@
 
 import React, { useState, useEffect } from 'react';
-// import { ThemeMode, YggdrasilViewMode, ActiveOverlayPanel } from '../types.js'; // Types removed
 
 const YggdrasilTopBar = ({
   themeMode, onToggleTheme, apiKeyIsSet, activeProjectName, onSaveActiveProject, 

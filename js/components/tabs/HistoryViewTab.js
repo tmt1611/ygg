@@ -1,7 +1,6 @@
 
 import React, { useState, useMemo } from 'react';
 import HistoryPanel from '../HistoryPanel.js';
-// import { HistoryEntry, HistoryActionType } from '../../types.js'; // Types removed
 
 const KEY_EVENT_TYPES = [
   'TREE_INIT_AI', 'AI_MOD_CONFIRMED', 'AI_SUMMARY_GEN', 'NODE_INSIGHTS_GENERATED',
