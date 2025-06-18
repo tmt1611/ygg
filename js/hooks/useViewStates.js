@@ -14,7 +14,6 @@ export const useViewStates = ({
   const [activeWorkspaceSubTab, setActiveWorkspaceSubTab] = useState(() => (localStorage.getItem(APP_STORAGE_KEYS.ACTIVE_WORKSPACE_SUB_TAB)) || 'projects');
   
   const [showListDescriptionsGlobal, setShowListDescriptionsGlobal] = useState(true);
-  const [listSearchTerm, setListSearchTerm] = useState('');
   
   const [collapsedNodeIds, setCollapsedNodeIds] = useState(() => {
     const storedCollapsed = localStorage.getItem(APP_STORAGE_KEYS.COLLAPSED_NODES);
@@ -86,7 +85,6 @@ export const useViewStates = ({
   return {
     activeWorkspaceSubTab, setActiveWorkspaceSubTab,
     showListDescriptionsGlobal, setShowListDescriptionsGlobal,
-    listSearchTerm, setListSearchTerm, 
     collapsedNodeIds, setCollapsedNodeIds,
     focusNodeId, setFocusNodeId, selectedNodeInFocusPanelId, setSelectedNodeInFocusPanelId,
     selectedGraphNodeId, setSelectedGraphNodeId,

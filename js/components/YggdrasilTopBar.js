@@ -88,6 +88,18 @@ const YggdrasilTopBar = ({
           disabled:(isAppBusy && !(yggdrasilViewMode === 'treeView' && activeOverlayPanel === 'focus')) || (isFocusViewDisabled && !focusNodeId),
           title: focusNodeId ? "Detailed view of the currently focused node" : "Select a node to enable Focus View"
         }, "Focus"),
+        React.createElement("div", { className: "yggdrasil-top-bar-search-wrapper" },
+          React.createElement("span", { className: "yggdrasil-top-bar-search-icon" }, "🔍"),
+          React.createElement("input", {
+            type: "search",
+            placeholder: "Search nodes...",
+            className: "yggdrasil-top-bar-search-input",
+            value: globalSearchTerm,
+            onChange: (e) => setGlobalSearchTerm(e.target.value),
+            "aria-label": "Search nodes in the current project",
+            disabled: !hasTechTreeData || isAppBusy
+          })
+        ),
         activeProjectName && (
           React.createElement("div", { className: "yggdrasil-top-bar-active-project", title: `Currently active project: ${activeProjectName}`},
             React.createElement("span", null, "🌲 Active:"), " ", activeProjectName

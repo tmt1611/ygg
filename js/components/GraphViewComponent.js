@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useMemo, useCallback } from 'react';
-import { linkHorizontal } from 'd3'; // Assuming d3 is globally available or managed by import map
+import { linkHorizontal, select } from 'd3'; // Assuming d3 is globally available or managed by import map
 import { useD3Tree } from '../hooks/useD3Tree.js';
 
 const NODE_IMPORTANCE_RUNES = {
@@ -21,6 +21,7 @@ const GraphViewComponent = ({
   findLinkSource,
   onNavigateToLinkedProject,
   handleNavigateToSourceNode,
+  searchTerm,
 }) => {
   const svgContainerDivRef = useRef(null); 
   const svgRef = useRef(null); 

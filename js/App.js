@@ -49,6 +49,7 @@ const App = () => {
   const [strategicSuggestions, setStrategicSuggestions] = useState(null);
   const [isFetchingStrategicSuggestions, setIsFetchingStrategicSuggestions] = useState(false);
   const [strategicSuggestionsError, setStrategicSuggestionsError] = useState(null);
+  const [globalSearchTerm, setGlobalSearchTerm] = useState('');
 
 
   // --- HOOKS ---
@@ -299,7 +300,7 @@ const App = () => {
             setInitialPrompt: setInitialPrompt,
             currentTreeStats: currentTreeStats,
             nodeOperations: nodeOperations,
-            viewStates: viewStates,
+            viewStates: { ...viewStates, globalSearchTerm },
             treeOperationsAI: treeOperationsAI,
             apiKeyHook: apiKeyHook,
             onExtractData: handleExtractData,

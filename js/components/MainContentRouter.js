@@ -15,6 +15,7 @@ const MainContentRouter = ({
   projectLinkingHook, handleNodeSelectedForInsightsOrActions, onToggleNodeActionsPanel,
   modalManager,
 }) => {
+  const { globalSearchTerm } = viewStates;
 
   if (yggdrasilViewMode === 'workspace' && !isLoading && !isModifying) {
     return (
@@ -67,7 +68,7 @@ const MainContentRouter = ({
           activeProjectId: projectManager.activeProjectId,
           findLinkSource: projectLinkingHook.findLinkSource,
           handleNavigateToSourceNode: projectLinkingHook.handleNavigateToSourceNode,
-          searchTerm: viewStates.globalSearchTerm,
+          searchTerm: globalSearchTerm,
         })
       );
     }
@@ -82,7 +83,7 @@ const MainContentRouter = ({
                 onAddQuickChild: nodeOperations.handleQuickAddChild,
                 onNodeImportanceChange: nodeOperations.handleNodeImportanceChange,
                 onOpenNodeEditModal: modalManager.openNodeEditModal,
-                searchTerm: viewStates.globalSearchTerm, 
+                searchTerm: globalSearchTerm, 
                 isAppBusy: isAppBusy,
                 collapsedNodeIds: viewStates.collapsedNodeIds,
                 onToggleCollapseNode: viewStates.handleToggleCollapseNode,
