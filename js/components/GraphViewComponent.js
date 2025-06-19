@@ -232,17 +232,14 @@ const GraphViewComponent = ({
 
     nodeGroups.select(".node-label")
       .attr("fill", d => d.isProxy ? null : "var(--graph-node-text)")
-      .attr("x", d => {
-        if (d.isProxy) return 0;
-        const angle = d.x * 180 / Math.PI;
-        const isLeft = angle > 90 && angle < 270;
-        return isLeft ? -(nodeRadius + 5) : (nodeRadius + 5);
-      })
-      .attr("text-anchor", d => {
-        if (d.isProxy) return "middle";
-        const angle = d.x * 180 / Math.PI;
-        const isLeft = angle > 90 && angle < 270;
-        return isLeft ? "end" : "start";
+      .attr("text-anchor", "middle")
+      .attr("transform", d => {
+          if (d.isProxy) return null;
+          // d.x is angle in radians. In d3.tree, 0 is typically to the right. The drawing logic uses -PI/2 to make 0 top.
+          // So, 0 is top, PI/2 is right, PI is bottom, 1.5PI is left.
+          const isBottomHalf = d.x > Math.PI / 2 && d.x < Math.PI * 1.5;
+          const yOffset = isBottomHalf ? (nodeRadius + 10) : -(nodeRadius + 10);
+          return `translate(0, ${yOffset})`;
       })
       .each(function(d) { // D3 text wrapping
           const text = select(this);
@@ -253,41 +250,35 @@ const GraphViewComponent = ({
               text.append("tspan").text(name);
               return;
           }
-
-          const words = name.split(/\s+/).reverse();
-          if (words.join(' ').length < 2) { // if it's one short word
-              text.append("tspan").text(name);
-              return;
-          }
-
-          let word;
-          const maxWidth = 100;
-          const lineHeight = 1.1; // ems
-          const x = text.attr("x");
-
-          const lines = [];
-          let currentLine = [];
           
-          // Use a temporary tspan to measure text length
+          const words = name.split(/\s+/);
+          const maxWidth = 90;
+          const lineHeight = 1.1; // ems
+          
+          let line = [];
+          const lines = [];
+          
           const tempTspan = text.append("tspan").style("visibility", "hidden");
-          while (word = words.pop()) {
-              currentLine.push(word);
-              tempTspan.text(currentLine.join(" "));
-              if (tempTspan.node().getComputedTextLength() > maxWidth && currentLine.length > 1) {
-                  currentLine.pop();
-                  lines.push(currentLine.join(" "));
-                  currentLine = [word];
-              }
-          }
-          lines.push(currentLine.join(" "));
+          words.forEach(word => {
+            const testLine = [...line, word];
+            tempTspan.text(testLine.join(" "));
+            if (tempTspan.node().getComputedTextLength() > maxWidth && line.length > 0) {
+              lines.push(line.join(" "));
+              line = [word];
+            } else {
+              line = testLine;
+            }
+          });
+          lines.push(line.join(" "));
           tempTspan.remove();
 
           const numLines = lines.length;
-          const startDy = -(numLines - 1) * lineHeight / 2; // Initial vertical offset
-
+          // startDy is for vertical centering of the text block
+          const startDy = -(numLines - 1) * 0.5 * lineHeight + 0.35; // a touch of offset for better middle alignment
+          
           lines.forEach((lineText, i) => {
               text.append("tspan")
-                  .attr("x", x)
+                  .attr("x", 0)
                   .attr("dy", i === 0 ? `${startDy}em` : `${lineHeight}em`)
                   .text(lineText);
           });
