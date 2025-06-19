@@ -56,7 +56,7 @@ const ConfirmModal = ({
           React.createElement("span", { className: "modal-icon", "aria-hidden": "true" }, icon),
           title
         ),
-        React.createElement("div", { id: "confirm-modal-message", style: { color: 'var(--text-secondary)', marginBottom: '25px', whiteSpace: 'pre-wrap', lineHeight: '1.5', fontSize: '0.95em' }}, message),
+        React.createElement("div", { id: "confirm-modal-message", style: { color: 'var(--text-secondary)', marginBottom: '25px', lineHeight: '1.5', fontSize: '0.95em', whiteSpace: typeof message === 'string' ? 'pre-wrap' : 'normal' }}, message),
         React.createElement("div", { className: "modal-footer-actions", style: { display: 'flex', justifyContent: 'flex-end', gap: '10px' }},
           cancelText && onCancel && (
             React.createElement("button", {

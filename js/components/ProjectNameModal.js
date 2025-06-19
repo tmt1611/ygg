@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 
 const ProjectNameModal = ({
   isOpen,
@@ -10,6 +10,35 @@ const ProjectNameModal = ({
 }) => {
   const [projectName, setProjectName] = useState('');
   const inputRef = useRef(null);
+
+  const { title, confirmButtonText, placeholderText, labelText, hintText } = useMemo(() => {
+    switch (mode) {
+      case 'rename':
+        return {
+          title: `Rename Project: ${currentName}`,
+          confirmButtonText: "Rename Project",
+          placeholderText: "Enter new project name",
+          labelText: 'Project Name:',
+          hintText: "This will update the name for this project."
+        };
+      case 'createExample':
+        return {
+          title: "Save as New Example Project",
+          confirmButtonText: "Save as Example",
+          placeholderText: "Enter example project name",
+          labelText: 'Example Project Name:',
+          hintText: "This name will identify your new example project template."
+        };
+      default: // 'create'
+        return {
+          title: "Create New Project",
+          confirmButtonText: "Create Project",
+          placeholderText: "Enter project name",
+          labelText: 'Project Name:',
+          hintText: "This name will be used to identify your new project."
+        };
+    }
+  }, [mode, currentName]);
 
   useEffect(() => {
     if (isOpen) {
@@ -44,23 +73,6 @@ const ProjectNameModal = ({
     }
   };
 
-  let title = "Project Name";
-  let confirmButtonText = "Confirm";
-  let placeholderText = "Enter project name";
-
-  if (mode === 'rename') {
-    title = `Rename Project: ${currentName}`;
-    confirmButtonText = "Rename Project";
-  } else if (mode === 'createExample') {
-    title = "Save as New Example Project";
-    confirmButtonText = "Save as Example";
-    placeholderText = "Enter example project name";
-  } else { 
-    title = "Create New Project";
-    confirmButtonText = "Create Project";
-  }
-
-
   return (
     React.createElement("div", { 
       className: "modal-overlay-basic", 
@@ -74,7 +86,7 @@ const ProjectNameModal = ({
             title
           ),
           React.createElement("label", { htmlFor: "project-name-input", style: {display: 'block', marginBottom: '5px'}},
-            mode === 'createExample' ? 'Example Project Name:' : 'Project Name:'
+            labelText
           ),
           React.createElement("input", {
             ref: inputRef,
@@ -83,14 +95,12 @@ const ProjectNameModal = ({
             value: projectName,
             onChange: (e) => setProjectName(e.target.value),
             style: { width: '100%' }, 
-            "aria-label": mode === 'createExample' ? 'Example project name' : 'Project name',
+            "aria-label": labelText,
             placeholder: placeholderText,
             required: true
           }),
           React.createElement("p", { style: { fontSize: '0.9em', color: 'var(--text-secondary)', marginTop: '8px', marginBottom: '20px' }},
-            mode === 'createExample' 
-              ? "This name will identify your new example project template." 
-              : "This name will be used to identify your project."
+            hintText
           ),
           React.createElement("div", { style: { display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '10px' }},
             React.createElement("button", { type: "button", onClick: onCancel }, "Cancel"),

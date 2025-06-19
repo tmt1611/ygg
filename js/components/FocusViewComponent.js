@@ -91,6 +91,22 @@ const FocusViewComponent = ({
     );
   };
 
+  const focusPos = allNodePositions.get(focusNodeData.id);
+
+  const parentPlaceholder = !parentNodeData && focusPos ? (
+    React.createElement("div", { className: "focus-node-placeholder", style: { position: 'absolute', top: `${focusPos.y - focusPos.height / 2 - 20}px`, left: '50%', transform: 'translate(-50%, -100%)' }},
+      React.createElement("span", { className: "focus-node-placeholder-icon" }, "🌌"),
+      "Sector Core (Root)"
+    )
+  ) : null;
+  
+  const childrenPlaceholder = childrenNodeData.length === 0 && focusPos ? (
+    React.createElement("div", { className: "focus-node-placeholder", style: { position: 'absolute', top: `${focusPos.y + focusPos.height / 2 + 20}px`, left: '50%', transform: 'translateX(-50%)' }},
+      React.createElement("span", { className: "focus-node-placeholder-icon" }, "🛰️"),
+      "No Subsystems Detected"
+    )
+  ) : null;
+
   return (
     React.createElement("div", { className: "focus-view-container" },
       React.createElement("div", { className: "focus-view-main-area" },
@@ -105,25 +121,11 @@ const FocusViewComponent = ({
             )
           ),
           parentNodeData && renderNode(parentNodeData, 'parent'),
-          !parentNodeData && allNodePositions.get(focusNodeData.id) && (() => {
-            const focusPos = allNodePositions.get(focusNodeData.id);
-            if (!focusPos) return null;
-            return React.createElement("div", { className: "focus-node-placeholder", style: { position: 'absolute', top: `${focusPos.y - focusPos.height / 2 - 20}px`, left: '50%', transform: 'translate(-50%, -100%)' }},
-              React.createElement("span", { className: "focus-node-placeholder-icon" }, "🌌"),
-              "Sector Core (Root)"
-            );
-          })(),
+          parentPlaceholder,
           renderNode(focusNodeData, 'focus'),
           childrenNodeData.length > 0 
             ? childrenNodeData.map((child) => renderNode(child, 'child'))
-            : allNodePositions.get(focusNodeData.id) && (() => {
-              const focusPos = allNodePositions.get(focusNodeData.id);
-              if (!focusPos) return null;
-              return React.createElement("div", { className: "focus-node-placeholder", style: { position: 'absolute', top: `${focusPos.y + focusPos.height / 2 + 20}px`, left: '50%', transform: 'translateX(-50%)' }},
-                React.createElement("span", { className: "focus-node-placeholder-icon" }, "🛰️"),
-                "No Subsystems Detected"
-              );
-            })()
+            : childrenPlaceholder
         ),
         React.createElement(FocusViewDetailPanel, {
             node: nodeForDetailPanel,

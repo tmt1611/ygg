@@ -151,19 +151,26 @@ html[data-theme='sol'] .yggdrasil-top-bar-active-project {
 .yggdrasil-top-bar-action-item.api-status.success { background-color: var(--success-bg); color: var(--success-color); }
 .yggdrasil-top-bar-action-item.api-status.error { background-color: var(--error-bg); color: var(--error-color); }
 
+@keyframes savedPop {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.15); }
+  100% { transform: scale(1); }
+}
 .yggdrasil-top-bar-save-button.saved,
 .yggdrasil-top-bar-download-button.saved {
   background-color: var(--success-color);
   border-color: var(--success-color);
   color: var(--text-on-accent);
   font-weight: bold;
-  transform: none;
+  animation: savedPop 0.3s ease-out;
+  transform: none; /* override default hover transform when saved */
 }
 .yggdrasil-top-bar-save-button.saved:hover,
 .yggdrasil-top-bar-download-button.saved:hover {
   background-color: var(--success-color);
   border-color: var(--success-color);
   color: var(--text-on-accent);
+  transform: none;
 }
 
 

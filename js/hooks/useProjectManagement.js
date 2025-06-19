@@ -137,35 +137,45 @@ export const useProjectManagement = ({
   const _setActiveInitialProject = useCallback((allProjects) => {
     const startupLogged = localStorage.getItem(APP_STORAGE_KEYS.STARTUP_LOAD_LOGGED);
     const logId = `startup-project-load-${new Date().toISOString()}`;
-    const storedActiveId = localStorage.getItem(APP_STORAGE_KEYS.ACTIVE_PROJECT_ID);
 
     const loadProjectState = (project, source) => {
       setActiveProjectId(project.isExample ? null : project.id);
       setTechTreeData(initializeNodes(project.treeData));
       setContextText(project.name);
       setInitialPromptFromHook(project.name);
-      if (!startupLogged) addHistoryEntry('PROJECT_LOADED', `Loaded project "${project.name}".`, { source, logId, projectId: project.id });
-    };
-
-    if (storedActiveId) {
-      const activeProj = allProjects.find(p => p.id === storedActiveId && !p.isExample);
-      if (activeProj) {
-        loadProjectState(activeProj, 'localStorage-active');
-        return;
+      if (!startupLogged) {
+        addHistoryEntry('PROJECT_LOADED', `Loaded project "${project.name}".`, { source, logId, projectId: project.id });
       }
+    };
+    
+    const findAndLoadProject = () => {
+        const storedActiveId = localStorage.getItem(APP_STORAGE_KEYS.ACTIVE_PROJECT_ID);
+        if (storedActiveId) {
+            const activeProj = allProjects.find(p => p.id === storedActiveId && !p.isExample);
+            if (activeProj) {
+                loadProjectState(activeProj, 'localStorage-active');
+                return true;
+            }
+        }
+    
+        const firstUserProject = allProjects.find(p => !p.isExample);
+        if (firstUserProject) {
+            loadProjectState(firstUserProject, 'fallback-first-user');
+            return true;
+        }
+        
+        const elfExample = allProjects.find(p => p.isExample && p.treeData.id === 'elf-warfare-root-example-v1');
+        if (elfExample) {
+            viewStates?.commonViewResetLogic(false);
+            loadProjectState(elfExample, 'fallback-example');
+            return true;
+        }
+
+        return false;
     }
 
-    const firstUserProject = allProjects.find(p => !p.isExample);
-    if (firstUserProject) {
-      loadProjectState(firstUserProject, 'fallback-first-user');
-      return;
-    }
-    
-    const elfExample = allProjects.find(p => p.isExample && p.treeData.id === 'elf-warfare-root-example-v1');
-    if (elfExample) {
-        viewStates?.commonViewResetLogic(false);
-        loadProjectState(elfExample, 'fallback-example');
-    }
+    findAndLoadProject();
+
   }, [setTechTreeData, setContextText, setInitialPromptFromHook, viewStates, addHistoryEntry]);
 
 
