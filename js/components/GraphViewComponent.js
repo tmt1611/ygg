@@ -226,7 +226,7 @@ const GraphViewComponent = ({
 
     // Apply static attributes and event handlers
     nodeGroups
-      .attr("transform", d => `translate(${d.y * Math.cos(d.x - Math.PI / 2)}, ${d.y * Math.sin(d.x - Math.PI / 2)})`)
+      .attr("transform", d => `rotate(${d.x * 180 / Math.PI - 90}) translate(${d.y}, 0)`)
       .on("click", handleNodeClick)
       .on("dblclick", handleNodeDoubleClick)
       .on("contextmenu", handleNodeContextMenu);
@@ -245,26 +245,29 @@ const GraphViewComponent = ({
       .attr("font-size", "11px")
       .style("user-select", "none")
       .style("pointer-events", "none")
-      .text(d => d.isProxy ? d.data.name : d.data.name)
-      .attr("dx", d => {
+      .attr("transform", d => (d.x >= Math.PI ? "rotate(180)" : null))
+      .attr("dy", "0.31em")
+      .attr("x", d => {
           if (d.isProxy) return 0;
-          const radius = getNodeRadius(d);
-          const isLeft = d.x > Math.PI;
-          return isLeft ? -(radius + 6) : (radius + 6);
+          return d.x < Math.PI ? (getNodeRadius(d) + 4) : -(getNodeRadius(d) + 4);
       })
       .attr("text-anchor", d => {
           if (d.isProxy) return "middle";
-          return d.x > Math.PI ? "end" : "start";
-      });
+          return d.x < Math.PI ? "start" : "end";
+      })
+      .text(d => d.isProxy ? d.data.name : d.data.name);
 
     nodeGroups.select(".node-rune-icon")
+      .attr("transform", d => `rotate(${-(d.x * 180 / Math.PI - 90)})`)
       .text(d => {
         if (d.isProxy) return '';
         // Now that text is outside, the rune can be inside.
         return NODE_IMPORTANCE_RUNES[d.data.importance] || '•';
       });
 
-    nodeGroups.select(".node-lock-icon").text(d => (d.data.isLocked && !d.isProxy ? "🔒" : ""));
+    nodeGroups.select(".node-lock-icon")
+      .attr("transform", d => `rotate(${-(d.x * 180 / Math.PI - 90)})`)
+      .text(d => (d.data.isLocked && !d.isProxy ? "🔒" : ""));
 
   }, [g, nodes, links, handleNodeClick, handleNodeDoubleClick, handleNodeContextMenu, projectLinksAndProxyNodes]);
 
