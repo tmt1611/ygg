@@ -450,11 +450,9 @@ Respond ONLY with the JSON array. No extra text or markdown.
     const result = await model.generateContent(prompt);
     const response = result.response;
 
-    let jsonStr = response.text().trim();
-    const fenceRegex = /^```(?:json|JSON)?\s*\n?(.*?)\n?\s*```$/s;
-    const match = jsonStr.match(fenceRegex);
-    if (match?.[1]) {
-      jsonStr = match[1].trim();
+    const jsonStr = extractJsonFromMarkdown(response.text());
+    if (!jsonStr) {
+      throw new Error("AI returned an empty response for strategic suggestions.");
     }
 
     const parsed = JSON.parse(jsonStr);
