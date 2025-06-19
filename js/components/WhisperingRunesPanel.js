@@ -30,6 +30,27 @@ const WhisperingRunesPanel = ({
     return null;
   }, [isTargetNodeRoot, activeProjectId, projects, findLinkSource, node]);
 
+  const { currentImportance, nextImportanceValue } = useMemo(() => {
+    if (!node) {
+      return { currentImportance: 'common', nextImportanceValue: 'major' };
+    }
+    const importanceCycle = ['common', 'major', 'minor'];
+    const currentImportance = node.importance || 'common';
+    const currentImportanceIndex = importanceCycle.indexOf(currentImportance);
+    const nextImportanceValue = importanceCycle[(currentImportanceIndex + 1) % importanceCycle.length];
+    return { currentImportance, nextImportanceValue };
+  }, [node]);
+
+  const currentImportanceInfo = useMemo(() => 
+    NODE_IMPORTANCE_OPTIONS.find(opt => opt.value === currentImportance) || NODE_IMPORTANCE_OPTIONS[1], 
+    [currentImportance]
+  );
+  
+  const nextImportanceInfo = useMemo(() => 
+    NODE_IMPORTANCE_OPTIONS.find(opt => opt.value === nextImportanceValue) || NODE_IMPORTANCE_OPTIONS[1],
+    [nextImportanceValue]
+  );
+
   useEffect(() => {
     if (!isSubMenuOpen) return;
     const handleClickOutside = (event) => {
@@ -71,19 +92,6 @@ const WhisperingRunesPanel = ({
     if (node) { onNodeImportanceChange(node.id, nextImportanceValue); }
   };
 
-  const importanceCycle = ['common', 'major', 'minor'];
-  const currentImportance = node.importance || 'common';
-  const currentImportanceIndex = importanceCycle.indexOf(currentImportance);
-  const nextImportanceValue = importanceCycle[(currentImportanceIndex + 1) % importanceCycle.length];
-
-  const currentImportanceInfo = useMemo(() => 
-    NODE_IMPORTANCE_OPTIONS.find(opt => opt.value === currentImportance) || NODE_IMPORTANCE_OPTIONS[1], 
-    [currentImportance]
-  );
-  const nextImportanceInfo = useMemo(() => 
-    NODE_IMPORTANCE_OPTIONS.find(opt => opt.value === nextImportanceValue) || NODE_IMPORTANCE_OPTIONS[1],
-    [nextImportanceValue]
-  );
   const lockIcon = node.isLocked ? (lockButtonFeedback ? '🔓' : '🔒') : (lockButtonFeedback ? '🔒' : '🔓');
 
   return (
@@ -98,7 +106,7 @@ const WhisperingRunesPanel = ({
         React.createElement("span", { className: "rune-icon" }, lockIcon), " ", node.isLocked ? 'Unlock' : 'Lock'
       ),
       React.createElement("button", {
-        onClick: handleCycleImportance, disabled: isAppBusy, title: `Cycle Importance (next: ${nextImportanceInfo.label})`, className: `importance-cycle-button importance-${currentImportance}`},
+        onClick: handleCycleImportance, disabled: isAppBusy || node.isLocked, title: `Cycle Importance (next: ${nextImportanceInfo.label})`, className: `importance-cycle-button importance-${currentImportance}`},
         React.createElement("span", { className: "rune-icon" }, currentImportanceInfo.rune), ` ${currentImportanceInfo.label}`
       ),
 
