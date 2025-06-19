@@ -196,7 +196,7 @@ const TechTreeListItemComponent = ({
             title: `Importance: ${currentImportanceObject.label}. Right-click for more actions.`,
             onClick: (e) => e.stopPropagation() // Prevent row selection when clicking select
           },
-            RUNE_IMPORTANCE_OPTIONS.map(opt => React.createElement("option", { key: opt.value, value: opt.value }, opt.rune, " ", opt.label))
+            NODE_IMPORTANCE_OPTIONS.map(opt => React.createElement("option", { key: opt.value, value: opt.value }, opt.rune, " ", opt.label))
           )
         )
       ),
