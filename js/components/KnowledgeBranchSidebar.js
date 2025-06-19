@@ -1,8 +1,9 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import AiToolsTab from './tabs/AiToolsTab.js';
 import AiInsightsTab from './tabs/AiInsightsTab.js';
 import HistoryViewTabContent from './tabs/HistoryViewTab.js';
+import { APP_STORAGE_KEYS } from '../constants.js';
 
 const sidebarTabs = [
     { id: 'ai-tools', label: 'AI Ops', icon: '🧠' },
@@ -15,7 +16,22 @@ const KnowledgeBranchSidebar = (props) => {
     isCollapsed, onToggleSidebar, activeSidebarTab, setActiveSidebarTab,
     isAppBusy, apiKeyIsSet, hasTechTreeData,
   } = props;
-  const [collapsedPanels, setCollapsedPanels] = useState(new Set());
+  const [collapsedPanels, setCollapsedPanels] = useState(() => {
+    const savedState = localStorage.getItem(APP_STORAGE_KEYS.SIDEBAR_PANEL_STATES);
+    try {
+        if (savedState) {
+            const parsed = JSON.parse(savedState);
+            return new Set(Array.isArray(parsed) ? parsed : []);
+        }
+    } catch (e) {
+        console.error("Failed to parse sidebar panel states from localStorage", e);
+    }
+    return new Set(['strategic-advisor']); // Collapse strategic advisor by default
+  });
+
+  useEffect(() => {
+    localStorage.setItem(APP_STORAGE_KEYS.SIDEBAR_PANEL_STATES, JSON.stringify(Array.from(collapsedPanels)));
+  }, [collapsedPanels]);
 
   const handleTogglePanel = (panelId) => {
     setCollapsedPanels(prev => {

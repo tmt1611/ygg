@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 
 const getNextThemeInfo = (currentTheme) => {
     switch (currentTheme) {
@@ -11,6 +11,24 @@ const getNextThemeInfo = (currentTheme) => {
     }
 };
 
+const useFeedbackState = (timeout = 1500) => {
+  const [feedback, setFeedback] = useState(false);
+
+  const trigger = useCallback(() => {
+    setFeedback(true);
+  }, []);
+
+  useEffect(() => {
+    let timer;
+    if (feedback) {
+      timer = setTimeout(() => setFeedback(false), timeout);
+    }
+    return () => clearTimeout(timer);
+  }, [feedback, timeout]);
+
+  return [feedback, trigger];
+};
+
 const YggdrasilTopBar = ({
   themeMode, onToggleTheme, apiKeyIsSet, activeProjectName, onSaveActiveProject, 
   onDownloadActiveProject, 
@@ -18,36 +36,20 @@ const YggdrasilTopBar = ({
   yggdrasilViewMode, activeOverlayPanel, setYggdrasilViewMode, setActiveOverlayPanel,
   focusNodeId
 }) => {
-  const [saveFeedback, setSaveFeedback] = useState(false);
-  const [downloadFeedback, setDownloadFeedback] = useState(false);
+  const [saveFeedback, triggerSaveFeedback] = useFeedbackState();
+  const [downloadFeedback, triggerDownloadFeedback] = useFeedbackState();
 
   const nextThemeInfo = useMemo(() => getNextThemeInfo(themeMode), [themeMode]);
 
   const handleSaveClick = () => {
     onSaveActiveProject();
-    setSaveFeedback(true);
+    triggerSaveFeedback();
   };
 
   const handleDownloadClick = () => {
     onDownloadActiveProject(); 
-    setDownloadFeedback(true);
+    triggerDownloadFeedback();
   };
-
-  useEffect(() => {
-    let timer;
-    if (saveFeedback) {
-      timer = setTimeout(() => setSaveFeedback(false), 1500); 
-    }
-    return () => clearTimeout(timer);
-  }, [saveFeedback]);
-
-  useEffect(() => {
-    let timer;
-    if (downloadFeedback) {
-      timer = setTimeout(() => setDownloadFeedback(false), 1500); 
-    }
-    return () => clearTimeout(timer);
-  }, [downloadFeedback]);
 
 
   const handleNavClick = (viewMode, overlay = null) => {

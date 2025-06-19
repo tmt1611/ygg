@@ -946,28 +946,6 @@ html[data-theme='sol'] .contextual-help-icon:hover, html[data-theme='sol'] .cont
 .path-to-root-display.no-scroll-end::after {
   opacity: 0;
 }
-.path-to-root-display::before, .path-to-root-display::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  width: 20px;
-  pointer-events: none;
-  transition: opacity 0.2s;
-}
-.path-to-root-display::before {
-  left: 0;
-  background: linear-gradient(to right, var(--panel-alt-bg), transparent);
-}
-.path-to-root-display::after {
-  right: 0;
-  background: linear-gradient(to left, var(--panel-alt-bg), transparent);
-}
-
-.path-to-root-display.no-scroll-start::before,
-.path-to-root-display.no-scroll-end::after {
-  opacity: 0;
-}
 
 
 .path-to-root-display::-webkit-scrollbar {
@@ -1488,8 +1466,6 @@ html[data-theme='sol'] .knowledge-branch-sidebar .panel-toggle-button {
 .project-actions .delete-action:hover { background-color: var(--error-bg); }
 .project-list-item.example-project .project-name { font-style: italic; color: var(--text-secondary); }
 .project-list-item.example-project.active .project-name { color: var(--primary-accent); }
-.project-list-item.example-project .project-name { font-style: italic; color: var(--text-secondary); }
-.project-list-item.example-project.active .project-name { color: var(--primary-accent); }
   
 .project-stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; } 
 .stat-item { 
@@ -1654,21 +1630,6 @@ html[data-theme='nebula'] .history-item-summary strong.history-keyword {
 .context-menu-icon { width: 1.2em; text-align: center; font-size: 1.1em; }
 .context-menu-label { flex-grow: 1; }
 .context-menu-submenu-indicator { margin-left: auto; opacity: 0.7; }
-.context-menu .submenu {
-  position: absolute;
-  left: 100%;
-  top: 0;
-  margin-left: 2px;
-  animation: contextMenuAppear 0.15s ease-out;
-  background: var(--panel-bg);
-  border: 1px solid var(--border-color-strong);
-  border-radius: var(--border-radius-lg);
-  box-shadow: var(--box-shadow-md);
-  padding: 4px;
-  z-index: 1011;
-  min-width: 120px;
-}
-.context-menu .submenu button[aria-checked="true"] { font-weight: 600; color: var(--primary-accent-dark); }
 .context-menu .submenu {
   position: absolute;
   left: 100%;
