@@ -20,6 +20,7 @@ export const useD3Tree = (
   const gSelectionRef = useRef(null);
   const zoomBehaviorRef = useRef(null);
   const [g, setG] = useState(null);
+  const initialDataLoaded = useRef(false);
 
   const rootHierarchy = useMemo(() => {
     if (!treeData) return null;
@@ -35,6 +36,16 @@ export const useD3Tree = (
       .separation((a, b) => (a.parent === b.parent ? 1 : 2));
   }, [rootHierarchy, radialRadiusFactor]);
 
+  const resetZoom = useCallback(() => {
+    if (svgSelectionRef.current && zoomBehaviorRef.current && svgRef.current && svgRef.current.parentElement) {
+      const { clientWidth, clientHeight } = svgRef.current.parentElement;
+      if (clientWidth > 0 && clientHeight > 0) {
+        const initialTransform = zoomIdentity.translate(clientWidth / 2, clientHeight / 2).scale(0.8);
+        svgSelectionRef.current.transition().duration(750).call(zoomBehaviorRef.current.transform, initialTransform);
+      }
+    }
+  }, []);
+
   useLayoutEffect(() => {
     if (!svgRef.current) return;
 
@@ -43,10 +54,6 @@ export const useD3Tree = (
       svgSelectionRef.current = svg;
       svg.select("g").remove(); 
       
-      const containerDiv = svgRef.current.parentElement;
-      if (!containerDiv) return;
-      const { clientWidth, clientHeight } = containerDiv;
-
       // The 'g' element will be centered, and nodes will be positioned relative to it.
       const gElement = svg.append("g");
       gSelectionRef.current = gElement;
@@ -60,14 +67,19 @@ export const useD3Tree = (
           }
         });
       svg.call(zoomBehaviorRef.current);
-      
-      if (clientWidth > 0 && clientHeight > 0) {
-        // Center the graph
-        const initialTransform = zoomIdentity.translate(clientWidth / 2, clientHeight / 2).scale(0.8);
-        svg.call(zoomBehaviorRef.current.transform, initialTransform);
-      }
     }
   }, [svgRef]); 
+
+  // This new effect handles the initial centering.
+  useLayoutEffect(() => {
+    if (treeData && !initialDataLoaded.current) {
+      resetZoom();
+      initialDataLoaded.current = true;
+    } else if (!treeData) {
+      // Reset the flag if data is unloaded, allowing re-centering on next load.
+      initialDataLoaded.current = false;
+    }
+  }, [treeData, resetZoom]);
 
   const nodesAndLinks = useMemo(() => {
     if (!rootHierarchy) return { nodes: [], links: [] };
@@ -77,16 +89,6 @@ export const useD3Tree = (
     // For radial, x is angle, y is radius. No swap needed.
     return { nodes, links };
   }, [rootHierarchy, treeLayout]);
-
-  const resetZoom = useCallback(() => {
-    if (svgSelectionRef.current && zoomBehaviorRef.current && svgRef.current && svgRef.current.parentElement) {
-      const { clientWidth, clientHeight } = svgRef.current.parentElement;
-      if (clientWidth > 0 && clientHeight > 0) {
-        const initialTransform = zoomIdentity.translate(clientWidth / 2, clientHeight / 2).scale(0.8);
-        svgSelectionRef.current.transition().duration(750).call(zoomBehaviorRef.current.transform, initialTransform);
-      }
-    }
-  }, [svgRef]); 
 
   const zoomIn = useCallback(() => {
     if (svgSelectionRef.current && zoomBehaviorRef.current) {
