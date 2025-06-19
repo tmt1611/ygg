@@ -63,6 +63,12 @@ export const ELF_WARFARE_STRUCTURE_JSON_STRING = `
 }
 `;
 
+export const NODE_IMPORTANCE_OPTIONS = [
+    { value: 'minor', label: 'Minor', rune: '🌱' },
+    { value: 'common', label: 'Common', rune: '🌿' },
+    { value: 'major', label: 'Major', rune: '🌳' },
+];
+
 export const EVENT_TYPE_INFO = {
     // AI
     'TREE_INIT_AI': { icon: '🧠', color: 'var(--primary-accent)', isKey: true, keywords: ['generated'] },

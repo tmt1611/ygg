@@ -4,7 +4,6 @@ import React, { useState, useCallback, useEffect, useMemo } from 'react';
 // Components
 import KnowledgeBranchSidebar from './components/KnowledgeBranchSidebar.js';
 import YggdrasilTopBar from './components/YggdrasilTopBar.js'; 
-import LoadingSpinner from './components/LoadingSpinner.js';
 import ErrorMessage from './components/ErrorMessage.js';
 import MainContentRouter from './components/MainContentRouter.js'; 
 import AppModals from './components/AppModals.js'; 
@@ -103,7 +102,7 @@ const App = () => {
   const aiInsightsHook = useAiInsights({
     apiKeyIsSet: apiKeyHook.status.isSet,
     historyManager, techTreeData, contextText: initialPrompt, setTechTreeData,
-    nodeOperationsHook: nodeOperations, modalManager
+    modalManager
   });
   const { aiInsightsData, aiInsightsIsLoading, aiInsightsError, handleGenerateAiInsights } = aiInsightsHook;
 
