@@ -4,6 +4,7 @@ import { getAllNodesAsMap } from '../utils.js';
 import FocusNodeDisplay from './FocusNodeDisplay.js';
 import FocusViewDetailPanel from './FocusViewDetailPanel.js';
 import { useFocusViewLayout } from '../hooks/useFocusViewLayout.js';
+import PathToRootDisplay from './PathToRootDisplay.js';
 
 const FocusViewComponent = ({
   treeData, focusNodeId, selectedNodeInPanelId, onSelectNodeInPanel, onChangeFocusNode,
@@ -71,6 +72,13 @@ const FocusViewComponent = ({
     onOpenContextMenu(nodeId, { x: event.clientX, y: event.clientY }, linkSourceInfoForContext);
   },[isAppBusy, onOpenContextMenu, treeData, activeProjectId, projects, findLinkSource]);
 
+  const pathDisplayProps = useMemo(() => ({
+    treeData,
+    currentNodeId: selectedNodeInPanelId || focusNodeId,
+    onSelectPathNode: (id) => onChangeFocusNode(id, treeData),
+    pathContext: 'stellar',
+  }), [treeData, selectedNodeInPanelId, focusNodeId, onChangeFocusNode]);
+
   if (!focusNodeData) {
     return ( React.createElement("div", { className: "focus-view-container", style: {padding: '20px', textAlign: 'center'}}, " Error: Focus node (ID: ", focusNodeId, ") not found. ", React.createElement("button", {onClick: onExitFocusView, style: {marginTop: '10px'}}, "Exit Focus View") ));
   }
@@ -108,40 +116,56 @@ const FocusViewComponent = ({
   ) : null;
 
   return (
-    React.createElement("div", { className: "focus-view-container" },
-      React.createElement("div", { className: "focus-view-main-area" },
-        React.createElement("div", { ref: layoutRef, className: "focus-view-layout", style: { minHeight: `${layoutHeight}px` } },
-          React.createElement("svg", { className: "focus-view-svg-overlay", style: { height: `${layoutHeight}px` } },
-            connectorLines.map(line => 
-              React.createElement("line", { 
-                key: line.id,
-                x1: line.x1, y1: line.y1, x2: line.x2, y2: line.y2, 
-                className: "focus-view-connector-line"
-              })
-            )
-          ),
-          parentNodeData && renderNode(parentNodeData, 'parent'),
-          parentPlaceholder,
-          renderNode(focusNodeData, 'focus'),
-          childrenNodeData.length > 0 
-            ? childrenNodeData.map((child) => renderNode(child, 'child'))
-            : childrenPlaceholder
+    React.createElement("div", { className: "focus-view-page-container" },
+      React.createElement("div", { className: "focus-view-header" },
+        React.createElement("div", { className: "focus-view-header-main" },
+            React.createElement("h3", { id: "focus-view-title" }, "Focus View"),
+            React.createElement(PathToRootDisplay, { ...pathDisplayProps })
         ),
-        React.createElement(FocusViewDetailPanel, {
-            node: nodeForDetailPanel,
-            isAppBusy: isAppBusy,
-            onNodeImportanceChange: onNodeImportanceChange,
-            onToggleLock: onToggleLock,
-            onOpenNodeEditModal: onOpenNodeEditModal,
-            onOpenLinkProjectModal: onOpenLinkProjectModal,
-            onNavigateToLinkedProject: onNavigateToLinkedProject,
-            onUnlinkProjectFromNode: onUnlinkProjectFromNode,
-            onDeleteNode: onDeleteNode,
-            onExitFocusView: onExitFocusView,
-            isProjectRoot: nodeForDetailPanel?.id === treeData?.id,
-            incomingLinkInfo: nodeForDetailPanel?.id === treeData?.id ? incomingLinkInfoForFocusNode : null,
-            handleNavigateToSourceNode: handleNavigateToSourceNode
-        })
+        React.createElement("div", { className: "overlay-panel-header-actions" },
+            React.createElement("button", {
+                onClick: onExitFocusView,
+                className: "base-icon-button",
+                "aria-label": "Close Focus View",
+                title: "Close Focus View and return to Graph View"
+            }, "×")
+        )
+      ),
+      React.createElement("div", { className: "focus-view-container" },
+        React.createElement("div", { className: "focus-view-main-area" },
+          React.createElement("div", { ref: layoutRef, className: "focus-view-layout", style: { minHeight: `${layoutHeight}px` } },
+            React.createElement("svg", { className: "focus-view-svg-overlay", style: { height: `${layoutHeight}px` } },
+              connectorLines.map(line => 
+                React.createElement("line", { 
+                  key: line.id,
+                  x1: line.x1, y1: line.y1, x2: line.x2, y2: line.y2, 
+                  className: "focus-view-connector-line"
+                })
+              )
+            ),
+            parentNodeData && renderNode(parentNodeData, 'parent'),
+            parentPlaceholder,
+            renderNode(focusNodeData, 'focus'),
+            childrenNodeData.length > 0 
+              ? childrenNodeData.map((child) => renderNode(child, 'child'))
+              : childrenPlaceholder
+          ),
+          React.createElement(FocusViewDetailPanel, {
+              node: nodeForDetailPanel,
+              isAppBusy: isAppBusy,
+              onNodeImportanceChange: onNodeImportanceChange,
+              onToggleLock: onToggleLock,
+              onOpenNodeEditModal: onOpenNodeEditModal,
+              onOpenLinkProjectModal: onOpenLinkProjectModal,
+              onNavigateToLinkedProject: onNavigateToLinkedProject,
+              onUnlinkProjectFromNode: onUnlinkProjectFromNode,
+              onDeleteNode: onDeleteNode,
+              onExitFocusView: onExitFocusView,
+              isProjectRoot: nodeForDetailPanel?.id === treeData?.id,
+              incomingLinkInfo: nodeForDetailPanel?.id === treeData?.id ? incomingLinkInfoForFocusNode : null,
+              handleNavigateToSourceNode: handleNavigateToSourceNode
+          })
+        )
       )
     )
   );

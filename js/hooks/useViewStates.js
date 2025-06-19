@@ -9,8 +9,7 @@ export const useViewStates = ({
   modalManager,
   addHistoryEntry,
   setYggdrasilViewMode,
-  setActiveOverlayPanel,
-  activeOverlayPanel,
+  yggdrasilViewMode,
 }) => {
   const [showListDescriptionsGlobal, setShowListDescriptionsGlobal] = useState(true);
   
@@ -26,12 +25,12 @@ export const useViewStates = ({
   useEffect(() => { localStorage.setItem(APP_STORAGE_KEYS.COLLAPSED_NODES, JSON.stringify(Array.from(collapsedNodeIds))); }, [collapsedNodeIds]);
 
   useEffect(() => {
-    // If the focus panel is open but there's no longer a valid focus node ID,
-    // close the panel automatically. This can happen if the focused node is deleted.
-    if (activeOverlayPanel === 'focus' && !focusNodeId) {
-      setActiveOverlayPanel(null);
+    // If the focus view is active but there's no longer a valid focus node ID,
+    // switch to the graph view. This can happen if the focused node is deleted.
+    if (yggdrasilViewMode === 'focus' && !focusNodeId) {
+      setYggdrasilViewMode('graph');
     }
-  }, [focusNodeId, activeOverlayPanel, setActiveOverlayPanel]);
+  }, [focusNodeId, yggdrasilViewMode, setYggdrasilViewMode]);
 
   const commonViewResetLogic = useCallback((forNewProjectContext = false) => {
     setError(null);
@@ -46,9 +45,9 @@ export const useViewStates = ({
     modalManager.closeContextMenu();
     if (forNewProjectContext) {
       setCollapsedNodeIds(new Set());
-      setActiveOverlayPanel(null); 
+      setYggdrasilViewMode('workspace'); 
     }
-  }, [setError, techTreeData, focusNodeId, selectedGraphNodeId, modalManager, setActiveOverlayPanel]);
+  }, [setError, techTreeData, focusNodeId, selectedGraphNodeId, modalManager, setYggdrasilViewMode]);
 
   const handleSwitchToFocusView = useCallback((nodeId, treeToSearch) => {
     const effectiveTree = treeToSearch || techTreeData;
@@ -56,12 +55,11 @@ export const useViewStates = ({
     if (node) {
       setFocusNodeId(nodeId); 
       setSelectedNodeInFocusPanelId(nodeId);
-      setYggdrasilViewMode('treeView'); 
-      setActiveOverlayPanel('focus'); 
+      setYggdrasilViewMode('focus'); 
     } else { 
         setError(`Cannot focus: Node with ID ${nodeId} not found in the current or provided tree.`); 
     }
-  }, [techTreeData, setYggdrasilViewMode, setActiveOverlayPanel, setError]);
+  }, [techTreeData, setYggdrasilViewMode, setError]);
 
   const handleToggleCollapseNode = useCallback((nodeId, isRecursive = false) => {
     setCollapsedNodeIds(prevCollapsed => {
@@ -97,7 +95,6 @@ export const useViewStates = ({
     handleToggleCollapseNode, handleToggleAllNodesList,
     commonViewResetLogic,
     setYggdrasilViewMode, 
-    setActiveOverlayPanel,
   }), [
     showListDescriptionsGlobal, setShowListDescriptionsGlobal,
     collapsedNodeIds, setCollapsedNodeIds,
@@ -107,6 +104,5 @@ export const useViewStates = ({
     handleToggleCollapseNode, handleToggleAllNodesList,
     commonViewResetLogic,
     setYggdrasilViewMode,
-    setActiveOverlayPanel,
   ]);
 };

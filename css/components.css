@@ -305,44 +305,8 @@ html[data-theme='sol'] .yggdrasil-app-body.sidebar-collapsed .knowledge-branch-s
   pointer-events: auto;
 }
 
-.overlay-panel-view {
-  position: relative; 
-  margin: 15px auto; /* Reduced margin */
-  width: clamp(320px, 90%, 1400px); /* Increased max width */
-  max-height: calc(100vh - var(--top-bar-height) - 30px);
-  min-height: 280px;
-  background-color: var(--panel-bg);
-  border: 1px solid var(--border-color-strong);
-  border-radius: var(--border-radius-lg); 
-  box-shadow: var(--box-shadow-lg);
-  display: flex; flex-direction: column;
-  z-index: 2; 
-  pointer-events: auto;
-  animation: overlayPanelAppear 0.3s ease-out;
-}
-
-@keyframes overlayPanelAppear {
-  from { opacity: 0.7; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-.overlay-panel-header {
-  display: flex; justify-content: space-between; align-items: center;
-  padding: 8px 12px; border-bottom: 1px solid var(--border-color); /* Reduced padding */
-  background-color: var(--panel-alt-bg);
-  border-top-left-radius: var(--border-radius-lg);
-  border-top-right-radius: var(--border-radius-lg);
-  gap: 12px;
-}
-.overlay-panel-header-main {
-  flex-grow: 1;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  min-width: 0; /* For flexbox truncation */
-  flex-wrap: wrap; /* Allow path to wrap on small screens */
-}
-.overlay-panel-header h3 { margin: 0; font-size: 1.15em; color: var(--primary-accent); } /* Reduced font size */
-.overlay-panel-content { flex-grow: 1; padding: 12px; overflow-y: auto; } /* Reduced padding */
+/* Styles for OverlayPanelView have been removed as it is no longer used for main content views. */
+/* Focus view now uses its own header and container setup. */
 
 @keyframes runeAwakening { 0% { opacity: 0.7; transform: scale(0.95) translateY(5px); } 100% { opacity: 1; transform: scale(1) translateY(0); } }
 .whispering-runes-panel {
@@ -439,7 +403,7 @@ html[data-theme='sol'] .panel-header-icon { color: var(--primary-accent-dark); f
 .importance-major { background-color: var(--importance-major-bg); color: var(--importance-major-text); border: 1px solid var(--importance-major-border); }
 
 .status-rune { font-size: 0.9em; margin-right: 4px; } 
-.list-view-importance-select, .focus-view-detail-panel .importance-select, .graph-view-selected-node-panel .importance-select, .overlay-panel-view .importance-select {
+.list-view-importance-select, .focus-view-detail-panel .importance-select, .graph-view-selected-node-panel .importance-select {
   padding: 6px 8px; text-align: left; font-size: 0.9em; /* Reduced padding/font-size */
 }
 
@@ -765,6 +729,24 @@ html[data-theme='sol'] .contextual-help-icon:hover, html[data-theme='sol'] .cont
 .api-key-warning-block p { margin: 2px 0; color: var(--text-primary); font-weight: 500; font-size: 0.9em;}
 
 /* Focus View Specific Styles */
+.focus-view-page-container {
+  display: flex; flex-direction: column; height: 100%;
+}
+.focus-view-header {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 8px 12px;
+  background-color: var(--panel-alt-bg);
+  border-bottom: 1px solid var(--border-color);
+  gap: 12px;
+  flex-shrink: 0;
+}
+.focus-view-header-main {
+  flex-grow: 1; display: flex; align-items: center;
+  gap: 12px; min-width: 0; flex-wrap: wrap;
+}
+.focus-view-header h3 { margin: 0; font-size: 1.15em; color: var(--primary-accent); }
+.focus-view-header .overlay-panel-header-actions .base-icon-button { font-size: 1.2em; padding: 4px; }
+
 .focus-node-display { /* Styles for the button wrapper of the celestial body */
   background-color: transparent;
   border: none;
@@ -786,30 +768,28 @@ html[data-theme='sol'] .contextual-help-icon:hover, html[data-theme='sol'] .cont
 }
 
 
-.overlay-panel-view .focus-view-container { 
-  display: flex; flex-direction: column; height: 100%; 
+.focus-view-container { 
+  display: flex; flex-direction: column; flex-grow: 1; overflow: hidden;
   background-color: var(--focus-stellar-bg); color: var(--focus-panel-text); 
-  border-radius: 0 0 var(--border-radius-lg) var(--border-radius-lg); 
 }
-.overlay-panel-view .focus-view-header { display: none; }
-.overlay-panel-view .focus-view-main-area { flex-grow: 1; display: flex; position: relative; padding: 12px; gap: 12px; }
+.focus-view-main-area { flex-grow: 1; display: flex; position: relative; padding: 12px; gap: 12px; overflow: hidden; }
 
-.overlay-panel-view .focus-view-layout { 
+.focus-view-layout { 
   flex-grow: 1; 
   position: relative; /* This is the main positioning context for parent/focus/children */
   display: flex; /* For overall centering if needed, but nodes are absolute */
   align-items: center; /* Center placeholder text if no nodes */
   justify-content: center; /* Center placeholder text if no nodes */
-  /* overflow-y is now handled by .overlay-panel-content */
+  overflow-y: auto; /* Allow layout to scroll if content overflows */
   overflow-x: hidden;
   min-height: 350px;
+  padding: 10px; /* Padding inside the scrollable area */
 }
-.overlay-panel-view .focus-view-svg-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
-.overlay-panel-view .focus-view-connector-line { stroke: var(--focus-connector-stroke); stroke-width: 2px; fill: none; animation: warpPulse 2s linear infinite; stroke-opacity: 0.8; }
+.focus-view-svg-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
+.focus-view-connector-line { stroke: var(--focus-connector-stroke); stroke-width: 2px; fill: none; animation: warpPulse 2s linear infinite; stroke-opacity: 0.8; }
 @keyframes warpPulse { 0% { stroke-dasharray: 10 200; stroke-dashoffset: 0; } 50% { stroke-dasharray: 50 160; stroke-dashoffset: -50; } 100% { stroke-dasharray: 10 200; stroke-dashoffset: -210; } }
 #warp-arrow path { fill: var(--focus-connector-stroke); }
 
-/* The old .focus-view-*-area divs have been removed from the layout. */
 .focus-node-placeholder {
   display: flex;
   flex-direction: column;
@@ -838,7 +818,7 @@ html[data-theme='sol'] .contextual-help-icon:hover, html[data-theme='sol'] .cont
 }
 
 
-.overlay-panel-view .focus-view-detail-panel { 
+.focus-view-detail-panel { 
   width: 320px; /* Restored width */
   flex-shrink: 0; 
   background-color: var(--focus-panel-bg); 
@@ -849,16 +829,16 @@ html[data-theme='sol'] .contextual-help-icon:hover, html[data-theme='sol'] .cont
   flex-direction: column; 
   gap: 15px; /* Increased gap */
 }
-.overlay-panel-view .focus-view-detail-panel .form-group { margin-bottom: 15px; }
-.overlay-panel-view .focus-view-detail-panel .form-group > label { display: block; margin-bottom: 4px; font-weight: 500; font-size: 0.85em; color: var(--focus-panel-text); opacity: 0.9; }
-.overlay-panel-view .focus-view-detail-panel .focus-view-info-block {
+.focus-view-detail-panel .form-group { margin-bottom: 15px; }
+.focus-view-detail-panel .form-group > label { display: block; margin-bottom: 4px; font-weight: 500; font-size: 0.85em; color: var(--focus-panel-text); opacity: 0.9; }
+.focus-view-detail-panel .focus-view-info-block {
     background: rgba(0,0,0,0.2);
     padding: 10px 12px;
     border-radius: var(--border-radius);
     border-left: 3px solid var(--focus-connector-stroke);
     margin-bottom: 15px;
 }
-.overlay-panel-view .focus-view-detail-panel .focus-view-info-block label {
+.focus-view-detail-panel .focus-view-info-block label {
     display: block;
     margin-bottom: 2px;
     font-weight: 500;
@@ -867,13 +847,13 @@ html[data-theme='sol'] .contextual-help-icon:hover, html[data-theme='sol'] .cont
     text-transform: uppercase;
     opacity: 0.9;
 }
-.overlay-panel-view .focus-view-detail-panel .focus-view-info-block .info-block-name {
+.focus-view-detail-panel .focus-view-info-block .info-block-name {
     font-size: 1.1em;
     font-weight: bold;
     margin: 2px 0 10px 0;
     color: var(--focus-panel-text);
 }
-.overlay-panel-view .focus-view-detail-panel .focus-view-info-block .info-block-description {
+.focus-view-detail-panel .focus-view-info-block .info-block-description {
     font-size: 0.9em;
     margin: 2px 0 0 0;
     white-space: pre-wrap;
@@ -884,20 +864,20 @@ html[data-theme='sol'] .contextual-help-icon:hover, html[data-theme='sol'] .cont
     color: var(--focus-panel-text);
     opacity: 0.9;
 }
-.overlay-panel-view .focus-view-detail-panel .focus-view-info-block .info-block-description i {
+.focus-view-detail-panel .focus-view-info-block .info-block-description i {
     opacity: 0.6;
 }
-.overlay-panel-view .focus-view-detail-panel .form-group input[type="text"],
-.overlay-panel-view .focus-view-detail-panel .form-group textarea,
-.overlay-panel-view .focus-view-detail-panel .form-group select {
+.focus-view-detail-panel .form-group input[type="text"],
+.focus-view-detail-panel .form-group textarea,
+.focus-view-detail-panel .form-group select {
    background-color: rgba(0,0,0,0.2); color: var(--focus-panel-text); border-color: rgba(var(--focus-panel-text), 0.3);
 }
-.overlay-panel-view .focus-view-detail-panel .form-group input[type="text"]:focus,
-.overlay-panel-view .focus-view-detail-panel .form-group textarea:focus,
-.overlay-panel-view .focus-view-detail-panel .form-group select:focus {
+.focus-view-detail-panel .form-group input[type="text"]:focus,
+.focus-view-detail-panel .form-group textarea:focus,
+.focus-view-detail-panel .form-group select:focus {
    border-color: var(--focus-connector-stroke); box-shadow: 0 0 0 2px rgba(77, 208, 225, 0.3);
 }
-.overlay-panel-view .focus-view-detail-panel .panel-sub-header {
+.focus-view-detail-panel .panel-sub-header {
     font-size: 0.8em;
     font-weight: 600;
     color: var(--focus-connector-stroke);
@@ -908,7 +888,7 @@ html[data-theme='sol'] .contextual-help-icon:hover, html[data-theme='sol'] .cont
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
-.overlay-panel-view .focus-view-detail-panel .panel-button-group button {
+.focus-view-detail-panel .panel-button-group button {
   background-color: rgba(255, 255, 255, 0.1);
   border-color: rgba(255, 255, 255, 0.3);
   color: var(--focus-panel-text);
@@ -919,13 +899,13 @@ html[data-theme='sol'] .contextual-help-icon:hover, html[data-theme='sol'] .cont
   justify-content: flex-start;
   gap: 10px;
 }
-.overlay-panel-view .focus-view-detail-panel .panel-button-group button:hover { background-color: rgba(255,255,255,0.2); }
-.overlay-panel-view .focus-view-detail-panel .panel-button-group button.primary { background-color: var(--focus-connector-stroke); color: var(--focus-stellar-bg); border-color: var(--focus-connector-stroke); }
-.overlay-panel-view .focus-view-detail-panel .panel-button-group button.primary:hover { background-color: var(--focus-connector-stroke); filter: brightness(1.1); }
-.overlay-panel-view .focus-view-detail-panel .panel-button-group button.danger { background-color: var(--error-color); color: var(--text-on-accent); border-color: var(--error-color); }
-.overlay-panel-view .focus-view-detail-panel .panel-button-group button.danger:hover { background-color: var(--error-color); filter: brightness(1.1); }
+.focus-view-detail-panel .panel-button-group button:hover { background-color: rgba(255,255,255,0.2); }
+.focus-view-detail-panel .panel-button-group button.primary { background-color: var(--focus-connector-stroke); color: var(--focus-stellar-bg); border-color: var(--focus-connector-stroke); }
+.focus-view-detail-panel .panel-button-group button.primary:hover { background-color: var(--focus-connector-stroke); filter: brightness(1.1); }
+.focus-view-detail-panel .panel-button-group button.danger { background-color: var(--error-color); color: var(--text-on-accent); border-color: var(--error-color); }
+.focus-view-detail-panel .panel-button-group button.danger:hover { background-color: var(--error-color); filter: brightness(1.1); }
 
-/* Path to Root Display in Overlay Panels */
+/* Path to Root Display in Focus View Header */
 .path-to-root-display {
   display: flex;
   align-items: center;
@@ -1853,9 +1833,9 @@ html[data-theme='nebula'] .history-controls .segmented-control button.active {
   .yggdrasil-app-body.sidebar-collapsed .knowledge-branch-sidebar .sidebar-header .sidebar-toggle-main { font-size: 1.2em; padding: 7px; }
   .yggdrasil-app-body.sidebar-collapsed .knowledge-branch-sidebar .sidebar-header-logo { margin: 8px auto; }
 
-  .overlay-panel-view { width: calc(100% - 16px); margin: 8px auto; max-height: calc(100vh - var(--top-bar-height) - 16px); }
-  .overlay-panel-view .focus-view-main-area { flex-direction: column; }
-  .overlay-panel-view .focus-view-detail-panel { width: 100%; border-left: none; border-top: 1px solid rgba(var(--focus-panel-text), 0.2); max-height: 40vh; }
+  /* Removed overlay-panel-view responsive styles */
+  .focus-view-main-area { flex-direction: column; }
+  .focus-view-detail-panel { width: 100%; border-left: none; border-top: 1px solid rgba(var(--focus-panel-text), 0.2); max-height: 40vh; }
 
   .whispering-runes-panel { bottom: 8px; right: 8px; padding: 6px; width: calc(100% - 16px); max-width: 280px; }
   

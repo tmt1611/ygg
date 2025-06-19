@@ -29,7 +29,6 @@ const AppModals = ({
   projects,
   activeProjectId,
   yggdrasilViewMode,
-  activeOverlayPanel,
 }) => {
   const {
     isProjectNameModalOpen, projectModalConfig, closeProjectNameModal,

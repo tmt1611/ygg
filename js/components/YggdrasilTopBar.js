@@ -15,7 +15,7 @@ const YggdrasilTopBar = ({
   themeMode, onToggleTheme, apiKeyIsSet, activeProjectName, onSaveActiveProject, 
   onDownloadActiveProject, 
   isAppBusy, hasTechTreeData,
-  yggdrasilViewMode, activeOverlayPanel, setYggdrasilViewMode, setActiveOverlayPanel,
+  yggdrasilViewMode, setYggdrasilViewMode,
   focusNodeId
 }) => {
   const [saveFeedback, setSaveFeedback] = useState(false);
@@ -48,9 +48,8 @@ const YggdrasilTopBar = ({
   };
 
 
-  const handleNavClick = (viewMode, overlay = null) => {
+  const handleNavClick = (viewMode) => {
     setYggdrasilViewMode(viewMode);
-    setActiveOverlayPanel(overlay);
   };
 
     return (
@@ -67,21 +66,21 @@ const YggdrasilTopBar = ({
           title: "Manage projects, API key, and initial generation"
         }, "Workspace"),
         React.createElement("button", {
-          className: `yggdrasil-top-bar-nav-button ${yggdrasilViewMode === 'treeView' && activeOverlayPanel === null ? 'active' : ''}`,
-          onClick: () => handleNavClick('treeView', null),
-          disabled: isAppBusy && !(yggdrasilViewMode === 'treeView' && activeOverlayPanel === null),
+          className: `yggdrasil-top-bar-nav-button ${yggdrasilViewMode === 'graph' ? 'active' : ''}`,
+          onClick: () => handleNavClick('graph'),
+          disabled: isAppBusy && yggdrasilViewMode !== 'graph',
           title: "Interactive graph visualization of the tree"
         }, "Graph"),
         React.createElement("button", {
-          className: `yggdrasil-top-bar-nav-button ${yggdrasilViewMode === 'treeView' && activeOverlayPanel === 'list' ? 'active' : ''}`,
-          onClick: () => handleNavClick('treeView', 'list'),
-          disabled: isAppBusy && !(yggdrasilViewMode === 'treeView' && activeOverlayPanel === 'list'),
+          className: `yggdrasil-top-bar-nav-button ${yggdrasilViewMode === 'list' ? 'active' : ''}`,
+          onClick: () => handleNavClick('list'),
+          disabled: isAppBusy && yggdrasilViewMode !== 'list',
           title: "Hierarchical list view of the tree"
         }, "List"),
         React.createElement("button", {
-          className: `yggdrasil-top-bar-nav-button ${yggdrasilViewMode === 'treeView' && activeOverlayPanel === 'focus' ? 'active' : ''}`,
-          onClick: () => focusNodeId ? handleNavClick('treeView', 'focus') : undefined,
-          disabled: (isAppBusy && !(yggdrasilViewMode === 'treeView' && activeOverlayPanel === 'focus')) || !focusNodeId,
+          className: `yggdrasil-top-bar-nav-button ${yggdrasilViewMode === 'focus' ? 'active' : ''}`,
+          onClick: () => focusNodeId ? handleNavClick('focus') : undefined,
+          disabled: (isAppBusy && yggdrasilViewMode !== 'focus') || !focusNodeId,
           title: focusNodeId ? "Detailed view of the currently focused node" : "Select a node to enable Focus View"
         }, "Focus"),
         activeProjectName && (

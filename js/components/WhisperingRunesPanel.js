@@ -8,7 +8,7 @@ const WhisperingRunesPanel = ({
   onOpenNodeEditModal, onToggleLock, onNodeImportanceChange,
   onLinkToProject, onGoToLinkedProject, onUnlinkProject,
   onDeleteNode, onSetFocusNode, onGenerateInsights,
-  isAppBusy, activeOverlayPanel, yggdrasilViewMode,
+  isAppBusy, yggdrasilViewMode,
   projects, activeProjectId, currentProjectRootId, findLinkSource, handleNavigateToSourceNode,
 }) => {
   const [isSubMenuOpen, setIsSubMenuOpen] = useState(false);
@@ -58,7 +58,7 @@ const WhisperingRunesPanel = ({
   }, [lockButtonFeedback]);
 
 
-  if (yggdrasilViewMode === 'workspace' || !node) { 
+  if (yggdrasilViewMode !== 'graph' || !node) { 
     return React.createElement("div", { className: "whispering-runes-panel hidden" }); 
   }
   
@@ -108,8 +108,8 @@ const WhisperingRunesPanel = ({
         ),
         isSubMenuOpen && (
             React.createElement("div", { ref: subMenuRef, className: "whispering-runes-submenu" },
-                activeOverlayPanel !== 'focus' && onSetFocusNode && (
-                  React.createElement("button", { onClick: () => { onSetFocusNode(node.id); setIsSubMenuOpen(false); }, disabled: isAppBusy, title: "Open in Focus View panel" }, React.createElement("span", { className: "rune-icon" }, "🎯"), " Focus View")
+                yggdrasilViewMode !== 'focus' && onSetFocusNode && (
+                  React.createElement("button", { onClick: () => { onSetFocusNode(node.id); setIsSubMenuOpen(false); }, disabled: isAppBusy, title: "Switch to Focus View for this node" }, React.createElement("span", { className: "rune-icon" }, "🎯"), " Focus View")
                 ),
                 onGenerateInsights && (
                   React.createElement("button", { onClick: () => { onGenerateInsights(node); setIsSubMenuOpen(false); }, disabled: isAppBusy, title: "Get AI-powered insights"}, React.createElement("span", { className: "rune-icon" }, "💡"), " AI Insights")

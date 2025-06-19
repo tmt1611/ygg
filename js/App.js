@@ -56,8 +56,8 @@ const App = () => {
 
   const appThemeAndLayout = useAppThemeAndLayout(addHistoryEntry);
   const {
-    themeMode, isSidebarCollapsed, yggdrasilViewMode, activeOverlayPanel,
-    toggleTheme, toggleSidebar, setYggdrasilViewMode, setActiveOverlayPanel
+    themeMode, isSidebarCollapsed, yggdrasilViewMode,
+    toggleTheme, toggleSidebar, setYggdrasilViewMode
   } = appThemeAndLayout;
   
   const [activeSidebarTab, setActiveSidebarTab] = useState('ai-tools');
@@ -71,7 +71,7 @@ const App = () => {
 
   const viewStates = useViewStates({
     techTreeData, setError, modalManager, addHistoryEntry,
-    setYggdrasilViewMode, setActiveOverlayPanel, activeOverlayPanel
+    setYggdrasilViewMode, yggdrasilViewMode
   });
   const { focusNodeId, selectedGraphNodeId, setSelectedGraphNodeId, handleSwitchToFocusView } = viewStates;
 
@@ -109,7 +109,7 @@ const App = () => {
 
   const projectLinkingHook = useProjectLinking({
     techTreeData, setTechTreeData, projectManager, modalManager, historyManager, viewStates,
-    yggdrasilViewMode, activeOverlayPanel 
+    yggdrasilViewMode
   });
 
   // --- EFFECTS ---
@@ -261,12 +261,10 @@ const App = () => {
         isAppBusy: isLoading || isModifying || isFetchingStrategicSuggestions,
         hasTechTreeData: !!techTreeData,
         yggdrasilViewMode: yggdrasilViewMode,
-        activeOverlayPanel: activeOverlayPanel,
         setYggdrasilViewMode: setYggdrasilViewMode,
-        setActiveOverlayPanel: setActiveOverlayPanel,
         focusNodeId: focusNodeId
       }),
-      React.createElement("div", { className: `yggdrasil-app-body theme-${themeMode} view-mode-${yggdrasilViewMode} ${isSidebarCollapsed ? 'sidebar-collapsed' : ''} ${activeOverlayPanel ? 'overlay-panel-active' : ''}` },
+      React.createElement("div", { className: `yggdrasil-app-body theme-${themeMode} view-mode-${yggdrasilViewMode} ${isSidebarCollapsed ? 'sidebar-collapsed' : ''}` },
         React.createElement(KnowledgeBranchSidebar, {
           isCollapsed: isSidebarCollapsed,
           onToggleSidebar: toggleSidebar,
@@ -325,13 +323,13 @@ const App = () => {
               handleDeleteNodeWithConfirmation: nodeOperations.handleDeleteNodeWithConfirmation
             },
             viewControls: {
-              yggdrasilViewMode, activeOverlayPanel, setActiveOverlayPanel
+              yggdrasilViewMode, setYggdrasilViewMode
             }
           })
         )
       ), 
 
-      isNodeActionsPanelVisible && yggdrasilViewMode === 'treeView' && activeOverlayPanel === null && (
+      isNodeActionsPanelVisible && yggdrasilViewMode === 'graph' && (
         React.createElement(WhisperingRunesPanel, {
           targetNodeId: selectedNodeForInsights?.id || null,
           treeData: techTreeData,
@@ -345,7 +343,6 @@ const App = () => {
           onSetFocusNode: viewStates.handleSwitchToFocusView,
           onGenerateInsights: handleGenerateAiInsights,
           isAppBusy: isLoading || isModifying || isFetchingStrategicSuggestions,
-          activeOverlayPanel: activeOverlayPanel,
           yggdrasilViewMode: yggdrasilViewMode,
           projects: projectManager.projects,
           activeProjectId: projectManager.activeProjectId,
@@ -371,7 +368,6 @@ const App = () => {
         projects: projectManager.projects,
         activeProjectId: projectManager.activeProjectId,
         yggdrasilViewMode: yggdrasilViewMode,
-        activeOverlayPanel: activeOverlayPanel,
       })
     )
   );

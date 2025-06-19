@@ -15,8 +15,11 @@ export const useAppThemeAndLayout = (addHistoryEntry) => {
     return savedState ? JSON.parse(savedState) : false;
   });
 
-  const [yggdrasilViewMode, _setYggdrasilViewMode] = useState(() => (localStorage.getItem(APP_STORAGE_KEYS.ACTIVE_MAIN_VIEW)) || 'workspace');
-  const [activeOverlayPanel, _setActiveOverlayPanel] = useState(null);
+  const [yggdrasilViewMode, _setYggdrasilViewMode] = useState(() => {
+    const savedView = localStorage.getItem(APP_STORAGE_KEYS.ACTIVE_MAIN_VIEW);
+    const validViews = ['workspace', 'graph', 'list', 'focus'];
+    return validViews.includes(savedView) ? savedView : 'workspace';
+  });
 
 
   useEffect(() => {
@@ -26,16 +29,12 @@ export const useAppThemeAndLayout = (addHistoryEntry) => {
 
   useEffect(() => {
     localStorage.setItem(APP_STORAGE_KEYS.SIDEBAR_COLLAPSED_STATE, JSON.stringify(isSidebarCollapsed));
-    // The class is now applied directly in App.js to avoid race conditions or incorrect element selection.
   }, [isSidebarCollapsed]);
   
-  useEffect(() => { localStorage.setItem(APP_STORAGE_KEYS.ACTIVE_MAIN_VIEW, yggdrasilViewMode); }, [yggdrasilViewMode]);
-  
-  useEffect(() => {
-    _setActiveOverlayPanel(null); 
+  useEffect(() => { 
+    localStorage.setItem(APP_STORAGE_KEYS.ACTIVE_MAIN_VIEW, yggdrasilViewMode); 
   }, [yggdrasilViewMode]);
-
-
+  
   const toggleTheme = useCallback(() => {
     setThemeMode(prevMode => {
         const currentIndex = THEME_CYCLE.indexOf(prevMode);
@@ -54,23 +53,9 @@ export const useAppThemeAndLayout = (addHistoryEntry) => {
     _setYggdrasilViewMode(prevMode => {
         const resolvedNewMode = typeof newMode === 'function' ? newMode(prevMode) : newMode;
         if (prevMode !== resolvedNewMode) {
-            addHistoryEntry('VIEW_CHANGED', `Main view changed to ${resolvedNewMode}.`);
+            addHistoryEntry('VIEW_CHANGED', `View changed to ${resolvedNewMode}.`);
         }
         return resolvedNewMode;
-    });
-  }, [addHistoryEntry]);
-
-  const setActiveOverlayPanel = useCallback((newPanel) => {
-    _setActiveOverlayPanel(prevPanel => {
-        const resolvedNewPanel = typeof newPanel === 'function' ? newPanel(prevPanel) : newPanel;
-        if (prevPanel !== resolvedNewPanel) {
-            if (resolvedNewPanel) {
-                addHistoryEntry('VIEW_CHANGED', `Overlay panel "${resolvedNewPanel}" opened.`);
-            } else {
-                addHistoryEntry('VIEW_CHANGED', `Overlay panel "${prevPanel}" closed.`);
-            }
-        }
-        return resolvedNewPanel;
     });
   }, [addHistoryEntry]);
 
@@ -79,10 +64,8 @@ export const useAppThemeAndLayout = (addHistoryEntry) => {
     themeMode,
     isSidebarCollapsed,
     yggdrasilViewMode,
-    activeOverlayPanel,
     toggleTheme,
     toggleSidebar,
     setYggdrasilViewMode,
-    setActiveOverlayPanel,
   };
 };
