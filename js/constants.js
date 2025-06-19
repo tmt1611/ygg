@@ -65,50 +65,50 @@ export const ELF_WARFARE_STRUCTURE_JSON_STRING = `
 
 export const EVENT_TYPE_INFO = {
     // AI
-    'TREE_INIT_AI': { icon: '🧠', color: 'var(--primary-accent)', isKey: true },
-    'AI_MOD_CONFIRMED': { icon: '🤖', color: 'var(--primary-accent)', isKey: true },
-    'AI_MOD_REJECTED': { icon: '🚫', color: 'var(--text-tertiary)', isKey: false },
-    'AI_MOD_UNDONE': { icon: '↩️', color: 'var(--warning-color)', isKey: true },
-    'NODE_INSIGHTS_GENERATED': { icon: '💡', color: 'var(--primary-accent-dark)', isKey: true },
-    'AI_STRATEGY_GEN': { icon: '✨', color: 'var(--primary-accent-dark)', isKey: true },
-    'AI_SUMMARY_GEN': { icon: '📜', color: 'var(--primary-accent-dark)', isKey: true },
-    'TREE_MOD_AI': { icon: '🤖', color: 'var(--text-secondary)', isKey: true },
+    'TREE_INIT_AI': { icon: '🧠', color: 'var(--primary-accent)', isKey: true, keywords: ['generated'] },
+    'AI_MOD_CONFIRMED': { icon: '🤖', color: 'var(--primary-accent)', isKey: true, keywords: ['applied'] },
+    'AI_MOD_REJECTED': { icon: '🚫', color: 'var(--text-tertiary)', isKey: false, keywords: ['rejected', 'discarded'] },
+    'AI_MOD_UNDONE': { icon: '↩️', color: 'var(--warning-color)', isKey: true, keywords: ['undone', 'reverted', 'cancelled'] },
+    'NODE_INSIGHTS_GENERATED': { icon: '💡', color: 'var(--primary-accent-dark)', isKey: true, keywords: ['generated'] },
+    'AI_STRATEGY_GEN': { icon: '✨', color: 'var(--primary-accent-dark)', isKey: true, keywords: ['generated'] },
+    'AI_SUMMARY_GEN': { icon: '📜', color: 'var(--primary-accent-dark)', isKey: true, keywords: ['generated'] },
+    'TREE_MOD_AI': { icon: '🤖', color: 'var(--text-secondary)', isKey: true, keywords: ['proposed', 'modifications'] },
 
     // Node Ops
-    'NODE_CREATED': { icon: '➕', color: 'var(--success-color)', isKey: true },
-    'NODE_UPDATED': { icon: '✏️', color: 'var(--text-secondary)', isKey: true },
-    'NODE_DELETED': { icon: '🗑️', color: 'var(--error-color)', isKey: true },
-    'NODE_LOCK_TOGGLED': { icon: '🔒', color: 'var(--text-secondary)', isKey: true },
-    'NODE_IMPORTANCE_CHANGED': { icon: '⚖️', color: 'var(--text-secondary)', isKey: true },
+    'NODE_CREATED': { icon: '➕', color: 'var(--success-color)', isKey: true, keywords: ['created', 'added'] },
+    'NODE_UPDATED': { icon: '✏️', color: 'var(--text-secondary)', isKey: true, keywords: ['updated', 'changed', 'renamed'] },
+    'NODE_DELETED': { icon: '🗑️', color: 'var(--error-color)', isKey: true, keywords: ['deleted', 'removed'] },
+    'NODE_LOCK_TOGGLED': { icon: '🔒', color: 'var(--text-secondary)', isKey: true, keywords: ['locked', 'unlocked'] },
+    'NODE_IMPORTANCE_CHANGED': { icon: '⚖️', color: 'var(--text-secondary)', isKey: true, keywords: ['changed'] },
 
     // Project Linking
-    'NODE_PROJECT_LINK_CREATED': { icon: '🔗', color: 'var(--secondary-accent-dark)', isKey: true },
-    'NODE_PROJECT_LINK_REMOVED': { icon: '🚫', color: 'var(--secondary-accent-dark)', isKey: true },
+    'NODE_PROJECT_LINK_CREATED': { icon: '🔗', color: 'var(--secondary-accent-dark)', isKey: true, keywords: ['linked'] },
+    'NODE_PROJECT_LINK_REMOVED': { icon: '🚫', color: 'var(--secondary-accent-dark)', isKey: true, keywords: ['unlinked'] },
 
     // Tree-wide
-    'TREE_LOCK_ALL': { icon: '🛡️', color: 'var(--warning-color)', isKey: true },
-    'TREE_UNLOCK_ALL': { icon: '🛡️', color: 'var(--warning-color)', isKey: true },
-    'TREE_DOWNLOADED': { icon: '📥', color: 'var(--text-secondary)', isKey: false },
-    'TREE_DATA_EXTRACTED': { icon: '📤', color: 'var(--text-secondary)', isKey: false },
+    'TREE_LOCK_ALL': { icon: '🛡️', color: 'var(--warning-color)', isKey: true, keywords: ['locked'] },
+    'TREE_UNLOCK_ALL': { icon: '🛡️', color: 'var(--warning-color)', isKey: true, keywords: ['unlocked'] },
+    'TREE_DOWNLOADED': { icon: '📥', color: 'var(--text-secondary)', isKey: false, keywords: ['downloaded'] },
+    'TREE_DATA_EXTRACTED': { icon: '📤', color: 'var(--text-secondary)', isKey: false, keywords: ['extracted'] },
 
     // Project Management
-    'PROJECT_CREATED': { icon: '📁', color: 'var(--success-color)', isKey: true },
-    'PROJECT_LOADED': { icon: '📂', color: 'var(--text-primary)', isKey: true },
-    'PROJECT_SAVED': { icon: '💾', color: 'var(--text-secondary)', isKey: false },
-    'PROJECT_RENAMED': { icon: '✏️', color: 'var(--text-primary)', isKey: true },
-    'PROJECT_DELETED': { icon: '🗑️', color: 'var(--error-color)', isKey: true },
-    'PROJECT_IMPORTED': { icon: '📄', color: 'var(--success-color)', isKey: true },
-    'PROJECT_EXAMPLE_LOADED': { icon: '⭐', color: 'var(--text-primary)', isKey: true },
+    'PROJECT_CREATED': { icon: '📁', color: 'var(--success-color)', isKey: true, keywords: ['created', 'saved'] },
+    'PROJECT_LOADED': { icon: '📂', color: 'var(--text-primary)', isKey: true, keywords: ['loaded', 'activated'] },
+    'PROJECT_SAVED': { icon: '💾', color: 'var(--text-secondary)', isKey: false, keywords: ['saved'] },
+    'PROJECT_RENAMED': { icon: '✏️', color: 'var(--text-primary)', isKey: true, keywords: ['renamed'] },
+    'PROJECT_DELETED': { icon: '🗑️', color: 'var(--error-color)', isKey: true, keywords: ['deleted'] },
+    'PROJECT_IMPORTED': { icon: '📄', color: 'var(--success-color)', isKey: true, keywords: ['imported'] },
+    'PROJECT_EXAMPLE_LOADED': { icon: '⭐', color: 'var(--text-primary)', isKey: true, keywords: ['started', 'loaded'] },
 
     // System & Misc
-    'API_KEY_STATUS_CHANGED': { icon: '🔑', color: 'var(--text-secondary)', isKey: false },
-    'APP_ERROR_ENCOUNTERED': { icon: '⚠️', color: 'var(--error-color)', isKey: true },
-    'THEME_CHANGED': { icon: '🎨', color: 'var(--text-tertiary)', isKey: false },
-    'VIEW_CHANGED': { icon: '👁️', color: 'var(--text-tertiary)', isKey: false },
-    'HISTORY_CLEARED': { icon: '🧹', color: 'var(--text-tertiary)', isKey: false },
+    'API_KEY_STATUS_CHANGED': { icon: '🔑', color: 'var(--text-secondary)', isKey: false, keywords: ['set', 'cleared'] },
+    'APP_ERROR_ENCOUNTERED': { icon: '⚠️', color: 'var(--error-color)', isKey: true, keywords: ['failed'] },
+    'THEME_CHANGED': { icon: '🎨', color: 'var(--text-tertiary)', isKey: false, keywords: ['switched'] },
+    'VIEW_CHANGED': { icon: '👁️', color: 'var(--text-tertiary)', isKey: false, keywords: ['opened', 'closed', 'changed'] },
+    'HISTORY_CLEARED': { icon: '🧹', color: 'var(--text-tertiary)', isKey: false, keywords: ['cleared'] },
 
     // Default
-    'default': { icon: '🔹', color: 'var(--text-tertiary)', isKey: false }
+    'default': { icon: '🔹', color: 'var(--text-tertiary)', isKey: false, keywords: [] }
 };
 
 export const ADVANCED_NATURE_MAGIC_JSON_STRING = `

@@ -1,6 +1,10 @@
 import React, { useMemo } from 'react';
 import { EVENT_TYPE_INFO } from '../constants.js';
 
+// Dynamically build a regex from keywords defined in constants for highlighting.
+const DYNAMIC_KEYWORDS = Object.values(EVENT_TYPE_INFO).flatMap(info => info.keywords || []);
+const HIGHLIGHT_REGEX = new RegExp(`"([^"]*)"|\\b(${[...new Set(DYNAMIC_KEYWORDS)].join('|')})\\b`, 'gi');
+
 const escapeHtml = (unsafe) => {
   return unsafe
     .replace(/&/g, "&amp;")
@@ -17,16 +21,15 @@ const HistoryItem = ({ entry }) => {
 
     const summaryWithHighlights = useMemo(() => {
         if (!entry.summary) return '';
-        // This regex will match quoted strings or known keywords
-        const regex = /"([^"]*)"|\b(created|deleted|updated|locked|unlocked|saved|loaded|imported|generated|applied|rejected|undone|cleared|failed|added|removed|changed|renamed|activated|switched|proposed|discarded|downloaded|set|enabled|disabled|opened|closed|cleared|regenerate|regenerated|revert|reverted|link|linked|unlink|unlinked)\b/gi;
         
-        return entry.summary.replace(regex, (match, quotedContent, keyword) => {
-            // Both `quotedContent` and `keyword` are captured. One will be defined, the other undefined.
+        // This regex will match quoted strings (as entities) or known keywords.
+        return entry.summary.replace(HIGHLIGHT_REGEX, (match, quotedContent, keyword) => {
             if (quotedContent !== undefined) {
-                // Escape user-provided content to prevent XSS.
+                // This is user-provided content inside quotes, so it must be escaped.
                 return `<strong class="history-entity">"${escapeHtml(quotedContent)}"</strong>`;
             }
             if (keyword !== undefined) {
+                // This is a known keyword from our safe list, no need to escape.
                 return `<strong class="history-keyword">${keyword.toLowerCase()}</strong>`;
             }
             return match; // Should not happen with this regex, but for safety.

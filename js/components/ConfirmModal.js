@@ -22,8 +22,7 @@ const ConfirmModal = ({
 
     const handleEscape = (event) => {
       if (event.key === 'Escape') {
-        // Only trigger cancel if a cancel action/button is available.
-        if (onCancel && cancelText) { 
+        if (onCancel) {
           onCancel();
         }
       }
@@ -40,7 +39,7 @@ const ConfirmModal = ({
   }
 
   const isDanger = confirmButtonStyle === 'danger';
-  const icon = isDanger ? '⚠️' : '❓';
+  const icon = isDanger ? '⚠️' : '💬';
   const modalClass = `modal-content-basic ${isDanger ? 'confirm-danger' : ''}`;
 
   return (
