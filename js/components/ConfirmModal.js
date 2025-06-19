@@ -31,7 +31,7 @@ const ConfirmModal = ({
     return () => {
       document.removeEventListener('keydown', handleEscape);
     };
-  }, [isOpen, onCancel, cancelText]);
+  }, [isOpen, onCancel]);
 
 
   if (!isOpen) {
