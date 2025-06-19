@@ -206,6 +206,14 @@ const App = () => {
     });
   }, [modalManager, clearHistory, addHistoryEntry]);
 
+  const handleGenerateInsightsAndSwitchTab = useCallback((node) => {
+    if (isSidebarCollapsed) {
+      toggleSidebar();
+    }
+    setActiveSidebarTab('ai-insights');
+    handleGenerateAiInsights(node);
+  }, [isSidebarCollapsed, toggleSidebar, setActiveSidebarTab, handleGenerateAiInsights]);
+
   const handleGenerateStrategicSuggestions = useCallback(async () => {
     if (!apiKeyHook.status.isSet || !initialPrompt.trim()) {
       setStrategicSuggestionsError("API Key must be set and project context (initial prompt) must be provided.");
@@ -339,7 +347,7 @@ const App = () => {
         projects: projectManager.projects,
         activeProjectId: projectManager.activeProjectId,
         yggdrasilViewMode: yggdrasilViewMode,
-        onGenerateInsights: handleGenerateAiInsights,
+        onGenerateInsights: handleGenerateInsightsAndSwitchTab,
       })
     )
   );

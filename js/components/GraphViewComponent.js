@@ -47,18 +47,16 @@ function wrap(textSelection, width, maxLines = 2) {
             
             const firstTspan = text.select('tspan');
             if (firstTspan.node()) {
-                const totalExtraHeightEm = (numLines - 1) * lineHeight;
-                
+                const fontSize = 11; // Must match CSS font-size for .node-label
+                const totalExtraHeightPx = (numLines - 1) * lineHeight * fontSize;
+                const initialDyPx = parseFloat(firstTspan.attr('dy'));
+
                 if (isTop) {
                     // For top-positioned text, shift the entire block up so the bottom line is where the single line would have been.
-                    const initialDyPx = parseFloat(initialDy); // This is in pixels
-                    const totalTextHeightPx = (numLines - 1) * 11 * lineHeight; // font-size is 11px
-                    firstTspan.attr('dy', `${initialDyPx - totalTextHeightPx}`);
+                    firstTspan.attr('dy', initialDyPx - totalExtraHeightPx);
                 } else if (isSide) {
                     // For side-positioned text, shift up by half the height of the extra lines to re-center vertically.
-                    // initialDy is "0.35em"
-                    const newDyEm = 0.35 - (totalExtraHeightEm / 2);
-                    firstTspan.attr('dy', `${newDyEm}em`);
+                    firstTspan.attr('dy', initialDyPx - (totalExtraHeightPx / 2));
                 }
                 // No adjustment needed for bottom-positioned text, as it naturally expands downwards.
             }
@@ -290,6 +288,14 @@ const GraphViewComponent = ({
 
     // Apply static attributes and event handlers
     nodeGroups
+      .attr("class", d => {
+        const classes = ['graph-view-node'];
+        if (d.isProxy) classes.push('proxy');
+        if (d.data._changeStatus && d.data._changeStatus !== 'unchanged') {
+          classes.push(`status-${d.data._changeStatus}`);
+        }
+        return classes.join(' ');
+      })
       .attr("transform", d => `rotate(${d.x * 180 / Math.PI - 90}) translate(${d.y}, 0)`)
       .on("click", handleNodeClick)
       .on("dblclick", handleNodeDoubleClick)
@@ -324,9 +330,11 @@ const GraphViewComponent = ({
       .attr("dy", d => {
           if (d.isProxy) return "0.3em";
           const angle = d.x * 180 / Math.PI;
-          if (angle > 15 && angle < 165) return (getNodeRadius(d) + 7); // Bottom
-          if (angle > 195 && angle < 345) return -(getNodeRadius(d) + 7); // Top
-          return "0.35em"; // Middle for sides
+          const radius = getNodeRadius(d);
+          const fontSize = 11; // Corresponds to font-size in CSS
+          if (angle > 15 && angle < 165) return (radius + 7); // Bottom
+          if (angle > 195 && angle < 345) return -(radius + 7); // Top
+          return fontSize * 0.35; // Middle for sides, in pixels
       })
       .attr("dx", d => {
           if (d.isProxy) return 0;

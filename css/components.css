@@ -935,6 +935,29 @@ html[data-theme='dark'] .graph-view-node.highlighted text.node-label,
 html[data-theme='nebula'] .graph-view-node.highlighted text.node-label {
     text-shadow: 0 0 5px var(--graph-node-highlight-stroke);
 }
+
+/* Change status highlights */
+.graph-view-node.status-new circle {
+  stroke: var(--success-color);
+  stroke-width: 3px;
+  filter: drop-shadow(0 0 6px var(--success-color));
+  animation: savedPop 0.4s ease-out;
+}
+.graph-view-node.status-content_modified circle {
+  stroke: var(--primary-accent);
+  stroke-width: 2.5px;
+}
+.graph-view-node.status-reparented circle {
+  stroke: var(--warning-color);
+  stroke-width: 2.5px;
+  stroke-dasharray: 4 2;
+}
+.graph-view-node.status-locked_content_changed circle {
+  stroke: var(--error-color);
+  stroke-width: 4px;
+  filter: drop-shadow(0 0 8px var(--error-color));
+  animation: errorAppear 0.5s ease-out;
+}
 .graph-view-node:not(.proxy) text.node-label {
   /* Create a "cutout" effect for readability over lines */
   paint-order: stroke;

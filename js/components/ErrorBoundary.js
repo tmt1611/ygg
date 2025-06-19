@@ -46,31 +46,6 @@ ${errorInfo?.componentStack || 'Not available'}
       });
   };
 
-  handleCopyError = () => {
-    const { error, errorInfo } = this.state;
-    if (!error) return;
-
-    const errorText = `
---- YGGDRASIL ERROR REPORT ---
-Date: ${new Date().toISOString()}
-Error: ${error.toString()}
-Stack Trace:
-${error.stack}
-Component Stack:
-${errorInfo?.componentStack || 'Not available'}
-------------------------------
-    `;
-    navigator.clipboard.writeText(errorText.trim())
-      .then(() => {
-        this.setState({ copyFeedback: 'Copied to clipboard!' });
-        setTimeout(() => this.setState({ copyFeedback: '' }), 2500);
-      })
-      .catch(err => {
-        this.setState({ copyFeedback: 'Failed to copy.' });
-        console.error('Failed to copy error report:', err);
-      });
-  };
-
   handleHardReset = () => {
     if (window.confirm("Are you sure you want to perform a hard reset?\n\nThis is a last resort option if the app is stuck in an error loop due to corrupted data.\n\nThis will DELETE ALL your saved projects and settings from this browser. This action cannot be undone.")) {
       try {

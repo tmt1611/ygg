@@ -29,49 +29,7 @@ const KnowledgeBranchSidebar = (props) => {
     return new Set(['strategic-advisor']); // Collapse strategic advisor by default
   });
 
-  useEffect(() => {
-    localStorage.setItem(APP_STORAGE_KEYS.SIDEBAR_PANEL_STATES, JSON.stringify(Array.from(collapsedPanels)));
-  }, [collapsedPanels]);
 
-  const handleTogglePanel = (panelId) => {
-    setCollapsedPanels(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(panelId)) {
-        newSet.delete(panelId);
-      } else {
-        newSet.add(panelId);
-      }
-      return newSet;
-    });
-  };
-  const [collapsedPanels, setCollapsedPanels] = useState(() => {
-    const savedState = localStorage.getItem(APP_STORAGE_KEYS.SIDEBAR_PANEL_STATES);
-    try {
-        if (savedState) {
-            const parsed = JSON.parse(savedState);
-            return new Set(Array.isArray(parsed) ? parsed : []);
-        }
-    } catch (e) {
-        console.error("Failed to parse sidebar panel states from localStorage", e);
-    }
-    return new Set(['strategic-advisor']); // Collapse strategic advisor by default
-  });
-
-  useEffect(() => {
-    localStorage.setItem(APP_STORAGE_KEYS.SIDEBAR_PANEL_STATES, JSON.stringify(Array.from(collapsedPanels)));
-  }, [collapsedPanels]);
-
-  const handleTogglePanel = (panelId) => {
-    setCollapsedPanels(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(panelId)) {
-        newSet.delete(panelId);
-      } else {
-        newSet.add(panelId);
-      }
-      return newSet;
-    });
-  };
 
   return (
     React.createElement("aside", { className: `knowledge-branch-sidebar ${isCollapsed ? 'collapsed' : ''}` },

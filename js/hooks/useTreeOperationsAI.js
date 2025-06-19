@@ -1,7 +1,7 @@
 
 import { useCallback } from 'react';
 import * as geminiService from '../services/geminiService.js';
-import { getLockedNodeIds, countNodesInTree } from '../utils.js';
+import { getLockedNodeIds, countNodesInTree, compareAndAnnotateTree } from '../utils.js';
 
 export const useTreeOperationsAI = ({
   apiKeyIsSet,
@@ -55,8 +55,9 @@ export const useTreeOperationsAI = ({
           handleSaveActiveProject(false);
           addHistoryEntry('TREE_INIT_AI', `Tree regenerated for project "${contextText}" by AI.`, { prompt: initialPrompt });
         }
-        if (newTree.id) {
-          handleSwitchToFocusView(newTree.id);
+        // Switch to graph view to show the new structure
+        if (viewStates) {
+            viewStates.setYggdrasilViewMode('graph');
         }
       } catch (e) { setError(e.message || "An unknown error occurred during AI generation."); console.error("Gemini API Error (Generate):", e); } 
       finally { setIsLoading(false); }
@@ -138,7 +139,8 @@ export const useTreeOperationsAI = ({
     const suggestionToApply = pendingAiSuggestion; 
     if (suggestionToApply) {
       setPreviousTreeStateForUndo(techTreeData); // Save the state BEFORE applying the suggestion
-      setTechTreeData(suggestionToApply);
+      const annotatedTree = compareAndAnnotateTree(techTreeData, suggestionToApply);
+      setTechTreeData(annotatedTree.annotatedTree);
       addHistoryEntry('AI_MOD_CONFIRMED', 'AI modifications applied to project.', { nodeCount: countNodesInTree(suggestionToApply), projectId: activeProjectId });
       setModificationPrompt(''); 
       handleSaveActiveProject(false);
