@@ -136,6 +136,7 @@ export const useProjectManagement = ({
     const logId = `startup-project-load-${new Date().toISOString()}`;
 
     const loadProjectState = (project, source) => {
+      viewStates?.commonViewResetLogic(false); // Centralized view reset
       setActiveProjectId(project.isExample ? null : project.id);
       setTechTreeData(initializeNodes(project.treeData));
       setInitialPrompt(project.name);
@@ -162,7 +163,6 @@ export const useProjectManagement = ({
         
         const elfExample = allProjects.find(p => p.isExample && p.treeData.id === 'elf-warfare-root-example-v1');
         if (elfExample) {
-            viewStates?.commonViewResetLogic(false);
             loadProjectState(elfExample, 'fallback-example');
             return true;
         }
