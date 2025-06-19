@@ -17,7 +17,6 @@ const AiSuggestionModal = ({
   const applyButtonRef = useRef(null);
   const [followUpPrompt, setFollowUpPrompt] = useState('');
   const [isRemovedNodesCollapsed, setIsRemovedNodesCollapsed] = useState(true);
-  const [isRemovedNodesCollapsed, setIsRemovedNodesCollapsed] = useState(true);
 
   const comparisonResult = useMemo(() => {
     if (!isOpen || !suggestion) return null;

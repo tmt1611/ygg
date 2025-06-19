@@ -417,39 +417,34 @@ html[data-theme='sol'] .panel-header-icon { color: var(--primary-accent-dark); f
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 18px;
-  height: 18px;
+  width: 16px;
+  height: 16px;
   border-radius: 50%;
-  background-color: transparent;
+  background-color: var(--button-default-bg);
   color: var(--text-tertiary);
-  font-size: 1em;
+  font-size: 0.8em;
+  font-weight: bold;
   cursor: help;
   margin-left: 6px;
   user-select: none;
-  transition: color 0.2s, transform 0.2s;
-  border: none;
+  transition: color 0.2s, transform 0.2s, background-color 0.2s, box-shadow 0.2s;
+  border: 1px solid var(--border-color);
+  outline: none;
 }
-.contextual-help-icon:hover, .contextual-help-icon:focus-within {
-  color: var(--primary-accent);
+.contextual-help-icon:hover, .contextual-help-icon:focus-visible {
+  color: var(--primary-accent-dark);
   transform: scale(1.1);
   background-color: var(--primary-accent-hover-bg);
+  border-color: var(--primary-accent);
+  box-shadow: 0 0 0 2px rgba(var(--primary-accent-rgb), 0.2);
 }
-html[data-theme='light'] .contextual-help-icon,
-html[data-theme='sol'] .contextual-help-icon {
-  color: var(--text-tertiary);
-  background-color: transparent;
-}
-html[data-theme='light'] .contextual-help-icon:hover, html[data-theme='light'] .contextual-help-icon:focus-within,
-html[data-theme='sol'] .contextual-help-icon:hover, html[data-theme='sol'] .contextual-help-icon:focus-within {
-  color: var(--primary-accent-dark);
-  background-color: var(--primary-accent-hover-bg);
-}
-.contextual-help-icon .tooltip-text { 
-  white-space: normal; line-height: 1.4; padding: 8px 10px; 
-  background-color: var(--focus-panel-bg);
-  color: var(--focus-panel-text);
-  border: 1px solid var(--primary-accent-light);
+.contextual-help-icon .tooltip-text {
+  white-space: normal; line-height: 1.4; padding: 8px 10px;
+  background-color: var(--panel-bg);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color-strong);
   text-align: left;
+  max-width: 250px;
 }
 
 .modal-overlay-basic { position: fixed; inset: 0; background-color: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 15px; backdrop-filter: blur(4px); }
@@ -525,9 +520,31 @@ html[data-theme='sol'] .contextual-help-icon:hover, html[data-theme='sol'] .cont
   overflow: hidden;
   margin: 0;
 }
-.ai-suggestion-modal-removed-nodes-list li { padding: 3px 0; border-bottom: 1px dotted var(--border-color); text-decoration: line-through; }
+.ai-suggestion-modal-removed-nodes-list li {
+  padding: 4px 6px;
+  border-bottom: 1px dotted var(--border-color);
+  text-decoration: line-through;
+  color: var(--text-tertiary);
+  transition: background-color 0.2s;
+  border-radius: var(--border-radius);
+  margin: 1px 0;
+}
+.ai-suggestion-modal-removed-nodes-list li:hover {
+    background-color: var(--error-bg);
+    text-decoration: none;
+    color: var(--error-color);
+}
+.ai-suggestion-modal-removed-nodes-list li:last-child {
+  border-bottom: none;
+}
 .ai-suggestion-modal-removed-nodes-list li strong { text-decoration: none; color: var(--text-primary); }
-.ai-suggestion-modal-removed-nodes-list .node-id { color: var(--error-color); font-size: 0.8em; }
+.ai-suggestion-modal-removed-nodes-list li:hover strong {
+    color: var(--error-color);
+}
+.ai-suggestion-modal-removed-nodes-list .node-id { color: var(--error-color); font-size: 0.8em; opacity: 0.7; }
+.ai-suggestion-modal-removed-nodes-list li:hover .node-id {
+    opacity: 1;
+}
 
 
 /* AI Suggestion Diff Preview Item */
@@ -1651,11 +1668,17 @@ html[data-theme='nebula'] .history-item-summary strong.history-entity {
 
 .history-item-summary strong.history-keyword {
   font-weight: 500;
-  color: var(--primary-accent);
+  color: var(--primary-accent-dark);
+  background-color: rgba(var(--primary-accent-rgb), 0.07);
+  padding: 1px 4px;
+  border-radius: var(--border-radius);
+  border: 1px solid rgba(var(--primary-accent-rgb), 0.1);
 }
 html[data-theme='dark'] .history-item-summary strong.history-keyword,
 html[data-theme='nebula'] .history-item-summary strong.history-keyword {
     color: var(--primary-accent-light);
+    background-color: rgba(var(--primary-accent-rgb), 0.15);
+    border-color: rgba(var(--primary-accent-rgb), 0.2);
     font-weight: 500;
 }
 

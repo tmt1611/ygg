@@ -60,7 +60,7 @@ ${errorInfo?.componentStack || 'Not available'}
               "Yggdrasil encountered an unexpected error and cannot continue."
             ),
             React.createElement("p", { className: "error-boundary-subtext" },
-              "Reloading the application may fix the issue. Your work should be auto-saved up to the last successful action."
+              "An unexpected error has occurred. Reloading the application may fix the issue. Your work is auto-saved up to the last successful action, so you can often continue safely after a reload."
             ),
             React.createElement("div", { className: "error-boundary-actions" },
               React.createElement("button", {

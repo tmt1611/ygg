@@ -400,7 +400,7 @@ export const useProjectManagement = ({
     const projectToLoad = projects.find(p => p.id === projectId);
     if (projectToLoad && viewStates) {
         handleSetActiveProject(projectId, projectToLoad.isExample);
-         viewStates.setYggdrasilViewMode('treeView'); 
+         viewStates.setYggdrasilViewMode('graph'); 
         if (projectToLoad.treeData && projectToLoad.treeData.id) {
            viewStates.setSelectedGraphNodeId(projectToLoad.treeData.id); 
         }
