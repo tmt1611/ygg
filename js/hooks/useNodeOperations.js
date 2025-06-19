@@ -40,7 +40,12 @@ export const useNodeOperations = ({
     if (!techTreeData) return;
     const nodeToDelete = findNodeById(techTreeData, nodeId);
     if (!nodeToDelete) {
-        console.error(`handleDeleteNodeWithConfirmation: Node with ID ${nodeId} not found.`);
+        openConfirmModal({
+            title: "Deletion Error",
+            message: `Node could not be found for deletion. It may have already been removed.`,
+            confirmText: "OK",
+            cancelText: null,
+        });
         return;
     }
 
