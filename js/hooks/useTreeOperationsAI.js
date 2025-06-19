@@ -179,10 +179,12 @@ export const useTreeOperationsAI = ({
       setPendingAiSuggestion(null);
       setBaseForModalDiff(null);
       setPreviousTreeStateForUndo(null);
+      setModificationPrompt('');
     } else if (previousTreeStateForUndoProp) { 
       setTechTreeData(previousTreeStateForUndoProp);
       addHistoryEntry('AI_MOD_UNDONE', 'Last confirmed AI modification to project tree undone.', { projectId: projectManager.activeProjectId });
       setPreviousTreeStateForUndo(null); 
+      setModificationPrompt('');
     } else {
       setError("No previous AI modification state available to undo.");
       return; 

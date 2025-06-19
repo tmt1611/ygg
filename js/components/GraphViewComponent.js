@@ -245,95 +245,44 @@ const GraphViewComponent = ({
       .attr("font-size", "11px")
       .style("user-select", "none")
       .style("pointer-events", "none")
-      .attr("text-anchor", "middle")
       .attr("transform", d => {
           // Counter-rotate the text to keep it horizontal
           const rotation = -(d.x * 180 / Math.PI - 90);
           return `rotate(${rotation})`;
       })
-      .style("dominant-baseline", d => {
+      .attr("text-anchor", d => {
           if (d.isProxy) return "middle";
-          // If node is in the top half of the layout, anchor text from its bottom edge, otherwise from its top edge.
-          const isTopHalf = d.x > Math.PI;
-          return isTopHalf ? "text-after-edge" : "text-before-edge";
+          // Position text based on angle for better readability
+          const angle = d.x * 180 / Math.PI;
+          if (angle > 15 && angle < 165) return "middle"; // Bottom-ish
+          if (angle > 195 && angle < 345) return "middle"; // Top-ish
+          return angle >= 165 && angle <= 195 ? "end" : "start"; // Sides
       })
-      .attr("x", 0) // Center horizontally relative to the node's origin
       .attr("dy", d => {
           if (d.isProxy) return "0.3em";
-          
-          const isTopHalf = d.x > Math.PI;
-          const radius = getNodeRadius(d);
-          const spacing = 7;
-          
-          return isTopHalf ? -(radius + spacing) : (radius + spacing);
+          const angle = d.x * 180 / Math.PI;
+          if (angle > 15 && angle < 165) return (getNodeRadius(d) + 7); // Bottom
+          if (angle > 195 && angle < 345) return -(getNodeRadius(d) + 7); // Top
+          return "0.35em"; // Middle for sides
       })
-      .text(d => d.isProxy ? d.data.name : null) // Set proxy names, but clear others for tspan wrapping
-      .each(function(d) {
-        if (d.isProxy || !d.data.name) return;
-        
-        const textElement = select(this);
-        textElement.text(null); // Clear previous content
-
-        const name = d.data.name;
-        // A more conservative wrapping width based on node radius.
-        // This creates more compact, readable text blocks.
-        const maxCharsPerLine = Math.floor(getNodeRadius(d) * 1.1 + 4);
-        const maxLines = 2;
-        const isTopHalf = d.x > Math.PI;
-
-        if (name.length <= maxCharsPerLine && !name.includes(' ')) {
-          textElement.text(name);
-          return;
-        }
-
-        const words = name.split(/\s+/);
-        let lines = [];
-        let currentLine = "";
-
-        for (const word of words) {
-            if (word.length > maxCharsPerLine) {
-                if (currentLine) lines.push(currentLine);
-                lines.push(word.substring(0, maxCharsPerLine - 1) + '…');
-                currentLine = "";
-                continue;
-            }
-
-            const testLine = currentLine ? `${currentLine} ${word}` : word;
-            if (testLine.length > maxCharsPerLine && currentLine) {
-                lines.push(currentLine);
-                currentLine = word;
-            } else {
-                currentLine = testLine;
-            }
-        }
-        if (currentLine) lines.push(currentLine);
-
-        if (lines.length > maxLines) {
-            lines = lines.slice(0, maxLines);
-            let lastLine = lines[maxLines - 1];
-            if (!lastLine.endsWith('…')) {
-                if (lastLine.length >= maxCharsPerLine - 1) {
-                   lastLine = lastLine.substring(0, maxCharsPerLine - 2);
-                }
-                lines[maxLines - 1] = lastLine + '…';
-            }
-        }
-        
-        // For text above the node, we need to draw it from bottom to top
-        // because the dominant-baseline is 'text-after-edge'.
-        if (isTopHalf) {
-            lines.reverse();
-        }
-
-        lines.forEach((l, i) => {
-            textElement.append("tspan")
-                .attr("x", 0)
-                // The first line's dy is handled by the parent <text> element.
-                // Subsequent lines are offset relative to the previous one.
-                // For top-half nodes, we use a negative dy to draw upwards.
-                .attr("dy", i === 0 ? 0 : (isTopHalf ? "-1.2em" : "1.2em"))
-                .text(l);
-        });
+      .attr("dx", d => {
+          if (d.isProxy) return 0;
+          const angle = d.x * 180 / Math.PI;
+          if (angle > 15 && angle < 165) return 0; // Bottom
+          if (angle > 195 && angle < 345) return 0; // Top
+          const spacing = getNodeRadius(d) + 7;
+          return angle >= 165 && angle <= 195 ? -spacing : spacing;
+      })
+      .text(d => {
+        if (d.isProxy) return d.data.name;
+        if (!d.data.name) return "";
+        // Simple truncation for a cleaner look. Full name is in the tooltip.
+        const maxLength = 25;
+        return d.data.name.length > maxLength ? d.data.name.substring(0, maxLength - 1) + '…' : d.data.name;
+      })
+      .each(function() {
+        // Clear any previous tspans from the old wrapping logic
+        select(this).selectAll("tspan").remove();
       });
 
     nodeGroups.select(".node-rune-icon")

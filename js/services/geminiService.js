@@ -98,7 +98,7 @@ const constructApiError = (error, baseMessage) => {
         (error.status && httpErrorCodes.includes(error.status))) { 
       const previousSource = apiClientState.activeSource;
       clearActiveApiKey(); 
-      detailedMessage = `The API Key (from ${previousSource || 'previous source'}) is invalid or lacks permissions, and has been cleared. AI features disabled. Please verify your key.`;
+      detailedMessage = `The API Key (from ${previousSource || 'previous source'}) is invalid or lacks permissions, and has been cleared. Please set a new key in Workspace > API Key Setup.`;
     }
   }
   return new Error(detailedMessage);
