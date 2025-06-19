@@ -272,14 +272,17 @@ const GraphViewComponent = ({
         if (d.isProxy || !d.data.name) return;
         
         const textElement = select(this);
-        const name = d.data.name;
-        const maxCharsPerLine = Math.floor(getNodeRadius(d) * 1.4); // Give a bit more room
-        const maxLines = 2;
-
         textElement.text(null); // Clear previous content
 
+        const name = d.data.name;
+        // A more conservative wrapping width based on node radius.
+        // This creates more compact, readable text blocks.
+        const maxCharsPerLine = Math.floor(getNodeRadius(d) * 1.1 + 4);
+        const maxLines = 2;
+        const isTopHalf = d.x > Math.PI;
+
         if (name.length <= maxCharsPerLine && !name.includes(' ')) {
-          textElement.text(name); // Set text directly if it fits and has no spaces
+          textElement.text(name);
           return;
         }
 
@@ -288,7 +291,6 @@ const GraphViewComponent = ({
         let currentLine = "";
 
         for (const word of words) {
-            // Handle very long words that must be truncated
             if (word.length > maxCharsPerLine) {
                 if (currentLine) lines.push(currentLine);
                 lines.push(word.substring(0, maxCharsPerLine - 1) + '…');
@@ -296,7 +298,7 @@ const GraphViewComponent = ({
                 continue;
             }
 
-            const testLine = currentLine ? currentLine + " " + word : word;
+            const testLine = currentLine ? `${currentLine} ${word}` : word;
             if (testLine.length > maxCharsPerLine && currentLine) {
                 lines.push(currentLine);
                 currentLine = word;
@@ -307,23 +309,29 @@ const GraphViewComponent = ({
         if (currentLine) lines.push(currentLine);
 
         if (lines.length > maxLines) {
-            const moreLinesExist = true;
             lines = lines.slice(0, maxLines);
-            if (moreLinesExist) {
-                let lastLine = lines[maxLines - 1];
-                if (!lastLine.endsWith('…')) {
-                    if (lastLine.length >= maxCharsPerLine) { // Use >= to be safe
-                       lastLine = lastLine.substring(0, maxCharsPerLine - 1);
-                    }
-                    lines[maxLines - 1] = lastLine + '…';
+            let lastLine = lines[maxLines - 1];
+            if (!lastLine.endsWith('…')) {
+                if (lastLine.length >= maxCharsPerLine - 1) {
+                   lastLine = lastLine.substring(0, maxCharsPerLine - 2);
                 }
+                lines[maxLines - 1] = lastLine + '…';
             }
         }
         
+        // For text above the node, we need to draw it from bottom to top
+        // because the dominant-baseline is 'text-after-edge'.
+        if (isTopHalf) {
+            lines.reverse();
+        }
+
         lines.forEach((l, i) => {
             textElement.append("tspan")
                 .attr("x", 0)
-                .attr("dy", i === 0 ? 0 : "1.1em")
+                // The first line's dy is handled by the parent <text> element.
+                // Subsequent lines are offset relative to the previous one.
+                // For top-half nodes, we use a negative dy to draw upwards.
+                .attr("dy", i === 0 ? 0 : (isTopHalf ? "-1.2em" : "1.2em"))
                 .text(l);
         });
       });
