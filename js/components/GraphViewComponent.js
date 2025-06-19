@@ -232,14 +232,34 @@ const GraphViewComponent = ({
 
     nodeGroups.select(".node-label")
       .attr("fill", d => d.isProxy ? null : "var(--graph-node-text)")
-      .attr("text-anchor", "middle")
+      .attr("text-anchor", d => {
+        if (d.isProxy) return "middle";
+        // Right side of circle (angle is right)
+        if (d.x > Math.PI * 0.25 && d.x < Math.PI * 0.75) return "start";
+        // Left side of circle (angle is left)
+        if (d.x > Math.PI * 1.25 && d.x < Math.PI * 1.75) return "end";
+        // Top or bottom
+        return "middle";
+      })
       .attr("transform", d => {
           if (d.isProxy) return null;
-          // d.x is angle in radians. In d3.tree, 0 is typically to the right. The drawing logic uses -PI/2 to make 0 top.
-          // So, 0 is top, PI/2 is right, PI is bottom, 1.5PI is left.
-          const isBottomHalf = d.x > Math.PI / 2 && d.x < Math.PI * 1.5;
-          const yOffset = isBottomHalf ? (nodeRadius + 10) : -(nodeRadius + 10);
-          return `translate(0, ${yOffset})`;
+          const padding = 5;
+          const angle = d.x;
+
+          // Right side
+          if (angle > Math.PI * 0.25 && angle < Math.PI * 0.75) {
+              return `translate(${nodeRadius + padding}, 0)`;
+          }
+          // Left side
+          if (angle > Math.PI * 1.25 && angle < Math.PI * 1.75) {
+              return `translate(${-(nodeRadius + padding)}, 0)`;
+          }
+          // Bottom side
+          if (angle >= Math.PI * 0.75 && angle <= Math.PI * 1.25) {
+              return `translate(0, ${nodeRadius + padding})`;
+          }
+          // Top side (default)
+          return `translate(0, ${-(nodeRadius + padding)})`;
       })
       .each(function(d) { // D3 text wrapping
           const text = select(this);

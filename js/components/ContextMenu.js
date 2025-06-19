@@ -4,7 +4,7 @@ import { NODE_IMPORTANCE_OPTIONS } from '../constants.js';
 
 const ContextMenu = ({
   isOpen, position, node, onClose, onToggleLock, onChangeImportance, onEditName, onAddChild,
-  onSetFocus, onDeleteNode, onLinkToProject, onGoToLinkedProject, onUnlinkProject,
+  onSetFocus, onDeleteNode, onLinkToProject, onGoToLinkedProject, onUnlinkProject, onGenerateInsights,
   projects, activeProjectId, currentProjectRootId, findLinkSource, handleNavigateToSourceNode,
   linkSourceInfoFromView,
 }) => {
@@ -53,6 +53,7 @@ const ContextMenu = ({
     const items = [
         { id: 'edit', label: "Edit Details...", icon: '✏️', action: () => onEditName(node) },
         { id: 'add-child', label: "Add Child Node...", icon: '➕', action: () => onAddChild(node) },
+        { id: 'ai-insights', label: "AI Insights", icon: '💡', action: () => { onGenerateInsights(node); } },
         { type: 'separator' },
         { id: 'toggle-lock', label: node.isLocked ? 'Unlock Node' : 'Lock Node', icon: node.isLocked ? '🔓' : '🔒', action: () => onToggleLock(node.id) },
         {
@@ -92,7 +93,7 @@ const ContextMenu = ({
     }
 
     return items;
-  }, [node, onEditName, onAddChild, onToggleLock, onSetFocus, onLinkToProject, onGoToLinkedProject, onUnlinkProject, onDeleteNode, handleCopy, copyFeedback, incomingLink, handleNavigateToSourceNode]);
+  }, [node, onEditName, onAddChild, onToggleLock, onSetFocus, onLinkToProject, onGoToLinkedProject, onUnlinkProject, onDeleteNode, onGenerateInsights, handleCopy, copyFeedback, incomingLink, handleNavigateToSourceNode]);
 
   const focusableItems = useMemo(() => menuItems.filter(item => item.type !== 'separator' && !item.isDisabled), [menuItems]);
 

@@ -29,6 +29,7 @@ const AppModals = ({
   projects,
   activeProjectId,
   yggdrasilViewMode,
+  onGenerateInsights,
 }) => {
   const {
     isProjectNameModalOpen, projectModalConfig, closeProjectNameModal,
@@ -120,6 +121,7 @@ const AppModals = ({
           onAddChild: (n) => modalManager.openNodeEditModal({mode:'addChild', targetNodeId: n.id, parentNodeName: n.name, title: `Add Child to: ${n.name}`, label: 'New Child Name', placeholder: 'Enter name'}),
           onSetFocus: (nodeId) => handleSwitchToFocusView(nodeId),
           onDeleteNode: (nodeId) => onDeleteNodeWithConfirmation(nodeId),
+          onGenerateInsights: onGenerateInsights,
           onLinkToProject: (nodeId) => projectLinkingHook.handleOpenLinkProjectModal(nodeId),
           onGoToLinkedProject: (projectId) => projectLinkingHook.handleNavigateToLinkedProject(projectId),
           onUnlinkProject: (nodeId) => projectLinkingHook.handleUnlinkProjectFromNode(nodeId),

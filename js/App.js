@@ -368,6 +368,7 @@ const App = () => {
         projects: projectManager.projects,
         activeProjectId: projectManager.activeProjectId,
         yggdrasilViewMode: yggdrasilViewMode,
+        onGenerateInsights: handleGenerateAiInsights,
       })
     )
   );
