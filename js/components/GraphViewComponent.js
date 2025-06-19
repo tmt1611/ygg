@@ -71,6 +71,7 @@ const GraphViewComponent = ({
   onSelectNode,
   onSwitchToFocusView,
   onOpenContextMenu,
+  onCloseContextMenu,
   isAppBusy,
   projects,
   activeProjectId,
@@ -83,7 +84,7 @@ const GraphViewComponent = ({
   const svgContainerDivRef = useRef(null); 
   const svgRef = useRef(null); 
   
-  const { g, nodes, links, config, resetZoom, zoomIn, zoomOut } = useD3Tree(svgRef, treeData);
+  const { g, nodes, links, config, resetZoom, zoomIn, zoomOut } = useD3Tree(svgRef, treeData, {}, onCloseContextMenu);
 
   const projectLinksAndProxyNodes = useMemo(() => {
     if (!nodes || nodes.length === 0 || !projects) {

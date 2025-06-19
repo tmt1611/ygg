@@ -366,6 +366,58 @@ html[data-theme='sol'] .panel-header-icon { color: var(--primary-accent-dark); f
 .ai-suggestion-modal-footer-note { font-size: 0.85em; color: var(--text-secondary); margin-top: auto; flex-shrink: 0; }
 .ai-suggestion-modal-footer-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; padding-top: 15px; border-top: 1px solid var(--border-color); flex-shrink: 0; }
 
+.ai-suggestion-modal-removed-nodes-section {
+  margin-top: 15px;
+  border-top: 1px solid var(--border-color);
+  padding-top: 10px;
+}
+.ai-suggestion-modal-removed-nodes-title {
+  font-size: 0.9em;
+  font-weight: 600;
+  color: var(--error-color);
+  cursor: pointer;
+  user-select: none;
+  position: relative;
+  padding-left: 18px;
+  margin-bottom: 5px;
+}
+.ai-suggestion-modal-removed-nodes-title::before {
+  content: '▶';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  transition: transform 0.2s ease-out;
+  font-size: 0.8em;
+}
+.ai-suggestion-modal-removed-nodes-title:not(.collapsed)::before {
+  transform: translateY(-50%) rotate(90deg);
+}
+.ai-suggestion-modal-removed-nodes-list {
+  list-style: none;
+  padding-left: 18px;
+  margin: 5px 0 0 0;
+  font-size: 0.85em;
+  color: var(--text-secondary);
+  max-height: 150px;
+  overflow-y: auto;
+  border-left: 1px solid var(--border-color);
+}
+.ai-suggestion-modal-removed-nodes-list.collapsed {
+  display: none;
+}
+.ai-suggestion-modal-removed-nodes-list li {
+  padding: 2px 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.ai-suggestion-modal-removed-nodes-list .node-id {
+  font-family: monospace;
+  font-size: 0.9em;
+  opacity: 0.7;
+}
+
 
 
 
@@ -748,7 +800,7 @@ html[data-theme='nebula'] .graph-view-node.highlighted text.node-label {
   /* Create a "cutout" effect for readability over lines */
   paint-order: stroke;
   stroke: var(--app-bg);
-  stroke-width: 6px; /* Adjust thickness of the "cutout" */
+  stroke-width: 5px; /* Adjust thickness of the "cutout" */
   stroke-linecap: round;
   stroke-linejoin: round;
   text-shadow: 0 0 5px var(--app-bg); /* Soften the edges a bit */
@@ -757,29 +809,18 @@ html[data-theme='nebula'] .graph-view-node.highlighted text.node-label {
 .graph-view-node:not(.proxy) text.node-label tspan {
   paint-order: stroke;
   stroke: var(--app-bg);
-  stroke-width: 6px;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-.graph-view-node:not(.proxy) text.node-label tspan {
-  paint-order: stroke;
-  stroke: var(--app-bg);
-  stroke-width: 6px;
+  stroke-width: 5px;
   stroke-linecap: round;
   stroke-linejoin: round;
 }
 html[data-theme='dark'] .graph-view-node:not(.proxy) text.node-label,
 html[data-theme='nebula'] .graph-view-node:not(.proxy) text.node-label {
-  stroke-width: 8px;
+  stroke-width: 6px;
   text-shadow: 0 0 8px var(--app-bg), 0 0 12px rgba(var(--primary-accent-rgb), 0.3);
 }
 html[data-theme='dark'] .graph-view-node:not(.proxy) text.node-label tspan,
 html[data-theme='nebula'] .graph-view-node:not(.proxy) text.node-label tspan {
-  stroke-width: 8px;
-}
-html[data-theme='dark'] .graph-view-node:not(.proxy) text.node-label tspan,
-html[data-theme='nebula'] .graph-view-node:not(.proxy) text.node-label tspan {
-  stroke-width: 8px;
+  stroke-width: 6px;
 }
 
 .graph-view-link { stroke: var(--graph-link-stroke-ecosystem); stroke-linecap: round; }
@@ -1535,6 +1576,32 @@ html[data-theme='sol'] .panel-variant-sidebar .panel-toggle-button {
   color: var(--text-tertiary);
   max-height: 150px;
   overflow-y: auto;
+}
+
+.error-message-inline {
+  background-color: var(--error-bg);
+  color: var(--error-color);
+  border: 1px solid var(--error-color);
+  border-radius: var(--border-radius);
+  padding: 10px 15px;
+  margin: 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.9em;
+  font-weight: 500;
+  box-shadow: var(--box-shadow-md);
+  position: absolute;
+  top: 0;
+  left: 10px;
+  right: 10px;
+  z-index: 50;
+  animation: errorAppear 0.3s ease-out;
+  max-width: calc(100% - 20px);
+}
+.error-message-inline .error-icon {
+  font-size: 1.3em;
+  line-height: 1;
 }
 
 

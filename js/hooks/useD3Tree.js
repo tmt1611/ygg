@@ -11,7 +11,8 @@ const defaultTreeConfig = {
 export const useD3Tree = (
   svgRef,
   treeData,
-  config = {}
+  config = {},
+  onBackgroundClick
 ) => {
   const finalConfig = { ...defaultTreeConfig, ...config };
   const { margin, radialRadiusFactor } = finalConfig;
@@ -33,7 +34,7 @@ export const useD3Tree = (
     // Make radius dependent on depth to avoid clutter
     return tree()
       .size([2 * Math.PI, depth * radialRadiusFactor])
-      .separation((a, b) => (a.parent === b.parent ? 1 : 2));
+      .separation((a, b) => (a.parent === b.parent ? 2 : 2.5));
   }, [rootHierarchy, radialRadiusFactor]);
 
   const resetZoom = useCallback(() => {
@@ -67,8 +68,16 @@ export const useD3Tree = (
           }
         });
       svg.call(zoomBehaviorRef.current);
+
+      if (onBackgroundClick) {
+        svg.on('click', (event) => {
+          if (event.target === svg.node()) {
+            onBackgroundClick();
+          }
+        });
+      }
     }
-  }, [svgRef]); 
+  }, [svgRef, onBackgroundClick]); 
 
   // This new effect handles the initial centering.
   useLayoutEffect(() => {

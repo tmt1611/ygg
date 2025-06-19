@@ -70,6 +70,7 @@ const MainContentRouter = ({
           onSelectNode: handleNodeSelectedForInsightsOrActions,
           onSwitchToFocusView: viewStates.handleSwitchToFocusView,
           onOpenContextMenu: modalManager.openContextMenu,
+          onCloseContextMenu: modalManager.closeContextMenu,
           isAppBusy: isAppBusy,
           projects: projectManager.projects,
           activeProjectId: projectManager.activeProjectId,
