@@ -296,8 +296,6 @@ const App = () => {
         }),
         
         React.createElement("main", { className: "yggdrasil-core-canvas" },
-          isLoading && React.createElement(LoadingSpinner, { message: "Generating Structure..." }),
-          isModifying && !isAiSuggestionModalOpen && React.createElement(LoadingSpinner, { message: "AI Applying Modifications..." }),
           error && React.createElement(ErrorMessage, { message: error }),
 
           React.createElement(MainContentRouter, {

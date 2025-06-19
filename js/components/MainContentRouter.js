@@ -3,6 +3,7 @@ import GraphViewComponent from './GraphViewComponent.js';
 import ListViewTabContent from './tabs/ListViewTab.js';
 import FocusViewComponent from './FocusViewComponent.js';
 import OverlayPanelView from './OverlayPanelView.js';
+import LoadingSpinner from './LoadingSpinner.js';
 
 const MainContentRouter = ({
   appState,
@@ -32,7 +33,14 @@ const MainContentRouter = ({
     yggdrasilViewMode, activeOverlayPanel, setActiveOverlayPanel
   } = viewControls;
 
-  if (yggdrasilViewMode === 'workspace' && !isLoading && !isModifying) {
+  if (yggdrasilViewMode === 'workspace') {
+    if (isLoading) {
+        return React.createElement(LoadingSpinner, { message: "Generating Structure..." });
+    }
+    if (isModifying && !modalManager.isAiSuggestionModalOpen) {
+        return React.createElement(LoadingSpinner, { message: "AI Applying Modifications..." });
+    }
+    
     return (
       React.createElement(WorkspaceTabContent, {
         projects: projectManager.projects,
