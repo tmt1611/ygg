@@ -13,39 +13,27 @@ const getNextThemeInfo = (currentTheme) => {
 
 const YggdrasilTopBar = ({
   themeMode, onToggleTheme, apiKeyIsSet, activeProjectName, onSaveActiveProject, 
-  onDownloadActiveProject, 
+  onDownloadActiveProject, saveFeedback, setSaveFeedback, downloadFeedback, setDownloadFeedback,
   isAppBusy, hasTechTreeData,
   yggdrasilViewMode, setYggdrasilViewMode,
   focusNodeId
 }) => {
-  const [saveFeedback, setSaveFeedback] = useState(false);
-  const [downloadFeedback, setDownloadFeedback] = useState(false);
 
   useEffect(() => {
     if (saveFeedback) {
       const timer = setTimeout(() => setSaveFeedback(false), 1500);
       return () => clearTimeout(timer);
     }
-  }, [saveFeedback]);
+  }, [saveFeedback, setSaveFeedback]);
 
   useEffect(() => {
     if (downloadFeedback) {
       const timer = setTimeout(() => setDownloadFeedback(false), 1500);
       return () => clearTimeout(timer);
     }
-  }, [downloadFeedback]);
+  }, [downloadFeedback, setDownloadFeedback]);
 
   const nextThemeInfo = useMemo(() => getNextThemeInfo(themeMode), [themeMode]);
-
-  const handleSaveClick = () => {
-    onSaveActiveProject();
-    setSaveFeedback(true);
-  };
-
-  const handleDownloadClick = () => {
-    onDownloadActiveProject(); 
-    setDownloadFeedback(true);
-  };
 
 
   const handleNavClick = (viewMode) => {
@@ -96,13 +84,13 @@ const YggdrasilTopBar = ({
           title: apiKeyIsSet ? "Gemini API Key is active." : "Gemini API Key not set. AI features disabled."
         }, apiKeyIsSet ? '🔑' : '⚠️'),
         React.createElement("button", { 
-          onClick: handleSaveClick, 
+          onClick: onSaveActiveProject, 
           disabled: isAppBusy || !hasTechTreeData, 
           className: `yggdrasil-top-bar-action-item primary yggdrasil-top-bar-save-button ${saveFeedback ? 'saved' : ''}`,
-          title: hasTechTreeData ? "Save the current state of the active project." : "No active project data to save."
+          title: hasTechTreeData ? "Save the current state of the active project (Ctrl+S)." : "No active project data to save."
         }, saveFeedback ? '✓' : '💾'),
         React.createElement("button", { 
-          onClick: handleDownloadClick, 
+          onClick: onDownloadActiveProject, 
           disabled: isAppBusy || !hasTechTreeData, 
           className: `yggdrasil-top-bar-action-item primary yggdrasil-top-bar-download-button ${downloadFeedback ? 'saved' : ''}`,
           title: hasTechTreeData ? "Save active project and download as .project.json" : "No active project data to download."

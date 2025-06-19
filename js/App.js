@@ -38,6 +38,8 @@ const App = () => {
   const [initialPrompt, setInitialPrompt] = useState('');
   const [modificationPrompt, setModificationPrompt] = useState('');
   const [isSummarizing, setIsSummarizing] = useState(false);
+  const [saveFeedback, setSaveFeedback] = useState(false);
+  const [downloadFeedback, setDownloadFeedback] = useState(false);
   
   const [previousTreeStateForUndo, setPreviousTreeStateForUndo] = useState(null);
   const [baseForModalDiff, setBaseForModalDiff] = useState(null); 
@@ -129,9 +131,28 @@ const App = () => {
 
 
   // --- Event Handlers & Callbacks ---
-  const handleDownloadTreeData = useCallback(() => {
+  const handleSaveActiveProjectWithFeedback = useCallback(() => {
+    if (!techTreeData) return;
+    projectManager.handleSaveActiveProject(false);
+    setSaveFeedback(true);
+  }, [projectManager, techTreeData]);
+
+  const handleDownloadTreeDataWithFeedback = useCallback(() => {
+    if (!techTreeData) return;
     projectManager.handleSaveActiveProject(true);
-  }, [projectManager]);
+    setDownloadFeedback(true);
+  }, [projectManager, techTreeData]);
+
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      if ((event.ctrlKey || event.metaKey) && event.key === 's') {
+        event.preventDefault();
+        handleSaveActiveProjectWithFeedback();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [handleSaveActiveProjectWithFeedback]);
 
   const handleExtractData = useCallback(async () => {
     if (!techTreeData) { setError("No data to extract."); return; }
@@ -269,8 +290,12 @@ const App = () => {
         onToggleTheme: toggleTheme,
         apiKeyIsSet: apiKeyHook.status.isSet,
         activeProjectName: activeProjectNameForDisplay,
-        onSaveActiveProject: () => projectManager.handleSaveActiveProject(false),
-        onDownloadActiveProject: handleDownloadTreeData,
+        onSaveActiveProject: handleSaveActiveProjectWithFeedback,
+        onDownloadActiveProject: handleDownloadTreeDataWithFeedback,
+        saveFeedback: saveFeedback,
+        setSaveFeedback: setSaveFeedback,
+        downloadFeedback: downloadFeedback,
+        setDownloadFeedback: setDownloadFeedback,
         isAppBusy: isLoading || isModifying || isFetchingStrategicSuggestions,
         hasTechTreeData: !!techTreeData,
         yggdrasilViewMode: yggdrasilViewMode,
