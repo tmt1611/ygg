@@ -342,6 +342,8 @@ html[data-theme='sol'] .panel-header-icon { color: var(--primary-accent-dark); f
 .modal-content-basic .modal-title .modal-icon { font-size: 1.2em; line-height: 1; }
 .modal-content-basic.confirm-danger .modal-title { color: var(--error-color); }
 .modal-content-basic.confirm-danger { border-top-color: var(--error-color); }
+.modal-content-basic.confirm-danger .modal-title { color: var(--error-color); }
+.modal-content-basic.confirm-danger { border-top-color: var(--error-color); }
 
 @keyframes modalFadeIn { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
 
@@ -365,6 +367,76 @@ html[data-theme='sol'] .panel-header-icon { color: var(--primary-accent-dark); f
 .ai-suggestion-modal-refinement-section { padding-top: 0px; }
 .ai-suggestion-modal-footer-note { font-size: 0.85em; color: var(--text-secondary); margin-top: auto; flex-shrink: 0; }
 .ai-suggestion-modal-footer-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; padding-top: 15px; border-top: 1px solid var(--border-color); flex-shrink: 0; }
+
+
+
+.ai-suggestion-modal-removed-nodes-section { margin-top: 15px; padding-top: 10px; border-top: 1px solid var(--border-color); }
+.ai-suggestion-modal-removed-nodes-title { 
+  font-size: 0.95em; 
+  font-weight: 600; 
+  color: var(--error-color); 
+  margin-bottom: 8px; 
+  cursor: pointer;
+  user-select: none;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px;
+  border-radius: var(--border-radius);
+}
+.ai-suggestion-modal-removed-nodes-title:hover {
+  background-color: var(--error-bg);
+}
+.ai-suggestion-modal-removed-nodes-title::before {
+  content: '▼';
+  display: inline-block;
+  font-size: 0.7em;
+  transition: transform 0.2s ease-out;
+  padding: 4px;
+}
+.ai-suggestion-modal-removed-nodes-title.collapsed::before {
+  transform: rotate(-90deg);
+}
+.ai-suggestion-modal-removed-nodes-list { 
+  font-size: 0.85em; 
+  color: var(--text-secondary); 
+  list-style: none; 
+  padding: 0; 
+  max-height: 120px; 
+  overflow-y: auto; 
+  transition: opacity 0.2s, max-height 0.3s, margin-top 0.3s, padding-top 0.3s;
+}
+.ai-suggestion-modal-removed-nodes-list.collapsed {
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  margin: 0;
+}
+.ai-suggestion-modal-removed-nodes-list li {
+  padding: 4px 6px;
+  border-bottom: 1px dotted var(--border-color);
+  text-decoration: line-through;
+  color: var(--text-tertiary);
+  transition: background-color 0.2s;
+  border-radius: var(--border-radius);
+  margin: 1px 0;
+}
+.ai-suggestion-modal-removed-nodes-list li:hover {
+    background-color: var(--error-bg);
+    text-decoration: none;
+    color: var(--error-color);
+}
+.ai-suggestion-modal-removed-nodes-list li:last-child {
+  border-bottom: none;
+}
+.ai-suggestion-modal-removed-nodes-list li strong { text-decoration: none; color: var(--text-primary); }
+.ai-suggestion-modal-removed-nodes-list li:hover strong {
+    color: var(--error-color);
+}
+.ai-suggestion-modal-removed-nodes-list .node-id { color: var(--error-color); font-size: 0.8em; opacity: 0.7; }
+.ai-suggestion-modal-removed-nodes-list li:hover .node-id {
+    opacity: 1;
+}
 
 
 
@@ -564,6 +636,38 @@ html[data-theme='sol'] .panel-header-icon { color: var(--primary-accent-dark); f
 .diff-list-item-desc::-webkit-scrollbar-track { background: transparent; }
 .diff-list-item-desc::-webkit-scrollbar-thumb { background-color: var(--border-color); border-radius: 3px; }
 .diff-list-item-desc::-webkit-scrollbar-thumb:hover { background-color: var(--border-color-strong); }
+
+.diff-details-list {
+  list-style: none;
+  padding: 0;
+  margin: 4px 0 0 16px;
+  font-size: 0.8em;
+  color: var(--text-tertiary);
+}
+.diff-details-item {
+  line-height: 1.4;
+  margin-bottom: 2px;
+  padding: 2px 4px;
+  border-radius: var(--border-radius);
+  background-color: rgba(var(--panel-bg-rgb), 0.2);
+}
+.diff-details-item strong {
+  color: var(--text-primary);
+  margin-right: 5px;
+}
+.diff-details-item .diff-from {
+  text-decoration: line-through;
+  color: var(--error-color);
+  opacity: 0.8;
+  word-break: break-all;
+}
+.diff-details-item .diff-to {
+  color: var(--success-color);
+  word-break: break-all;
+}
+.diff-details-item .diff-arrow {
+  margin: 0 4px;
+}
 
 .diff-details-list {
   list-style: none;

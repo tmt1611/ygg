@@ -4,6 +4,7 @@ import ModificationPromptInput from '../ModificationPromptInput.js';
 import LoadingSpinner from '../LoadingSpinner.js';
 import ErrorMessage from '../ErrorMessage.js';
 import ContextualHelpTooltip from '../ContextualHelpTooltip.js';
+import ContextualHelpTooltip from '../ContextualHelpTooltip.js';
 
 const AiToolsTab = ({
   modificationPrompt, setModificationPrompt, onModifyAiTree, isAiModifying,
