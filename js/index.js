@@ -2,7 +2,7 @@
 console.log('index.js: script started'); // Log to confirm script start
 
 import React from 'react';
-import ReactDOM from 'react-dom/client';
+import * as ReactDOM from 'react-dom/client';
 import App from './App.js';
 import ErrorBoundary from './components/ErrorBoundary.js';
 

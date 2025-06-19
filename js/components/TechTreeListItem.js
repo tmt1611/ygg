@@ -1,11 +1,6 @@
 
 import React, { useMemo, useCallback, useState, useEffect } from 'react';
-
-const RUNE_IMPORTANCE_OPTIONS = [
-    { value: 'minor', label: 'Minor', rune: '🌱' },
-    { value: 'common', label: 'Common', rune: '🌿' },
-    { value: 'major', label: 'Major', rune: '🌳' },
-];
+import { NODE_IMPORTANCE_OPTIONS } from '../constants.js';
 
 const TechTreeListItemComponent = ({
     node, showDescriptionsGlobal,
@@ -137,7 +132,7 @@ const TechTreeListItemComponent = ({
     nodeNameTitle += ` (↩️ Linked from: ${incomingLinkSource.sourceProjectName} / ${incomingLinkSource.sourceNodeName})`;
   }
 
-  const currentImportanceObject = RUNE_IMPORTANCE_OPTIONS.find(opt => opt.value === (node.importance || 'common')) || RUNE_IMPORTANCE_OPTIONS[1];
+  const currentImportanceObject = NODE_IMPORTANCE_OPTIONS.find(opt => opt.value === (node.importance || 'common')) || NODE_IMPORTANCE_OPTIONS[1];
 
 
   return (
@@ -201,7 +196,7 @@ const TechTreeListItemComponent = ({
             title: `Importance: ${currentImportanceObject.label}. Right-click for more actions.`,
             onClick: (e) => e.stopPropagation() // Prevent row selection when clicking select
           },
-            RUNE_IMPORTANCE_OPTIONS.map(opt => React.createElement("option", { key: opt.value, value: opt.value }, opt.rune, " ", opt.label))
+            NODE_IMPORTANCE_OPTIONS.map(opt => React.createElement("option", { key: opt.value, value: opt.value }, opt.rune, " ", opt.label))
           )
         )
       ),

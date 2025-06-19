@@ -69,19 +69,6 @@ export const clearActiveApiKey = () => {
     return { success: true, message: "API Key cleared. Provide a new key to enable AI features.", source: null };
 };
 
-export const getApiKeyStatus = () => {
-    if (apiClientState.isKeyAvailable && apiClientState.activeSource && apiClientState.activeKey) {
-        return { available: true, source: apiClientState.activeSource, message: `Using API Key from ${apiClientState.activeSource}. AI features enabled.` };
-    }
-    try {
-        if (typeof process !== 'undefined' && process.env && process.env.API_KEY && apiClientState.activeSource !== 'environment' && !apiClientState.isKeyAvailable) { 
-            return { available: false, source: null, message: "Environment API_KEY detected but not active. Try selecting 'Use Environment API_KEY' or enter manually."};
-        }
-    } catch (e) {
-        // silently ignore, as process.env might not be available
-    }
-    return { available: false, source: null, message: "API Key not set. Provide a valid API Key for AI features." };
-};
 
 export const isApiKeySet = () => apiClientState.isKeyAvailable && apiClientState.client !== null;
 
@@ -308,7 +295,9 @@ Output the complete, modified JSON for the tech tree, adhering to ALL rules abov
                 id: 'NEW_NODE_ROOT_WRAPPER', 
                 name: `${currentTree.name || 'Modified Tree'} (Wrapped Multi-Root)`,
                 description: "AI suggested multiple root nodes; this is an auto-generated wrapper.",
-                isLocked: false, importance: 'common', children: parsedData
+                isLocked: false, importance: 'common', children: parsedData,
+                linkedProjectId: currentTree.linkedProjectId || null,
+                linkedProjectName: currentTree.linkedProjectName || null,
             };
         } else { 
             console.error("Gemini modification resulted in an un-wrappable array or array with invalid items:", parsedData);
@@ -461,11 +450,9 @@ Respond ONLY with the JSON array. No extra text or markdown.
     const result = await model.generateContent(prompt);
     const response = result.response;
 
-    let jsonStr = response.text().trim();
-    const fenceRegex = /^```(?:json|JSON)?\s*\n?(.*?)\n?\s*```$/s;
-    const match = jsonStr.match(fenceRegex);
-    if (match?.[1]) {
-      jsonStr = match[1].trim();
+    const jsonStr = extractJsonFromMarkdown(response.text());
+    if (!jsonStr) {
+      throw new Error("AI returned an empty response for strategic suggestions.");
     }
 
     const parsed = JSON.parse(jsonStr);

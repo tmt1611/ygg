@@ -4,7 +4,6 @@ import React, { useState, useCallback, useEffect, useMemo } from 'react';
 // Components
 import KnowledgeBranchSidebar from './components/KnowledgeBranchSidebar.js';
 import YggdrasilTopBar from './components/YggdrasilTopBar.js'; 
-import LoadingSpinner from './components/LoadingSpinner.js';
 import ErrorMessage from './components/ErrorMessage.js';
 import MainContentRouter from './components/MainContentRouter.js'; 
 import AppModals from './components/AppModals.js'; 
@@ -67,7 +66,7 @@ const App = () => {
   const modalManager = useModalManager();
   const {
     pendingAiSuggestion, isAiSuggestionModalOpen,
-    setPendingAiSuggestion 
+    setPendingAiSuggestion, closeAiSuggestionModal
   } = modalManager;
 
   const viewStates = useViewStates({
@@ -79,8 +78,8 @@ const App = () => {
   const projectManager = useProjectManagement({
     modalManager, historyManager, viewStates,
     currentTechTreeData: techTreeData, currentContextText: initialPrompt,
-    setTechTreeData, setContextText: setInitialPrompt,
-    setInitialPromptFromHook: setInitialPrompt, setError
+    setTechTreeData, setInitialPrompt: setInitialPrompt,
+    setError
   });
   const { projects, activeProjectId } = projectManager;
 
@@ -97,13 +96,13 @@ const App = () => {
     techTreeData, setTechTreeData, contextText: initialPrompt, initialPrompt,
     previousTreeStateForUndoProp: previousTreeStateForUndo, setPreviousTreeStateForUndo,
     baseForModalDiffProp: baseForModalDiff, setBaseForModalDiff, 
-    setIsLoading, setIsModifying, setModificationPromptFromHook: setModificationPrompt
+    setIsLoading, setIsModifying, setModificationPrompt: setModificationPrompt
   });
 
   const aiInsightsHook = useAiInsights({
     apiKeyIsSet: apiKeyHook.status.isSet,
     historyManager, techTreeData, contextText: initialPrompt, setTechTreeData,
-    nodeOperationsHook: nodeOperations, modalManager
+    modalManager
   });
   const { aiInsightsData, aiInsightsIsLoading, aiInsightsError, handleGenerateAiInsights } = aiInsightsHook;
 
@@ -116,12 +115,6 @@ const App = () => {
   // --- EFFECTS ---
   useEffect(() => {
     projectManager.initializeDefaultProjects();
-    if (!techTreeData && (pendingAiSuggestion || previousTreeStateForUndo || baseForModalDiff)) {
-        setPendingAiSuggestion(null);
-        setPreviousTreeStateForUndo(null);
-        setBaseForModalDiff(null);
-        setModificationPrompt(''); 
-    }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); 
 
@@ -131,9 +124,9 @@ const App = () => {
         setPreviousTreeStateForUndo(null);
         setBaseForModalDiff(null);
         setModificationPrompt(''); 
-        if (isAiSuggestionModalOpen) modalManager.closeAiSuggestionModal();
+        if (isAiSuggestionModalOpen) closeAiSuggestionModal();
     }
-  }, [techTreeData, pendingAiSuggestion, previousTreeStateForUndo, baseForModalDiff, isAiSuggestionModalOpen, modalManager.closeAiSuggestionModal, setPendingAiSuggestion]);
+  }, [techTreeData, pendingAiSuggestion, previousTreeStateForUndo, baseForModalDiff, isAiSuggestionModalOpen, closeAiSuggestionModal, setPendingAiSuggestion, setModificationPrompt]);
 
 
   // --- Event Handlers & Callbacks ---

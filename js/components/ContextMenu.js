@@ -1,11 +1,6 @@
 
 import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react';
-
-const NODE_IMPORTANCE_OPTIONS = [
-    { value: 'minor', label: 'Minor' },
-    { value: 'common', label: 'Common' },
-    { value: 'major', label: 'Major' },
-];
+import { NODE_IMPORTANCE_OPTIONS } from '../constants.js';
 
 const ContextMenu = ({
   isOpen, position, node, onClose, onToggleLock, onChangeImportance, onEditName, onAddChild,

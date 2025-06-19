@@ -1,12 +1,7 @@
 import React, { useEffect, useRef, useMemo, useCallback } from 'react';
 import { linkRadial, select } from 'd3';
 import { useD3Tree } from '../hooks/useD3Tree.js';
-
-const NODE_IMPORTANCE_RUNES = {
-  minor: '🌱',
-  common: '🌿',
-  major: '🌳',
-};
+import { NODE_IMPORTANCE_RUNES } from '../constants.js';
 
 const GraphViewComponent = ({
   treeData,
@@ -22,6 +17,8 @@ const GraphViewComponent = ({
   onNavigateToLinkedProject,
   handleNavigateToSourceNode
 }) => {
+
+
   const svgContainerDivRef = useRef(null); 
   const svgRef = useRef(null); 
   
@@ -62,7 +59,7 @@ const GraphViewComponent = ({
                         name: createAcronym(targetProject.name),
                         fullName: targetProject.name,
                         id: `proxy-data-${targetProject.id}`, importance: 'common',
-                        isOutgoingLink: true, realProjectId: targetProject.id, realNodeId: targetProject.treeData.id,
+                        isOutgoingLink: true, realProjectId: targetProject.id, realNodeId: targetProject.treeData?.id,
                     },
                     parent: node
                 };
@@ -150,14 +147,14 @@ const GraphViewComponent = ({
     const nodeId = d.data.id;
     if (nodeId) {
         let linkSourceInfo = null;
-        if (nodeId === treeData.id && activeProjectId) { 
+        if (treeData && nodeId === treeData.id && activeProjectId) { 
             linkSourceInfo = findLinkSource(activeProjectId, projects);
         }
         onOpenContextMenu(nodeId, { x: event.clientX, y: event.clientY }, linkSourceInfo);
     } else {
         console.warn("Node ID not found on D3GraphNode data in context menu handler", d);
     }
-  }, [isAppBusy, onOpenContextMenu, treeData.id, activeProjectId, projects, findLinkSource]);
+  }, [isAppBusy, onOpenContextMenu, treeData, activeProjectId, projects, findLinkSource]);
 
   // Effect for drawing the main graph structure
   useEffect(() => {

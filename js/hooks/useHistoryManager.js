@@ -1,5 +1,5 @@
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useMemo } from 'react';
 import { generateUUID } from '../utils.js';
 import { APP_STORAGE_KEYS } from '../constants.js';
 
@@ -43,5 +43,7 @@ export const useHistoryManager = () => {
     setHistory([]);
   }, []);
 
-  return { history, addHistoryEntry, clearHistory };
+  return useMemo(() => ({
+    history, addHistoryEntry, clearHistory
+  }), [history, addHistoryEntry, clearHistory]);
 };

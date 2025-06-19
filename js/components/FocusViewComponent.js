@@ -29,7 +29,7 @@ const FocusViewComponent = ({
     return nodeMap.get(selectedNodeInPanelId) || focusNodeData;
   }, [nodeMap, selectedNodeInPanelId, focusNodeData]);
 
-  const isFocusNodeRoot = focusNodeData?.id === treeData.id;
+  const isFocusNodeRoot = focusNodeData?.id === treeData?.id;
   const incomingLinkInfoForFocusNode = useMemo(() => {
     if (isFocusNodeRoot && activeProjectId) {
       return findLinkSource(activeProjectId, projects);
@@ -67,9 +67,9 @@ const FocusViewComponent = ({
   const handleNodeContextMenu = useCallback((event, nodeId) => {
     event.preventDefault(); if (isAppBusy) return;
     let linkSourceInfoForContext = null;
-    if (nodeId === treeData.id && activeProjectId) linkSourceInfoForContext = findLinkSource(activeProjectId, projects);
+    if (treeData && nodeId === treeData.id && activeProjectId) linkSourceInfoForContext = findLinkSource(activeProjectId, projects);
     onOpenContextMenu(nodeId, { x: event.clientX, y: event.clientY }, linkSourceInfoForContext);
-  },[isAppBusy, onOpenContextMenu, treeData.id, activeProjectId, projects, findLinkSource]);
+  },[isAppBusy, onOpenContextMenu, treeData, activeProjectId, projects, findLinkSource]);
 
   if (!focusNodeData) {
     return ( React.createElement("div", { className: "focus-view-container", style: {padding: '20px', textAlign: 'center'}}, " Error: Focus node (ID: ", focusNodeId, ") not found. ", React.createElement("button", {onClick: onExitFocusView, style: {marginTop: '10px'}}, "Exit Focus View") ));
@@ -84,8 +84,8 @@ const FocusViewComponent = ({
             onClick: () => handleNodeClick(nodeData.id, type === 'focus'), 
             onContextMenu: (e) => handleNodeContextMenu(e, nodeData.id), 
             isAppBusy: isAppBusy,
-            isRootNode: nodeData.id === treeData.id,
-            linkSourceInfo: nodeData.id === treeData.id ? incomingLinkInfoForFocusNode : null,
+            isRootNode: nodeData.id === treeData?.id,
+            linkSourceInfo: nodeData.id === treeData?.id ? incomingLinkInfoForFocusNode : null,
             style: { position: 'absolute', left: `${pos.x}px`, top: `${pos.y}px`, transform: 'translate(-50%, -50%)' }
         })
     );
@@ -138,8 +138,8 @@ const FocusViewComponent = ({
             onUnlinkProjectFromNode: onUnlinkProjectFromNode,
             onDeleteNode: onDeleteNode,
             onExitFocusView: onExitFocusView,
-            isProjectRoot: nodeForDetailPanel?.id === treeData.id,
-            incomingLinkInfo: nodeForDetailPanel?.id === treeData.id ? incomingLinkInfoForFocusNode : null,
+            isProjectRoot: nodeForDetailPanel?.id === treeData?.id,
+            incomingLinkInfo: nodeForDetailPanel?.id === treeData?.id ? incomingLinkInfoForFocusNode : null,
             handleNavigateToSourceNode: handleNavigateToSourceNode
         })
       )

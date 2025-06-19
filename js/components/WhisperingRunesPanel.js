@@ -1,6 +1,7 @@
 
 import React, { useMemo, useState, useEffect, useRef } from 'react';
 import { findNodeById } from '../utils.js';
+import { NODE_IMPORTANCE_OPTIONS } from '../constants.js';
 
 const WhisperingRunesPanel = ({
   targetNodeId, treeData,
@@ -71,16 +72,18 @@ const WhisperingRunesPanel = ({
   };
 
   const importanceCycle = ['common', 'major', 'minor'];
-  const importanceLabels = {
-    minor: { label: 'Minor', rune: '🌱' },
-    common: { label: 'Common', rune: '🌿' },
-    major: { label: 'Major', rune: '🌳' },
-  };
   const currentImportance = node.importance || 'common';
   const currentImportanceIndex = importanceCycle.indexOf(currentImportance);
   const nextImportanceValue = importanceCycle[(currentImportanceIndex + 1) % importanceCycle.length];
-  const currentImportanceInfo = importanceLabels[currentImportance];
-  const nextImportanceInfo = importanceLabels[nextImportanceValue];
+
+  const currentImportanceInfo = useMemo(() => 
+    NODE_IMPORTANCE_OPTIONS.find(opt => opt.value === currentImportance) || NODE_IMPORTANCE_OPTIONS[1], 
+    [currentImportance]
+  );
+  const nextImportanceInfo = useMemo(() => 
+    NODE_IMPORTANCE_OPTIONS.find(opt => opt.value === nextImportanceValue) || NODE_IMPORTANCE_OPTIONS[1],
+    [nextImportanceValue]
+  );
   const lockIcon = node.isLocked ? (lockButtonFeedback ? '🔓' : '🔒') : (lockButtonFeedback ? '🔒' : '🔓');
 
   return (

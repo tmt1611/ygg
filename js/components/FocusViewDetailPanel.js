@@ -1,12 +1,7 @@
 
 import React from 'react';
 import ContextualHelpTooltip from './ContextualHelpTooltip.js';
-
-const NODE_IMPORTANCE_OPTIONS = [
-    { value: 'minor', label: 'Minor', rune: '🌱' },
-    { value: 'common', label: 'Common', rune: '🌿' },
-    { value: 'major', label: 'Major', rune: '🌳' },
-];
+import { NODE_IMPORTANCE_OPTIONS } from '../constants.js';
 
 const FocusViewDetailPanel = ({
   node,

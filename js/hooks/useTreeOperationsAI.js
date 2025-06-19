@@ -20,7 +20,7 @@ export const useTreeOperationsAI = ({
   setBaseForModalDiff,  
   setIsLoading,
   setIsModifying,
-  setModificationPromptFromHook,
+  setModificationPrompt,
 }) => {
   const { openAiSuggestionModal, closeAiSuggestionModal, openConfirmModal, setPendingAiSuggestion, pendingAiSuggestion } = modalManager;
   const { addHistoryEntry } = historyManager;
@@ -137,19 +137,20 @@ export const useTreeOperationsAI = ({
     const { activeProjectId, handleSaveActiveProject } = projectManager;
     const suggestionToApply = pendingAiSuggestion; 
     if (suggestionToApply) {
+      setPreviousTreeStateForUndo(techTreeData); // Save the state BEFORE applying the suggestion
       setTechTreeData(suggestionToApply);
       addHistoryEntry('AI_MOD_CONFIRMED', 'AI modifications applied to project.', { nodeCount: countNodesInTree(suggestionToApply), projectId: activeProjectId });
-      setModificationPromptFromHook(''); 
+      setModificationPrompt(''); 
       handleSaveActiveProject(false);
     }
     setPendingAiSuggestion(null); 
     setBaseForModalDiff(null);    
-    setPreviousTreeStateForUndo(null); 
+    // Do NOT clear the undo state, so the user can revert this confirmed change.
     closeAiSuggestionModal();
   }, [
-    pendingAiSuggestion, projectManager,
+    pendingAiSuggestion, projectManager, techTreeData,
     closeAiSuggestionModal, addHistoryEntry, 
-    setTechTreeData, setModificationPromptFromHook, setError,
+    setTechTreeData, setModificationPrompt, setError,
     setPendingAiSuggestion, setBaseForModalDiff, setPreviousTreeStateForUndo
   ]);
 

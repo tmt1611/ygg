@@ -11,11 +11,11 @@
     <script type="importmap">
     {
       "imports": {
-        "react": "https://esm.sh/react@^19.1.0",
-        "react-dom/": "https://esm.sh/react-dom@^19.1.0/",
-        "react/": "https://esm.sh/react@^19.1.0/",
+        "react": "https://esm.sh/react@^18.2.0",
+        "react-dom/client": "https://esm.sh/react-dom@^18.2.0/client",
         "@google/generative-ai": "https://esm.sh/@google/generative-ai@^0.14.0",
-        "d3": "https://esm.sh/d3@^7.9.0"
+        "d3": "https://esm.sh/d3@^7.9.0",
+        "uuid": "https://jspm.dev/uuid"
       }
     }
     </script>
@@ -60,6 +60,7 @@
         --warning-bg: #FFF8E1;   
         
         --disabled-bg: #E9ECEF;
+        --disabled-bg-rgb: 233, 236, 239;
         --disabled-text: #6C757D;
         --disabled-border: #CED4DA;
 
@@ -176,6 +177,7 @@
         --warning-bg: #F9A825;    
 
         --disabled-bg: #333333;
+        --disabled-bg-rgb: 51, 51, 51;
         --disabled-text: #6A6A6A;
         --disabled-border: #454545;
 
@@ -265,6 +267,7 @@
         --warning-bg: #FFF3E0;
 
         --disabled-bg: #F5F5F5;
+        --disabled-bg-rgb: 245, 245, 245;
         --disabled-text: #BDBDBD;
         --disabled-border: #E0E0E0;
 
@@ -349,6 +352,7 @@
         --warning-bg: rgba(187, 128, 9, 0.2);    
 
         --disabled-bg: #21262d;
+        --disabled-bg-rgb: 33, 38, 45;
         --disabled-text: #6e7681;
         --disabled-border: #30363d;
 

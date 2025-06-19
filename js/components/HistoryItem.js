@@ -6,7 +6,8 @@ const DYNAMIC_KEYWORDS = Object.values(EVENT_TYPE_INFO).flatMap(info => info.key
 const HIGHLIGHT_REGEX = new RegExp(`"([^"]*)"|\\b(${[...new Set(DYNAMIC_KEYWORDS)].join('|')})\\b`, 'gi');
 
 const escapeHtml = (unsafe) => {
-  return unsafe
+  // Ensure the input is a string before trying to replace characters.
+  return String(unsafe || '')
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")

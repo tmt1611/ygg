@@ -10,8 +10,7 @@ export const useProjectManagement = ({
   currentTechTreeData,
   currentContextText,
   setTechTreeData,
-  setContextText,
-  setInitialPromptFromHook,
+  setInitialPrompt,
   setError,
 }) => {
   const [projects, setProjects] = useState([]);
@@ -23,10 +22,9 @@ export const useProjectManagement = ({
   const resetTreeForNewProjectContext = useCallback(() => {
     viewStates?.commonViewResetLogic(true); 
     setTechTreeData(null);
-    setContextText('');
-    setInitialPromptFromHook('');
+    setInitialPrompt('');
     setActiveProjectId(null);
-  }, [viewStates, setTechTreeData, setContextText, setInitialPromptFromHook]);
+  }, [viewStates, setTechTreeData, setInitialPrompt, setActiveProjectId]);
 
   const saveProjectsToLocalStorage = useCallback(() => {
     if (projects.length > 0) localStorage.setItem(APP_STORAGE_KEYS.PROJECT_COLLECTION, JSON.stringify(projects));
@@ -57,11 +55,10 @@ export const useProjectManagement = ({
     if (projectId === activeProjectId) {
       setTechTreeData(newTreeData);
       if (newName) {
-        setContextText(newName);
-        setInitialPromptFromHook(newName);
+        setInitialPrompt(newName);
       }
     }
-  }, [activeProjectId, setTechTreeData, setContextText, setInitialPromptFromHook]);
+  }, [activeProjectId, setTechTreeData, setInitialPrompt]);
 
   const _loadProjectsFromStorage = useCallback(() => {
     try {
@@ -139,10 +136,10 @@ export const useProjectManagement = ({
     const logId = `startup-project-load-${new Date().toISOString()}`;
 
     const loadProjectState = (project, source) => {
+      viewStates?.commonViewResetLogic(false); // Centralized view reset
       setActiveProjectId(project.isExample ? null : project.id);
       setTechTreeData(initializeNodes(project.treeData));
-      setContextText(project.name);
-      setInitialPromptFromHook(project.name);
+      setInitialPrompt(project.name);
       if (!startupLogged) {
         addHistoryEntry('PROJECT_LOADED', `Loaded project "${project.name}".`, { source, logId, projectId: project.id });
       }
@@ -166,7 +163,6 @@ export const useProjectManagement = ({
         
         const elfExample = allProjects.find(p => p.isExample && p.treeData.id === 'elf-warfare-root-example-v1');
         if (elfExample) {
-            viewStates?.commonViewResetLogic(false);
             loadProjectState(elfExample, 'fallback-example');
             return true;
         }
@@ -176,7 +172,7 @@ export const useProjectManagement = ({
 
     findAndLoadProject();
 
-  }, [setTechTreeData, setContextText, setInitialPromptFromHook, viewStates, addHistoryEntry]);
+  }, [setTechTreeData, setInitialPrompt, viewStates, addHistoryEntry, setActiveProjectId]);
 
 
   const initializeDefaultProjects = useCallback(() => {
@@ -204,8 +200,7 @@ export const useProjectManagement = ({
       viewStates?.commonViewResetLogic(false);
       const initializedTree = initializeNodes(projectToLoad.treeData);
       setTechTreeData(initializedTree);
-      setContextText(projectToLoad.name);
-      setInitialPromptFromHook(projectToLoad.name);
+      setInitialPrompt(projectToLoad.name);
 
       if (projectToLoad.isExample || fromExample) {
         setActiveProjectId(null); 
@@ -217,7 +212,7 @@ export const useProjectManagement = ({
     } else {
       setError(`Project with ID ${projectId} not found.`);
     }
-  }, [projects, viewStates, setTechTreeData, setContextText, setInitialPromptFromHook, addHistoryEntry, setError]);
+  }, [projects, viewStates, setTechTreeData, setInitialPrompt, addHistoryEntry, setError, setActiveProjectId]);
 
   const saveNewProject = useCallback((treeToSave, name, isExample = false) => {
     if (!treeToSave) { setError("No tree data to save as project."); return null; }
@@ -228,12 +223,11 @@ export const useProjectManagement = ({
     setProjects(prev => [...prev, newProject]);
     if (!isExample) {
         setActiveProjectId(newProject.id);
-        setContextText(name); 
-        setInitialPromptFromHook(name);
+        setInitialPrompt(name);
     }
     addHistoryEntry('PROJECT_CREATED', `${isExample ? 'Example p' : 'P'}roject "${name}" saved.`);
     return newProject;
-  }, [addHistoryEntry, setError, setContextText, setInitialPromptFromHook]);
+  }, [addHistoryEntry, setError, setInitialPrompt, setActiveProjectId]);
 
   const internalCreateNewProject = useCallback((name) => {
     resetTreeForNewProjectContext();
@@ -241,8 +235,7 @@ export const useProjectManagement = ({
       id: 'root-empty-' + generateUUID().substring(0,8), name: 'New Project Root', description: 'Start building your tech tree.', importance: 'common'
     });
     setTechTreeData(newEmptyTree); 
-    setContextText(name);
-    setInitialPromptFromHook(name);
+    setInitialPrompt(name);
     
     const savedProject = saveNewProject(newEmptyTree, name, false);
     closeProjectNameModal();
@@ -251,7 +244,7 @@ export const useProjectManagement = ({
         viewStates.setActiveOverlayPanel(null); // Ensure graph view is active
         viewStates.setSelectedGraphNodeId(savedProject.treeData.id); // Select the root node
     }
-  }, [resetTreeForNewProjectContext, setTechTreeData, setContextText, setInitialPromptFromHook, saveNewProject, closeProjectNameModal, viewStates]);
+  }, [resetTreeForNewProjectContext, setTechTreeData, setInitialPrompt, saveNewProject, closeProjectNameModal, viewStates]);
 
   const handleCreateNewProject = useCallback(() => {
     openProjectNameModal({ mode: 'create', onConfirm: internalCreateNewProject });
@@ -305,7 +298,7 @@ export const useProjectManagement = ({
       openProjectNameModal({
         mode: 'create', currentName: currentContextText || "New Project",
         onConfirm: (nameFromModal) => {
-          setContextText(nameFromModal); setInitialPromptFromHook(nameFromModal);
+          setInitialPrompt(nameFromModal);
           const newSavedProject = saveNewProject(currentTechTreeData, nameFromModal, false);
           if (newSavedProject && andDownload) { 
             const filename = `${newSavedProject.name.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.project.json`;
@@ -344,15 +337,15 @@ export const useProjectManagement = ({
         link.click(); document.body.removeChild(link); URL.revokeObjectURL(url);
         addHistoryEntry('TREE_DOWNLOADED', `Project "${updatedProject.name}" downloaded.`);
     }
-  }, [activeProjectId, currentTechTreeData, projects, currentContextText, addHistoryEntry, openProjectNameModal, saveNewProject, closeProjectNameModal, setContextText, setInitialPromptFromHook, setError]);
+  }, [activeProjectId, currentTechTreeData, projects, currentContextText, addHistoryEntry, openProjectNameModal, saveNewProject, closeProjectNameModal, setInitialPrompt, setError]);
 
   const internalRenameProject = useCallback((projectId, newName) => {
     const oldProject = projects.find(p => p.id === projectId);
     setProjects(prevProjects => prevProjects.map(p => p.id === projectId ? { ...p, name: newName, lastModified: new Date().toISOString() } : p));
-    if (activeProjectId === projectId) { setContextText(newName); setInitialPromptFromHook(newName); }
+    if (activeProjectId === projectId) { setInitialPrompt(newName); }
     addHistoryEntry('PROJECT_RENAMED', `Project "${oldProject?.name}" renamed to "${newName}".`);
     closeProjectNameModal();
-  }, [projects, activeProjectId, addHistoryEntry, closeProjectNameModal, setContextText, setInitialPromptFromHook]);
+  }, [projects, activeProjectId, addHistoryEntry, closeProjectNameModal, setInitialPrompt]);
 
   const handleRenameProject = useCallback((projectIdToRename, currentName) => { 
     const projectToRename = projects.find(p => p.id === projectIdToRename && !p.isExample);

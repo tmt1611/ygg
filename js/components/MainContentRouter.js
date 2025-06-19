@@ -82,7 +82,7 @@ const MainContentRouter = ({
         }
       },
         React.createElement(GraphViewComponent, {
-          treeData,
+          treeData: techTreeData,
           activeNodeId: viewStates.selectedGraphNodeId,
           onSelectNode: handleNodeSelectedForInsightsOrActions,
           onSwitchToFocusView: viewStates.handleSwitchToFocusView,

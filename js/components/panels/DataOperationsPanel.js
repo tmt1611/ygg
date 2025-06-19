@@ -43,8 +43,8 @@ const DataOperationsPanel = ({
             title: extractButtonDisabled ? (apiKeyIsSet && currentTreeExists ? "AI is busy or no active project" : currentTreeExists ? "API Key required for summary" : "No active project") : "Extract data from the active project based on selected mode"
           },
             isSummarizing ? (
-              React.createElement("span", { style: { display: 'flex', alignItems: 'center', justifyContent: 'center' }},
-                React.createElement("span", { className: "basic-spinner-animation", style: { display: 'inline-block', width: '1em', height: '1em', border: '2px solid var(--primary-accent-light)', borderLeftColor: 'var(--primary-accent)', borderRadius: '50%', marginRight: '8px' }}),
+              React.createElement("span", { style: { display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }},
+                React.createElement("span", { className: "basic-spinner-animation" }),
                 "Summarizing..."
               )
             ) : 'Extract Data'

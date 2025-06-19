@@ -19,6 +19,7 @@ const OverlayPanelView = ({
   useEffect(() => {
     if (isOpen) {
       const focusTarget = closeButtonRef.current || panelRef.current;
+      // Set focus inside the panel when it opens for accessibility.
       setTimeout(() => focusTarget?.focus(), 50); 
       
       const handleEscape = (event) => {
@@ -27,11 +28,15 @@ const OverlayPanelView = ({
         }
       };
       document.addEventListener('keydown', handleEscape);
-      return () => document.removeEventListener('keydown', handleEscape);
-    } else {
-        if(panelRef.current?.classList.contains('visible')){ 
-             onRestoreFocus();
+
+      // Cleanup function to run when the panel is closing.
+      return () => {
+        document.removeEventListener('keydown', handleEscape);
+        // Restore focus to the element that opened the panel.
+        if (onRestoreFocus) {
+          onRestoreFocus();
         }
+      };
     }
   }, [isOpen, onClosePanel, onRestoreFocus]);
 

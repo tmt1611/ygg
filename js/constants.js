@@ -63,6 +63,18 @@ export const ELF_WARFARE_STRUCTURE_JSON_STRING = `
 }
 `;
 
+export const NODE_IMPORTANCE_OPTIONS = [
+    { value: 'minor', label: 'Minor', rune: '🌱' },
+    { value: 'common', label: 'Common', rune: '🌿' },
+    { value: 'major', label: 'Major', rune: '🌳' },
+];
+
+// Derived map for direct lookup, avoiding duplication.
+export const NODE_IMPORTANCE_RUNES = NODE_IMPORTANCE_OPTIONS.reduce((acc, { value, rune }) => {
+    acc[value] = rune;
+    return acc;
+}, {});
+
 export const EVENT_TYPE_INFO = {
     // AI
     'TREE_INIT_AI': { icon: '🧠', color: 'var(--primary-accent)', isKey: true, keywords: ['generated'] },
