@@ -147,14 +147,14 @@ const GraphViewComponent = ({
     const nodeId = d.data.id;
     if (nodeId) {
         let linkSourceInfo = null;
-        if (nodeId === treeData.id && activeProjectId) { 
+        if (treeData && nodeId === treeData.id && activeProjectId) { 
             linkSourceInfo = findLinkSource(activeProjectId, projects);
         }
         onOpenContextMenu(nodeId, { x: event.clientX, y: event.clientY }, linkSourceInfo);
     } else {
         console.warn("Node ID not found on D3GraphNode data in context menu handler", d);
     }
-  }, [isAppBusy, onOpenContextMenu, treeData.id, activeProjectId, projects, findLinkSource]);
+  }, [isAppBusy, onOpenContextMenu, treeData, activeProjectId, projects, findLinkSource]);
 
   // Effect for drawing the main graph structure
   useEffect(() => {
