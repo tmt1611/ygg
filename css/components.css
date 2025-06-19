@@ -884,6 +884,42 @@ html[data-theme='sol'] .panel-header-icon { color: var(--primary-accent-dark); f
 .focus-view-detail-panel .focus-view-info-block .info-block-description i {
     opacity: 0.6;
 }
+.focus-view-detail-panel .focus-view-info-block {
+    background: rgba(0,0,0,0.2);
+    padding: 10px 12px;
+    border-radius: var(--border-radius);
+    border-left: 3px solid var(--focus-connector-stroke);
+    margin-bottom: 15px;
+}
+.focus-view-detail-panel .focus-view-info-block label {
+    display: block;
+    margin-bottom: 2px;
+    font-weight: 500;
+    font-size: 0.8em;
+    color: var(--focus-connector-stroke);
+    text-transform: uppercase;
+    opacity: 0.9;
+}
+.focus-view-detail-panel .focus-view-info-block .info-block-name {
+    font-size: 1.1em;
+    font-weight: bold;
+    margin: 2px 0 10px 0;
+    color: var(--focus-panel-text);
+}
+.focus-view-detail-panel .focus-view-info-block .info-block-description {
+    font-size: 0.9em;
+    margin: 2px 0 0 0;
+    white-space: pre-wrap;
+    word-break: break-word;
+    max-height: 120px;
+    overflow-y: auto;
+    line-height: 1.4;
+    color: var(--focus-panel-text);
+    opacity: 0.9;
+}
+.focus-view-detail-panel .focus-view-info-block .info-block-description i {
+    opacity: 0.6;
+}
 .focus-view-detail-panel .form-group input[type="text"],
 .focus-view-detail-panel .form-group textarea,
 .focus-view-detail-panel .form-group select {
@@ -1354,267 +1390,6 @@ html[data-theme='light'] .ai-insights-list-item-name, html[data-theme='sol'] .ai
 mark.search-highlight { background-color: var(--warning-bg); color: var(--text-primary); font-weight: 600; padding: 1px 0; }
 
 
-.workspace-tab-container { padding: 12px; background-color: var(--app-bg); height: 100%; overflow-y: auto; } 
-.workspace-content-area { flex-grow: 1; overflow-y: auto; }
-.workspace-tab-container .panel {
-  border: 1px solid var(--border-color);
-  border-radius: var(--border-radius-lg);
-  background-color: var(--panel-bg);
-  overflow: hidden;
-  transition: background-color 0.2s ease, border-color 0.2s;
-}
-.workspace-tab-container .panel:not(.collapsed):hover {
-    border-color: var(--border-color-strong);
-}
-.workspace-tab-container .collapsible-panel-header {
-  padding: 10px 15px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  user-select: none;
-  transition: background-color 0.2s ease;
-  border-bottom: 1px solid var(--border-color);
-}
-.workspace-tab-container .panel.collapsed .collapsible-panel-header {
-    border-bottom-color: transparent;
-}
-.workspace-tab-container .collapsible-panel-header:hover {
-  background-color: var(--panel-alt-bg);
-}
-.workspace-tab-container .collapsible-panel-header h3 {
-  padding: 0;
-  margin: 0;
-  font-size: 1.1em;
-  font-weight: 600;
-  color: var(--text-primary);
-  flex-grow: 1;
-}
-.workspace-tab-container .panel-header-icon {
-  color: var(--primary-accent);
-  margin-right: 0;
-  font-size: 1.2em;
-}
-html[data-theme='dark'] .workspace-tab-container .panel-header-icon {
-    color: var(--primary-accent-light);
-}
-.workspace-tab-container .panel-toggle-button {
-  color: var(--text-secondary);
-  transition: transform 0.2s ease-out;
-  padding: 0;
-  font-size: 1.2em;
-  background: none;
-  border: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 24px;
-  height: 24px;
-}
-.workspace-tab-container .panel-toggle-button.collapsed {
-  transform: rotate(-90deg);
-}
-.workspace-tab-container .panel-content-wrapper {
-  padding: 15px 20px;
-}
-.workspace-tab-container .panel-content-wrapper.collapsed {
-  display: none;
-}
-.workspace-tab-container .panel {
-  border: 1px solid var(--border-color);
-  border-radius: var(--border-radius-lg);
-  background-color: var(--panel-bg);
-  overflow: hidden;
-  transition: background-color 0.2s ease, border-color 0.2s;
-}
-.workspace-tab-container .panel:not(.collapsed):hover {
-    border-color: var(--border-color-strong);
-}
-.workspace-tab-container .collapsible-panel-header {
-  padding: 10px 15px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  user-select: none;
-  transition: background-color 0.2s ease;
-  border-bottom: 1px solid var(--border-color);
-}
-.workspace-tab-container .panel.collapsed .collapsible-panel-header {
-    border-bottom-color: transparent;
-}
-.workspace-tab-container .collapsible-panel-header:hover {
-  background-color: var(--panel-alt-bg);
-}
-.workspace-tab-container .collapsible-panel-header h3 {
-  padding: 0;
-  margin: 0;
-  font-size: 1.1em;
-  font-weight: 600;
-  color: var(--text-primary);
-  flex-grow: 1;
-}
-.workspace-tab-container .panel-header-icon {
-  color: var(--primary-accent);
-  margin-right: 0;
-  font-size: 1.2em;
-}
-html[data-theme='dark'] .workspace-tab-container .panel-header-icon {
-    color: var(--primary-accent-light);
-}
-.workspace-tab-container .panel-toggle-button {
-  color: var(--text-secondary);
-  transition: transform 0.2s ease-out;
-  padding: 0;
-  font-size: 1.2em;
-  background: none;
-  border: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 24px;
-  height: 24px;
-}
-.workspace-tab-container .panel-toggle-button.collapsed {
-  transform: rotate(-90deg);
-}
-.workspace-tab-container .panel-content-wrapper {
-  padding: 15px 20px;
-}
-.workspace-tab-container .panel-content-wrapper.collapsed {
-  display: none;
-}
-/* Collapsible Panels in Sidebar */
-.knowledge-branch-sidebar .panel {
-  border: 1px solid rgba(var(--primary-accent-rgb), 0.25);
-  border-radius: var(--border-radius);
-  background-color: transparent;
-  overflow: hidden; /* Ensures content doesn't spill on collapse animation */
-}
-
-.knowledge-branch-sidebar .collapsible-panel-header {
-  padding: 6px 10px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  user-select: none;
-  transition: background-color 0.2s ease;
-}
-.knowledge-branch-sidebar .collapsible-panel-header:hover {
-  background-color: rgba(var(--primary-accent-rgb), 0.08);
-}
-
-.knowledge-branch-sidebar .collapsible-panel-header h3 {
-  padding: 0;
-  margin: 0;
-  font-size: 1em;
-  font-weight: 500;
-  color: var(--primary-accent-light);
-  flex-grow: 1;
-}
-
-html[data-theme='light'] .knowledge-branch-sidebar .collapsible-panel-header h3,
-html[data-theme='sol'] .knowledge-branch-sidebar .collapsible-panel-header h3 {
-  color: var(--primary-accent-dark);
-}
-
-.knowledge-branch-sidebar .panel-header-icon {
-  color: var(--primary-accent-light);
-  margin-right: 0; /* Override default */
-  font-size: 1.1em;
-}
-
-html[data-theme='light'] .knowledge-branch-sidebar .panel-header-icon,
-html[data-theme='sol'] .knowledge-branch-sidebar .panel-header-icon {
-  color: var(--primary-accent-dark);
-}
-
-.knowledge-branch-sidebar .panel-header-actions {
-  margin-left: 0; /* Override default */
-  flex-shrink: 0;
-}
-
-.knowledge-branch-sidebar .panel-toggle-button {
-  color: var(--primary-accent-light);
-  transition: transform 0.2s ease-out;
-  width: 18px;
-  height: 18px;
-  padding: 0;
-  background: none;
-  border: none;
-  box-shadow: none;
-  cursor: pointer;
-}
-
-html[data-theme='light'] .knowledge-branch-sidebar .panel-toggle-button,
-html[data-theme='sol'] .knowledge-branch-sidebar .panel-toggle-button {
-    color: var(--primary-accent-dark);
-}
-
-.knowledge-branch-sidebar .panel-toggle-button.collapsed {
-  transform: rotate(-90deg);
-}
-
-.knowledge-branch-sidebar .panel-content-wrapper {
-  padding: 0 10px 10px 10px;
-}
-.knowledge-branch-sidebar .panel-content-wrapper.collapsed {
-  display: none;
-}
-.project-list { list-style: none; padding: 0; margin: 0; }
-.project-list-item { display: flex; justify-content: space-between; align-items: center; padding: 8px; border-bottom: 1px solid var(--border-color); transition: background-color 0.15s; } 
-.project-list-item:last-child { border-bottom: none; }
-.project-list-item:hover { background-color: var(--panel-alt-bg); }
-.project-list-item.active { background-color: var(--primary-accent-hover-bg); border-left: 3px solid var(--primary-accent); padding-left: 5px; } 
-.project-info { display: flex; flex-direction: column; flex-grow: 1; cursor: pointer; }
-.project-name { font-weight: 500; font-size: 1em; color: var(--text-primary); } 
-.project-list-item.active .project-name { color: var(--primary-accent-dark); }
-.project-last-modified { font-size: 0.75em; color: var(--text-tertiary); } 
-.project-actions { display: flex; gap: 6px; } 
-.project-actions .base-icon-button { font-size: 1.1em; padding: 7px; } 
-.project-actions .delete-action { color: var(--error-color); }
-.project-actions .delete-action:hover { background-color: var(--error-bg); }
-.project-list-item.example-project .project-name { font-style: italic; color: var(--text-secondary); }
-.project-list-item.example-project.active .project-name { color: var(--primary-accent); }
-  
-.project-stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; } 
-.stat-item { 
-  background-color: var(--panel-alt-bg); 
-  padding: 8px 12px; 
-  border-radius: var(--border-radius-lg); 
-  border: 1px solid var(--border-color); 
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  text-align: center;
-  transition: transform 0.2s, box-shadow 0.2s;
-}
-.stat-item:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--box-shadow-md);
-}
-.stat-label { 
-  display: block; 
-  font-size: 0.8em; 
-  font-weight: 500;
-  color: var(--text-secondary); 
-  margin-bottom: 2px; 
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-} 
-.stat-value { 
-  font-size: 1.5em; 
-  font-weight: 700; 
-  color: var(--text-primary); 
-  line-height: 1.1;
-}
-.stat-value.locked { color: var(--warning-color); }
-.stat-value.importance-minor { color: var(--importance-minor-text); }
-.stat-value.importance-common { color: var(--importance-common-text); }
-.stat-value.importance-major { color: var(--importance-major-text); }
-
-
 /* History Log Styles */
 .history-item {
   padding: 6px 4px;
@@ -1668,11 +1443,17 @@ html[data-theme='nebula'] .history-item-summary strong.history-entity {
 
 .history-item-summary strong.history-keyword {
   font-weight: 500;
-  color: var(--primary-accent);
+  color: var(--primary-accent-dark);
+  background-color: rgba(var(--primary-accent-rgb), 0.07);
+  padding: 1px 4px;
+  border-radius: var(--border-radius);
+  border: 1px solid rgba(var(--primary-accent-rgb), 0.1);
 }
 html[data-theme='dark'] .history-item-summary strong.history-keyword,
 html[data-theme='nebula'] .history-item-summary strong.history-keyword {
     color: var(--primary-accent-light);
+    background-color: rgba(var(--primary-accent-rgb), 0.15);
+    border-color: rgba(var(--primary-accent-rgb), 0.2);
     font-weight: 500;
 }
 
