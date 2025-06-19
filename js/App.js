@@ -25,7 +25,7 @@ import { useApiKey } from './hooks/useApiKey.js';
 
 // Services & Utils
 import * as geminiService from './services/geminiService.js';
-import { findNodeById, countNodesInTree, getTreeDepth, getLockedNodeIds, countNodesByImportance } from './utils.js';
+import { findNodeById, countNodesInTree, getTreeDepth, getLockedNodeIds, countNodesByImportance, areAllNodesLocked } from './utils.js';
 
 
 
@@ -219,11 +219,13 @@ const App = () => {
 
   const currentTreeStats = useMemo(() => {
       if (!techTreeData) return null;
+      const totalNodes = countNodesInTree(techTreeData);
       return {
-          totalNodes: techTreeData ? countNodesInTree(techTreeData) : 0,
-          depth: techTreeData ? getTreeDepth(techTreeData) : 0,
-          lockedCount: techTreeData ? getLockedNodeIds(techTreeData).length : 0,
-          importanceCounts: techTreeData ? countNodesByImportance(techTreeData) : {minor:0, common:0, major:0},
+          totalNodes: totalNodes,
+          depth: getTreeDepth(techTreeData),
+          lockedCount: getLockedNodeIds(techTreeData).length,
+          importanceCounts: countNodesByImportance(techTreeData),
+          isAllLocked: totalNodes > 0 ? areAllNodesLocked(techTreeData) : false,
       };
   }, [techTreeData]);
 
