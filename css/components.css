@@ -732,6 +732,32 @@ html[data-theme='sol'] .panel-header-icon { color: var(--primary-accent-dark); f
   margin-right: 4px;
 }
 @keyframes errorAppear { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+
+
+/* Error Message - Compact Inline Style */
+.error-message-wrapper { margin-top: 8px; }
+.error-message-inline {
+  padding: 8px 12px;
+  margin: 1em 0;
+  border-radius: var(--border-radius);
+  background-color: var(--error-bg);
+  border: 1px solid var(--error-color);
+  color: var(--error-color);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9em;
+  font-weight: 500;
+  animation: errorAppear 0.3s ease-out;
+}
+.error-message-inline .error-icon {
+  font-size: 1.2em;
+  line-height: 1;
+}
+.error-message-inline strong {
+  margin-right: 4px;
+}
+@keyframes errorAppear { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
 .api-key-status-message { padding: 7px 10px; margin-top: 8px; border-radius: var(--border-radius); font-size: 0.85em; text-align: center; } /* Reduced padding/font-size */
 .api-key-status-message.success { background-color: var(--success-bg); color: var(--success-color); border: 1px solid var(--success-color); }
 .api-key-status-message.error { background-color: var(--error-bg); color: var(--error-color); border: 1px solid var(--error-color); }
@@ -800,6 +826,33 @@ html[data-theme='sol'] .panel-header-icon { color: var(--primary-accent-dark); f
 .focus-view-connector-line { stroke: var(--focus-connector-stroke); stroke-width: 2px; fill: none; animation: warpPulse 2s linear infinite; stroke-opacity: 0.8; }
 @keyframes warpPulse { 0% { stroke-dasharray: 10 200; stroke-dashoffset: 0; } 50% { stroke-dasharray: 50 160; stroke-dashoffset: -50; } 100% { stroke-dasharray: 10 200; stroke-dashoffset: -210; } }
 #warp-arrow path { fill: var(--focus-connector-stroke); }
+
+.focus-node-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 15px;
+  border-radius: var(--border-radius);
+  background: var(--focus-placeholder-bg);
+  color: var(--focus-placeholder-text);
+  text-align: center;
+  min-width: 150px;
+  font-size: 0.9em;
+  font-style: italic;
+  border: 2px dashed var(--focus-connector-stroke);
+  opacity: 0.7;
+  animation: placeholderPulse 3s ease-in-out infinite alternate;
+}
+@keyframes placeholderPulse {
+  from { opacity: 0.5; transform: scale(0.98); }
+  to { opacity: 0.8; transform: scale(1); }
+}
+.focus-node-placeholder-icon {
+  font-size: 2em;
+  color: var(--focus-connector-stroke);
+}
 
 .focus-node-placeholder {
   display: flex;
@@ -915,6 +968,78 @@ html[data-theme='sol'] .panel-header-icon { color: var(--primary-accent-dark); f
 .focus-view-detail-panel .panel-button-group button.primary:hover { background-color: var(--focus-connector-stroke); filter: brightness(1.1); }
 .focus-view-detail-panel .panel-button-group button.danger { background-color: var(--error-color); color: var(--text-on-accent); border-color: var(--error-color); }
 .focus-view-detail-panel .panel-button-group button.danger:hover { background-color: var(--error-color); filter: brightness(1.1); }
+
+/* Path to Root Display in Focus View Header */
+.path-to-root-display {
+  display: flex;
+  align-items: center;
+  flex-wrap: nowrap; /* Prevent wrapping */
+  gap: 2px 4px;
+  padding: 3px 8px;
+  border-radius: var(--border-radius);
+  background-color: rgba(var(--panel-alt-bg-rgb), 0.6);
+  font-size: 0.8em;
+  color: var(--text-secondary);
+  border: 1px solid var(--border-color);
+  max-width: 100%;
+  overflow-x: auto; /* Allow horizontal scroll on overflow */
+  position: relative;
+  /* Simple scrollbar styling */
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-color) transparent;
+}
+.path-to-root-display::before, .path-to-root-display::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 20px;
+  pointer-events: none;
+  transition: opacity 0.2s;
+}
+.path-to-root-display::before {
+  left: 0;
+  background: linear-gradient(to right, var(--panel-alt-bg), transparent);
+}
+.path-to-root-display::after {
+  right: 0;
+  background: linear-gradient(to left, var(--panel-alt-bg), transparent);
+}
+
+.path-to-root-display.no-scroll-start::before,
+.path-to-root-display.no-scroll-end::after {
+  opacity: 0;
+}
+
+
+.path-to-root-display::-webkit-scrollbar {
+    height: 4px;
+}
+.path-to-root-display::-webkit-scrollbar-track {
+    background: transparent;
+}
+.path-to-root-display::-webkit-scrollbar-thumb {
+    background-color: var(--border-color);
+    border-radius: 2px;
+}
+.path-to-root-display .path-segment {
+  cursor: pointer;
+  padding: 1px 4px;
+  border-radius: var(--border-radius);
+  transition: background-color 0.2s, color 0.2s;
+}
+.path-to-root-display .path-segment:hover {
+  background-color: var(--primary-accent-hover-bg);
+  color: var(--primary-accent-dark);
+}
+.path-to-root-display .path-segment.current-focus-path-node {
+  background-color: var(--primary-accent);
+  color: var(--text-on-accent);
+  font-weight: 600;
+}
+.path-to-root-display .path-separator {
+  opacity: 0.5;
+}
 
 /* Path to Root Display in Focus View Header */
 .path-to-root-display {
@@ -1705,6 +1830,81 @@ html[data-theme='sol'] .panel-variant-sidebar .panel-toggle-button {
   border-right-color: transparent;
   border-radius: 50%;
   vertical-align: middle;
+}
+
+
+/* Error Boundary Styles */
+.error-boundary-container {
+  position: fixed;
+  inset: 0;
+  background-color: var(--app-bg);
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  z-index: 9999;
+  font-family: var(--font-family-sans);
+}
+.error-boundary-content {
+  max-width: 600px;
+  text-align: center;
+  background-color: var(--panel-bg);
+  padding: 30px 40px;
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--box-shadow-lg);
+  border-top: 4px solid var(--error-color);
+}
+.error-boundary-icon {
+  font-size: 3em;
+  line-height: 1;
+  margin-bottom: 15px;
+  color: var(--error-color);
+}
+.error-boundary-title {
+  font-family: var(--font-family-serif-display);
+  font-size: 2em;
+  margin-bottom: 10px;
+  color: var(--error-color);
+}
+.error-boundary-message {
+  font-size: 1.1em;
+  color: var(--text-primary);
+  margin-bottom: 15px;
+}
+.error-boundary-subtext {
+  font-size: 0.9em;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin-bottom: 25px;
+}
+.error-boundary-actions {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-bottom: 20px;
+}
+.error-boundary-details {
+  margin-top: 20px;
+  text-align: left;
+  background-color: var(--panel-alt-bg);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  padding: 10px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+.error-boundary-details summary {
+  cursor: pointer;
+  font-weight: bold;
+  color: var(--text-secondary);
+  margin-bottom: 5px;
+}
+.error-boundary-details pre {
+  white-space: pre-wrap;
+  word-break: break-all;
+  font-size: 0.8em;
+  color: var(--text-tertiary);
 }
 
 
