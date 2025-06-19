@@ -257,16 +257,21 @@ const GraphViewComponent = ({
           // This dy is for the <text> element, it positions the first line.
           return getNodeRadius(d) + 5;
       })
-      .text(d => d.data.name)
+      .text(d => d.isProxy ? d.data.name : null) // Set proxy names, but clear others for tspan wrapping
       .each(function(d) {
         if (d.isProxy || !d.data.name) return;
         
         const text = select(this);
         const name = d.data.name;
-        const maxCharsPerLine = 22;
+        const maxCharsPerLine = Math.floor(getNodeRadius(d) * 1.2 + 4);
         const maxLines = 2;
 
-        if (name.length <= maxCharsPerLine) return; // No wrap needed
+        text.text(null); // Clear previous content to handle updates correctly
+
+        if (name.length <= maxCharsPerLine) {
+          text.text(name); // Set text directly if it doesn't need wrapping
+          return;
+        }
 
         let words = name.split(/\s+/).reverse();
         let word;
@@ -292,10 +297,9 @@ const GraphViewComponent = ({
             lines[maxLines - 1] = lastLine + '...';
         }
         
-        text.text(null); // Clear existing text
-
         lines.forEach((l, i) => {
-            // The first tspan has dy=0, subsequent ones have dy=1.1em to create new lines
+            // The first tspan has dy=0 relative to the parent <text> dy.
+            // Subsequent ones have dy=1.1em to create new lines.
             text.append("tspan")
                 .attr("x", 0)
                 .attr("dy", i === 0 ? 0 : "1.1em")
