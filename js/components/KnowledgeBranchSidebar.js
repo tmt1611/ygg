@@ -124,7 +124,7 @@ const KnowledgeBranchSidebar = (props) => {
               })
             ),
             activeSidebarTab === 'history' && (
-              React.createElement(HistoryViewTabContent, { history: props.history })
+              React.createElement(HistoryViewTabContent, { history: props.history, onClearHistory: props.onClearHistory })
             )
           )
         )

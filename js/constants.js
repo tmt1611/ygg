@@ -105,6 +105,7 @@ export const EVENT_TYPE_INFO = {
     'APP_ERROR_ENCOUNTERED': { icon: '⚠️', color: 'var(--error-color)', isKey: true },
     'THEME_CHANGED': { icon: '🎨', color: 'var(--text-tertiary)', isKey: false },
     'VIEW_CHANGED': { icon: '👁️', color: 'var(--text-tertiary)', isKey: false },
+    'HISTORY_CLEARED': { icon: '🧹', color: 'var(--text-tertiary)', isKey: false },
 
     // Default
     'default': { icon: '🔹', color: 'var(--text-tertiary)', isKey: false }

@@ -4,7 +4,7 @@ import { EVENT_TYPE_INFO } from '../../constants.js';
 
 const KEY_EVENT_TYPES = Object.keys(EVENT_TYPE_INFO).filter(key => EVENT_TYPE_INFO[key].isKey);
 
-const HistoryViewTabContent = ({ history }) => {
+const HistoryViewTabContent = ({ history, onClearHistory }) => {
   const [filterMode, setFilterMode] = useState('key');
   const [searchTerm, setSearchTerm] = useState('');
 
@@ -29,6 +29,13 @@ const HistoryViewTabContent = ({ history }) => {
         React.createElement("h3", { style: { fontSize: '1.05em' } }, "Action History")
       ),
       React.createElement("div", { className: "history-controls" },
+        React.createElement("button", {
+            onClick: onClearHistory,
+            className: "base-icon-button",
+            title: "Clear all history entries",
+            disabled: history.length === 0,
+            style: { padding: '4px' }
+        }, '🧹'),
         React.createElement("input", {
           type: "search",
           placeholder: `Search ${filteredHistory.length} events...`,
@@ -62,7 +69,9 @@ const HistoryViewTabContent = ({ history }) => {
         ) : (
           React.createElement("div", { className: "placeholder-center-content", style: { minHeight: '100px', padding: '10px' }},
             React.createElement("span", { className: "placeholder-icon", style: {fontSize: '2em', marginBottom: '8px'}}, "📜"),
-            React.createElement("p", { style: { color: 'var(--text-tertiary)', fontSize: '0.9em' }}, "No matching actions found.")
+            history.length > 0 ? 
+                React.createElement("p", { style: { color: 'var(--text-tertiary)', fontSize: '0.9em' }}, "No actions match your search.") :
+                React.createElement("p", { style: { color: 'var(--text-tertiary)', fontSize: '0.9em' }}, "No actions recorded yet.")
           )
         )
       )

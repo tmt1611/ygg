@@ -1,6 +1,0 @@
-
-/* This file can be used for global styles or theme overrides not covered by CSS variables. */
-body {
-    /* Ensures a default background if others fail, though index.html already sets this. */
-    background-color: var(--app-bg); 
-}

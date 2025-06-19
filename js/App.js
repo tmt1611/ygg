@@ -53,7 +53,7 @@ const App = () => {
 
   // --- HOOKS ---
   const historyManager = useHistoryManager();
-  const { addHistoryEntry } = historyManager;
+  const { addHistoryEntry, clearHistory } = historyManager;
 
   const appThemeAndLayout = useAppThemeAndLayout(addHistoryEntry);
   const {
@@ -203,6 +203,21 @@ const App = () => {
     return initialPrompt || "Unsaved Project";
   }, [activeProjectId, projects, initialPrompt]);
 
+  const handleClearHistoryWithConfirmation = useCallback(() => {
+    modalManager.openConfirmModal({
+        title: "Clear History?",
+        message: "This will permanently delete all history entries for this session. This action cannot be undone.",
+        confirmText: "Clear History",
+        confirmButtonStyle: 'danger',
+        onConfirm: () => {
+            clearHistory();
+            addHistoryEntry('HISTORY_CLEARED', 'History log cleared by user.');
+            modalManager.closeConfirmModal();
+        },
+        onCancel: modalManager.closeConfirmModal,
+    });
+  }, [modalManager, clearHistory, addHistoryEntry]);
+
   const handleGenerateStrategicSuggestions = useCallback(async () => {
     if (!apiKeyHook.status.isSet || !initialPrompt.trim()) {
       setStrategicSuggestionsError("API Key must be set and project context (initial prompt) must be provided.");
@@ -289,6 +304,7 @@ const App = () => {
           onAddSuggestedChildFromInsight: (name, desc) => aiInsightsHook.handleAddSuggestedChildFromInsight(selectedNodeForInsights.id, name, desc),
           // History Tab Props
           history: historyManager.history,
+          onClearHistory: handleClearHistoryWithConfirmation,
           // Common Props
           apiKeyIsSet: apiKeyHook.status.isSet,
           hasTechTreeData: !!techTreeData,
