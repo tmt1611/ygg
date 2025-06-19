@@ -770,6 +770,32 @@ html[data-theme='dark'] .graph-view-node:not(.proxy) text.node-label tspan,
 html[data-theme='nebula'] .graph-view-node:not(.proxy) text.node-label tspan {
   stroke-width: 8px;
 }
+.graph-view-node:not(.proxy) text.node-label {
+  /* Create a "cutout" effect for readability over lines */
+  paint-order: stroke;
+  stroke: var(--app-bg);
+  stroke-width: 6px; /* Adjust thickness of the "cutout" */
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  text-shadow: 0 0 5px var(--app-bg); /* Soften the edges a bit */
+  font-weight: 500;
+}
+.graph-view-node:not(.proxy) text.node-label tspan {
+  paint-order: stroke;
+  stroke: var(--app-bg);
+  stroke-width: 6px;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+html[data-theme='dark'] .graph-view-node:not(.proxy) text.node-label,
+html[data-theme='nebula'] .graph-view-node:not(.proxy) text.node-label {
+  stroke-width: 8px;
+  text-shadow: 0 0 8px var(--app-bg), 0 0 12px rgba(var(--primary-accent-rgb), 0.3);
+}
+html[data-theme='dark'] .graph-view-node:not(.proxy) text.node-label tspan,
+html[data-theme='nebula'] .graph-view-node:not(.proxy) text.node-label tspan {
+  stroke-width: 8px;
+}
 
 .graph-view-link { stroke: var(--graph-link-stroke-ecosystem); stroke-linecap: round; }
 .graph-view-project-link { stroke: var(--primary-accent); stroke-linecap: round; }
@@ -1450,6 +1476,80 @@ html[data-theme='sol'] .panel-variant-sidebar .panel-toggle-button {
   color: var(--text-tertiary);
   font-size: 0.9em;
   user-select: none;
+}
+
+
+/* Error Boundary */
+.error-boundary-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  width: 100vw;
+  padding: 20px;
+  background-color: var(--app-bg);
+  color: var(--text-primary);
+}
+.error-boundary-content {
+  max-width: 650px;
+  text-align: center;
+  background-color: var(--panel-bg);
+  padding: 30px 40px;
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--box-shadow-lg);
+  border-top: 4px solid var(--error-color);
+}
+.error-boundary-icon {
+  font-size: 3.5em;
+  line-height: 1;
+  margin-bottom: 15px;
+  color: var(--error-color);
+  animation: errorAppear 0.5s ease-out;
+}
+@keyframes errorAppear { from { transform: scale(0.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+.error-boundary-title {
+  font-family: var(--font-family-serif-display);
+  font-size: 2em;
+  margin-bottom: 10px;
+}
+.error-boundary-message {
+  font-size: 1.1em;
+  color: var(--text-secondary);
+  margin-bottom: 20px;
+}
+.error-boundary-subtext {
+  font-size: 0.9em;
+  color: var(--text-tertiary);
+  margin-bottom: 25px;
+  line-height: 1.5;
+}
+.error-boundary-actions {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.error-boundary-details {
+  margin-top: 25px;
+  text-align: left;
+  background-color: var(--panel-alt-bg);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  padding: 10px;
+}
+.error-boundary-details summary {
+  cursor: pointer;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+.error-boundary-details pre {
+  margin-top: 10px;
+  white-space: pre-wrap;
+  word-break: break-all;
+  font-size: 0.8em;
+  color: var(--text-tertiary);
+  max-height: 150px;
+  overflow-y: auto;
 }
 
 
