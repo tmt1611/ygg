@@ -231,23 +231,25 @@ const GraphViewComponent = ({
     });
 
     nodeGroups.select(".node-label")
-      .text(d => d.data.name)
-      .attr("fill", d => d.isProxy ? null : "var(--graph-node-text)")
-      .attr("transform", d => {
-          if (d.isProxy) return null;
-          const angle = d.x * 180 / Math.PI;
-          const rotate = angle > 90 && angle < 270 ? angle + 180 : angle;
-          return `rotate(${rotate})`;
+      .text(d => {
+        if (d.isProxy) return d.data.name;
+        // Truncate long names for better readability in graph view. Full name is on hover (via <title>).
+        return d.data.name.length > 25 ? d.data.name.substring(0, 22) + '...' : d.data.name;
       })
+      .attr("fill", d => d.isProxy ? null : "var(--graph-node-text)")
+      .attr("transform", null) // Keep text horizontal
       .attr("x", d => {
         if (d.isProxy) return 0;
         const angle = d.x * 180 / Math.PI;
-        return (angle > 90 && angle < 270) ? -(nodeRadius + 5) : (nodeRadius + 5);
+        // Check if node is on the left-ish side of circle
+        const isLeft = angle > 90 && angle < 270;
+        return isLeft ? -(nodeRadius + 5) : (nodeRadius + 5);
       })
       .attr("text-anchor", d => {
         if (d.isProxy) return "middle";
         const angle = d.x * 180 / Math.PI;
-        return (angle > 90 && angle < 270) ? "end" : "start";
+        const isLeft = angle > 90 && angle < 270;
+        return isLeft ? "end" : "start";
       });
 
     nodeGroups.select(".node-rune-icon")
