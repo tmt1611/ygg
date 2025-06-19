@@ -66,7 +66,7 @@ const App = () => {
   const modalManager = useModalManager();
   const {
     pendingAiSuggestion, isAiSuggestionModalOpen,
-    setPendingAiSuggestion 
+    setPendingAiSuggestion, closeAiSuggestionModal
   } = modalManager;
 
   const viewStates = useViewStates({
@@ -124,9 +124,9 @@ const App = () => {
         setPreviousTreeStateForUndo(null);
         setBaseForModalDiff(null);
         setModificationPrompt(''); 
-        if (isAiSuggestionModalOpen) modalManager.closeAiSuggestionModal();
+        if (isAiSuggestionModalOpen) closeAiSuggestionModal();
     }
-  }, [techTreeData, pendingAiSuggestion, previousTreeStateForUndo, baseForModalDiff, isAiSuggestionModalOpen, modalManager.closeAiSuggestionModal, setPendingAiSuggestion, setModificationPrompt]);
+  }, [techTreeData, pendingAiSuggestion, previousTreeStateForUndo, baseForModalDiff, isAiSuggestionModalOpen, closeAiSuggestionModal, setPendingAiSuggestion, setModificationPrompt]);
 
 
   // --- Event Handlers & Callbacks ---
