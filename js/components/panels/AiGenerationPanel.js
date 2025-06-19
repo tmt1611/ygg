@@ -11,8 +11,7 @@ const AiGenerationPanel = ({
   apiKeyIsSet
 }) => {
   return (
-    React.createElement("fieldset", null,
-      React.createElement("legend", null, "AI Structure Generation / Context ", React.createElement(ContextualHelpTooltip, { helpText: "Describe the main topic or overall context for your tech tree. The AI will use this to generate an initial structure or regenerate the structure for the active project. If no project is active, a new one will be created using this context as its name." })),
+    React.createElement("div", null,
       React.createElement("label", { htmlFor: "techTreeContextPrompt", style: {marginBottom: '5px'}}, "Project Context / AI Topic:"),
       React.createElement("textarea", { id: "techTreeContextPrompt", style: { width: '100%', minHeight: '100px', resize: 'vertical', marginBottom: '10px' },
         placeholder: "e.g., 'Machine Learning Fundamentals', 'Game Development Pipeline', 'Sustainable Energy Sources'",

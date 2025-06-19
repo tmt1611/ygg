@@ -16,9 +16,7 @@ const ProjectOverviewPanel = ({
   const showStats = !!stats;
 
   return (
-    React.createElement("div", { className: "panel", style: {display: 'flex', flexDirection: 'column', gap: '20px'} },
-      React.createElement("fieldset", null,
-        React.createElement("legend", null, "Project Statistics"),
+    React.createElement("div", null,
         showStats ? (
           React.createElement(React.Fragment, null,
             React.createElement("div", { style: {display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px'}},
@@ -49,7 +47,6 @@ const ProjectOverviewPanel = ({
             "Load or create a project to view its statistics."
           )
         )
-      )
     )
   );
 };

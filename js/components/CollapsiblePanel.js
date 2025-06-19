@@ -31,8 +31,10 @@ const CollapsiblePanel = ({
     }
   };
 
+  const panelClasses = `panel ${isCollapsed ? 'collapsed' : ''}`;
+
   return (
-    React.createElement("div", { className: "panel" },
+    React.createElement("div", { className: panelClasses },
       React.createElement("div", {
         className: "collapsible-panel-header",
         onClick: handleHeaderClick,
@@ -48,7 +50,7 @@ const CollapsiblePanel = ({
         React.createElement("div", { className: "panel-header-actions" },
             headerActions,
             React.createElement("button", {
-              className: `panel-toggle-button base-icon-button ${isCollapsed ? 'collapsed' : ''}`,
+              className: `panel-toggle-button ${isCollapsed ? 'collapsed' : ''}`,
               "aria-label": `${isCollapsed ? 'Expand' : 'Collapse'} ${title}`,
             },
               React.createElement("svg", { viewBox: "0 0 24 24", fill: "currentColor", width: "1em", height: "1em", style: { display: 'block', pointerEvents: 'none' } },

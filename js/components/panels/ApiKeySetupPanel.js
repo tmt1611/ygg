@@ -14,8 +14,7 @@ const ApiKeySetupPanel = ({ apiKeyHook, controlsDisabled }) => {
   } = apiKeyHook;
 
   return (
-    React.createElement("fieldset", null,
-      React.createElement("legend", null, "Gemini API Key Setup ", React.createElement(ContextualHelpTooltip, { helpText: "Your Google Gemini API Key is required for all AI features. It's stored in memory for the current session only and not saved persistently in the browser. Get your key from Google AI Studio." })),
+    React.createElement("div", null,
       React.createElement("div", { style: { display: 'flex', flexDirection: 'column', gap: '8px' }},
         (["environment", "pasted"]).map(mode => ( 
           React.createElement("label", { key: mode, style: { display: 'flex', alignItems: 'center', cursor: (isApiKeyProcessing || controlsDisabled) ? 'not-allowed' : 'pointer', padding: '5px 0' }},

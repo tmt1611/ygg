@@ -14,8 +14,7 @@ const DataOperationsPanel = ({
   const extractButtonDisabled = controlsDisabled || !currentTreeExists || (extractionMode === 'summary' && !apiKeyIsSet);
 
   return (
-    React.createElement("fieldset", null,
-      React.createElement("legend", null, "Data Operations for Active Project ", React.createElement(ContextualHelpTooltip, { helpText: "These operations apply to the currently active project. 'Save & Download' saves the project and downloads its .project.json file. 'Extract Data' can output the tree as raw text or generate an AI summary (requires API key)." })),
+    React.createElement("div", null,
       React.createElement("div", { style: { display: 'flex', flexDirection: 'column', gap: '15px' }},
         React.createElement("button", { onClick: handleDownloadTree, disabled: !currentTreeExists || controlsDisabled, className: "secondary", title: !currentTreeExists ? "No active project or tree data to save/download" : "Save the current state of the active project (or save new if based on example) and download it as a .project.json file" },
           "Save Active Project & Download"
