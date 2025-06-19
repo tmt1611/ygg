@@ -153,10 +153,17 @@ html[data-theme='sol'] .yggdrasil-top-bar-active-project {
 
 .yggdrasil-top-bar-save-button.saved,
 .yggdrasil-top-bar-download-button.saved {
-  background-color: var(--success-color) !important;
-  border-color: var(--success-color) !important;
-  color: var(--button-primary-text) !important;
+  background-color: var(--success-color);
+  border-color: var(--success-color);
+  color: var(--text-on-accent);
   font-weight: bold;
+  transform: none;
+}
+.yggdrasil-top-bar-save-button.saved:hover,
+.yggdrasil-top-bar-download-button.saved:hover {
+  background-color: var(--success-color);
+  border-color: var(--success-color);
+  color: var(--text-on-accent);
 }
 
 
@@ -1567,6 +1574,17 @@ html[data-theme='dark'] .history-item-summary strong.history-entity,
 html[data-theme='nebula'] .history-item-summary strong.history-entity {
     color: var(--secondary-accent);
 }
+
+.history-item-summary strong.history-keyword {
+  font-weight: 500;
+  color: var(--primary-accent);
+}
+html[data-theme='dark'] .history-item-summary strong.history-keyword,
+html[data-theme='nebula'] .history-item-summary strong.history-keyword {
+    color: var(--primary-accent-light);
+    font-weight: 500;
+}
+
 .history-item-time {
   font-size: 0.75em;
   color: var(--text-tertiary);
