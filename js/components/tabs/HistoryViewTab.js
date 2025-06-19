@@ -23,40 +23,40 @@ const HistoryViewTabContent = ({ history, onClearHistory }) => {
   const keyEventsCount = useMemo(() => history.filter(entry => KEY_EVENT_TYPES.includes(entry.type)).length, [history]);
 
   return (
-    React.createElement("div", { style: { display: 'flex', flexDirection: 'column', gap: '10px', height: '100%' }},
-      React.createElement("div", { className: "panel-header", style: { alignItems: 'flex-start' } },
-        React.createElement("span", { className: "panel-header-icon", style: { fontSize: '1.2em', paddingTop: '2px' } }, "📜"),
-        React.createElement("h3", { style: { fontSize: '1.05em' } }, "Action History")
-      ),
-      React.createElement("div", { className: "history-controls" },
-        React.createElement("button", {
-            onClick: onClearHistory,
-            className: "base-icon-button",
-            title: "Clear all history entries",
-            disabled: history.length === 0,
-            style: { padding: '4px' }
-        }, '🧹'),
-        React.createElement("input", {
-          type: "search",
-          placeholder: `Search ${filteredHistory.length} events...`,
-          value: searchTerm,
-          onChange: (e) => setSearchTerm(e.target.value),
-          style: { width: '100%', flexGrow: 1, fontSize: '0.9em' },
-          "aria-label": "Search history log"
-        }),
-        React.createElement("div", { className: "segmented-control", role: "radiogroup", "aria-label": "History Filter" },
+    React.createElement("div", { style: { display: 'flex', flexDirection: 'column', gap: '8px', height: '100%' }},
+      React.createElement("div", { className: "panel-header", style: { alignItems: 'center', gap: '8px', padding: '4px 8px', borderBottom: '1px solid var(--border-color)', marginBottom: 0 } },
+        React.createElement("span", { className: "panel-header-icon", style: { fontSize: '1.2em' } }, "📜"),
+        React.createElement("h3", { style: { fontSize: '1.05em', margin: 0, flexShrink: 0 } }, "Action History"),
+        React.createElement("div", { className: "panel-header-actions", style: { flexGrow: 1, justifyContent: 'flex-end', gap: '8px' } },
+          React.createElement("input", {
+            type: "search",
+            placeholder: `Search ${filteredHistory.length} events...`,
+            value: searchTerm,
+            onChange: (e) => setSearchTerm(e.target.value),
+            style: { width: '100%', maxWidth: '200px', fontSize: '0.85em', padding: '4px 8px' },
+            "aria-label": "Search history log"
+          }),
+          React.createElement("div", { className: "segmented-control", role: "radiogroup", "aria-label": "History Filter" },
+            React.createElement("button", {
+              role: "radio", "aria-checked": filterMode === 'key',
+              className: filterMode === 'key' ? 'active' : '',
+              onClick: () => setFilterMode('key'),
+              title: `Show Key Events Only (${keyEventsCount})`
+            }, "Key"),
+            React.createElement("button", {
+              role: "radio", "aria-checked": filterMode === 'all',
+              className: filterMode === 'all' ? 'active' : '',
+              onClick: () => setFilterMode('all'),
+              title: `Show All Events (${history.length})`
+            }, "All")
+          ),
           React.createElement("button", {
-            role: "radio", "aria-checked": filterMode === 'key',
-            className: filterMode === 'key' ? 'active' : '',
-            onClick: () => setFilterMode('key'),
-            title: `Show Key Events Only (${keyEventsCount})`
-          }, "Key"),
-          React.createElement("button", {
-            role: "radio", "aria-checked": filterMode === 'all',
-            className: filterMode === 'all' ? 'active' : '',
-            onClick: () => setFilterMode('all'),
-            title: `Show All Events (${history.length})`
-          }, "All")
+              onClick: onClearHistory,
+              className: "base-icon-button",
+              title: "Clear all history entries",
+              disabled: history.length === 0,
+              style: { padding: '4px' }
+          }, '🧹')
         )
       ),
       React.createElement("div", { style: { flexGrow: 1, overflowY: 'auto' }},

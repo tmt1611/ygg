@@ -1465,22 +1465,15 @@ html[data-theme='nebula'] .history-item-summary strong.history-keyword {
   padding-top: 3px;
 }
 
-.history-controls {
-    display: flex;
-    gap: 8px;
-    align-items: center;
-    padding: 0 4px 8px 4px;
-    border-bottom: 1px solid var(--border-color);
-    margin-bottom: 5px;
-}
-.history-controls .segmented-control {
+.segmented-control {
     display: flex;
     background-color: var(--button-default-bg);
     border: 1px solid var(--border-color);
     border-radius: var(--border-radius);
     padding: 2px;
+    flex-shrink: 0;
 }
-.history-controls .segmented-control button {
+.segmented-control button {
     border: 1px solid transparent;
     background: none;
     box-shadow: none;
@@ -1488,29 +1481,30 @@ html[data-theme='nebula'] .history-item-summary strong.history-keyword {
     font-size: 0.8em;
     font-weight: 500;
     transition: background-color 0.2s, color 0.2s;
+    cursor: pointer;
 }
-.history-controls .segmented-control button:hover:not(.active) {
+.segmented-control button:hover:not(.active) {
     background: var(--button-default-hover-bg);
     transform: none;
 }
-.history-controls .segmented-control button.active {
+.segmented-control button.active {
     background-color: var(--panel-bg);
     color: var(--primary-accent-dark);
     font-weight: 600;
     box-shadow: var(--box-shadow-sm);
     border-color: var(--border-color);
 }
-html[data-theme='dark'] .history-controls .segmented-control,
-html[data-theme='nebula'] .history-controls .segmented-control {
+html[data-theme='dark'] .segmented-control,
+html[data-theme='nebula'] .segmented-control {
     background-color: var(--button-default-bg);
     border-color: var(--border-color-strong);
 }
-html[data-theme='dark'] .history-controls .segmented-control button:hover:not(.active),
-html[data-theme='nebula'] .history-controls .segmented-control button:hover:not(.active) {
+html[data-theme='dark'] .segmented-control button:hover:not(.active),
+html[data-theme='nebula'] .segmented-control button:hover:not(.active) {
     background: var(--button-default-hover-bg);
 }
-html[data-theme='dark'] .history-controls .segmented-control button.active,
-html[data-theme='nebula'] .history-controls .segmented-control button.active {
+html[data-theme='dark'] .segmented-control button.active,
+html[data-theme='nebula'] .segmented-control button.active {
     background-color: var(--panel-alt-bg);
     color: var(--primary-accent-light);
     border-color: var(--border-color-strong);
@@ -1519,17 +1513,19 @@ html[data-theme='nebula'] .history-controls .segmented-control button.active {
 
 .workspace-tab-container { padding: 12px; background-color: var(--app-bg); height: 100%; overflow-y: auto; } 
 .workspace-content-area { flex-grow: 1; overflow-y: auto; }
-.workspace-tab-container .panel {
+/* Collapsible Panel Variants */
+/* Workspace Variant */
+.panel.panel-variant-workspace {
   border: 1px solid var(--border-color);
   border-radius: var(--border-radius-lg);
   background-color: var(--panel-bg);
   overflow: hidden;
   transition: background-color 0.2s ease, border-color 0.2s;
 }
-.workspace-tab-container .panel:not(.collapsed):hover {
+.panel.panel-variant-workspace:not(.collapsed):hover {
     border-color: var(--border-color-strong);
 }
-.workspace-tab-container .collapsible-panel-header {
+.panel-variant-workspace .collapsible-panel-header {
   padding: 10px 15px;
   cursor: pointer;
   display: flex;
@@ -1539,13 +1535,10 @@ html[data-theme='nebula'] .history-controls .segmented-control button.active {
   transition: background-color 0.2s ease;
   border-bottom: 1px solid var(--border-color);
 }
-.workspace-tab-container .panel.collapsed .collapsible-panel-header {
-    border-bottom-color: transparent;
-}
-.workspace-tab-container .collapsible-panel-header:hover {
+.panel-variant-workspace .collapsible-panel-header:hover {
   background-color: var(--panel-alt-bg);
 }
-.workspace-tab-container .collapsible-panel-header h3 {
+.panel-variant-workspace .collapsible-panel-header h3 {
   padding: 0;
   margin: 0;
   font-size: 1.1em;
@@ -1553,15 +1546,15 @@ html[data-theme='nebula'] .history-controls .segmented-control button.active {
   color: var(--text-primary);
   flex-grow: 1;
 }
-.workspace-tab-container .panel-header-icon {
+.panel-variant-workspace .panel-header-icon {
   color: var(--primary-accent);
   margin-right: 0;
   font-size: 1.2em;
 }
-html[data-theme='dark'] .workspace-tab-container .panel-header-icon {
+html[data-theme='dark'] .panel-variant-workspace .panel-header-icon {
     color: var(--primary-accent-light);
 }
-.workspace-tab-container .panel-toggle-button {
+.panel-variant-workspace .panel-toggle-button {
   color: var(--text-secondary);
   transition: transform 0.2s ease-out;
   padding: 0;
@@ -1574,88 +1567,18 @@ html[data-theme='dark'] .workspace-tab-container .panel-header-icon {
   width: 24px;
   height: 24px;
 }
-.workspace-tab-container .panel-toggle-button.collapsed {
-  transform: rotate(-90deg);
-}
-.workspace-tab-container .panel-content-wrapper {
+.panel-variant-workspace .panel-content-wrapper {
   padding: 15px 20px;
 }
-.workspace-tab-container .panel-content-wrapper.collapsed {
-  display: none;
-}
-.workspace-tab-container .panel {
-  border: 1px solid var(--border-color);
-  border-radius: var(--border-radius-lg);
-  background-color: var(--panel-bg);
-  overflow: hidden;
-  transition: background-color 0.2s ease, border-color 0.2s;
-}
-.workspace-tab-container .panel:not(.collapsed):hover {
-    border-color: var(--border-color-strong);
-}
-.workspace-tab-container .collapsible-panel-header {
-  padding: 10px 15px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  user-select: none;
-  transition: background-color 0.2s ease;
-  border-bottom: 1px solid var(--border-color);
-}
-.workspace-tab-container .panel.collapsed .collapsible-panel-header {
-    border-bottom-color: transparent;
-}
-.workspace-tab-container .collapsible-panel-header:hover {
-  background-color: var(--panel-alt-bg);
-}
-.workspace-tab-container .collapsible-panel-header h3 {
-  padding: 0;
-  margin: 0;
-  font-size: 1.1em;
-  font-weight: 600;
-  color: var(--text-primary);
-  flex-grow: 1;
-}
-.workspace-tab-container .panel-header-icon {
-  color: var(--primary-accent);
-  margin-right: 0;
-  font-size: 1.2em;
-}
-html[data-theme='dark'] .workspace-tab-container .panel-header-icon {
-    color: var(--primary-accent-light);
-}
-.workspace-tab-container .panel-toggle-button {
-  color: var(--text-secondary);
-  transition: transform 0.2s ease-out;
-  padding: 0;
-  font-size: 1.2em;
-  background: none;
-  border: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 24px;
-  height: 24px;
-}
-.workspace-tab-container .panel-toggle-button.collapsed {
-  transform: rotate(-90deg);
-}
-.workspace-tab-container .panel-content-wrapper {
-  padding: 15px 20px;
-}
-.workspace-tab-container .panel-content-wrapper.collapsed {
-  display: none;
-}
-/* Collapsible Panels in Sidebar */
-.knowledge-branch-sidebar .panel {
+
+/* Sidebar Variant */
+.panel.panel-variant-sidebar {
   border: 1px solid rgba(var(--primary-accent-rgb), 0.25);
   border-radius: var(--border-radius);
   background-color: transparent;
-  overflow: hidden; /* Ensures content doesn't spill on collapse animation */
+  overflow: hidden;
 }
-
-.knowledge-branch-sidebar .collapsible-panel-header {
+.panel-variant-sidebar .collapsible-panel-header {
   padding: 6px 10px;
   cursor: pointer;
   display: flex;
@@ -1664,11 +1587,10 @@ html[data-theme='dark'] .workspace-tab-container .panel-header-icon {
   user-select: none;
   transition: background-color 0.2s ease;
 }
-.knowledge-branch-sidebar .collapsible-panel-header:hover {
+.panel-variant-sidebar .collapsible-panel-header:hover {
   background-color: rgba(var(--primary-accent-rgb), 0.08);
 }
-
-.knowledge-branch-sidebar .collapsible-panel-header h3 {
+.panel-variant-sidebar .collapsible-panel-header h3 {
   padding: 0;
   margin: 0;
   font-size: 1em;
@@ -1676,29 +1598,24 @@ html[data-theme='dark'] .workspace-tab-container .panel-header-icon {
   color: var(--primary-accent-light);
   flex-grow: 1;
 }
-
-html[data-theme='light'] .knowledge-branch-sidebar .collapsible-panel-header h3,
-html[data-theme='sol'] .knowledge-branch-sidebar .collapsible-panel-header h3 {
+html[data-theme='light'] .panel-variant-sidebar .collapsible-panel-header h3,
+html[data-theme='sol'] .panel-variant-sidebar .collapsible-panel-header h3 {
   color: var(--primary-accent-dark);
 }
-
-.knowledge-branch-sidebar .panel-header-icon {
+.panel-variant-sidebar .panel-header-icon {
   color: var(--primary-accent-light);
-  margin-right: 0; /* Override default */
+  margin-right: 0;
   font-size: 1.1em;
 }
-
-html[data-theme='light'] .knowledge-branch-sidebar .panel-header-icon,
-html[data-theme='sol'] .knowledge-branch-sidebar .panel-header-icon {
+html[data-theme='light'] .panel-variant-sidebar .panel-header-icon,
+html[data-theme='sol'] .panel-variant-sidebar .panel-header-icon {
   color: var(--primary-accent-dark);
 }
-
-.knowledge-branch-sidebar .panel-header-actions {
-  margin-left: 0; /* Override default */
+.panel-variant-sidebar .panel-header-actions {
+  margin-left: 0;
   flex-shrink: 0;
 }
-
-.knowledge-branch-sidebar .panel-toggle-button {
+.panel-variant-sidebar .panel-toggle-button {
   color: var(--primary-accent-light);
   transition: transform 0.2s ease-out;
   width: 18px;
@@ -1709,20 +1626,22 @@ html[data-theme='sol'] .knowledge-branch-sidebar .panel-header-icon {
   box-shadow: none;
   cursor: pointer;
 }
-
-html[data-theme='light'] .knowledge-branch-sidebar .panel-toggle-button,
-html[data-theme='sol'] .knowledge-branch-sidebar .panel-toggle-button {
+html[data-theme='light'] .panel-variant-sidebar .panel-toggle-button,
+html[data-theme='sol'] .panel-variant-sidebar .panel-toggle-button {
     color: var(--primary-accent-dark);
 }
-
-.knowledge-branch-sidebar .panel-toggle-button.collapsed {
-  transform: rotate(-90deg);
-}
-
-.knowledge-branch-sidebar .panel-content-wrapper {
+.panel-variant-sidebar .panel-content-wrapper {
   padding: 0 10px 10px 10px;
 }
-.knowledge-branch-sidebar .panel-content-wrapper.collapsed {
+
+/* Common Collapsed Styles for Panels */
+.panel.collapsed .collapsible-panel-header {
+    border-bottom-color: transparent;
+}
+.panel .panel-toggle-button.collapsed {
+  transform: rotate(-90deg);
+}
+.panel .panel-content-wrapper.collapsed {
   display: none;
 }
 .project-list { list-style: none; padding: 0; margin: 0; }

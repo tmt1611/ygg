@@ -1,40 +1,30 @@
 import React, { useMemo } from 'react';
 import { EVENT_TYPE_INFO } from '../constants.js';
 
-// Dynamically build a regex from keywords defined in constants for highlighting.
-const DYNAMIC_KEYWORDS = Object.values(EVENT_TYPE_INFO).flatMap(info => info.keywords || []);
-const HIGHLIGHT_REGEX = new RegExp(`"([^"]*)"|\\b(${[...new Set(DYNAMIC_KEYWORDS)].join('|')})\\b`, 'gi');
-
-const escapeHtml = (unsafe) => {
-  // Ensure the input is a string before trying to replace characters.
-  return String(unsafe || '')
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
-};
+const DYNAMIC_KEYWORDS = [...new Set(Object.values(EVENT_TYPE_INFO).flatMap(info => info.keywords || []))];
+const KEYWORD_REGEX_PART = DYNAMIC_KEYWORDS.map(kw => `\\b${kw}\\b`).join('|');
+// This regex will split the string by quoted content and keywords, keeping them in the results.
+const TOKENIZER_REGEX = new RegExp(`(".*?")|(${KEYWORD_REGEX_PART})`, 'gi');
 
 const HistoryItem = ({ entry }) => {
     const { icon, color } = EVENT_TYPE_INFO[entry.type] || EVENT_TYPE_INFO.default;
-
     const title = `Type: ${entry.type}\nTimestamp: ${new Date(entry.timestamp).toLocaleString()}${entry.details ? `\nDetails: ${JSON.stringify(entry.details)}` : ''}`;
 
-    const summaryWithHighlights = useMemo(() => {
-        if (!entry.summary) return '';
+    const summaryElements = useMemo(() => {
+        if (!entry.summary) return null;
+
+        const parts = entry.summary.split(TOKENIZER_REGEX).filter(Boolean);
         
-        // This regex will match quoted strings (as entities) or known keywords.
-        return entry.summary.replace(HIGHLIGHT_REGEX, (match, quotedContent, keyword) => {
-            if (quotedContent !== undefined) {
-                // This is user-provided content inside quotes, so it must be escaped.
-                return `<strong class="history-entity">"${escapeHtml(quotedContent)}"</strong>`;
+        return parts.map((part, index) => {
+            if (part.startsWith('"') && part.endsWith('"')) {
+                return React.createElement("strong", { key: index, className: "history-entity" }, part);
             }
-            if (keyword !== undefined) {
-                // This is a known keyword from our safe list, no need to escape.
-                return `<strong class="history-keyword">${keyword.toLowerCase()}</strong>`;
+            if (DYNAMIC_KEYWORDS.includes(part.toLowerCase())) {
+                return React.createElement("strong", { key: index, className: "history-keyword" }, part.toLowerCase());
             }
-            return match; // Should not happen with this regex, but for safety.
+            return React.createElement(React.Fragment, { key: index }, part);
         });
+
     }, [entry.summary]);
 
     return (
@@ -44,10 +34,7 @@ const HistoryItem = ({ entry }) => {
                 style: { color: color }, 
                 "aria-hidden": "true" 
             }, icon),
-            React.createElement("span", { 
-                className: "history-item-summary", 
-                dangerouslySetInnerHTML: { __html: summaryWithHighlights } 
-            }),
+            React.createElement("span", { className: "history-item-summary" }, summaryElements),
             React.createElement("span", { className: "history-item-time" },
                 new Date(entry.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })
             )

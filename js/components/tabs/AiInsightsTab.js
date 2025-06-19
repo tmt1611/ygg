@@ -2,6 +2,21 @@ import React from 'react';
 import LoadingSpinner from '../LoadingSpinner.js';
 import ErrorMessage from '../ErrorMessage.js';
 
+const InsightListItem = ({ item, onAction, actionIcon, actionTitle, isAppBusy, children }) => (
+  React.createElement("li", null,
+    React.createElement("div", { className: "ai-insights-list-item-content" },
+      React.createElement("span", { className: "ai-insights-list-item-name" }, item.name || item),
+      children
+    ),
+    React.createElement("button", { 
+      onClick: () => onAction(item), 
+      disabled: isAppBusy, 
+      className: "add-child-btn base-icon-button", 
+      title: actionTitle
+    }, actionIcon)
+  )
+);
+
 const AiInsightsTab = ({
   node,
   insightsData,
@@ -15,7 +30,7 @@ const AiInsightsTab = ({
   apiKeyIsSet,
 }) => {
   if (!node) {
-    return React.createElement("p", { style: { textAlign: 'center', color: 'var(--text-secondary)', fontSize: '0.9em', padding: '15px 5px' } }, "Select a node in Graph, List, or Focus view to see Node Insight.");
+    return React.createElement("p", { style: { textAlign: 'center', color: 'var(--text-tertiary)', fontSize: '0.9em', padding: '15px 5px' } }, "Select a node in Graph, List, or Focus view to see Node Insight.");
   }
 
   const fetchButtonDisabled = !node || !apiKeyIsSet || isLoading || isAppBusy;
@@ -60,10 +75,14 @@ const AiInsightsTab = ({
               React.createElement("h4", null, "Alternative Names"),
               React.createElement("ul", { className: "ai-insights-list" },
                 insightsData.alternative_names.map((altName, index) => (
-                  React.createElement("li", { key: `alt-name-${index}` },
-                    React.createElement("span", { className: "ai-insights-list-item-name" }, altName),
-                    React.createElement("button", { onClick: () => onUseAlternativeName(altName), disabled: isAppBusy, className: "add-child-btn base-icon-button", title: `Rename to "${altName}"` }, "🔄")
-                  )
+                  React.createElement(InsightListItem, { 
+                    key: `alt-name-${index}`,
+                    item: altName,
+                    onAction: onUseAlternativeName,
+                    actionIcon: "🔄",
+                    actionTitle: `Rename to "${altName}"`,
+                    isAppBusy: isAppBusy
+                  })
                 ))
               )
             )
@@ -74,12 +93,15 @@ const AiInsightsTab = ({
               React.createElement("h4", null, "Potential Children"),
               React.createElement("ul", { className: "ai-insights-list" },
                 insightsData.potential_children.map((child, index) => (
-                  React.createElement("li", { key: `potential-child-${index}` },
-                    React.createElement("div", { className: "ai-insights-list-item-content" },
-                      React.createElement("span", { className: "ai-insights-list-item-name" }, child.name),
-                      child.description && React.createElement("p", { className: "ai-insights-list-item-desc" }, child.description)
-                    ),
-                    React.createElement("button", { onClick: () => onAddSuggestedChild(child.name, child.description), disabled: isAppBusy, className: "add-child-btn base-icon-button", title: `Add "${child.name}"` }, "➕")
+                  React.createElement(InsightListItem, { 
+                    key: `potential-child-${index}`,
+                    item: child,
+                    onAction: () => onAddSuggestedChild(child.name, child.description),
+                    actionIcon: "➕",
+                    actionTitle: `Add "${child.name}"`,
+                    isAppBusy: isAppBusy
+                  },
+                    child.description && React.createElement("p", { className: "ai-insights-list-item-desc" }, child.description)
                   )
                 ))
               )

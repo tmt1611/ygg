@@ -1,4 +1,3 @@
-
 import React from 'react';
 
 const CollapsiblePanel = ({
@@ -9,6 +8,7 @@ const CollapsiblePanel = ({
   onToggle,
   children,
   headerActions,
+  variant = 'workspace' // 'workspace' or 'sidebar'
 }) => {
 
   const handleHeaderKeyDown = (event) => {
@@ -22,7 +22,7 @@ const CollapsiblePanel = ({
     }
   };
 
-  const panelClasses = `panel ${isCollapsed ? 'collapsed' : ''}`;
+  const panelClasses = `panel panel-variant-${variant} ${isCollapsed ? 'collapsed' : ''}`;
 
   return (
     React.createElement("div", { className: panelClasses },
@@ -38,7 +38,7 @@ const CollapsiblePanel = ({
       },
         icon && React.createElement("span", { className: "panel-header-icon", "aria-hidden": "true" }, icon),
         React.createElement("h3", null, title),
-        React.createElement("div", { 
+        React.createElement("div", {
           className: "panel-header-actions",
           onClick: (e) => e.stopPropagation() // Prevent actions from toggling the panel
         },

@@ -23,6 +23,7 @@ const AiToolsTab = ({
         panelId: 'tree-modifier',
         title: 'Tree Modifier AI',
         icon: '🌳',
+        variant: 'sidebar',
         isCollapsed: collapsedPanels.has('tree-modifier'),
         onToggle: onTogglePanel,
       },
@@ -53,6 +54,7 @@ const AiToolsTab = ({
         panelId: 'strategic-advisor',
         title: 'Strategic Advisor AI',
         icon: '✨',
+        variant: 'sidebar',
         isCollapsed: collapsedPanels.has('strategic-advisor'),
         onToggle: onTogglePanel,
         headerActions: React.createElement(ContextualHelpTooltip, { helpText: "Get AI-powered suggestions for high-level next steps or new development pathways for your project based on its current context and structure." })

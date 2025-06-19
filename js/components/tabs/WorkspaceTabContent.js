@@ -59,7 +59,7 @@ const WorkspaceTabContent = ({
                       "Overview: ", contextText || 'Current Project'
                     ),
                     React.createElement("button", { 
-                        onClick: onToggleAllLock, 
+                        onClick: handleToggleAllLock, 
                         disabled: isAppBusy, 
                         className: "secondary panel-button",
                         style: {padding: '5px 10px', fontSize: '0.9em'},
