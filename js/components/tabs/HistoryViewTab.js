@@ -25,33 +25,33 @@ const HistoryViewTabContent = ({ history }) => {
 
   return (
     React.createElement("div", { style: { display: 'flex', flexDirection: 'column', gap: '10px', height: '100%' }},
-      React.createElement("div", { className: "panel-header" },
-        React.createElement("span", { className: "panel-header-icon", style: { fontSize: '1.2em' } }, "📜"),
-        React.createElement("h3", { style: { fontSize: '1.05em' } }, "Action History"),
-        React.createElement("div", { className: "panel-header-actions", style: { display: 'flex', gap: '4px' }},
-          React.createElement("button", {
-            onClick: () => setFilterMode('all'),
-            className: `base-icon-button ${filterMode === 'all' ? 'active' : ''}`,
-            disabled: filterMode === 'all',
-            title: `Show All Events (${history.length})`
-          }, "All"),
-          React.createElement("button", {
-            onClick: () => setFilterMode('key'),
-            className: `base-icon-button ${filterMode === 'key' ? 'active' : ''}`,
-            disabled: filterMode === 'key',
-            title: `Show Key Events Only (${keyEventsCount})`
-          }, "Key")
-        )
+      React.createElement("div", { className: "panel-header", style: { alignItems: 'flex-start' } },
+        React.createElement("span", { className: "panel-header-icon", style: { fontSize: '1.2em', paddingTop: '2px' } }, "📜"),
+        React.createElement("h3", { style: { fontSize: '1.05em' } }, "Action History")
       ),
-      React.createElement("div", { className: "history-controls", style: { padding: '0 4px 8px 4px', borderBottom: '1px solid var(--border-color)', marginBottom: '5px' } },
+      React.createElement("div", { className: "history-controls" },
         React.createElement("input", {
           type: "search",
           placeholder: `Search ${filteredHistory.length} events...`,
           value: searchTerm,
           onChange: (e) => setSearchTerm(e.target.value),
-          style: { width: '100%', fontSize: '0.9em' },
+          style: { width: '100%', flexGrow: 1, fontSize: '0.9em' },
           "aria-label": "Search history log"
-        })
+        }),
+        React.createElement("div", { className: "segmented-control", role: "radiogroup", "aria-label": "History Filter" },
+          React.createElement("button", {
+            role: "radio", "aria-checked": filterMode === 'key',
+            className: filterMode === 'key' ? 'active' : '',
+            onClick: () => setFilterMode('key'),
+            title: `Show Key Events Only (${keyEventsCount})`
+          }, "Key"),
+          React.createElement("button", {
+            role: "radio", "aria-checked": filterMode === 'all',
+            className: filterMode === 'all' ? 'active' : '',
+            onClick: () => setFilterMode('all'),
+            title: `Show All Events (${history.length})`
+          }, "All")
+        )
       ),
       React.createElement("div", { style: { flexGrow: 1, overflowY: 'auto' }},
         filteredHistory.length > 0 ? (

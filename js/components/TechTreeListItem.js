@@ -114,11 +114,13 @@ const TechTreeListItemComponent = ({
     );
   }, []);
 
-  const handleNodeNameClick = useCallback(() => {
-    if (onSelectListItem) {
+  const handleNodeNameClick = useCallback((e) => {
+    if (e.detail === 2) { // Double click
+      onSwitchToFocusView(node.id);
+    } else if (onSelectListItem) {
       onSelectListItem(node.id);
     }
-  }, [node.id, onSelectListItem]);
+  }, [node.id, onSelectListItem, onSwitchToFocusView]);
 
   const handleContextMenu = useCallback((event) => {
     event.preventDefault();
@@ -169,57 +171,47 @@ const TechTreeListItemComponent = ({
         ),
 
         React.createElement("div", { className: "list-view-actions" },
-           React.createElement("button", { onClick: handleLockToggle, disabled: isAppBusy,
+          node.description && React.createElement("button", { 
+            onClick: handleToggleLocalDescription, disabled: isAppBusy, className: "list-item-action-icon base-icon-button",
+            style: { opacity: isEffectivelyDescriptionVisible ? 1 : 0.5 },
+            "aria-pressed": isEffectivelyDescriptionVisible,
+            "aria-label": isEffectivelyDescriptionVisible ? `Hide description for ${node.name}` : `Show description for ${node.name}`,
+            title: isEffectivelyDescriptionVisible ? `Hide Description` : `Show Description`
+          }, '📄'),
+          React.createElement("button", { onClick: handleLockToggle, disabled: isAppBusy,
             className: `list-item-action-icon base-icon-button ${node.isLocked ? 'locked' : ''}`,
             "aria-pressed": !!node.isLocked,
             "aria-label": node.isLocked ? `Unlock node ${node.name}` : `Lock node ${node.name}`,
             title: node.isLocked ? `Unlock Node` : `Lock Node`},
             node.isLocked ? '🔒' : '🔓'
           ),
-           React.createElement("div", { className: "list-view-importance-select-wrapper" },
-              React.createElement("select", {
-                value: node.importance || 'common',
-                onChange: handleImportanceChange,
-                disabled: isAppBusy,
-                className: `list-view-importance-select importance-${node.importance || 'common'}`,
-                "aria-label": `Importance for ${node.name}`,
-                title: `Current importance: ${currentImportanceObject.rune} ${currentImportanceObject.label}. Click to change.`
-              },
-                RUNE_IMPORTANCE_OPTIONS.map(opt => React.createElement("option", { key: opt.value, value: opt.value }, opt.rune, " ", opt.label))
-              )
-            ),
-           React.createElement("button", { onClick: handleToggleLocalDescription, disabled: isAppBusy || !node.description, className: "list-item-action-icon base-icon-button",
-            "aria-pressed": isEffectivelyDescriptionVisible,
-            "aria-label": isEffectivelyDescriptionVisible ? `Hide description for ${node.name}` : `Show description for ${node.name}`,
-            title: node.description ? (isEffectivelyDescriptionVisible ? `Hide Description` : `Show Description`) : "No description available"},
-            isEffectivelyDescriptionVisible ? '👁️' : '👁️‍🗨️'
-          ),
-          React.createElement("button", { onClick: handleEditNameAndDescriptionClick, disabled: isAppBusy, className: "list-item-action-icon primary-action base-icon-button",
-            "aria-label": `Edit ${node.name}`, title: `Edit Name & Description`},
-            "✏️"
-          ),
-          React.createElement("button", { onClick: handleAddChildClick, disabled: isAppBusy, className: "list-item-action-icon base-icon-button",
-            "aria-label": `Add child to ${node.name}. Hold Shift to add without a prompt.`, title: `Add Child Node (Shift+Click for quick add)`},
-            "✨"
-          ),
-           React.createElement("button", { onClick: handleFocusNodeClick, disabled: isAppBusy, className: "list-item-action-icon primary-action base-icon-button", 
-            "aria-label": `Focus on ${node.name}`, title: `Focus on Node`},
-            "🎯"
-          ),
-          (node.linkedProjectId || incomingLinkSource) && (onNavigateToLinkedProject || handleNavigateToSourceNode) && (
-            React.createElement("button", { onClick: handleGoToLinkedProjectClick, disabled: isAppBusy, className: "list-item-action-icon base-icon-button",
-              "aria-label": incomingLinkSource ? `Go to source: ${incomingLinkSource.sourceProjectName}` : `Go to linked project: ${node.linkedProjectName}`, 
-              title: incomingLinkSource ? `Go to Source: ${incomingLinkSource.sourceProjectName} / ${incomingLinkSource.sourceNodeName}` : `Go to Linked Project: ${node.linkedProjectName || 'Unknown'}`},
-              incomingLinkSource ? '↩️' : '↪️'
-            )
+          React.createElement("button", { 
+            onClick: handleAddChildClick, 
+            disabled: isAppBusy, 
+            className: "list-item-action-icon base-icon-button",
+            "aria-label": `Add child to ${node.name}. Hold Shift to add without a prompt.`, 
+            title: `Add Child Node (Shift+Click for quick add)`
+          }, '➕'),
+          React.createElement("select", {
+            value: node.importance || 'common',
+            onChange: handleImportanceChange,
+            disabled: isAppBusy || node.isLocked,
+            className: `list-view-importance-select importance-${node.importance || 'common'}`,
+            "aria-label": `Importance for ${node.name}`,
+            title: `Importance: ${currentImportanceObject.label}. Right-click for more actions.`,
+            onClick: (e) => e.stopPropagation() // Prevent row selection when clicking select
+          },
+            RUNE_IMPORTANCE_OPTIONS.map(opt => React.createElement("option", { key: opt.value, value: opt.value }, opt.rune, " ", opt.label))
           )
         )
       ),
 
       !isCollapsed && node.description && isEffectivelyDescriptionVisible && (
-        React.createElement("div", { className: "list-view-item-content" },
+        React.createElement("div", { 
+          className: "list-view-item-content", 
+        },
           React.createElement("div", { className: "list-view-description-area" }, 
-            React.createElement("div", { className: "list-view-description" },
+            React.createElement("p", { className: "list-view-description" },
                 getHighlightedText(node.description, searchTerm)
             )
           )

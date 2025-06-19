@@ -888,16 +888,27 @@ html[data-theme='sol'] .contextual-help-icon:hover, html[data-theme='sol'] .cont
 .overlay-panel-view .focus-view-detail-panel .form-group select:focus {
    border-color: var(--focus-connector-stroke); box-shadow: 0 0 0 2px rgba(77, 208, 225, 0.3);
 }
+.overlay-panel-view .focus-view-detail-panel .panel-sub-header {
+    font-size: 0.8em;
+    font-weight: 600;
+    color: var(--focus-connector-stroke);
+    margin-top: 15px;
+    margin-bottom: 6px;
+    padding-bottom: 3px;
+    border-bottom: 1px solid rgba(var(--focus-panel-text), 0.2);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
 .overlay-panel-view .focus-view-detail-panel .panel-button-group button {
   background-color: rgba(255, 255, 255, 0.1);
   border-color: rgba(255, 255, 255, 0.3);
   color: var(--focus-panel-text);
-  padding: 9px 12px; /* Increased padding */
-  font-size: 0.9em;
+  padding: 8px 10px;
+  font-size: 0.85em;
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 8px;
+  justify-content: flex-start;
+  gap: 10px;
 }
 .overlay-panel-view .focus-view-detail-panel .panel-button-group button:hover { background-color: rgba(255,255,255,0.2); }
 .overlay-panel-view .focus-view-detail-panel .panel-button-group button.primary { background-color: var(--focus-connector-stroke); color: var(--focus-stellar-bg); border-color: var(--focus-connector-stroke); }
@@ -1305,21 +1316,33 @@ html[data-theme='light'] .ai-insights-list-item-name, html[data-theme='sol'] .ai
 .list-item-action-icon.primary-action { color: var(--primary-accent); }
 
 .list-view-importance-select-wrapper { width: auto; } /* Make width flexible */
-.list-view-importance-select { font-size: 0.8em; padding: 4px 6px; text-align: left; } /* Keep existing select styles, wrapper change will make it compact */
+.list-view-importance-select { 
+  font-size: 0.8em; 
+  padding: 2px 4px; 
+  text-align: left; 
+  border: 1px solid transparent;
+  background-color: transparent;
+  margin-left: 2px;
+} /* Keep existing select styles, wrapper change will make it compact */
+.list-view-importance-select:hover {
+  border-color: var(--border-color);
+  background-color: var(--button-default-hover-bg);
+}
 
-.list-view-item-content { padding: 0 8px 8px 8px; } 
+.list-view-item-content { padding: 4px 8px 8px 44px; } 
 .list-view-description-area { 
-  padding: 4px 6px; /* Reduced padding */
-  background-color: var(--panel-alt-bg); 
+  padding: 6px 10px; /* Reduced padding */
+  background-color: rgba(var(--panel-alt-bg-rgb), 0.7); 
   border-radius: var(--border-radius); 
   margin-top: 4px; /* Reduced margin */
+  border-left: 2px solid var(--primary-accent-light);
 } 
-.list-view-description { font-size: 0.85em; color: var(--text-secondary); white-space: pre-wrap; word-break: break-word; } 
+.list-view-description { margin: 0; font-size: 0.85em; color: var(--text-secondary); white-space: pre-wrap; word-break: break-word; line-height: 1.4; } 
 .list-view-child-container { 
   list-style: none; 
   padding: 0; 
   margin-top: 0; /* Remove top margin, rely on parent li padding */
-  margin-left: 20px; 
+  margin-left: 36px; /* Align with description indent */
   border-left: 1px solid var(--border-color); /* Thinner border */
 }
 mark.search-highlight { background-color: var(--warning-bg); color: var(--text-primary); font-weight: 600; padding: 1px 0; }
@@ -1589,6 +1612,57 @@ html[data-theme='nebula'] .history-item-summary strong.history-keyword {
   white-space: nowrap;
   flex-shrink: 0;
   padding-top: 3px;
+}
+
+.history-controls {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    padding: 0 4px 8px 4px;
+    border-bottom: 1px solid var(--border-color);
+    margin-bottom: 5px;
+}
+.history-controls .segmented-control {
+    display: flex;
+    background-color: var(--button-default-bg);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    padding: 2px;
+}
+.history-controls .segmented-control button {
+    border: 1px solid transparent;
+    background: none;
+    box-shadow: none;
+    padding: 2px 8px;
+    font-size: 0.8em;
+    font-weight: 500;
+    transition: background-color 0.2s, color 0.2s;
+}
+.history-controls .segmented-control button:hover:not(.active) {
+    background: var(--button-default-hover-bg);
+    transform: none;
+}
+.history-controls .segmented-control button.active {
+    background-color: var(--panel-bg);
+    color: var(--primary-accent-dark);
+    font-weight: 600;
+    box-shadow: var(--box-shadow-sm);
+    border-color: var(--border-color);
+}
+html[data-theme='dark'] .history-controls .segmented-control,
+html[data-theme='nebula'] .history-controls .segmented-control {
+    background-color: var(--button-default-bg);
+    border-color: var(--border-color-strong);
+}
+html[data-theme='dark'] .history-controls .segmented-control button:hover:not(.active),
+html[data-theme='nebula'] .history-controls .segmented-control button:hover:not(.active) {
+    background: var(--button-default-hover-bg);
+}
+html[data-theme='dark'] .history-controls .segmented-control button.active,
+html[data-theme='nebula'] .history-controls .segmented-control button.active {
+    background-color: var(--panel-alt-bg);
+    color: var(--primary-accent-light);
+    border-color: var(--border-color-strong);
 }
 
 
