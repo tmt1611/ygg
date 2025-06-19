@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import AiToolsTab from './tabs/AiToolsTab.js';
 import AiInsightsTab from './tabs/AiInsightsTab.js';
 import HistoryViewTabContent from './tabs/HistoryViewTab.js';
@@ -29,7 +29,21 @@ const KnowledgeBranchSidebar = (props) => {
     return new Set(['strategic-advisor']); // Collapse strategic advisor by default
   });
 
+  const handleTogglePanel = useCallback((panelId) => {
+    setCollapsedPanels(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(panelId)) {
+        newSet.delete(panelId);
+      } else {
+        newSet.add(panelId);
+      }
+      return newSet;
+    });
+  }, []);
 
+  useEffect(() => {
+    localStorage.setItem(APP_STORAGE_KEYS.SIDEBAR_PANEL_STATES, JSON.stringify(Array.from(collapsedPanels)));
+  }, [collapsedPanels]);
 
   return (
     React.createElement("aside", { className: `knowledge-branch-sidebar ${isCollapsed ? 'collapsed' : ''}` },

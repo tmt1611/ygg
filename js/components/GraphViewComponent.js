@@ -13,10 +13,10 @@ function wrap(textSelection, width, maxLines = 2) {
         let lineNumber = 0;
         const lineHeight = 1.2; // ems
         
-        const initialDy = text.attr('dy');
+        const initialX = text.attr('x') || 0;
         text.text(null); // Clear original text
 
-        let tspan = text.append('tspan').attr('x', 0).attr('dy', initialDy);
+        let tspan = text.append('tspan').attr('x', initialX);
 
         while ((word = words.pop()) && lineNumber < maxLines) {
             line.push(word);
@@ -30,7 +30,7 @@ function wrap(textSelection, width, maxLines = 2) {
                 }
                 line = [word];
                 lineNumber++;
-                tspan = text.append('tspan').attr('x', 0).attr('dy', `${lineHeight}em`).text(word);
+                tspan = text.append('tspan').attr('x', initialX).attr('dy', `${lineHeight}em`).text(word);
             }
         }
         
@@ -41,25 +41,18 @@ function wrap(textSelection, width, maxLines = 2) {
         // Adjust for multi-line text to keep it centered on its anchor point
         const numLines = text.selectAll('tspan').size();
         if (numLines > 1) {
-            const angle = text.datum().x * 180 / Math.PI;
-            const isTop = angle > 195 && angle < 345;
-            const isSide = (angle >= 165 && angle <= 195) || (angle >= 345 || angle <= 15);
-            
+            const dominantBaseline = text.attr('dominant-baseline');
             const firstTspan = text.select('tspan');
-            if (firstTspan.node()) {
-                const fontSize = 11; // Must match CSS font-size for .node-label
-                const totalExtraHeightPx = (numLines - 1) * lineHeight * fontSize;
-                const initialDyPx = parseFloat(firstTspan.attr('dy'));
+            const totalExtraHeightEms = (numLines - 1) * lineHeight;
 
-                if (isTop) {
-                    // For top-positioned text, shift the entire block up so the bottom line is where the single line would have been.
-                    firstTspan.attr('dy', initialDyPx - totalExtraHeightPx);
-                } else if (isSide) {
-                    // For side-positioned text, shift up by half the height of the extra lines to re-center vertically.
-                    firstTspan.attr('dy', initialDyPx - (totalExtraHeightPx / 2));
-                }
-                // No adjustment needed for bottom-positioned text, as it naturally expands downwards.
+            if (dominantBaseline === 'middle') {
+                // Shift up by half the total height of the extra lines
+                firstTspan.attr('dy', `-${totalExtraHeightEms / 2}em`);
+            } else if (dominantBaseline === 'auto' || dominantBaseline === 'alphabetic') { // This is for 'top'
+                // Shift up by the total height of the extra lines
+                firstTspan.attr('dy', `-${totalExtraHeightEms}em`);
             }
+            // 'hanging' (bottom) doesn't need adjustment as it expands down.
         }
     });
 }
@@ -317,33 +310,40 @@ const GraphViewComponent = ({
       .attr("transform", d => {
           // Counter-rotate the text to keep it horizontal
           const rotation = -(d.x * 180 / Math.PI - 90);
-          return `rotate(${rotation})`;
+          const angle = d.x * 180 / Math.PI;
+          const radius = getNodeRadius(d);
+          const spacing = 8; // Increased spacing slightly
+          let x = 0;
+          let y = 0;
+
+          // Determine position based on angle
+          if (angle > 15 && angle < 165) { // Bottom-ish
+              y = radius + spacing;
+          } else if (angle > 195 && angle < 345) { // Top-ish
+              y = -(radius + spacing);
+          } else { // Sides
+              x = (angle >= 165 && angle <= 195) ? -spacing : spacing;
+              y = 0;
+          }
+          
+          return `rotate(${rotation}) translate(${x}, ${y})`;
       })
       .attr("text-anchor", d => {
           if (d.isProxy) return "middle";
-          // Position text based on angle for better readability
           const angle = d.x * 180 / Math.PI;
           if (angle > 15 && angle < 165) return "middle"; // Bottom-ish
           if (angle > 195 && angle < 345) return "middle"; // Top-ish
           return angle >= 165 && angle <= 195 ? "end" : "start"; // Sides
       })
-      .attr("dy", d => {
-          if (d.isProxy) return "0.3em";
+      .attr("dominant-baseline", d => {
+          if (d.isProxy) return "middle";
           const angle = d.x * 180 / Math.PI;
-          const radius = getNodeRadius(d);
-          const fontSize = 11; // Corresponds to font-size in CSS
-          if (angle > 15 && angle < 165) return (radius + 7); // Bottom
-          if (angle > 195 && angle < 345) return -(radius + 7); // Top
-          return fontSize * 0.35; // Middle for sides, in pixels
+          if (angle > 15 && angle < 165) return "hanging"; // Bottom
+          if (angle > 195 && angle < 345) return "auto"; // Top (alphabetic)
+          return "middle"; // Sides
       })
-      .attr("dx", d => {
-          if (d.isProxy) return 0;
-          const angle = d.x * 180 / Math.PI;
-          if (angle > 15 && angle < 165) return 0; // Bottom
-          if (angle > 195 && angle < 345) return 0; // Top
-          const spacing = getNodeRadius(d) + 7;
-          return angle >= 165 && angle <= 195 ? -spacing : spacing;
-      })
+      .attr("dy", d => d.isProxy ? "0.3em" : null)
+      .attr("dx", null)
       .text(d => d.isProxy ? d.data.name : (d.data.name || ""))
       .each(function(d) {
         select(this).selectAll("tspan").remove();
