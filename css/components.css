@@ -1403,6 +1403,70 @@ html[data-theme='dark'] .workspace-tab-container .panel-header-icon {
 .workspace-tab-container .panel-content-wrapper.collapsed {
   display: none;
 }
+.workspace-tab-container .panel {
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-lg);
+  background-color: var(--panel-bg);
+  overflow: hidden;
+  transition: background-color 0.2s ease, border-color 0.2s;
+}
+.workspace-tab-container .panel:not(.collapsed):hover {
+    border-color: var(--border-color-strong);
+}
+.workspace-tab-container .collapsible-panel-header {
+  padding: 10px 15px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  user-select: none;
+  transition: background-color 0.2s ease;
+  border-bottom: 1px solid var(--border-color);
+}
+.workspace-tab-container .panel.collapsed .collapsible-panel-header {
+    border-bottom-color: transparent;
+}
+.workspace-tab-container .collapsible-panel-header:hover {
+  background-color: var(--panel-alt-bg);
+}
+.workspace-tab-container .collapsible-panel-header h3 {
+  padding: 0;
+  margin: 0;
+  font-size: 1.1em;
+  font-weight: 600;
+  color: var(--text-primary);
+  flex-grow: 1;
+}
+.workspace-tab-container .panel-header-icon {
+  color: var(--primary-accent);
+  margin-right: 0;
+  font-size: 1.2em;
+}
+html[data-theme='dark'] .workspace-tab-container .panel-header-icon {
+    color: var(--primary-accent-light);
+}
+.workspace-tab-container .panel-toggle-button {
+  color: var(--text-secondary);
+  transition: transform 0.2s ease-out;
+  padding: 0;
+  font-size: 1.2em;
+  background: none;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+}
+.workspace-tab-container .panel-toggle-button.collapsed {
+  transform: rotate(-90deg);
+}
+.workspace-tab-container .panel-content-wrapper {
+  padding: 15px 20px;
+}
+.workspace-tab-container .panel-content-wrapper.collapsed {
+  display: none;
+}
 /* Collapsible Panels in Sidebar */
 .knowledge-branch-sidebar .panel {
   border: 1px solid rgba(var(--primary-accent-rgb), 0.25);
