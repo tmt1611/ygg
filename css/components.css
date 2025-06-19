@@ -507,6 +507,74 @@ html[data-theme='sol'] .panel-header-icon { color: var(--primary-accent-dark); f
     opacity: 1;
 }
 
+.ai-suggestion-modal-removed-nodes-section { margin-top: 15px; padding-top: 10px; border-top: 1px solid var(--border-color); }
+.ai-suggestion-modal-removed-nodes-title { 
+  font-size: 0.95em; 
+  font-weight: 600; 
+  color: var(--error-color); 
+  margin-bottom: 8px; 
+  cursor: pointer;
+  user-select: none;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px;
+  border-radius: var(--border-radius);
+}
+.ai-suggestion-modal-removed-nodes-title:hover {
+  background-color: var(--error-bg);
+}
+.ai-suggestion-modal-removed-nodes-title::before {
+  content: '▼';
+  display: inline-block;
+  font-size: 0.7em;
+  transition: transform 0.2s ease-out;
+  padding: 4px;
+}
+.ai-suggestion-modal-removed-nodes-title.collapsed::before {
+  transform: rotate(-90deg);
+}
+.ai-suggestion-modal-removed-nodes-list { 
+  font-size: 0.85em; 
+  color: var(--text-secondary); 
+  list-style: none; 
+  padding: 0; 
+  max-height: 120px; 
+  overflow-y: auto; 
+  transition: opacity 0.2s, max-height 0.3s, margin-top 0.3s, padding-top 0.3s;
+}
+.ai-suggestion-modal-removed-nodes-list.collapsed {
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  margin: 0;
+}
+.ai-suggestion-modal-removed-nodes-list li {
+  padding: 4px 6px;
+  border-bottom: 1px dotted var(--border-color);
+  text-decoration: line-through;
+  color: var(--text-tertiary);
+  transition: background-color 0.2s;
+  border-radius: var(--border-radius);
+  margin: 1px 0;
+}
+.ai-suggestion-modal-removed-nodes-list li:hover {
+    background-color: var(--error-bg);
+    text-decoration: none;
+    color: var(--error-color);
+}
+.ai-suggestion-modal-removed-nodes-list li:last-child {
+  border-bottom: none;
+}
+.ai-suggestion-modal-removed-nodes-list li strong { text-decoration: none; color: var(--text-primary); }
+.ai-suggestion-modal-removed-nodes-list li:hover strong {
+    color: var(--error-color);
+}
+.ai-suggestion-modal-removed-nodes-list .node-id { color: var(--error-color); font-size: 0.8em; opacity: 0.7; }
+.ai-suggestion-modal-removed-nodes-list li:hover .node-id {
+    opacity: 1;
+}
+
 
 /* AI Suggestion Diff Preview Item */
 .diff-list-item {
@@ -1000,6 +1068,34 @@ html[data-theme='sol'] .graph-view-svg-container {
 .graph-view-node.highlighted text.node-label {
     font-weight: bold;
     fill: var(--graph-node-highlight-stroke);
+}
+html[data-theme='dark'] .graph-view-node.highlighted text.node-label,
+html[data-theme='nebula'] .graph-view-node.highlighted text.node-label {
+    text-shadow: 0 0 5px var(--graph-node-highlight-stroke);
+}
+.graph-view-node:not(.proxy) text.node-label {
+  /* Create a "cutout" effect for readability over lines */
+  paint-order: stroke;
+  stroke: var(--app-bg);
+  stroke-width: 4px; /* Adjust thickness of the "cutout" */
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  text-shadow: 0 0 3px var(--app-bg); /* Soften the edges a bit */
+  font-weight: 500;
+}
+.graph-view-node:not(.proxy) text.node-label tspan {
+  paint-order: stroke;
+  stroke: var(--app-bg);
+  stroke-width: 4px;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+html[data-theme='dark'] .graph-view-node:not(.proxy) text.node-label {
+  stroke-width: 5px;
+  text-shadow: 0 0 5px var(--app-bg), 0 0 8px rgba(var(--primary-accent-rgb), 0.3);
+}
+html[data-theme='dark'] .graph-view-node:not(.proxy) text.node-label tspan {
+  stroke-width: 5px;
 }
 html[data-theme='dark'] .graph-view-node.highlighted text.node-label,
 html[data-theme='nebula'] .graph-view-node.highlighted text.node-label {
