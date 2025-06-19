@@ -83,9 +83,9 @@ const ContextMenu = ({
 
     items.push(
         { type: 'separator' },
-        { id: 'copy-name', label: copyFeedback === 'name' ? 'Copied!' : "Copy Name", icon: '📋', action: () => handleCopy('name') },
-        { id: 'copy-id', label: copyFeedback === 'id' ? 'Copied!' : "Copy ID", icon: '🆔', action: () => handleCopy('id') },
-        { id: 'copy-json', label: copyFeedback === 'json' ? 'Copied!' : "Copy as JSON", icon: '📦', action: () => handleCopy('json') }
+        { id: 'copy-name', label: "Copy Name", icon: '📋', action: () => handleCopy('name') },
+        { id: 'copy-id', label: "Copy ID", icon: '🆔', action: () => handleCopy('id') },
+        { id: 'copy-json', label: "Copy as JSON", icon: '📦', action: () => handleCopy('json') }
     );
 
     if (onDeleteNode) {
@@ -189,12 +189,19 @@ const ContextMenu = ({
   return (
     React.createElement("div", { ref: menuRef, className: "context-menu", style: menuStyle, role: "menu", "aria-orientation": "vertical", "aria-labelledby": "context-menu-node-name", onKeyDown: handleKeyDown },
       React.createElement("div", { id: "context-menu-node-name", className: "context-menu-header" },
-        "Node: ", React.createElement("strong", null, node.name.length > 25 ? `${node.name.substring(0, 22)}...` : node.name)
+        React.createElement("span", { style: { flexGrow: 1 } }, "Node: ", React.createElement("strong", null, node.name.length > 25 ? `${node.name.substring(0, 22)}...` : node.name)),
+        React.createElement("button", {
+          onClick: onClose,
+          className: "base-icon-button",
+          title: "Close Menu (Esc)",
+          style: { padding: '2px', fontSize: '1.1em', width: '20px', height: '20px', alignSelf: 'center', marginRight: '-5px' }
+        }, "×")
       ),
       React.createElement("ul", { className: "main-menu" },
         menuItems.map((item, index) => {
           if (item.type === 'separator') return React.createElement("li", { key: `sep-${index}`, role: "separator" }, React.createElement("hr", null));
           const isFocused = !isImportanceSubMenuOpen && focusableItems[focusedIndex]?.id === item.id;
+          const isCopied = item.id.startsWith('copy-') && copyFeedback === item.id.substring(5);
           return React.createElement("li", { key: item.id, role: "none" },
             React.createElement("button", {
               role: "menuitem",
@@ -205,7 +212,7 @@ const ContextMenu = ({
               "aria-haspopup": item.hasSubmenu,
               "aria-expanded": item.hasSubmenu ? isImportanceSubMenuOpen : undefined,
             },
-              React.createElement("span", { className: "context-menu-icon" }, item.icon),
+              React.createElement("span", { className: "context-menu-icon" }, isCopied ? '✅' : item.icon),
               React.createElement("span", { className: "context-menu-label" }, item.label),
               item.hasSubmenu && React.createElement("span", { className: "context-menu-submenu-indicator" }, "›")
             )

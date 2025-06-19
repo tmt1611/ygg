@@ -187,17 +187,17 @@ const TechTreeListItemComponent = ({
             "aria-label": `Add child to ${node.name}. Hold Shift to add without a prompt.`, 
             title: `Add Child Node (Shift+Click for quick add)`
           }, '➕'),
-          React.createElement("select", {
-            value: node.importance || 'common',
-            onChange: handleImportanceChange,
-            disabled: isAppBusy || node.isLocked,
-            className: `list-view-importance-select importance-${node.importance || 'common'}`,
-            "aria-label": `Importance for ${node.name}`,
-            title: `Importance: ${currentImportanceObject.label}. Right-click for more actions.`,
-            onClick: (e) => e.stopPropagation() // Prevent row selection when clicking select
-          },
-            NODE_IMPORTANCE_OPTIONS.map(opt => React.createElement("option", { key: opt.value, value: opt.value }, opt.rune, " ", opt.label))
-          )
+          React.createElement("span", {
+            className: `list-view-importance-rune importance-${node.importance || 'common'}`,
+            title: `Importance: ${currentImportanceObject.label}. Right-click node for actions.`,
+            style: {
+              fontSize: '1.2em',
+              cursor: 'default',
+              padding: '0 6px',
+              userSelect: 'none',
+              lineHeight: 1,
+            }
+          }, currentImportanceObject.rune)
         )
       ),
 

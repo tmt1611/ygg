@@ -291,7 +291,7 @@ html[data-theme='sol'] .panel-header-icon { color: var(--primary-accent-dark); f
 .importance-major { background-color: var(--importance-major-bg); color: var(--importance-major-text); border: 1px solid var(--importance-major-border); }
 
 .status-rune { font-size: 0.9em; margin-right: 4px; } 
-.list-view-importance-select, .focus-view-detail-panel .importance-select, .graph-view-selected-node-panel .importance-select {
+.focus-view-detail-panel .importance-select, .graph-view-selected-node-panel .importance-select {
   padding: 6px 8px; text-align: left; font-size: 0.9em; /* Reduced padding/font-size */
 }
 
@@ -1088,19 +1088,10 @@ html[data-theme='light'] .ai-insights-list-item-name, html[data-theme='sol'] .ai
 .list-item-action-icon.locked { color: var(--warning-color); }
 .list-item-action-icon.primary-action { color: var(--primary-accent); }
 
-.list-view-importance-select-wrapper { width: auto; } /* Make width flexible */
-.list-view-importance-select { 
-  font-size: 0.8em; 
-  padding: 2px 4px; 
-  text-align: left; 
-  border: 1px solid transparent;
-  background-color: transparent;
-  margin-left: 2px;
-} /* Keep existing select styles, wrapper change will make it compact */
-.list-view-importance-select:hover {
-  border-color: var(--border-color);
-  background-color: var(--button-default-hover-bg);
-}
+/* .list-view-importance-select and its wrapper are removed in favor of a static rune display */
+.list-view-importance-rune.importance-minor { color: var(--importance-minor-text); }
+.list-view-importance-rune.importance-common { color: var(--importance-common-text); }
+.list-view-importance-rune.importance-major { color: var(--importance-major-text); }
 
 .list-view-item-content { padding: 4px 8px 8px 44px; } 
 .list-view-description-area { 
@@ -1376,6 +1367,9 @@ html[data-theme='sol'] .panel-variant-sidebar .panel-toggle-button {
 }
 .context-menu ul { list-style: none; padding: 0; margin: 0; }
 .context-menu .context-menu-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   padding: 4px 10px;
   font-size: 0.8em;
   color: var(--text-secondary);
@@ -1384,6 +1378,7 @@ html[data-theme='sol'] .panel-variant-sidebar .panel-toggle-button {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  gap: 8px;
 }
 .context-menu .context-menu-header strong { color: var(--text-primary); }
 .context-menu li[role="separator"] hr { margin: 2px 0; border-top: 1px solid var(--border-color); }
