@@ -20,7 +20,6 @@ export const useModalManager = () => {
   const [contextMenuPosition, setContextMenuPosition] = useState(null);
   const [contextMenuNodeId, setContextMenuNodeId] = useState(null);
   const [contextMenuLinkSourceInfo, setContextMenuLinkSourceInfo] = useState(null);
-  const [contextMenuLinkSourceInfo, setContextMenuLinkSourceInfo] = useState(null);
   
   const [isTechExtractionModalOpen, setIsTechExtractionModalOpen] = useState(false);
   const [extractedTechsContent, setExtractedTechsContent] = useState('');

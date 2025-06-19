@@ -342,8 +342,6 @@ html[data-theme='sol'] .panel-header-icon { color: var(--primary-accent-dark); f
 .modal-content-basic .modal-title .modal-icon { font-size: 1.2em; line-height: 1; }
 .modal-content-basic.confirm-danger .modal-title { color: var(--error-color); }
 .modal-content-basic.confirm-danger { border-top-color: var(--error-color); }
-.modal-content-basic.confirm-danger .modal-title { color: var(--error-color); }
-.modal-content-basic.confirm-danger { border-top-color: var(--error-color); }
 
 @keyframes modalFadeIn { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
 
@@ -1393,6 +1391,140 @@ html[data-theme='sol'] .panel-variant-sidebar .panel-toggle-button {
 
 
 
+
+
+/* Path to Root Display */
+.path-to-root-display {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background-color: var(--button-default-bg);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  padding: 3px 8px;
+  font-size: 0.8em;
+  overflow-x: auto;
+  max-width: 50vw; /* Prevent it from taking too much space */
+  position: relative;
+}
+.path-to-root-display::-webkit-scrollbar { height: 0; width: 0; }
+.path-to-root-display { scrollbar-width: none; }
+.path-to-root-display::before, .path-to-root-display::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 20px;
+  pointer-events: none;
+  transition: opacity 0.2s;
+}
+.path-to-root-display::before {
+  left: 0;
+  background: linear-gradient(to right, var(--button-default-bg), transparent);
+}
+.path-to-root-display::after {
+  right: 0;
+  background: linear-gradient(to left, var(--button-default-bg), transparent);
+}
+.path-to-root-display.no-scroll-start::before,
+.path-to-root-display.no-scroll-end::after {
+  opacity: 0;
+}
+.path-segment {
+  white-space: nowrap;
+  padding: 2px 5px;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  transition: background-color 0.2s, color 0.2s;
+}
+.path-segment:hover {
+  background-color: var(--primary-accent-hover-bg);
+  color: var(--primary-accent-dark);
+}
+.path-segment.current-focus-path-node {
+  background-color: var(--primary-accent);
+  color: var(--text-on-accent);
+  font-weight: 600;
+}
+.path-separator {
+  color: var(--text-tertiary);
+  font-size: 0.9em;
+  user-select: none;
+}
+
+
+/* Error Boundary */
+.error-boundary-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  width: 100vw;
+  padding: 20px;
+  background-color: var(--app-bg);
+  color: var(--text-primary);
+}
+.error-boundary-content {
+  max-width: 650px;
+  text-align: center;
+  background-color: var(--panel-bg);
+  padding: 30px 40px;
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--box-shadow-lg);
+  border-top: 4px solid var(--error-color);
+}
+.error-boundary-icon {
+  font-size: 3.5em;
+  line-height: 1;
+  margin-bottom: 15px;
+  color: var(--error-color);
+  animation: errorAppear 0.5s ease-out;
+}
+@keyframes errorAppear { from { transform: scale(0.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+.error-boundary-title {
+  font-family: var(--font-family-serif-display);
+  font-size: 2em;
+  margin-bottom: 10px;
+}
+.error-boundary-message {
+  font-size: 1.1em;
+  color: var(--text-secondary);
+  margin-bottom: 20px;
+}
+.error-boundary-subtext {
+  font-size: 0.9em;
+  color: var(--text-tertiary);
+  margin-bottom: 25px;
+  line-height: 1.5;
+}
+.error-boundary-actions {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.error-boundary-details {
+  margin-top: 25px;
+  text-align: left;
+  background-color: var(--panel-alt-bg);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  padding: 10px;
+}
+.error-boundary-details summary {
+  cursor: pointer;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+.error-boundary-details pre {
+  margin-top: 10px;
+  white-space: pre-wrap;
+  word-break: break-all;
+  font-size: 0.8em;
+  color: var(--text-tertiary);
+  max-height: 150px;
+  overflow-y: auto;
+}
 
 
 @media (max-width: 768px) {
