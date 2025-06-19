@@ -49,8 +49,6 @@ function wrap(textSelection, width, maxLines = 2) {
                 // Shift up by half the total height of the extra lines
                 firstTspan.attr('dy', `-${totalExtraHeightEms / 2}em`);
             }
-            // 'hanging' (for bottom-positioned text) and 'text-after-edge' (for top-positioned text)
-            // don't need vertical adjustment as they naturally expand away from the anchor point.
         }
     });
 }
@@ -308,38 +306,26 @@ const GraphViewComponent = ({
       .attr("transform", d => {
           // Counter-rotate the text to keep it horizontal
           const rotation = -(d.x * 180 / Math.PI - 90);
-          const angle = d.x * 180 / Math.PI;
           const radius = getNodeRadius(d);
-          const spacing = 8; // Increased spacing slightly
+          const spacing = 8;
           let x = 0;
-          let y = 0;
-
-          // Determine position based on angle
-          if (angle > 15 && angle < 165) { // Bottom-ish
-              y = radius + spacing;
-          } else if (angle > 195 && angle < 345) { // Top-ish
-              y = -(radius + spacing);
-          } else { // Sides
-              x = (angle >= 165 && angle <= 195) ? -spacing : spacing;
-              y = 0;
+          
+          // d.x is angle in radians. 0 is right, PI/2 is down, PI is left, 3PI/2 is up.
+          // Place text on the side that gives it more space (away from the center)
+          if (d.x > Math.PI / 2 && d.x < 3 * Math.PI / 2) { // Left hemisphere
+              x = -radius - spacing;
+          } else { // Right hemisphere
+              x = radius + spacing;
           }
           
-          return `rotate(${rotation}) translate(${x}, ${y})`;
+          return `rotate(${rotation}) translate(${x}, 0)`;
       })
       .attr("text-anchor", d => {
           if (d.isProxy) return "middle";
-          const angle = d.x * 180 / Math.PI;
-          if (angle > 15 && angle < 165) return "middle"; // Bottom-ish
-          if (angle > 195 && angle < 345) return "middle"; // Top-ish
-          return angle >= 165 && angle <= 195 ? "end" : "start"; // Sides
+          // If node is on the left, anchor text to the end. If on right, anchor to start.
+          return (d.x > Math.PI / 2 && d.x < 3 * Math.PI / 2) ? "end" : "start";
       })
-      .attr("dominant-baseline", d => {
-          if (d.isProxy) return "middle";
-          const angle = d.x * 180 / Math.PI;
-          if (angle > 15 && angle < 165) return "hanging"; // Bottom: top of text is at y
-          if (angle > 195 && angle < 345) return "text-after-edge"; // Top: bottom of text is at y
-          return "middle"; // Sides
-      })
+      .attr("dominant-baseline", "middle")
       .attr("dy", d => d.isProxy ? "0.3em" : null)
       .attr("dx", null)
       .text(d => d.isProxy ? d.data.name : (d.data.name || ""))

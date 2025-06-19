@@ -28,9 +28,12 @@ class ErrorBoundary extends Component {
     const errorText = `
 --- YGGDRASIL ERROR REPORT ---
 Date: ${new Date().toISOString()}
+User Agent: ${navigator.userAgent}
 Error: ${error.toString()}
+
 Stack Trace:
 ${error.stack}
+
 Component Stack:
 ${errorInfo?.componentStack || 'Not available'}
 ------------------------------
