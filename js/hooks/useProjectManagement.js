@@ -240,8 +240,7 @@ export const useProjectManagement = ({
     const savedProject = saveNewProject(newEmptyTree, name, false);
     closeProjectNameModal();
     if (viewStates && savedProject && savedProject.treeData.id) {
-        viewStates.setYggdrasilViewMode('treeView');
-        viewStates.setActiveOverlayPanel(null); // Ensure graph view is active
+        viewStates.setYggdrasilViewMode('graph');
         viewStates.setSelectedGraphNodeId(savedProject.treeData.id); // Select the root node
     }
   }, [resetTreeForNewProjectContext, setTechTreeData, setInitialPrompt, saveNewProject, closeProjectNameModal, viewStates]);

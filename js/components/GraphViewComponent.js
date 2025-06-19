@@ -201,7 +201,7 @@ const GraphViewComponent = ({
             }
           });
 
-          group.append("text").attr("class", "node-label").attr("dy", "0.31em").attr("font-size", "10px")
+          group.append("text").attr("class", "node-label").attr("font-size", "10px")
             .style("pointer-events", "none").style("user-select", "none");
           
           group.append("text").attr("class", "node-rune-icon").attr("dy", "0.35em")
@@ -231,17 +231,10 @@ const GraphViewComponent = ({
     });
 
     nodeGroups.select(".node-label")
-      .text(d => {
-        if (d.isProxy) return d.data.name;
-        // Truncate long names for better readability in graph view. Full name is on hover (via <title>).
-        return d.data.name.length > 25 ? d.data.name.substring(0, 22) + '...' : d.data.name;
-      })
       .attr("fill", d => d.isProxy ? null : "var(--graph-node-text)")
-      .attr("transform", null) // Keep text horizontal
       .attr("x", d => {
         if (d.isProxy) return 0;
         const angle = d.x * 180 / Math.PI;
-        // Check if node is on the left-ish side of circle
         const isLeft = angle > 90 && angle < 270;
         return isLeft ? -(nodeRadius + 5) : (nodeRadius + 5);
       })
@@ -250,6 +243,54 @@ const GraphViewComponent = ({
         const angle = d.x * 180 / Math.PI;
         const isLeft = angle > 90 && angle < 270;
         return isLeft ? "end" : "start";
+      })
+      .each(function(d) { // D3 text wrapping
+          const text = select(this);
+          const name = d.isProxy ? d.data.name : d.data.name;
+          text.text(null); // Clear existing text/tspans
+
+          if (d.isProxy) {
+              text.append("tspan").text(name);
+              return;
+          }
+
+          const words = name.split(/\s+/).reverse();
+          if (words.join(' ').length < 2) { // if it's one short word
+              text.append("tspan").text(name);
+              return;
+          }
+
+          let word;
+          const maxWidth = 100;
+          const lineHeight = 1.1; // ems
+          const x = text.attr("x");
+
+          const lines = [];
+          let currentLine = [];
+          
+          // Use a temporary tspan to measure text length
+          const tempTspan = text.append("tspan").style("visibility", "hidden");
+          while (word = words.pop()) {
+              currentLine.push(word);
+              tempTspan.text(currentLine.join(" "));
+              if (tempTspan.node().getComputedTextLength() > maxWidth && currentLine.length > 1) {
+                  currentLine.pop();
+                  lines.push(currentLine.join(" "));
+                  currentLine = [word];
+              }
+          }
+          lines.push(currentLine.join(" "));
+          tempTspan.remove();
+
+          const numLines = lines.length;
+          const startDy = -(numLines - 1) * lineHeight / 2; // Initial vertical offset
+
+          lines.forEach((lineText, i) => {
+              text.append("tspan")
+                  .attr("x", x)
+                  .attr("dy", i === 0 ? `${startDy}em` : `${lineHeight}em`)
+                  .text(lineText);
+          });
       });
 
     nodeGroups.select(".node-rune-icon")
