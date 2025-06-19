@@ -716,6 +716,37 @@ html[data-theme='sol'] .contextual-help-icon:hover, html[data-theme='sol'] .cont
 .diff-details-item .diff-arrow {
   margin: 0 4px;
 }
+.diff-details-list {
+  list-style: none;
+  padding: 0;
+  margin: 4px 0 0 16px;
+  font-size: 0.8em;
+  color: var(--text-tertiary);
+}
+.diff-details-item {
+  line-height: 1.4;
+  margin-bottom: 2px;
+  padding: 2px 4px;
+  border-radius: var(--border-radius);
+  background-color: rgba(var(--panel-bg-rgb), 0.2);
+}
+.diff-details-item strong {
+  color: var(--text-primary);
+  margin-right: 5px;
+}
+.diff-details-item .diff-from {
+  text-decoration: line-through;
+  color: var(--error-color);
+  opacity: 0.8;
+  word-break: break-all;
+}
+.diff-details-item .diff-to {
+  color: var(--success-color);
+  word-break: break-all;
+}
+.diff-details-item .diff-arrow {
+  margin: 0 4px;
+}
 
 .diff-list-child-container {
   margin-top: 0;

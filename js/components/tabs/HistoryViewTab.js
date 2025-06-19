@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from 'react';
 import HistoryItem from '../HistoryItem.js';
 import { EVENT_TYPE_INFO } from '../../constants.js';
