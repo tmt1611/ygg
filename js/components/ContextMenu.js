@@ -200,7 +200,7 @@ const ContextMenu = ({
             React.createElement("button", {
               role: "menuitem",
               className: `context-menu-item ${isFocused ? 'focused' : ''} ${item.isDestructive ? 'destructive' : ''}`,
-              onClick: item.action ? () => { if(!item.hasSubmenu) onClose(); item.action(); } : undefined,
+              onClick: item.action,
               disabled: item.isDisabled,
               title: item.title || item.label,
               "aria-haspopup": item.hasSubmenu,

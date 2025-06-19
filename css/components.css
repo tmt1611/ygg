@@ -1314,7 +1314,7 @@ html[data-theme='light'] .ai-insights-list-item-name, html[data-theme='sol'] .ai
   border-bottom: none;
 }
 .list-view-item:hover {
-  background-color: rgba(var(--primary-accent-rgb), 0.03); /* Subtle hover for the whole item */
+  background-color: rgba(var(--primary-accent-rgb), 0.05); /* Subtle hover for the whole item */
 }
 .list-view-item.selected > .list-view-item-header {
   background-color: var(--primary-accent-hover-bg);
