@@ -1,7 +1,5 @@
 import React from 'react';
 
-import React from 'react';
-
 const StatDisplay = ({ label, value, valueClassName }) => (
   React.createElement("div", { className: "stat-item" },
     React.createElement("span", { className: "stat-label" }, label),
