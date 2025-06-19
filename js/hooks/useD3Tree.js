@@ -48,7 +48,7 @@ export const useD3Tree = (
   }, []);
 
   // Effect to determine when the SVG container is ready (has dimensions)
-  useLayoutEffect(() => {
+  useEffect(() => {
     const svgElement = svgRef.current;
     if (!svgElement?.parentElement) return;
 
