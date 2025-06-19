@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useCallback, useState, useLayoutEffect } fr
 import { select, zoom, hierarchy, tree, zoomIdentity } from 'd3';
 
 const defaultTreeConfig = {
-  nodeRadius: 10,
+  nodeRadius: 16, // Base for 'common', but will be overridden in GraphViewComponent
   // New config for radial layout
   radialRadiusFactor: 120, 
   margin: { top: 20, right: 20, bottom: 20, left: 20 },

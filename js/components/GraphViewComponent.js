@@ -3,6 +3,17 @@ import { linkRadial, select } from 'd3';
 import { useD3Tree } from '../hooks/useD3Tree.js';
 import { NODE_IMPORTANCE_RUNES } from '../constants.js';
 
+const getNodeRadius = (node) => {
+    if (node?.isProxy) return 16;
+    switch (node?.data?.importance) {
+        case 'major': return 22;
+        case 'minor': return 12;
+        case 'common':
+        default:
+            return 16;
+    }
+};
+
 const GraphViewComponent = ({
   treeData,
   activeNodeId,
@@ -23,8 +34,6 @@ const GraphViewComponent = ({
   const svgRef = useRef(null); 
   
   const { g, nodes, links, config, resetZoom, zoomIn, zoomOut } = useD3Tree(svgRef, treeData);
-
-  const { nodeRadius } = config; 
 
   const projectLinksAndProxyNodes = useMemo(() => {
     if (!nodes || nodes.length === 0 || !projects) {
@@ -193,22 +202,29 @@ const GraphViewComponent = ({
           group.each(function(d) {
             const el = select(this);
             if (d.isProxy) {
-              el.append("rect").attr("width", nodeRadius * 2.5).attr("height", nodeRadius * 2.5)
-                .attr("x", -nodeRadius * 1.25).attr("y", -nodeRadius * 1.25)
+              el.append("rect").attr("width", 32).attr("height", 32)
+                .attr("x", -16).attr("y", -16)
                 .attr("rx", 3).attr("ry", 3).style("cursor", "pointer");
             } else {
-              el.append("circle").attr("r", nodeRadius).attr("stroke-width", 1.5).style("cursor", "pointer");
+              el.append("circle").attr("r", getNodeRadius).attr("stroke-width", 1.5).style("cursor", "pointer");
             }
           });
 
-          group.append("text").attr("class", "node-label").attr("font-size", "10px")
+          group.append("text").attr("class", "node-label")
+            .attr("font-size", d => {
+                if (d.isProxy) return "11px";
+                const radius = getNodeRadius(d);
+                if (radius > 20) return "10px";
+                if (radius > 14) return "9px";
+                return "8px";
+            })
             .style("pointer-events", "none").style("user-select", "none");
           
           group.append("text").attr("class", "node-rune-icon").attr("dy", "0.35em")
-            .attr("font-size", `${nodeRadius * 1.2}px`).style("pointer-events", "none").style("user-select", "none");
+            .attr("font-size", d => `${getNodeRadius(d) * 1.2}px`).style("pointer-events", "none").style("user-select", "none");
 
-          group.append("text").attr("class", "node-icon node-lock-icon").attr("dy", `${nodeRadius * 0.4}px`)
-            .attr("dx", `${-nodeRadius * 0.9}px`).attr("font-size", `${nodeRadius * 0.8}px`)
+          group.append("text").attr("class", "node-icon node-lock-icon").attr("dy", d => `${getNodeRadius(d) * 0.4}px`)
+            .attr("dx", d => `${-getNodeRadius(d) * 0.9}px`).attr("font-size", d => `${getNodeRadius(d) * 0.8}px`)
             .attr("fill", "var(--text-tertiary)").style("pointer-events", "none");
 
           return group;
@@ -231,36 +247,8 @@ const GraphViewComponent = ({
     });
 
     nodeGroups.select(".node-label")
-      .attr("fill", d => d.isProxy ? null : "var(--graph-node-text)")
-      .attr("text-anchor", d => {
-        if (d.isProxy) return "middle";
-        // Right side of circle (angle is right)
-        if (d.x > Math.PI * 0.25 && d.x < Math.PI * 0.75) return "start";
-        // Left side of circle (angle is left)
-        if (d.x > Math.PI * 1.25 && d.x < Math.PI * 1.75) return "end";
-        // Top or bottom
-        return "middle";
-      })
-      .attr("transform", d => {
-          if (d.isProxy) return null;
-          const padding = 5;
-          const angle = d.x;
-
-          // Right side
-          if (angle > Math.PI * 0.25 && angle < Math.PI * 0.75) {
-              return `translate(${nodeRadius + padding}, 0)`;
-          }
-          // Left side
-          if (angle > Math.PI * 1.25 && angle < Math.PI * 1.75) {
-              return `translate(${-(nodeRadius + padding)}, 0)`;
-          }
-          // Bottom side
-          if (angle >= Math.PI * 0.75 && angle <= Math.PI * 1.25) {
-              return `translate(0, ${nodeRadius + padding})`;
-          }
-          // Top side (default)
-          return `translate(0, ${-(nodeRadius + padding)})`;
-      })
+      .attr("fill", "var(--graph-node-text)") // Always set fill, CSS can override for proxy
+      .attr("text-anchor", "middle")
       .each(function(d) { // D3 text wrapping
           const text = select(this);
           const name = d.isProxy ? d.data.name : d.data.name;
@@ -271,8 +259,9 @@ const GraphViewComponent = ({
               return;
           }
           
-          const words = name.split(/\s+/);
-          const maxWidth = 90;
+          const words = name.split(/\s+/).filter(Boolean);
+          const radius = getNodeRadius(d);
+          const maxWidth = radius * 2 * 0.8; // Use 80% of diameter for text width
           const lineHeight = 1.1; // ems
           
           let line = [];
@@ -305,13 +294,8 @@ const GraphViewComponent = ({
       });
 
     nodeGroups.select(".node-rune-icon")
-      .text(d => d.isProxy ? '' : NODE_IMPORTANCE_RUNES[d.data.importance || 'common'])
-      .attr("fill", d => {
-        if (d.isProxy) return null;
-        if (d.data.importance === 'minor') return 'var(--importance-minor-text)';
-        if (d.data.importance === 'major') return 'var(--importance-major-text)';
-        return 'var(--importance-common-text)';
-      });
+      .text('') // Text is now inside the node, so we hide the rune to avoid overlap.
+      .attr("fill", "transparent");
 
     nodeGroups.select(".node-lock-icon").text(d => (d.data.isLocked && !d.isProxy ? "🔒" : ""));
 

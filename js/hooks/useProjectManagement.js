@@ -1,6 +1,6 @@
 
 import { useState, useCallback, useEffect } from 'react';
-import { generateUUID, initializeNodes, findNodeById, updateNodeInTree } from '../utils.js';
+import { generateUUID, initializeNodes, findNodeById, updateNodeInTree, getAllNodesAsMap } from '../utils.js';
 import { APP_STORAGE_KEYS, ELF_WARFARE_STRUCTURE_JSON_STRING, ADVANCED_NATURE_MAGIC_JSON_STRING } from '../constants.js';
 
 export const useProjectManagement = ({
@@ -360,18 +360,36 @@ export const useProjectManagement = ({
     const projectToDelete = projects.find(p => p.id === projectId);
     if (!projectToDelete) { setError("Project not found for deletion."); return; }
     openConfirmModal({
-      title: `Delete ${projectToDelete.isExample ? 'Example' : ''} Project?`, message: `Delete "${projectToDelete.name}"? This cannot be undone.`,
+      title: `Delete ${projectToDelete.isExample ? 'Example' : ''} Project?`, message: `Delete "${projectToDelete.name}"? This will also remove any links pointing to it from other projects. This cannot be undone.`,
       confirmText: `Delete ${projectToDelete.isExample ? 'Example' : ''} Project`, cancelText: "Cancel", confirmButtonStyle: 'danger',
       onConfirm: () => {
-        const remainingProjects = projects.filter(p => p.id !== projectId);
-        setProjects(remainingProjects);
-        addHistoryEntry('PROJECT_DELETED', `${projectToDelete.isExample ? 'Example p' : 'P'}roject "${projectToDelete.name}" deleted.`);
+        
+        const projectsWithLinksCleaned = projects
+          .filter(p => p.id !== projectId) // Remove the deleted project
+          .map(p => { // Check every other project for links TO the deleted one
+            if (!p.treeData) return p;
+            let treeData = p.treeData;
+            let wasModified = false;
+            const nodesMap = getAllNodesAsMap(treeData);
+            
+            nodesMap.forEach(node => {
+              if (node.linkedProjectId === projectId) {
+                treeData = updateNodeInTree(treeData, node.id, { linkedProjectId: null, linkedProjectName: null });
+                wasModified = true;
+              }
+            });
+            
+            return wasModified ? { ...p, treeData, lastModified: new Date().toISOString() } : p;
+          });
+
+        setProjects(projectsWithLinksCleaned);
+        addHistoryEntry('PROJECT_DELETED', `${projectToDelete.isExample ? 'Example p' : 'P'}roject "${projectToDelete.name}" deleted. Dangling links cleaned.`);
         
         if (activeProjectId === projectId) {
-            const nextUserProject = remainingProjects.find(p => !p.isExample);
+            const nextUserProject = projectsWithLinksCleaned.find(p => !p.isExample);
             if(nextUserProject) handleSetActiveProject(nextUserProject.id);
             else {
-                const nextExampleProject = remainingProjects.find(p => p.isExample);
+                const nextExampleProject = projectsWithLinksCleaned.find(p => p.isExample);
                 if (nextExampleProject) handleSetActiveProject(nextExampleProject.id, true);
                 else resetTreeForNewProjectContext();
             }
