@@ -340,9 +340,40 @@ export const useProjectManagement = ({
 
   const internalRenameProject = useCallback((projectId, newName) => {
     const oldProject = projects.find(p => p.id === projectId);
-    setProjects(prevProjects => prevProjects.map(p => p.id === projectId ? { ...p, name: newName, lastModified: new Date().toISOString() } : p));
+    if (!oldProject) return;
+
+    // Find all projects that link to the project being renamed and update them.
+    const projectsWithLinksUpdated = projects.map(proj => {
+      if (proj.id === projectId) {
+        // This is the project being renamed.
+        return { ...proj, name: newName, lastModified: new Date().toISOString() };
+      }
+
+      // Check if this project has links to the renamed project.
+      if (!proj.treeData) return proj;
+      
+      let treeData = proj.treeData;
+      let wasModified = false;
+      const nodesMap = getAllNodesAsMap(treeData);
+
+      nodesMap.forEach(node => {
+        if (node.linkedProjectId === projectId) {
+          treeData = updateNodeInTree(treeData, node.id, { linkedProjectName: newName });
+          wasModified = true;
+        }
+      });
+
+      if (wasModified) {
+        return { ...proj, treeData, lastModified: new Date().toISOString() };
+      }
+      
+      return proj;
+    });
+
+    setProjects(projectsWithLinksUpdated);
+
     if (activeProjectId === projectId) { setInitialPrompt(newName); }
-    addHistoryEntry('PROJECT_RENAMED', `Project "${oldProject?.name}" renamed to "${newName}".`);
+    addHistoryEntry('PROJECT_RENAMED', `Project "${oldProject.name}" renamed to "${newName}". Incoming links updated.`);
     closeProjectNameModal();
   }, [projects, activeProjectId, addHistoryEntry, closeProjectNameModal, setInitialPrompt]);
 

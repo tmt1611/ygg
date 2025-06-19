@@ -47,17 +47,19 @@ ${errorInfo?.componentStack || 'Not available'}
   };
 
   handleHardReset = () => {
-    try {
-      console.warn("Yggdrasil: Performing hard reset. Clearing all application data from localStorage.");
-      Object.values(APP_STORAGE_KEYS).forEach(key => {
-        localStorage.removeItem(key);
-      });
-      sessionStorage.clear();
-      console.log("Yggdrasil: localStorage and sessionStorage cleared.");
-    } catch (e) {
-      console.error("Yggdrasil: Failed to clear application storage.", e);
-    } finally {
-      window.location.reload();
+    if (window.confirm("Are you sure you want to perform a hard reset?\n\nThis will DELETE ALL your saved projects and settings from this browser. This action cannot be undone.")) {
+      try {
+        console.warn("Yggdrasil: Performing hard reset. Clearing all application data from localStorage.");
+        Object.values(APP_STORAGE_KEYS).forEach(key => {
+          localStorage.removeItem(key);
+        });
+        sessionStorage.clear();
+        console.log("Yggdrasil: localStorage and sessionStorage cleared.");
+      } catch (e) {
+        console.error("Yggdrasil: Failed to clear application storage.", e);
+      } finally {
+        window.location.reload();
+      }
     }
   };
 
