@@ -241,21 +241,67 @@ const GraphViewComponent = ({
 
     nodeGroups.select(".node-label")
       .attr("fill", "var(--graph-node-text)")
-      .attr("dominant-baseline", "middle")
       .attr("font-size", "11px")
       .style("user-select", "none")
       .style("pointer-events", "none")
-      .attr("transform", d => (d.x >= Math.PI ? "rotate(180)" : null))
-      .attr("dy", "0.31em")
-      .attr("x", d => {
-          if (d.isProxy) return 0;
-          return d.x < Math.PI ? (getNodeRadius(d) + 4) : -(getNodeRadius(d) + 4);
+      .attr("text-anchor", "middle")
+      .attr("transform", d => {
+          // Counter-rotate the text to keep it horizontal
+          const rotation = -(d.x * 180 / Math.PI - 90);
+          return `rotate(${rotation})`;
       })
-      .attr("text-anchor", d => {
-          if (d.isProxy) return "middle";
-          return d.x < Math.PI ? "start" : "end";
+      .attr("x", 0) // Center horizontally relative to the node's origin
+      .attr("dy", d => {
+          // Position below the circle for normal nodes, or centered for proxy nodes
+          if (d.isProxy) return "0.3em";
+          // This dy is for the <text> element, it positions the first line.
+          return getNodeRadius(d) + 5;
       })
-      .text(d => d.isProxy ? d.data.name : d.data.name);
+      .text(d => d.data.name)
+      .each(function(d) {
+        if (d.isProxy || !d.data.name) return;
+        
+        const text = select(this);
+        const name = d.data.name;
+        const maxCharsPerLine = 22;
+        const maxLines = 2;
+
+        if (name.length <= maxCharsPerLine) return; // No wrap needed
+
+        let words = name.split(/\s+/).reverse();
+        let word;
+        let line = [];
+        let lines = [];
+        
+        while (word = words.pop()) {
+            line.push(word);
+            if (line.join(' ').length > maxCharsPerLine && line.length > 1) {
+                line.pop();
+                lines.push(line.join(' '));
+                line = [word];
+            }
+        }
+        lines.push(line.join(' '));
+
+        if (lines.length > maxLines) {
+            lines = lines.slice(0, maxLines);
+            let lastLine = lines[maxLines - 1];
+            if (lastLine.length > maxCharsPerLine - 3) {
+                lastLine = lastLine.substring(0, maxCharsPerLine - 3);
+            }
+            lines[maxLines - 1] = lastLine + '...';
+        }
+        
+        text.text(null); // Clear existing text
+
+        lines.forEach((l, i) => {
+            // The first tspan has dy=0, subsequent ones have dy=1.1em to create new lines
+            text.append("tspan")
+                .attr("x", 0)
+                .attr("dy", i === 0 ? 0 : "1.1em")
+                .text(l);
+        });
+      });
 
     nodeGroups.select(".node-rune-icon")
       .attr("transform", d => `rotate(${-(d.x * 180 / Math.PI - 90)})`)

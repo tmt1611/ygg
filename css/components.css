@@ -1013,12 +1013,22 @@ html[data-theme='nebula'] .graph-view-node.highlighted text.node-label {
   stroke-linecap: round;
   stroke-linejoin: round;
   text-shadow: 0 0 3px var(--app-bg); /* Soften the edges a bit */
-  dominant-baseline: middle;
   font-weight: 500;
-} 
+  dominant-baseline: text-before-edge; /* Better for text positioned below a point */
+}
+.graph-view-node:not(.proxy) text.node-label tspan {
+  paint-order: stroke;
+  stroke: var(--app-bg);
+  stroke-width: 4px;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
 html[data-theme='dark'] .graph-view-node:not(.proxy) text.node-label {
   stroke-width: 5px;
   text-shadow: 0 0 5px var(--app-bg), 0 0 8px rgba(var(--primary-accent-rgb), 0.3);
+}
+html[data-theme='dark'] .graph-view-node:not(.proxy) text.node-label tspan {
+  stroke-width: 5px;
 }
 
 .graph-view-link { stroke: var(--graph-link-stroke-ecosystem); stroke-linecap: round; }
