@@ -3,6 +3,57 @@ import { linkRadial, select } from 'd3';
 import { useD3Tree } from '../hooks/useD3Tree.js';
 import { NODE_IMPORTANCE_RUNES } from '../constants.js';
 
+// Helper function to wrap SVG text
+function wrap(textSelection, width, maxLines = 2) {
+    textSelection.each(function() {
+        const text = select(this);
+        const words = text.text().split(/\s+/).reverse();
+        let word;
+        let line = [];
+        let lineNumber = 0;
+        const lineHeight = 1.2; // ems
+        
+        const initialDy = text.attr('dy');
+        text.text(null); // Clear original text
+
+        let tspan = text.append('tspan').attr('x', 0).attr('dy', initialDy);
+
+        while ((word = words.pop()) && lineNumber < maxLines) {
+            line.push(word);
+            tspan.text(line.join(' '));
+            if (tspan.node().getComputedTextLength() > width && line.length > 1) {
+                line.pop();
+                tspan.text(line.join(' '));
+                if (lineNumber + 1 >= maxLines) {
+                    tspan.text(tspan.text() + '…');
+                    break;
+                }
+                line = [word];
+                lineNumber++;
+                tspan = text.append('tspan').attr('x', 0).attr('dy', `${lineHeight}em`).text(word);
+            }
+        }
+        
+        if (words.length > 0 && lineNumber < maxLines) {
+            tspan.text(tspan.text() + '…');
+        }
+
+        // Adjust for top-positioned text to keep it centered on its anchor point
+        const angle = text.datum().x * 180 / Math.PI;
+        const isTop = angle > 195 && angle < 345;
+        if (isTop) {
+            const numLines = text.selectAll('tspan').size();
+            const firstTspan = text.select('tspan');
+            if (numLines > 1 && firstTspan.node()) {
+                const fontSize = 11; // from the .node-label style
+                const totalTextHeight = (numLines - 1) * (fontSize * lineHeight);
+                firstTspan.attr('dy', parseFloat(initialDy) - totalTextHeight);
+            }
+        }
+    });
+}
+
+
 const getNodeRadius = (node) => {
     if (node?.isProxy) return 16;
     switch (node?.data?.importance) {
@@ -273,16 +324,13 @@ const GraphViewComponent = ({
           const spacing = getNodeRadius(d) + 7;
           return angle >= 165 && angle <= 195 ? -spacing : spacing;
       })
-      .text(d => {
-        if (d.isProxy) return d.data.name;
-        if (!d.data.name) return "";
-        // Simple truncation for a cleaner look. Full name is in the tooltip.
-        const maxLength = 25;
-        return d.data.name.length > maxLength ? d.data.name.substring(0, maxLength - 1) + '…' : d.data.name;
-      })
-      .each(function() {
-        // Clear any previous tspans from the old wrapping logic
+      .text(d => d.isProxy ? d.data.name : (d.data.name || ""))
+      .each(function(d) {
         select(this).selectAll("tspan").remove();
+        if (!d.isProxy && d.data.name) {
+            const maxTextWidth = 100; // pixels
+            wrap(select(this), maxTextWidth, 2);
+        }
       });
 
     nodeGroups.select(".node-rune-icon")

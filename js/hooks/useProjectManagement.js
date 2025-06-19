@@ -209,6 +209,10 @@ export const useProjectManagement = ({
         setActiveProjectId(projectToLoad.id);
         addHistoryEntry('PROJECT_LOADED', `Project "${projectToLoad.name}" activated.`);
       }
+      // Switch to graph view after loading a project from the workspace
+      if (viewStates) {
+        viewStates.setYggdrasilViewMode('graph');
+      }
     } else {
       setError(`Project with ID ${projectId} not found.`);
     }
