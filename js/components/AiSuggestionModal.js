@@ -118,7 +118,11 @@ const AiSuggestionModal = ({
                       role: "button",
                       tabIndex: 0,
                       onKeyDown: (e) => { if (e.key === 'Enter' || e.key === ' ') setIsRemovedNodesCollapsed(!isRemovedNodesCollapsed); }
-                    }, "Nodes To Be Removed (", removedNodes.length, "):"),
+                    },
+                     annotatedTree?._isErrorNode ? "Potentially Removed Nodes" : "Nodes To Be Removed",
+                     " (", removedNodes.length, "):"
+                    ),
+                    annotatedTree?._isErrorNode && !isRemovedNodesCollapsed && React.createElement("p", {style: {fontSize: '0.8em', color: 'var(--text-tertiary)', paddingLeft: '10px', margin: '0 0 5px 0'}}, "Because the AI suggestion was malformed, all original nodes are listed here as potentially removed."),
                     React.createElement("ul", { className: `ai-suggestion-modal-removed-nodes-list ${isRemovedNodesCollapsed ? 'collapsed' : ''}` },
                         !isRemovedNodesCollapsed && removedNodes.map(node => (
                             React.createElement("li", { key: `removed-${node.id}`},
