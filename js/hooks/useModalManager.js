@@ -1,5 +1,5 @@
 
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useMemo } from 'react';
 
 export const useModalManager = () => {
   const lastFocusedElementRef = useRef(null);
@@ -87,7 +87,7 @@ export const useModalManager = () => {
   }, [restoreFocus]);
 
 
-  return {
+  const value = useMemo(() => ({
     isProjectNameModalOpen, projectModalConfig, openProjectNameModal, closeProjectNameModal,
     isAiSuggestionModalOpen, pendingAiSuggestion, openAiSuggestionModal, closeAiSuggestionModal, setPendingAiSuggestion,
     isConfirmModalOpen, confirmModalConfig, openConfirmModal, closeConfirmModal,
@@ -96,5 +96,16 @@ export const useModalManager = () => {
     isTechExtractionModalOpen, extractedTechsContent, extractionModalTitle, extractionMode, openTechExtractionModal, closeTechExtractionModal, setExtractionMode,
     isLinkProjectModalOpen, linkProjectModalConfig, openLinkProjectModal, closeLinkProjectModal,
     restoreFocus,
-  };
+  }), [
+    isProjectNameModalOpen, projectModalConfig, openProjectNameModal, closeProjectNameModal,
+    isAiSuggestionModalOpen, pendingAiSuggestion, openAiSuggestionModal, closeAiSuggestionModal, setPendingAiSuggestion,
+    isConfirmModalOpen, confirmModalConfig, openConfirmModal, closeConfirmModal,
+    isNodeEditModalOpen, nodeEditModalConfig, openNodeEditModal, closeNodeEditModal,
+    isContextMenuOpen, contextMenuPosition, contextMenuNodeId, contextMenuLinkSourceInfo, openContextMenu, closeContextMenu,
+    isTechExtractionModalOpen, extractedTechsContent, extractionModalTitle, extractionMode, openTechExtractionModal, closeTechExtractionModal, setExtractionMode,
+    isLinkProjectModalOpen, linkProjectModalConfig, openLinkProjectModal, closeLinkProjectModal,
+    restoreFocus,
+  ]);
+
+  return value;
 };

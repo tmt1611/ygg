@@ -1,5 +1,5 @@
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useMemo } from 'react';
 import { findNodeById, getAllExpandableNodeIds, areAllNodesExpanded } from '../utils.js'; // Removed findNodesByTerm
 import { APP_STORAGE_KEYS } from '../constants.js';
 
@@ -88,7 +88,7 @@ export const useViewStates = ({
     }
   }, [techTreeData, collapsedNodeIds]); 
 
-  return {
+  return useMemo(() => ({
     showListDescriptionsGlobal, setShowListDescriptionsGlobal,
     collapsedNodeIds, setCollapsedNodeIds,
     focusNodeId, setFocusNodeId, selectedNodeInFocusPanelId, setSelectedNodeInFocusPanelId,
@@ -98,5 +98,15 @@ export const useViewStates = ({
     commonViewResetLogic,
     setYggdrasilViewMode, 
     setActiveOverlayPanel,
-  };
+  }), [
+    showListDescriptionsGlobal, setShowListDescriptionsGlobal,
+    collapsedNodeIds, setCollapsedNodeIds,
+    focusNodeId, setFocusNodeId, selectedNodeInFocusPanelId, setSelectedNodeInFocusPanelId,
+    selectedGraphNodeId, setSelectedGraphNodeId,
+    handleSwitchToFocusView,
+    handleToggleCollapseNode, handleToggleAllNodesList,
+    commonViewResetLogic,
+    setYggdrasilViewMode,
+    setActiveOverlayPanel,
+  ]);
 };
