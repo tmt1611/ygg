@@ -12,8 +12,6 @@ export const useViewStates = ({
   setActiveOverlayPanel,
   activeOverlayPanel,
 }) => {
-  const [activeWorkspaceSubTab, setActiveWorkspaceSubTab] = useState(() => (localStorage.getItem(APP_STORAGE_KEYS.ACTIVE_WORKSPACE_SUB_TAB)) || 'projects');
-  
   const [showListDescriptionsGlobal, setShowListDescriptionsGlobal] = useState(true);
   
   const [collapsedNodeIds, setCollapsedNodeIds] = useState(() => {
@@ -25,7 +23,6 @@ export const useViewStates = ({
   const [selectedNodeInFocusPanelId, setSelectedNodeInFocusPanelId] = useState(null);
   const [selectedGraphNodeId, setSelectedGraphNodeId] = useState(null);
 
-  useEffect(() => { localStorage.setItem(APP_STORAGE_KEYS.ACTIVE_WORKSPACE_SUB_TAB, activeWorkspaceSubTab); }, [activeWorkspaceSubTab]);
   useEffect(() => { localStorage.setItem(APP_STORAGE_KEYS.COLLAPSED_NODES, JSON.stringify(Array.from(collapsedNodeIds))); }, [collapsedNodeIds]);
 
   useEffect(() => {
@@ -92,7 +89,6 @@ export const useViewStates = ({
   }, [techTreeData, collapsedNodeIds]); 
 
   return {
-    activeWorkspaceSubTab, setActiveWorkspaceSubTab,
     showListDescriptionsGlobal, setShowListDescriptionsGlobal,
     collapsedNodeIds, setCollapsedNodeIds,
     focusNodeId, setFocusNodeId, selectedNodeInFocusPanelId, setSelectedNodeInFocusPanelId,

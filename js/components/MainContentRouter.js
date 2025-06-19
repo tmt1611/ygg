@@ -35,8 +35,6 @@ const MainContentRouter = ({
   if (yggdrasilViewMode === 'workspace' && !isLoading && !isModifying) {
     return (
       React.createElement(WorkspaceTabContent, {
-        activeSubTab: viewStates.activeWorkspaceSubTab,
-        setActiveSubTab: viewStates.setActiveWorkspaceSubTab,
         projects: projectManager.projects,
         activeProjectId: projectManager.activeProjectId,
         onLoadProject: (id) => projectManager.handleSetActiveProject(id),

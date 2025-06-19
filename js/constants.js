@@ -9,7 +9,6 @@ export const APP_STORAGE_KEYS = {
   SIDEBAR_COLLAPSED_STATE: 'yggdrasilSidebarCollapsedState_v2.1',
   SIDEBAR_PANEL_STATES: 'yggdrasilSidebarPanelStates_v2.1', 
   ACTIVE_MAIN_VIEW: 'yggdrasilActiveMainView_v2.1',
-  ACTIVE_WORKSPACE_SUB_TAB: 'yggdrasilActiveWorkspaceSubTab_v2.1', 
 };
 
 export const ELF_WARFARE_STRUCTURE_JSON_STRING = `
