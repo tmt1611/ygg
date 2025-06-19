@@ -42,7 +42,9 @@
         --primary-accent-hover-bg: #E8F5E9; 
 
         --secondary-accent: #A0522D; /* Yggdrasil: Earthy Brown */
+        --secondary-accent-rgb: 160, 82, 45;
         --secondary-accent-dark: #795548; 
+        --secondary-accent-dark-rgb: 121, 85, 72;
         
         --border-color: #D1D5DB;
         --border-color-strong: #A0A0C0;
@@ -158,7 +160,9 @@
         --primary-accent-hover-bg: #2A2A2A; /* Darker hover background */
         
         --secondary-accent: #BCAAA4; 
+        --secondary-accent-rgb: 188, 170, 164;
         --secondary-accent-dark: #8D6E63;
+        --secondary-accent-dark-rgb: 141, 110, 99;
 
         --border-color: #383838; /* Darker border color */
         --border-color-strong: #555555;
@@ -245,7 +249,9 @@
         --primary-accent-hover-bg: rgba(229,115,115, 0.08);
 
         --secondary-accent: #81C784; /* Sage Green */
+        --secondary-accent-rgb: 129, 199, 132;
         --secondary-accent-dark: #4CAF50;
+        --secondary-accent-dark-rgb: 76, 175, 80;
         
         --border-color: #EAE3DC;
         --border-color-strong: #CFC5BB;
@@ -327,7 +333,9 @@
         --primary-accent-hover-bg: rgba(88, 166, 255, 0.12);
 
         --secondary-accent: #f78166; 
+        --secondary-accent-rgb: 247, 129, 102;
         --secondary-accent-dark: #d36c54;
+        --secondary-accent-dark-rgb: 211, 108, 84;
 
         --border-color: #30363d;
         --border-color-strong: #454c56;
@@ -393,6 +401,8 @@
       *, *::before, *::after { box-sizing: border-box; }
       html, body { margin: 0; padding: 0; height: 100%; }
       body {
+        /* Default background color from theme.css, now consolidated here */
+        background-color: var(--app-bg);
         font-family: var(--font-family-sans);
         font-size: var(--font-size-base);
         line-height: var(--line-height-base);

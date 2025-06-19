@@ -121,6 +121,7 @@ const AiSuggestionModal = ({
                     React.createElement("ul", { className: `ai-suggestion-modal-removed-nodes-list ${isRemovedNodesCollapsed ? 'collapsed' : ''}` },
                         !isRemovedNodesCollapsed && removedNodes.map(node => (
                             React.createElement("li", { key: `removed-${node.id}`},
+                              node.isLocked && React.createElement("span", { title: "Locked Node", style: { marginRight: '4px', color: 'var(--error-color)', fontWeight: 'bold' } }, "🔒"),
                               React.createElement("strong", null, node.name), " ", node.description && `- "${node.description.substring(0, 40)}${node.description.length > 40 ? '...' : ''}"`,
                               React.createElement("span", { className: "node-id" }, " (ID: ", node.id.substring(0,8), "...)")
                             )

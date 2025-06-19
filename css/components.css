@@ -1563,10 +1563,14 @@ html[data-theme='nebula'] .history-item-summary strong {
   color: var(--secondary-accent-dark);
   font-weight: 500;
   font-style: italic;
+  background-color: rgba(var(--secondary-accent-dark-rgb, 121, 85, 72), 0.05);
+  padding: 1px 4px;
+  border-radius: var(--border-radius);
 }
 html[data-theme='dark'] .history-item-summary strong.history-entity,
 html[data-theme='nebula'] .history-item-summary strong.history-entity {
     color: var(--secondary-accent);
+    background-color: rgba(var(--secondary-accent-rgb, 247, 129, 102), 0.1);
 }
 
 .history-item-summary strong.history-keyword {
