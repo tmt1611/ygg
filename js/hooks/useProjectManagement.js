@@ -26,7 +26,7 @@ export const useProjectManagement = ({
     setContextText('');
     setInitialPromptFromHook('');
     setActiveProjectId(null);
-  }, [viewStates, setTechTreeData, setContextText, setInitialPromptFromHook]);
+  }, [viewStates, setTechTreeData, setContextText, setInitialPromptFromHook, setActiveProjectId]);
 
   const saveProjectsToLocalStorage = useCallback(() => {
     if (projects.length > 0) localStorage.setItem(APP_STORAGE_KEYS.PROJECT_COLLECTION, JSON.stringify(projects));
@@ -176,7 +176,7 @@ export const useProjectManagement = ({
 
     findAndLoadProject();
 
-  }, [setTechTreeData, setContextText, setInitialPromptFromHook, viewStates, addHistoryEntry]);
+  }, [setTechTreeData, setContextText, setInitialPromptFromHook, viewStates, addHistoryEntry, setActiveProjectId]);
 
 
   const initializeDefaultProjects = useCallback(() => {
@@ -217,7 +217,7 @@ export const useProjectManagement = ({
     } else {
       setError(`Project with ID ${projectId} not found.`);
     }
-  }, [projects, viewStates, setTechTreeData, setContextText, setInitialPromptFromHook, addHistoryEntry, setError]);
+  }, [projects, viewStates, setTechTreeData, setContextText, setInitialPromptFromHook, addHistoryEntry, setError, setActiveProjectId]);
 
   const saveNewProject = useCallback((treeToSave, name, isExample = false) => {
     if (!treeToSave) { setError("No tree data to save as project."); return null; }
@@ -233,7 +233,7 @@ export const useProjectManagement = ({
     }
     addHistoryEntry('PROJECT_CREATED', `${isExample ? 'Example p' : 'P'}roject "${name}" saved.`);
     return newProject;
-  }, [addHistoryEntry, setError, setContextText, setInitialPromptFromHook]);
+  }, [addHistoryEntry, setError, setContextText, setInitialPromptFromHook, setActiveProjectId]);
 
   const internalCreateNewProject = useCallback((name) => {
     resetTreeForNewProjectContext();
