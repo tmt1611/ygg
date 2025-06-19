@@ -17,6 +17,8 @@ const GraphViewComponent = ({
   onNavigateToLinkedProject,
   handleNavigateToSourceNode
 }) => {
+
+
   const svgContainerDivRef = useRef(null); 
   const svgRef = useRef(null); 
   
@@ -57,7 +59,7 @@ const GraphViewComponent = ({
                         name: createAcronym(targetProject.name),
                         fullName: targetProject.name,
                         id: `proxy-data-${targetProject.id}`, importance: 'common',
-                        isOutgoingLink: true, realProjectId: targetProject.id, realNodeId: targetProject.treeData.id,
+                        isOutgoingLink: true, realProjectId: targetProject.id, realNodeId: targetProject.treeData?.id,
                     },
                     parent: node
                 };
