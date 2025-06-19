@@ -271,46 +271,57 @@ const GraphViewComponent = ({
       .each(function(d) {
         if (d.isProxy || !d.data.name) return;
         
-        const text = select(this);
+        const textElement = select(this);
         const name = d.data.name;
-        const maxCharsPerLine = Math.floor(getNodeRadius(d) * 1.2 + 4);
+        const maxCharsPerLine = Math.floor(getNodeRadius(d) * 1.4); // Give a bit more room
         const maxLines = 2;
 
-        text.text(null); // Clear previous content to handle updates correctly
+        textElement.text(null); // Clear previous content
 
-        if (name.length <= maxCharsPerLine) {
-          text.text(name); // Set text directly if it doesn't need wrapping
+        if (name.length <= maxCharsPerLine && !name.includes(' ')) {
+          textElement.text(name); // Set text directly if it fits and has no spaces
           return;
         }
 
-        let words = name.split(/\s+/).reverse();
-        let word;
-        let line = [];
+        const words = name.split(/\s+/);
         let lines = [];
-        
-        while (word = words.pop()) {
-            line.push(word);
-            if (line.join(' ').length > maxCharsPerLine && line.length > 1) {
-                line.pop();
-                lines.push(line.join(' '));
-                line = [word];
+        let currentLine = "";
+
+        for (const word of words) {
+            // Handle very long words that must be truncated
+            if (word.length > maxCharsPerLine) {
+                if (currentLine) lines.push(currentLine);
+                lines.push(word.substring(0, maxCharsPerLine - 1) + '…');
+                currentLine = "";
+                continue;
+            }
+
+            const testLine = currentLine ? currentLine + " " + word : word;
+            if (testLine.length > maxCharsPerLine && currentLine) {
+                lines.push(currentLine);
+                currentLine = word;
+            } else {
+                currentLine = testLine;
             }
         }
-        lines.push(line.join(' '));
+        if (currentLine) lines.push(currentLine);
 
         if (lines.length > maxLines) {
+            const moreLinesExist = true;
             lines = lines.slice(0, maxLines);
-            let lastLine = lines[maxLines - 1];
-            if (lastLine.length > maxCharsPerLine - 3) {
-                lastLine = lastLine.substring(0, maxCharsPerLine - 3);
+            if (moreLinesExist) {
+                let lastLine = lines[maxLines - 1];
+                if (!lastLine.endsWith('…')) {
+                    if (lastLine.length >= maxCharsPerLine) { // Use >= to be safe
+                       lastLine = lastLine.substring(0, maxCharsPerLine - 1);
+                    }
+                    lines[maxLines - 1] = lastLine + '…';
+                }
             }
-            lines[maxLines - 1] = lastLine + '...';
         }
         
         lines.forEach((l, i) => {
-            // The first tspan has dy=0 relative to the parent <text> dy.
-            // Subsequent ones have dy=1.1em to create new lines.
-            text.append("tspan")
+            textElement.append("tspan")
                 .attr("x", 0)
                 .attr("dy", i === 0 ? 0 : "1.1em")
                 .text(l);

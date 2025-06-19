@@ -20,8 +20,7 @@ export const useD3Tree = (
   const gSelectionRef = useRef(null);
   const zoomBehaviorRef = useRef(null);
   const [g, setG] = useState(null);
-  const [isContainerReady, setIsContainerReady] = useState(false);
-  const initialDataLoaded = useRef(false);
+  const initialDataLoadedForSession = useRef(false);
 
   const rootHierarchy = useMemo(() => {
     if (!treeData) return null;
@@ -47,31 +46,6 @@ export const useD3Tree = (
     }
   }, []);
 
-  // Effect to determine when the SVG container is ready (has dimensions)
-  useEffect(() => {
-    const svgElement = svgRef.current;
-    if (!svgElement?.parentElement) return;
-
-    const container = svgElement.parentElement;
-    
-    // Check initial size
-    if (container.clientWidth > 0 && container.clientHeight > 0) {
-        setIsContainerReady(true);
-        return;
-    }
-
-    // Fallback to observer if size is not yet available
-    const resizeObserver = new ResizeObserver(() => {
-        if (container.clientWidth > 0 && container.clientHeight > 0) {
-            setIsContainerReady(true);
-            resizeObserver.disconnect(); // We only need it once
-        }
-    });
-    resizeObserver.observe(container);
-
-    return () => resizeObserver.disconnect();
-  }, [svgRef]);
-
   useLayoutEffect(() => {
     if (!svgRef.current) return;
 
@@ -96,17 +70,21 @@ export const useD3Tree = (
     }
   }, [svgRef]); 
 
-  // This new effect handles the initial centering, waiting for both data and a ready container.
+  // This new effect handles the initial centering.
   useLayoutEffect(() => {
-    if (treeData && isContainerReady && !initialDataLoaded.current) {
-      resetZoom();
-      initialDataLoaded.current = true;
+    if (treeData && g) {
+      // Center the graph on first load of a new tree.
+      // A small delay helps ensure the parent container has its final dimensions.
+      const timer = setTimeout(() => {
+        resetZoom();
+      }, 50); 
+      initialDataLoadedForSession.current = true;
+      return () => clearTimeout(timer);
     } else if (!treeData) {
-      // Reset the flags if data is unloaded, allowing re-centering on next load.
-      initialDataLoaded.current = false;
-      setIsContainerReady(false);
+      // Reset the flag if data is unloaded, allowing re-centering on next load.
+      initialDataLoadedForSession.current = false;
     }
-  }, [treeData, isContainerReady, resetZoom]);
+  }, [treeData, g, resetZoom]);
 
   const nodesAndLinks = useMemo(() => {
     if (!rootHierarchy) return { nodes: [], links: [] };
