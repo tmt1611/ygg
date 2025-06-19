@@ -37,7 +37,8 @@ const AiSuggestionModal = ({
             modifiedContentNodes: [],
             lockedContentChangedNodes: [],
             structureModifiedNodes: [],
-            reparentedNodes: []
+            reparentedNodes: [],
+            lockedNodesRemoved: []
         };
     }
     return compareAndAnnotateTree(currentTreeForDiff, suggestion);

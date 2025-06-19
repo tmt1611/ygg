@@ -115,12 +115,6 @@ const App = () => {
   // --- EFFECTS ---
   useEffect(() => {
     projectManager.initializeDefaultProjects();
-    if (!techTreeData && (pendingAiSuggestion || previousTreeStateForUndo || baseForModalDiff)) {
-        setPendingAiSuggestion(null);
-        setPreviousTreeStateForUndo(null);
-        setBaseForModalDiff(null);
-        setModificationPrompt(''); 
-    }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); 
 
@@ -132,7 +126,7 @@ const App = () => {
         setModificationPrompt(''); 
         if (isAiSuggestionModalOpen) modalManager.closeAiSuggestionModal();
     }
-  }, [techTreeData, pendingAiSuggestion, previousTreeStateForUndo, baseForModalDiff, isAiSuggestionModalOpen, modalManager.closeAiSuggestionModal, setPendingAiSuggestion]);
+  }, [techTreeData, pendingAiSuggestion, previousTreeStateForUndo, baseForModalDiff, isAiSuggestionModalOpen, modalManager.closeAiSuggestionModal, setPendingAiSuggestion, setModificationPrompt]);
 
 
   // --- Event Handlers & Callbacks ---
