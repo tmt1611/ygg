@@ -4,7 +4,7 @@ import { useD3Tree } from '../hooks/useD3Tree.js';
 import { NODE_IMPORTANCE_RUNES } from '../constants.js';
 
 // Helper function to wrap SVG text
-function wrap(textSelection, width, maxLines = 2) {
+function wrap(textSelection, width, maxLines = 3) {
     textSelection.each(function() {
         const text = select(this);
         const words = text.text().split(/\s+/).reverse();
@@ -334,7 +334,7 @@ const GraphViewComponent = ({
         select(this).selectAll("tspan").remove();
         if (!d.isProxy && d.data.name) {
             const maxTextWidth = getNodeRadius(d) * 6; // Dynamic width based on node size
-            wrap(select(this), maxTextWidth, 2);
+            wrap(select(this), maxTextWidth, 3);
         }
       });
 
