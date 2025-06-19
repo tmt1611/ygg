@@ -2,79 +2,48 @@ import React, { useState, useMemo } from 'react';
 import HistoryItem from '../HistoryItem.js';
 import { EVENT_TYPE_INFO } from '../../constants.js';
 
-const KEY_EVENT_TYPES = Object.keys(EVENT_TYPE_INFO).filter(key => EVENT_TYPE_INFO[key].isKey);
+const KEY_EVENT_TYPES = [
+  'TREE_INIT_AI', 'AI_MOD_CONFIRMED', 'AI_SUMMARY_GEN', 'NODE_INSIGHTS_GENERATED',
+  'AI_STRATEGY_GEN', 'NODE_CREATED', 'NODE_UPDATED', 'NODE_DELETED', 'NODE_LOCK_TOGGLED',
+  'NODE_STATUS_CHANGED', 'NODE_PROJECT_LINK_CREATED', 'NODE_PROJECT_LINK_REMOVED',
+  'TREE_LOCK_ALL', 'TREE_UNLOCK_ALL', 'PROJECT_CREATED', 'PROJECT_LOADED',
+  'PROJECT_SAVED', 'PROJECT_RENAMED', 'PROJECT_DELETED', 'PROJECT_IMPORTED',
+  'PROJECT_EXAMPLE_LOADED', 'TREE_DOWNLOADED', 'API_KEY_STATUS_CHANGED',
+  'APP_ERROR_ENCOUNTERED', 
+];
 
 const HistoryViewTabContent = ({ history, onClearHistory }) => {
   const [filterMode, setFilterMode] = useState('key');
   const [searchTerm, setSearchTerm] = useState('');
 
   const filteredHistory = useMemo(() => {
-    let tempHistory = history;
     if (filterMode === 'key') {
-      tempHistory = tempHistory.filter(entry => KEY_EVENT_TYPES.includes(entry.type));
+      return history.filter(entry => KEY_EVENT_TYPES.includes(entry.type));
     }
-    if (searchTerm.trim()) {
-      const lowerSearchTerm = searchTerm.toLowerCase();
-      tempHistory = tempHistory.filter(entry => entry.summary.toLowerCase().includes(lowerSearchTerm));
-    }
-    return tempHistory;
-  }, [history, filterMode, searchTerm]);
-
-  const keyEventsCount = useMemo(() => history.filter(entry => KEY_EVENT_TYPES.includes(entry.type)).length, [history]);
+    return history;
+  }, [history, filterMode]);
 
   return (
-    React.createElement("div", { style: { display: 'flex', flexDirection: 'column', gap: '10px', height: '100%' }},
-      React.createElement("div", { className: "panel-header", style: { alignItems: 'flex-start' } },
-        React.createElement("span", { className: "panel-header-icon", style: { fontSize: '1.2em', paddingTop: '2px' } }, "📜"),
-        React.createElement("h3", { style: { fontSize: '1.05em' } }, "Action History")
-      ),
-      React.createElement("div", { className: "history-controls" },
+    React.createElement("div", { style: { display: 'flex', flexDirection: 'column', gap: '10px' }},
+      React.createElement("div", { style: { display: 'flex', justifyContent: 'center', gap: '10px', paddingBottom: '10px', borderBottom: '1px solid var(--border-color)' }},
         React.createElement("button", {
-            onClick: onClearHistory,
-            className: "base-icon-button",
-            title: "Clear all history entries",
-            disabled: history.length === 0,
-            style: { padding: '4px' }
-        }, '🧹'),
-        React.createElement("input", {
-          type: "search",
-          placeholder: `Search ${filteredHistory.length} events...`,
-          value: searchTerm,
-          onChange: (e) => setSearchTerm(e.target.value),
-          style: { width: '100%', flexGrow: 1, fontSize: '0.9em' },
-          "aria-label": "Search history log"
-        }),
-        React.createElement("div", { className: "segmented-control", role: "radiogroup", "aria-label": "History Filter" },
-          React.createElement("button", {
-            role: "radio", "aria-checked": filterMode === 'key',
-            className: filterMode === 'key' ? 'active' : '',
-            onClick: () => setFilterMode('key'),
-            title: `Show Key Events Only (${keyEventsCount})`
-          }, "Key"),
-          React.createElement("button", {
-            role: "radio", "aria-checked": filterMode === 'all',
-            className: filterMode === 'all' ? 'active' : '',
-            onClick: () => setFilterMode('all'),
-            title: `Show All Events (${history.length})`
-          }, "All")
+          onClick: () => setFilterMode('all'),
+          className: filterMode === 'all' ? 'primary' : 'secondary',
+          disabled: filterMode === 'all',
+          style: {fontSize: '0.9em', padding: '6px 10px'}
+        },
+          "Show All (", history.length, ")"
+        ),
+        React.createElement("button", {
+          onClick: () => setFilterMode('key'),
+          className: filterMode === 'key' ? 'primary' : 'secondary',
+          disabled: filterMode === 'key',
+          style: {fontSize: '0.9em', padding: '6px 10px'}
+        },
+          "Key Events Only (", history.filter(entry => KEY_EVENT_TYPES.includes(entry.type)).length, ")"
         )
       ),
-      React.createElement("div", { style: { flexGrow: 1, overflowY: 'auto' }},
-        filteredHistory.length > 0 ? (
-          React.createElement("ul", { style: { listStyle: 'none', padding: 0, margin: 0 }, "aria-label": "History of actions" },
-            filteredHistory.map((entry) => (
-              React.createElement(HistoryItem, { key: entry.id, entry: entry })
-            ))
-          )
-        ) : (
-          React.createElement("div", { className: "placeholder-center-content", style: { minHeight: '100px', padding: '10px' }},
-            React.createElement("span", { className: "placeholder-icon", style: {fontSize: '2em', marginBottom: '8px'}}, "📜"),
-            history.length > 0 ? 
-                React.createElement("p", { style: { color: 'var(--text-tertiary)', fontSize: '0.9em' }}, "No actions match your search.") :
-                React.createElement("p", { style: { color: 'var(--text-tertiary)', fontSize: '0.9em' }}, "No actions recorded yet.")
-          )
-        )
-      )
+      React.createElement(HistoryPanel, { history: filteredHistory })
     )
   );
 };

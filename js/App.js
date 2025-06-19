@@ -302,13 +302,7 @@ const App = () => {
           onUseSuggestedDescription: (desc) => aiInsightsHook.handleUseSuggestedDescription(selectedNodeForInsights.id, desc),
           onUseAlternativeName: (altName) => aiInsightsHook.handleUseAlternativeName(selectedNodeForInsights.id, altName),
           onAddSuggestedChildFromInsight: (name, desc) => aiInsightsHook.handleAddSuggestedChildFromInsight(selectedNodeForInsights.id, name, desc),
-          // History Tab Props
-          history: historyManager.history,
-          onClearHistory: handleClearHistoryWithConfirmation,
-          // Common Props
-          apiKeyIsSet: apiKeyHook.status.isSet,
-          hasTechTreeData: !!techTreeData,
-          isAppBusy: isLoading || isModifying || isFetchingStrategicSuggestions
+          history: historyManager.history
         }),
         
         React.createElement("main", { className: "yggdrasil-core-canvas" },
