@@ -28,12 +28,10 @@ const OverlayPanelView = ({
       };
       document.addEventListener('keydown', handleEscape);
       return () => document.removeEventListener('keydown', handleEscape);
-    } else {
-        if(panelRef.current?.classList.contains('visible')){ 
-             onRestoreFocus();
-        }
     }
-  }, [isOpen, onClosePanel, onRestoreFocus]);
+    // The onRestoreFocus logic was flawed and redundant. 
+    // The parent modal manager already handles restoring focus correctly on close.
+  }, [isOpen, onClosePanel]);
 
 
   return (
