@@ -20,6 +20,7 @@ export const useD3Tree = (
   const gSelectionRef = useRef(null);
   const zoomBehaviorRef = useRef(null);
   const [g, setG] = useState(null);
+  const [isContainerReady, setIsContainerReady] = useState(false);
   const initialDataLoaded = useRef(false);
 
   const rootHierarchy = useMemo(() => {
@@ -46,6 +47,31 @@ export const useD3Tree = (
     }
   }, []);
 
+  // Effect to determine when the SVG container is ready (has dimensions)
+  useLayoutEffect(() => {
+    const svgElement = svgRef.current;
+    if (!svgElement?.parentElement) return;
+
+    const container = svgElement.parentElement;
+    
+    // Check initial size
+    if (container.clientWidth > 0 && container.clientHeight > 0) {
+        setIsContainerReady(true);
+        return;
+    }
+
+    // Fallback to observer if size is not yet available
+    const resizeObserver = new ResizeObserver(() => {
+        if (container.clientWidth > 0 && container.clientHeight > 0) {
+            setIsContainerReady(true);
+            resizeObserver.disconnect(); // We only need it once
+        }
+    });
+    resizeObserver.observe(container);
+
+    return () => resizeObserver.disconnect();
+  }, [svgRef]);
+
   useLayoutEffect(() => {
     if (!svgRef.current) return;
 
@@ -70,16 +96,17 @@ export const useD3Tree = (
     }
   }, [svgRef]); 
 
-  // This new effect handles the initial centering.
+  // This new effect handles the initial centering, waiting for both data and a ready container.
   useLayoutEffect(() => {
-    if (treeData && !initialDataLoaded.current) {
+    if (treeData && isContainerReady && !initialDataLoaded.current) {
       resetZoom();
       initialDataLoaded.current = true;
     } else if (!treeData) {
-      // Reset the flag if data is unloaded, allowing re-centering on next load.
+      // Reset the flags if data is unloaded, allowing re-centering on next load.
       initialDataLoaded.current = false;
+      setIsContainerReady(false);
     }
-  }, [treeData, resetZoom]);
+  }, [treeData, isContainerReady, resetZoom]);
 
   const nodesAndLinks = useMemo(() => {
     if (!rootHierarchy) return { nodes: [], links: [] };
