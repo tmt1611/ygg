@@ -14,8 +14,14 @@ export const useViewStates = ({
   const [showListDescriptionsGlobal, setShowListDescriptionsGlobal] = useState(true);
   
   const [collapsedNodeIds, setCollapsedNodeIds] = useState(() => {
-    const storedCollapsed = localStorage.getItem(APP_STORAGE_KEYS.COLLAPSED_NODES);
-    return storedCollapsed ? new Set(JSON.parse(storedCollapsed)) : new Set();
+    try {
+      const storedCollapsed = localStorage.getItem(APP_STORAGE_KEYS.COLLAPSED_NODES);
+      const parsed = storedCollapsed ? JSON.parse(storedCollapsed) : [];
+      return new Set(Array.isArray(parsed) ? parsed : []);
+    } catch (e) {
+      console.warn("Could not parse collapsed node IDs from localStorage", e);
+      return new Set();
+    }
   });
   
   const [focusNodeId, setFocusNodeId] = useState(null);

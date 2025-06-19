@@ -211,17 +211,10 @@ const GraphViewComponent = ({
           });
 
           group.append("text").attr("class", "node-label")
-            .attr("font-size", d => {
-                if (d.isProxy) return "11px";
-                const radius = getNodeRadius(d);
-                if (radius > 20) return "10px";
-                if (radius > 14) return "9px";
-                return "8px";
-            })
             .style("pointer-events", "none").style("user-select", "none");
           
           group.append("text").attr("class", "node-rune-icon").attr("dy", "0.35em")
-            .attr("font-size", d => `${getNodeRadius(d) * 1.2}px`).style("pointer-events", "none").style("user-select", "none");
+            .attr("font-size", d => `${getNodeRadius(d) * 0.9}px`).style("pointer-events", "none").style("user-select", "none");
 
           group.append("text").attr("class", "node-icon node-lock-icon").attr("dy", d => `${getNodeRadius(d) * 0.4}px`)
             .attr("dx", d => `${-getNodeRadius(d) * 0.9}px`).attr("font-size", d => `${getNodeRadius(d) * 0.8}px`)
@@ -247,59 +240,33 @@ const GraphViewComponent = ({
     });
 
     nodeGroups.select(".node-label")
-      .attr("fill", "var(--graph-node-text)") // Always set fill, CSS can override for proxy
-      .attr("text-anchor", "middle")
-      .each(function(d) { // D3 text wrapping
-          const text = select(this);
-          const name = d.isProxy ? d.data.name : d.data.name;
-          text.text(null); // Clear existing text/tspans
-
-          if (d.isProxy) {
-              text.append("tspan").text(name);
-              return;
-          }
-          
-          const words = name.split(/\s+/).filter(Boolean);
+      .attr("fill", "var(--graph-node-text)")
+      .attr("dominant-baseline", "middle")
+      .attr("font-size", "11px")
+      .style("user-select", "none")
+      .style("pointer-events", "none")
+      .text(d => d.isProxy ? d.data.name : d.data.name)
+      .attr("dx", d => {
+          if (d.isProxy) return 0;
           const radius = getNodeRadius(d);
-          const maxWidth = radius * 2 * 0.8; // Use 80% of diameter for text width
-          const lineHeight = 1.1; // ems
-          
-          let line = [];
-          const lines = [];
-          
-          const tempTspan = text.append("tspan").style("visibility", "hidden");
-          words.forEach(word => {
-            const testLine = [...line, word];
-            tempTspan.text(testLine.join(" "));
-            if (tempTspan.node().getComputedTextLength() > maxWidth && line.length > 0) {
-              lines.push(line.join(" "));
-              line = [word];
-            } else {
-              line = testLine;
-            }
-          });
-          lines.push(line.join(" "));
-          tempTspan.remove();
-
-          const numLines = lines.length;
-          // startDy is for vertical centering of the text block
-          const startDy = -(numLines - 1) * 0.5 * lineHeight + 0.35; // a touch of offset for better middle alignment
-          
-          lines.forEach((lineText, i) => {
-              text.append("tspan")
-                  .attr("x", 0)
-                  .attr("dy", i === 0 ? `${startDy}em` : `${lineHeight}em`)
-                  .text(lineText);
-          });
+          const isLeft = d.x > Math.PI;
+          return isLeft ? -(radius + 6) : (radius + 6);
+      })
+      .attr("text-anchor", d => {
+          if (d.isProxy) return "middle";
+          return d.x > Math.PI ? "end" : "start";
       });
 
     nodeGroups.select(".node-rune-icon")
-      .text('') // Text is now inside the node, so we hide the rune to avoid overlap.
-      .attr("fill", "transparent");
+      .text(d => {
+        if (d.isProxy) return '';
+        // Now that text is outside, the rune can be inside.
+        return NODE_IMPORTANCE_RUNES[d.data.importance] || '•';
+      });
 
     nodeGroups.select(".node-lock-icon").text(d => (d.data.isLocked && !d.isProxy ? "🔒" : ""));
 
-  }, [g, nodes, links, nodeRadius, handleNodeClick, handleNodeDoubleClick, handleNodeContextMenu, projectLinksAndProxyNodes]);
+  }, [g, nodes, links, handleNodeClick, handleNodeDoubleClick, handleNodeContextMenu, projectLinksAndProxyNodes]);
 
   // Effect for dynamic styling (selection, search highlight)
   useEffect(() => {

@@ -11,8 +11,13 @@ export const useAppThemeAndLayout = (addHistoryEntry) => {
   });
 
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(() => {
-    const savedState = localStorage.getItem(APP_STORAGE_KEYS.SIDEBAR_COLLAPSED_STATE);
-    return savedState ? JSON.parse(savedState) : false;
+    try {
+      const savedState = localStorage.getItem(APP_STORAGE_KEYS.SIDEBAR_COLLAPSED_STATE);
+      return savedState ? JSON.parse(savedState) : false;
+    } catch (e) {
+      console.warn("Could not parse sidebar collapsed state from localStorage", e);
+      return false;
+    }
   });
 
   const [yggdrasilViewMode, _setYggdrasilViewMode] = useState(() => {
