@@ -23,9 +23,9 @@ const AiGenerationPanel = ({
         style: { width: '100%', padding: '10px' }, className: "primary", "aria-busy": isLoadingInitial,
         title: generateUIDisabled ? (apiKeyIsSet ? "Enter a prompt first" : "API Key required") : (activeUserProjectExists ? "Regenerate structure for current project based on this context" : "Generate a new project and structure based on this context")
       },
-        isLoadingInitial ? ( 
-          React.createElement("span", {style: {display: 'flex', alignItems: 'center', justifyContent: 'center'}},
-            React.createElement("span", {className: "basic-spinner-animation", style: {display: 'inline-block', width: '1.2em', height: '1.2em', border: '3px solid rgba(255,255,255,0.3)', borderLeftColor: '#fff', borderRadius: '50%', marginRight: '8px'}}),
+        isLoadingInitial ? (
+          React.createElement("span", {style: {display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px'}},
+            React.createElement("span", {className: "basic-spinner-animation"}),
             "Generating..."
           )
         ) : (activeUserProjectExists ? 'Regenerate Structure for Context' : 'Generate New Structure')

@@ -46,8 +46,8 @@ const ModificationPromptInput = ({
         "aria-busy": isLoading
       },
         isLoading ? (
-          React.createElement("span", {style: {display: 'flex', alignItems: 'center', justifyContent: 'center'}},
-            React.createElement("span", {className: "basic-spinner-animation", style: {display: 'inline-block', width: '1.2em', height: '1.2em', border: '3px solid rgba(255,255,255,0.3)', borderLeftColor: '#fff', borderRadius: '50%', marginRight: '8px', verticalAlign: 'middle'}}),
+          React.createElement("span", {style: {display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px'}},
+            React.createElement("span", {className: "basic-spinner-animation"}),
             "Suggesting..."
           )
         ) : (

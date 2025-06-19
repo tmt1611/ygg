@@ -1828,6 +1828,18 @@ html[data-theme='nebula'] .history-controls .segmented-control button.active {
   overflow-y: auto;
 }
 
+@keyframes basicSpinnerSpin { to { transform: rotate(360deg); } }
+.basic-spinner-animation {
+  animation: basicSpinnerSpin 0.8s linear infinite;
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  vertical-align: middle;
+}
+
 
 @media (max-width: 768px) {
   .yggdrasil-top-bar { padding: 0 8px; }
