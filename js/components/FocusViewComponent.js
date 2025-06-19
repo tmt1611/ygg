@@ -4,6 +4,7 @@ import FocusNodeDisplay from './FocusNodeDisplay.js';
 import FocusViewDetailPanel from './FocusViewDetailPanel.js';
 import { useFocusViewLayout } from '../hooks/useFocusViewLayout.js';
 import PathToRootDisplay from './PathToRootDisplay.js';
+import PathToRootDisplay from './PathToRootDisplay.js';
 
 const FocusViewComponent = ({
   treeData, focusNodeId, selectedNodeInPanelId, onSelectNodeInPanel, onChangeFocusNode,
