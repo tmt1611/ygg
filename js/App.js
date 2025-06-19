@@ -7,7 +7,7 @@ import YggdrasilTopBar from './components/YggdrasilTopBar.js';
 import ErrorMessage from './components/ErrorMessage.js';
 import MainContentRouter from './components/MainContentRouter.js'; 
 import AppModals from './components/AppModals.js'; 
-import WhisperingRunesPanel from './components/WhisperingRunesPanel.js';
+
 
 
 // Hooks
@@ -43,7 +43,6 @@ const App = () => {
   const [baseForModalDiff, setBaseForModalDiff] = useState(null); 
 
   const [selectedNodeForInsights, setSelectedNodeForInsights] = useState(null);
-  const [isNodeActionsPanelVisible, setIsNodeActionsPanelVisible] = useState(true); 
 
   const [strategicSuggestions, setStrategicSuggestions] = useState(null);
   const [isFetchingStrategicSuggestions, setIsFetchingStrategicSuggestions] = useState(false);
@@ -170,11 +169,7 @@ const App = () => {
       setSelectedGraphNodeId(null);
       aiInsightsHook.clearAiInsights(); 
     }
-  }, [techTreeData, setSelectedGraphNodeId, aiInsightsHook]); 
-
-  const toggleNodeActionsPanelVisibility = useCallback(() => {
-    setIsNodeActionsPanelVisible(prev => !prev);
-  }, []);
+  }, [techTreeData, setSelectedGraphNodeId, aiInsightsHook]);
 
 
   const currentTreeStats = useMemo(() => {
@@ -319,7 +314,6 @@ const App = () => {
             },
             appCallbacks: {
               handleExtractData, handleNodeSelectedForInsightsOrActions,
-              toggleNodeActionsPanelVisibility,
               handleDeleteNodeWithConfirmation: nodeOperations.handleDeleteNodeWithConfirmation
             },
             viewControls: {
@@ -327,29 +321,6 @@ const App = () => {
             }
           })
         )
-      ), 
-
-      isNodeActionsPanelVisible && yggdrasilViewMode === 'graph' && (
-        React.createElement(WhisperingRunesPanel, {
-          targetNodeId: selectedNodeForInsights?.id || null,
-          treeData: techTreeData,
-          onOpenNodeEditModal: modalManager.openNodeEditModal,
-          onToggleLock: nodeOperations.handleToggleNodeLock,
-          onNodeImportanceChange: nodeOperations.handleNodeImportanceChange,
-          onLinkToProject: projectLinkingHook.handleOpenLinkProjectModal,
-          onGoToLinkedProject: projectLinkingHook.handleNavigateToLinkedProject,
-          onUnlinkProject: projectLinkingHook.handleUnlinkProjectFromNode,
-          onDeleteNode: nodeOperations.handleDeleteNodeWithConfirmation,
-          onSetFocusNode: viewStates.handleSwitchToFocusView,
-          onGenerateInsights: handleGenerateAiInsights,
-          isAppBusy: isLoading || isModifying || isFetchingStrategicSuggestions,
-          yggdrasilViewMode: yggdrasilViewMode,
-          projects: projectManager.projects,
-          activeProjectId: projectManager.activeProjectId,
-          currentProjectRootId: techTreeData?.id,
-          findLinkSource: projectLinkingHook.findLinkSource,
-          handleNavigateToSourceNode: projectLinkingHook.handleNavigateToSourceNode
-        })
       ),
 
       React.createElement(AppModals, {

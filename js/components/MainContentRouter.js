@@ -25,7 +25,6 @@ const MainContentRouter = ({
 
   const {
     handleExtractData, handleNodeSelectedForInsightsOrActions,
-    toggleNodeActionsPanelVisibility,
     handleDeleteNodeWithConfirmation
   } = appCallbacks;
 
@@ -72,7 +71,6 @@ const MainContentRouter = ({
           onSwitchToFocusView: viewStates.handleSwitchToFocusView,
           onOpenContextMenu: modalManager.openContextMenu,
           isAppBusy: isAppBusy,
-          onToggleNodeActionsPanel: toggleNodeActionsPanelVisibility,
           projects: projectManager.projects,
           activeProjectId: projectManager.activeProjectId,
           findLinkSource: projectLinkingHook.findLinkSource,

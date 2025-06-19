@@ -234,6 +234,11 @@ export const useProjectManagement = ({
   }, [addHistoryEntry, setError, setInitialPrompt, setActiveProjectId]);
 
   const internalCreateNewProject = useCallback((name) => {
+    if (projects.some(p => !p.isExample && p.name.toLowerCase() === name.toLowerCase())) {
+        setError(`A project named "${name}" already exists. Please choose a unique name.`);
+        closeProjectNameModal();
+        return;
+    }
     resetTreeForNewProjectContext();
     const newEmptyTree = initializeNodes({
       id: 'root-empty-' + generateUUID().substring(0,8), name: 'New Project Root', description: 'Start building your tech tree.', importance: 'common'
@@ -247,7 +252,7 @@ export const useProjectManagement = ({
         viewStates.setYggdrasilViewMode('graph');
         viewStates.setSelectedGraphNodeId(savedProject.treeData.id); // Select the root node
     }
-  }, [resetTreeForNewProjectContext, setTechTreeData, setInitialPrompt, saveNewProject, closeProjectNameModal, viewStates]);
+  }, [projects, setError, resetTreeForNewProjectContext, setTechTreeData, setInitialPrompt, saveNewProject, closeProjectNameModal, viewStates]);
 
   const handleCreateNewProject = useCallback(() => {
     openProjectNameModal({ mode: 'create', onConfirm: internalCreateNewProject });
@@ -345,6 +350,12 @@ export const useProjectManagement = ({
   const internalRenameProject = useCallback((projectId, newName) => {
     const oldProject = projects.find(p => p.id === projectId);
     if (!oldProject) return;
+
+    if (projects.some(p => p.id !== projectId && !p.isExample && p.name.toLowerCase() === newName.toLowerCase())) {
+        setError(`A project named "${newName}" already exists. Please choose a unique name.`);
+        closeProjectNameModal();
+        return;
+    }
 
     // Find all projects that link to the project being renamed and update them.
     const projectsWithLinksUpdated = projects.map(proj => {

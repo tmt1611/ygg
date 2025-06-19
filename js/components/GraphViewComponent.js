@@ -38,16 +38,29 @@ function wrap(textSelection, width, maxLines = 2) {
             tspan.text(tspan.text() + '…');
         }
 
-        // Adjust for top-positioned text to keep it centered on its anchor point
-        const angle = text.datum().x * 180 / Math.PI;
-        const isTop = angle > 195 && angle < 345;
-        if (isTop) {
-            const numLines = text.selectAll('tspan').size();
+        // Adjust for multi-line text to keep it centered on its anchor point
+        const numLines = text.selectAll('tspan').size();
+        if (numLines > 1) {
+            const angle = text.datum().x * 180 / Math.PI;
+            const isTop = angle > 195 && angle < 345;
+            const isSide = (angle >= 165 && angle <= 195) || (angle >= 345 || angle <= 15);
+            
             const firstTspan = text.select('tspan');
-            if (numLines > 1 && firstTspan.node()) {
-                const fontSize = 11; // from the .node-label style
-                const totalTextHeight = (numLines - 1) * (fontSize * lineHeight);
-                firstTspan.attr('dy', parseFloat(initialDy) - totalTextHeight);
+            if (firstTspan.node()) {
+                const totalExtraHeightEm = (numLines - 1) * lineHeight;
+                
+                if (isTop) {
+                    // For top-positioned text, shift the entire block up so the bottom line is where the single line would have been.
+                    const initialDyPx = parseFloat(initialDy); // This is in pixels
+                    const totalTextHeightPx = (numLines - 1) * 11 * lineHeight; // font-size is 11px
+                    firstTspan.attr('dy', `${initialDyPx - totalTextHeightPx}`);
+                } else if (isSide) {
+                    // For side-positioned text, shift up by half the height of the extra lines to re-center vertically.
+                    // initialDy is "0.35em"
+                    const newDyEm = 0.35 - (totalExtraHeightEm / 2);
+                    firstTspan.attr('dy', `${newDyEm}em`);
+                }
+                // No adjustment needed for bottom-positioned text, as it naturally expands downwards.
             }
         }
     });
@@ -72,7 +85,6 @@ const GraphViewComponent = ({
   onSwitchToFocusView,
   onOpenContextMenu,
   isAppBusy,
-  onToggleNodeActionsPanel, 
   projects,
   activeProjectId,
   findLinkSource,
@@ -383,8 +395,7 @@ const GraphViewComponent = ({
       React.createElement("div", { className: "graph-view-controls" },
         React.createElement("button", { onClick: zoomIn, title: "Zoom In", disabled: isAppBusy }, "➕"),
         React.createElement("button", { onClick: zoomOut, title: "Zoom Out", disabled: isAppBusy }, "➖"),
-        React.createElement("button", { onClick: resetZoom, title: "Reset Zoom & Pan", disabled: isAppBusy }, "🎯"),
-        React.createElement("button", { onClick: onToggleNodeActionsPanel, title: "Toggle Node Actions Panel", disabled: isAppBusy || !treeData }, "🛠️")
+        React.createElement("button", { onClick: resetZoom, title: "Reset Zoom & Pan", disabled: isAppBusy }, "🎯")
       )
     )
   );
