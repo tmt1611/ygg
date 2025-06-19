@@ -214,6 +214,16 @@ const App = () => {
     handleGenerateAiInsights(node);
   }, [isSidebarCollapsed, toggleSidebar, setActiveSidebarTab, handleGenerateAiInsights]);
 
+  const handleSwitchToAiOpsTab = useCallback((node) => {
+    if (isSidebarCollapsed) {
+        toggleSidebar();
+    }
+    setActiveSidebarTab('ai-tools');
+    // Pre-fill the prompt for a better workflow
+    setModificationPrompt(`Regarding the node "${node.name}" and its children, `);
+    // Ideally, we'd also focus the input, but that's a more complex ref-passing task. This is good enough.
+  }, [isSidebarCollapsed, toggleSidebar, setActiveSidebarTab, setModificationPrompt]);
+
   const handleGenerateStrategicSuggestions = useCallback(async () => {
     if (!apiKeyHook.status.isSet || !initialPrompt.trim()) {
       setStrategicSuggestionsError("API Key must be set and project context (initial prompt) must be provided.");
@@ -348,6 +358,7 @@ const App = () => {
         activeProjectId: projectManager.activeProjectId,
         yggdrasilViewMode: yggdrasilViewMode,
         onGenerateInsights: handleGenerateInsightsAndSwitchTab,
+        onSwitchToAiOps: handleSwitchToAiOpsTab,
       })
     )
   );

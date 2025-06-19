@@ -30,6 +30,7 @@ const AppModals = ({
   activeProjectId,
   yggdrasilViewMode,
   onGenerateInsights,
+  onSwitchToAiOps,
 }) => {
   const {
     isProjectNameModalOpen, projectModalConfig, closeProjectNameModal,
@@ -122,6 +123,7 @@ const AppModals = ({
           onSetFocus: (nodeId) => handleSwitchToFocusView(nodeId),
           onDeleteNode: (nodeId) => onDeleteNodeWithConfirmation(nodeId),
           onGenerateInsights: onGenerateInsights,
+          onSwitchToAiOps: onSwitchToAiOps,
           onLinkToProject: (nodeId) => projectLinkingHook.handleOpenLinkProjectModal(nodeId),
           onGoToLinkedProject: (projectId) => projectLinkingHook.handleNavigateToLinkedProject(projectId),
           onUnlinkProject: (nodeId) => projectLinkingHook.handleUnlinkProjectFromNode(nodeId),

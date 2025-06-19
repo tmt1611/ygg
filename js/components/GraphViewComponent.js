@@ -48,11 +48,9 @@ function wrap(textSelection, width, maxLines = 2) {
             if (dominantBaseline === 'middle') {
                 // Shift up by half the total height of the extra lines
                 firstTspan.attr('dy', `-${totalExtraHeightEms / 2}em`);
-            } else if (dominantBaseline === 'auto' || dominantBaseline === 'alphabetic') { // This is for 'top'
-                // Shift up by the total height of the extra lines
-                firstTspan.attr('dy', `-${totalExtraHeightEms}em`);
             }
-            // 'hanging' (bottom) doesn't need adjustment as it expands down.
+            // 'hanging' (for bottom-positioned text) and 'text-after-edge' (for top-positioned text)
+            // don't need vertical adjustment as they naturally expand away from the anchor point.
         }
     });
 }
@@ -338,8 +336,8 @@ const GraphViewComponent = ({
       .attr("dominant-baseline", d => {
           if (d.isProxy) return "middle";
           const angle = d.x * 180 / Math.PI;
-          if (angle > 15 && angle < 165) return "hanging"; // Bottom
-          if (angle > 195 && angle < 345) return "auto"; // Top (alphabetic)
+          if (angle > 15 && angle < 165) return "hanging"; // Bottom: top of text is at y
+          if (angle > 195 && angle < 345) return "text-after-edge"; // Top: bottom of text is at y
           return "middle"; // Sides
       })
       .attr("dy", d => d.isProxy ? "0.3em" : null)
