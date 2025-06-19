@@ -14,9 +14,27 @@ export const useNodeOperations = ({
   const { handleSaveActiveProject } = projectManager;
   const { focusNodeId, setFocusNodeId, selectedNodeInFocusPanelId, setSelectedNodeInFocusPanelId } = viewStates;
 
+  const deleteNodeAndChildren = useCallback((nodeIdToDelete) => {
+    if (!techTreeData) return;
+    const nodeToDelete = findNodeById(techTreeData, nodeIdToDelete);
+    if (!nodeToDelete) {
+        console.error(`deleteNodeAndChildren: Node with ID ${nodeIdToDelete} not found.`);
+        return;
+    }
+    
+    const newTree = removeNodeAndChildrenFromTree(techTreeData, nodeIdToDelete);
+    setTechTreeData(newTree);
+    addHistoryEntry('NODE_DELETED', `Node "${nodeToDelete.name}" and children deleted.`);
+    handleSaveActiveProject(false);
 
-
-
+    // Reset focus if the focused node or its ancestor was deleted
+    if (focusNodeId === nodeIdToDelete || (newTree && !findNodeById(newTree, focusNodeId))) {
+        setFocusNodeId(null);
+    }
+    if (selectedNodeInFocusPanelId === nodeIdToDelete || (newTree && !findNodeById(newTree, selectedNodeInFocusPanelId))) {
+        setSelectedNodeInFocusPanelId(null);
+    }
+  }, [techTreeData, setTechTreeData, addHistoryEntry, handleSaveActiveProject, focusNodeId, selectedNodeInFocusPanelId, setFocusNodeId, setSelectedNodeInFocusPanelId]);
 
   const handleDeleteNodeWithConfirmation = useCallback((nodeId) => {
     if (!techTreeData) return;
@@ -120,28 +138,6 @@ export const useNodeOperations = ({
     }
   }, [techTreeData, setTechTreeData, handleSaveActiveProject, addHistoryEntry]);
 
-  const deleteNodeAndChildren = useCallback((nodeIdToDelete) => {
-    if (!techTreeData) return;
-    const nodeToDelete = findNodeById(techTreeData, nodeIdToDelete);
-    if (!nodeToDelete) {
-        console.error(`deleteNodeAndChildren: Node with ID ${nodeIdToDelete} not found.`);
-        return;
-    }
-    
-    const newTree = removeNodeAndChildrenFromTree(techTreeData, nodeIdToDelete);
-    setTechTreeData(newTree);
-    addHistoryEntry('NODE_DELETED', `Node "${nodeToDelete.name}" and children deleted.`);
-    handleSaveActiveProject(false);
-
-    // Reset focus if the focused node or its ancestor was deleted
-    if (focusNodeId === nodeIdToDelete || (newTree && !findNodeById(newTree, focusNodeId))) {
-        setFocusNodeId(null);
-    }
-    if (selectedNodeInFocusPanelId === nodeIdToDelete || (newTree && !findNodeById(newTree, selectedNodeInFocusPanelId))) {
-        setSelectedNodeInFocusPanelId(null);
-    }
-  }, [techTreeData, setTechTreeData, addHistoryEntry, handleSaveActiveProject, focusNodeId, selectedNodeInFocusPanelId, setFocusNodeId, setSelectedNodeInFocusPanelId]);
-
   const handleToggleAllLock = useCallback(() => {
     if (!techTreeData) return;
     const allLocked = areAllNodesLocked(techTreeData);
@@ -162,7 +158,6 @@ export const useNodeOperations = ({
     handleToggleNodeLock,
     handleNodeImportanceChange,
     handleConfirmNodeEdit,
-    deleteNodeAndChildren,
     handleDeleteNodeWithConfirmation,
     handleQuickAddChild,
     handleToggleAllLock,
