@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useCallback, useState } from 'react';
+import { useEffect, useMemo, useRef, useCallback, useState, useLayoutEffect } from 'react';
 import { select, zoom, hierarchy, tree, zoomIdentity } from 'd3';
 
 const defaultTreeConfig = {
@@ -35,7 +35,7 @@ export const useD3Tree = (
       .separation((a, b) => (a.parent === b.parent ? 1 : 2));
   }, [rootHierarchy, radialRadiusFactor]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!svgRef.current) return;
 
     if (!svgSelectionRef.current) {
