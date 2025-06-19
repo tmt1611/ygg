@@ -20,7 +20,7 @@ export const useTreeOperationsAI = ({
   setBaseForModalDiff,  
   setIsLoading,
   setIsModifying,
-  setModificationPromptFromHook,
+  setModificationPrompt,
 }) => {
   const { openAiSuggestionModal, closeAiSuggestionModal, openConfirmModal, setPendingAiSuggestion, pendingAiSuggestion } = modalManager;
   const { addHistoryEntry } = historyManager;
@@ -139,7 +139,7 @@ export const useTreeOperationsAI = ({
     if (suggestionToApply) {
       setTechTreeData(suggestionToApply);
       addHistoryEntry('AI_MOD_CONFIRMED', 'AI modifications applied to project.', { nodeCount: countNodesInTree(suggestionToApply), projectId: activeProjectId });
-      setModificationPromptFromHook(''); 
+      setModificationPrompt(''); 
       handleSaveActiveProject(false);
     }
     setPendingAiSuggestion(null); 
@@ -149,7 +149,7 @@ export const useTreeOperationsAI = ({
   }, [
     pendingAiSuggestion, projectManager,
     closeAiSuggestionModal, addHistoryEntry, 
-    setTechTreeData, setModificationPromptFromHook, setError,
+    setTechTreeData, setModificationPrompt, setError,
     setPendingAiSuggestion, setBaseForModalDiff, setPreviousTreeStateForUndo
   ]);
 

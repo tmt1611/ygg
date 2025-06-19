@@ -78,8 +78,8 @@ const App = () => {
   const projectManager = useProjectManagement({
     modalManager, historyManager, viewStates,
     currentTechTreeData: techTreeData, currentContextText: initialPrompt,
-    setTechTreeData, setContextText: setInitialPrompt,
-    setInitialPromptFromHook: setInitialPrompt, setError
+    setTechTreeData, setInitialPrompt: setInitialPrompt,
+    setError
   });
   const { projects, activeProjectId } = projectManager;
 
@@ -96,7 +96,7 @@ const App = () => {
     techTreeData, setTechTreeData, contextText: initialPrompt, initialPrompt,
     previousTreeStateForUndoProp: previousTreeStateForUndo, setPreviousTreeStateForUndo,
     baseForModalDiffProp: baseForModalDiff, setBaseForModalDiff, 
-    setIsLoading, setIsModifying, setModificationPromptFromHook: setModificationPrompt
+    setIsLoading, setIsModifying, setModificationPrompt: setModificationPrompt
   });
 
   const aiInsightsHook = useAiInsights({
