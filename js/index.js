@@ -1,4 +1,3 @@
-
 console.log('Yggdrasil v3.0: Script initiated.');
 
 import React from 'react';
