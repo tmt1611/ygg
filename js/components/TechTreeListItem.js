@@ -1,6 +1,6 @@
 
 import React, { useMemo, useCallback, useState, useEffect } from 'react';
-import { NODE_IMPORTANCE_OPTIONS as RUNE_IMPORTANCE_OPTIONS } from '../constants.js';
+import { NODE_IMPORTANCE_OPTIONS } from '../constants.js';
 
 const TechTreeListItemComponent = ({
     node, showDescriptionsGlobal,
@@ -132,7 +132,7 @@ const TechTreeListItemComponent = ({
     nodeNameTitle += ` (↩️ Linked from: ${incomingLinkSource.sourceProjectName} / ${incomingLinkSource.sourceNodeName})`;
   }
 
-  const currentImportanceObject = RUNE_IMPORTANCE_OPTIONS.find(opt => opt.value === (node.importance || 'common')) || RUNE_IMPORTANCE_OPTIONS[1];
+  const currentImportanceObject = NODE_IMPORTANCE_OPTIONS.find(opt => opt.value === (node.importance || 'common')) || NODE_IMPORTANCE_OPTIONS[1];
 
 
   return (

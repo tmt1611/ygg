@@ -1,12 +1,7 @@
 import React, { useEffect, useRef, useMemo, useCallback } from 'react';
 import { linkRadial, select } from 'd3';
 import { useD3Tree } from '../hooks/useD3Tree.js';
-
-const NODE_IMPORTANCE_RUNES = {
-  minor: '🌱',
-  common: '🌿',
-  major: '🌳',
-};
+import { NODE_IMPORTANCE_RUNES } from '../constants.js';
 
 const GraphViewComponent = ({
   treeData,
