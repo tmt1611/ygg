@@ -89,39 +89,6 @@ const App = () => {
     techTreeData, setTechTreeData, modalManager, historyManager, projectManager, viewStates
   });
 
-  const handleDeleteNodeWithConfirmation = useCallback((nodeId) => {
-    if (!techTreeData) return;
-    const nodeToDelete = findNodeById(techTreeData, nodeId);
-    if (!nodeToDelete) {
-        console.error(`handleDeleteNodeWithConfirmation: Node with ID ${nodeId} not found.`);
-        return;
-    }
-
-    if (nodeToDelete.isLocked) {
-        modalManager.openConfirmModal({
-            title: "Deletion Blocked",
-            message: `The node "${nodeToDelete.name}" is locked. Unlock it first to delete.`,
-            confirmText: "OK",
-            cancelText: null,
-        });
-        return;
-    }
-
-    modalManager.openConfirmModal({
-        title: "Delete Node?",
-        message: `Delete "${nodeToDelete.name}" and ALL its descendants? This action cannot be undone.`,
-        confirmText: "Delete",
-        confirmButtonStyle: 'danger',
-        onConfirm: () => {
-            nodeOperations.deleteNodeAndChildren(nodeId);
-            modalManager.closeConfirmModal();
-        },
-        onCancel: () => {
-            modalManager.closeConfirmModal();
-        }
-    });
-  }, [techTreeData, modalManager, nodeOperations]);
-
   const apiKeyHook = useApiKey(addHistoryEntry); 
 
   const treeOperationsAI = useTreeOperationsAI({
@@ -348,7 +315,7 @@ const App = () => {
             appCallbacks: {
               handleExtractData, handleNodeSelectedForInsightsOrActions,
               toggleNodeActionsPanelVisibility,
-              handleDeleteNodeWithConfirmation
+              handleDeleteNodeWithConfirmation: nodeOperations.handleDeleteNodeWithConfirmation
             },
             viewControls: {
               yggdrasilViewMode, activeOverlayPanel, setActiveOverlayPanel
@@ -367,7 +334,7 @@ const App = () => {
           onLinkToProject: projectLinkingHook.handleOpenLinkProjectModal,
           onGoToLinkedProject: projectLinkingHook.handleNavigateToLinkedProject,
           onUnlinkProject: projectLinkingHook.handleUnlinkProjectFromNode,
-          onDeleteNode: handleDeleteNodeWithConfirmation,
+          onDeleteNode: nodeOperations.handleDeleteNodeWithConfirmation,
           onSetFocusNode: viewStates.handleSwitchToFocusView,
           onGenerateInsights: handleGenerateAiInsights,
           isAppBusy: isLoading || isModifying || isFetchingStrategicSuggestions,
@@ -392,7 +359,7 @@ const App = () => {
         projectLinkingHook: projectLinkingHook,
         techTreeData: techTreeData,
         nodeOperations: nodeOperations,
-        onDeleteNodeWithConfirmation: handleDeleteNodeWithConfirmation,
+        onDeleteNodeWithConfirmation: nodeOperations.handleDeleteNodeWithConfirmation,
         handleSwitchToFocusView: viewStates.handleSwitchToFocusView,
         projects: projectManager.projects,
         activeProjectId: projectManager.activeProjectId,

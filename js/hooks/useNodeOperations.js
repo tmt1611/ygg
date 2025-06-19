@@ -9,10 +9,45 @@ export const useNodeOperations = ({
   projectManager,
   viewStates,
 }) => {
-  const { nodeEditModalConfig, closeNodeEditModal } = modalManager;
+  const { nodeEditModalConfig, closeNodeEditModal, openConfirmModal, closeConfirmModal } = modalManager;
   const { addHistoryEntry } = historyManager;
   const { handleSaveActiveProject } = projectManager;
   const { focusNodeId, setFocusNodeId, selectedNodeInFocusPanelId, setSelectedNodeInFocusPanelId } = viewStates;
+
+
+
+  const handleDeleteNodeWithConfirmation = useCallback((nodeId) => {
+    if (!techTreeData) return;
+    const nodeToDelete = findNodeById(techTreeData, nodeId);
+    if (!nodeToDelete) {
+        console.error(`handleDeleteNodeWithConfirmation: Node with ID ${nodeId} not found.`);
+        return;
+    }
+
+    if (nodeToDelete.isLocked) {
+        openConfirmModal({
+            title: "Deletion Blocked",
+            message: `The node "${nodeToDelete.name}" is locked. Unlock it first to delete.`,
+            confirmText: "OK",
+            cancelText: null,
+        });
+        return;
+    }
+
+    openConfirmModal({
+        title: "Delete Node?",
+        message: `Delete "${nodeToDelete.name}" and ALL its descendants? This action cannot be undone.`,
+        confirmText: "Delete",
+        confirmButtonStyle: 'danger',
+        onConfirm: () => {
+            deleteNodeAndChildren(nodeId);
+            closeConfirmModal();
+        },
+        onCancel: () => {
+            closeConfirmModal();
+        }
+    });
+  }, [techTreeData, openConfirmModal, closeConfirmModal, deleteNodeAndChildren]);
 
   const handleToggleNodeLock = useCallback((nodeId) => {
     if (!techTreeData) return;
@@ -126,6 +161,7 @@ export const useNodeOperations = ({
     handleNodeImportanceChange,
     handleConfirmNodeEdit,
     deleteNodeAndChildren,
+    handleDeleteNodeWithConfirmation,
     handleQuickAddChild,
     handleToggleAllLock,
   };

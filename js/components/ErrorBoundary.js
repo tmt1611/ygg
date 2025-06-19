@@ -37,8 +37,8 @@ ${errorInfo?.componentStack || 'Not available'}
     `;
     navigator.clipboard.writeText(errorText.trim())
       .then(() => {
-        this.setState({ copyFeedback: 'Copied!' });
-        setTimeout(() => this.setState({ copyFeedback: '' }), 2000);
+        this.setState({ copyFeedback: 'Copied to clipboard!' });
+        setTimeout(() => this.setState({ copyFeedback: '' }), 2500);
       })
       .catch(err => {
         this.setState({ copyFeedback: 'Failed to copy.' });
@@ -48,6 +48,7 @@ ${errorInfo?.componentStack || 'Not available'}
 
   render() {
     if (this.state.hasError) {
+      const copyButtonClass = this.state.copyFeedback.startsWith('Copied') ? "success" : "secondary";
       return (
         React.createElement("div", { className: "error-boundary-container" },
           React.createElement("div", { className: "error-boundary-content" },
@@ -70,7 +71,7 @@ ${errorInfo?.componentStack || 'Not available'}
               ),
               this.state.error && React.createElement("button", {
                 onClick: this.handleCopyError,
-                className: "secondary"
+                className: copyButtonClass
               },
                 this.state.copyFeedback || "Copy Error Details"
               )

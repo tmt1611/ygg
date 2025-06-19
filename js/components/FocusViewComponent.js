@@ -5,8 +5,6 @@ import FocusNodeDisplay from './FocusNodeDisplay.js';
 import FocusViewDetailPanel from './FocusViewDetailPanel.js';
 import { useFocusViewLayout } from '../hooks/useFocusViewLayout.js';
 
-const VERTICAL_SPACING = 40;
-
 const FocusViewComponent = ({
   treeData, focusNodeId, selectedNodeInPanelId, onSelectNodeInPanel, onChangeFocusNode,
   onExitFocusView, onOpenNodeEditModal, onToggleLock, onNodeImportanceChange, isAppBusy,
@@ -40,7 +38,7 @@ const FocusViewComponent = ({
   }, [isFocusNodeRoot, activeProjectId, projects, findLinkSource]);
 
   const layoutRef = useRef(null); 
-  const { positions: allNodePositions, height: contentHeight } = useFocusViewLayout(layoutRef, focusNodeData, parentNodeData, childrenNodeData);
+  const { positions: allNodePositions, height: layoutHeight } = useFocusViewLayout(layoutRef, focusNodeData, parentNodeData, childrenNodeData);
 
   const connectorLines = useMemo(() => {
     if (!allNodePositions || allNodePositions.size === 0) return [];
@@ -96,19 +94,13 @@ const FocusViewComponent = ({
   return (
     React.createElement("div", { className: "focus-view-container" },
       React.createElement("div", { className: "focus-view-main-area" },
-        React.createElement("div", { ref: layoutRef, className: "focus-view-layout", style: { height: contentHeight ? `${contentHeight}px` : '100%' } },
-          React.createElement("svg", { className: "focus-view-svg-overlay", style: { height: contentHeight ? `${contentHeight}px` : '100%' } },
-            React.createElement("defs", null,
-              React.createElement("marker", { id: "warp-arrow", viewBox: "0 0 10 10", refX: "8", refY: "5", markerWidth: "6", markerHeight: "6", orient: "auto-start-reverse"},
-                React.createElement("path", { d: "M 0 0 L 10 5 L 0 10 z", fill: "var(--focus-connector-stroke)" })
-              )
-            ),
+        React.createElement("div", { ref: layoutRef, className: "focus-view-layout", style: { minHeight: `${layoutHeight}px` } },
+          React.createElement("svg", { className: "focus-view-svg-overlay", style: { height: `${layoutHeight}px` } },
             connectorLines.map(line => 
               React.createElement("line", { 
                 key: line.id,
                 x1: line.x1, y1: line.y1, x2: line.x2, y2: line.y2, 
-                className: "focus-view-connector-line", 
-                markerEnd: "url(#warp-arrow)" 
+                className: "focus-view-connector-line"
               })
             )
           ),
@@ -116,7 +108,7 @@ const FocusViewComponent = ({
           !parentNodeData && allNodePositions.get(focusNodeData.id) && (() => {
             const focusPos = allNodePositions.get(focusNodeData.id);
             if (!focusPos) return null;
-            return React.createElement("div", { className: "focus-node-placeholder", style: { position: 'absolute', top: `${focusPos.y - focusPos.height / 2 - VERTICAL_SPACING}px`, left: '50%', transform: 'translate(-50%, -100%)' }},
+            return React.createElement("div", { className: "focus-node-placeholder", style: { position: 'absolute', top: `${focusPos.y - focusPos.height / 2 - 20}px`, left: '50%', transform: 'translate(-50%, -100%)' }},
               React.createElement("span", { className: "focus-node-placeholder-icon" }, "🌌"),
               "Sector Core (Root)"
             );
@@ -127,7 +119,7 @@ const FocusViewComponent = ({
             : allNodePositions.get(focusNodeData.id) && (() => {
               const focusPos = allNodePositions.get(focusNodeData.id);
               if (!focusPos) return null;
-              return React.createElement("div", { className: "focus-node-placeholder", style: { position: 'absolute', top: `${focusPos.y + focusPos.height / 2 + VERTICAL_SPACING}px`, left: '50%', transform: 'translateX(-50%)' }},
+              return React.createElement("div", { className: "focus-node-placeholder", style: { position: 'absolute', top: `${focusPos.y + focusPos.height / 2 + 20}px`, left: '50%', transform: 'translateX(-50%)' }},
                 React.createElement("span", { className: "focus-node-placeholder-icon" }, "🛰️"),
                 "No Subsystems Detected"
               );
