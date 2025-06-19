@@ -630,6 +630,30 @@ html[data-theme='sol'] .panel-header-icon { color: var(--primary-accent-dark); f
 @keyframes warpPulse { 0% { stroke-dasharray: 10 200; stroke-dashoffset: 0; } 50% { stroke-dasharray: 50 160; stroke-dashoffset: -50; } 100% { stroke-dasharray: 10 200; stroke-dashoffset: -210; } }
 #warp-arrow path { fill: var(--focus-connector-stroke); }
 
+.focus-node-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  color: var(--focus-placeholder-text);
+  background-color: var(--focus-placeholder-bg);
+  padding: 8px 12px;
+  border-radius: var(--border-radius);
+  font-size: 0.9em;
+  font-weight: 500;
+  user-select: none;
+  pointer-events: none;
+  animation: fadeInPlaceholder 0.5s ease-out;
+}
+@keyframes fadeInPlaceholder {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.focus-node-placeholder-icon {
+  font-size: 1.8em;
+  opacity: 0.8;
+}
+
 
 
 
@@ -1381,6 +1405,15 @@ html[data-theme='sol'] .panel-variant-sidebar .panel-toggle-button {
   gap: 8px;
 }
 .context-menu .context-menu-header strong { color: var(--text-primary); }
+.context-menu .context-menu-close-btn {
+  padding: 0;
+  width: 22px;
+  height: 22px;
+  font-size: 1.3em;
+  line-height: 1;
+  flex-shrink: 0;
+  margin-right: -6px; /* Align to edge */
+}
 .context-menu li[role="separator"] hr { margin: 2px 0; border-top: 1px solid var(--border-color); }
 .context-menu-item {
   display: flex;

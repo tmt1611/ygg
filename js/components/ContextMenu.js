@@ -192,9 +192,8 @@ const ContextMenu = ({
         React.createElement("span", { style: { flexGrow: 1 } }, "Node: ", React.createElement("strong", null, node.name.length > 25 ? `${node.name.substring(0, 22)}...` : node.name)),
         React.createElement("button", {
           onClick: onClose,
-          className: "base-icon-button",
+          className: "base-icon-button context-menu-close-btn",
           title: "Close Menu (Esc)",
-          style: { padding: '2px', fontSize: '1.1em', width: '20px', height: '20px', alignSelf: 'center', marginRight: '-5px' }
         }, "×")
       ),
       React.createElement("ul", { className: "main-menu" },

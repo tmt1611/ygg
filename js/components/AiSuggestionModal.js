@@ -101,15 +101,15 @@ const AiSuggestionModal = ({
                     React.createElement(AiSuggestionPreviewListItem, { node: annotatedTree, level: 0, isVisualDiff: true })
                 )
               ) : (
-                React.createElement("div", { className: "error-message-inline", style: { margin: '1em' } },
-                  React.createElement("div", { className: "error-icon" }, "⚠️"),
+                React.createElement("div", { className: "error-message-inline", style: { margin: '1em', padding: '15px' } },
+                  React.createElement("div", { className: "error-icon", style: { fontSize: '1.5em' } }, "⚠️"),
                   React.createElement("div", null,
-                    React.createElement("strong", null, "AI Suggestion Error:"), " ",
-                    annotatedTree?.description || "Could not display preview due to a malformed AI suggestion. The AI may have returned data that is not a valid tree structure (e.g. missing required fields). You can try refining your prompt."
+                    React.createElement("strong", { style: { display: 'block', marginBottom: '5px' } }, "AI Suggestion Error"),
+                    annotatedTree?.description || "Could not display preview due to a malformed AI suggestion. The AI may have returned data that is not a valid tree structure (e.g. missing required fields). You can try refining your prompt or reject this suggestion."
                   )
                 )
               ),
-              removedNodes.length > 0 && (
+              removedNodes.length > 0 && !annotatedTree?._isErrorNode && (
                 React.createElement("div", { className: "ai-suggestion-modal-removed-nodes-section" },
                     React.createElement("h4", { 
                       className: `ai-suggestion-modal-removed-nodes-title ${isRemovedNodesCollapsed ? 'collapsed' : ''}`,
@@ -119,10 +119,9 @@ const AiSuggestionModal = ({
                       tabIndex: 0,
                       onKeyDown: (e) => { if (e.key === 'Enter' || e.key === ' ') setIsRemovedNodesCollapsed(!isRemovedNodesCollapsed); }
                     },
-                     annotatedTree?._isErrorNode ? "Potentially Removed Nodes" : "Nodes To Be Removed",
+                     "Nodes To Be Removed",
                      " (", removedNodes.length, "):"
                     ),
-                    annotatedTree?._isErrorNode && !isRemovedNodesCollapsed && React.createElement("p", {style: {fontSize: '0.8em', color: 'var(--text-tertiary)', paddingLeft: '10px', margin: '0 0 5px 0'}}, "Because the AI suggestion was malformed, all original nodes are listed here as potentially removed."),
                     React.createElement("ul", { className: `ai-suggestion-modal-removed-nodes-list ${isRemovedNodesCollapsed ? 'collapsed' : ''}` },
                         !isRemovedNodesCollapsed && removedNodes.map(node => (
                             React.createElement("li", { key: `removed-${node.id}`},

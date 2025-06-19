@@ -98,38 +98,7 @@ export const useProjectManagement = ({
       return newProjects;
   }, []);
 
-  const _linkExampleProjects = useCallback((projectsList) => {
-      let linkedProjects = [...projectsList];
-      const ewProject = linkedProjects.find(p => p.isExample && p.treeData.id === 'elf-warfare-root-example-v1');
-      const anmProject = linkedProjects.find(p => p.isExample && p.treeData.id === 'nature-magic-root-example-v1');
 
-      if (!ewProject || !anmProject) return linkedProjects;
-      
-      let ewTree = ewProject.treeData;
-      let anmTree = anmProject.treeData;
-      let modified = false;
-
-      const nodeToLinkInEW = findNodeById(ewTree, "natures-embrace");
-      if (nodeToLinkInEW && nodeToLinkInEW.linkedProjectId !== anmProject.id) {
-          ewTree = updateNodeInTree(ewTree, "natures-embrace", { linkedProjectId: anmProject.id, linkedProjectName: anmProject.name });
-          modified = true;
-      }
-      
-      if (anmTree.linkedProjectId !== ewProject.id) {
-          anmTree = { ...anmTree, linkedProjectId: ewProject.id, linkedProjectName: ewProject.name };
-          modified = true;
-      }
-
-      if (modified) {
-          return linkedProjects.map(p => {
-              if (p.id === ewProject.id) return { ...p, treeData: ewTree, lastModified: new Date().toISOString() };
-              if (p.id === anmProject.id) return { ...p, treeData: anmTree, lastModified: new Date().toISOString() };
-              return p;
-          });
-      }
-      
-      return linkedProjects;
-  }, []);
 
   const _setActiveInitialProject = useCallback((allProjects) => {
     const startupLogged = localStorage.getItem(APP_STORAGE_KEYS.STARTUP_LOAD_LOGGED);
@@ -179,8 +148,7 @@ export const useProjectManagement = ({
     const startupLogged = localStorage.getItem(APP_STORAGE_KEYS.STARTUP_LOAD_LOGGED);
     try {
       let projectsFromStorage = _loadProjectsFromStorage();
-      let projectsWithExamples = _addMissingExampleProjects(projectsFromStorage);
-      let allProjects = _linkExampleProjects(projectsWithExamples);
+      let allProjects = _addMissingExampleProjects(projectsFromStorage);
       
       setProjects(allProjects);
       _setActiveInitialProject(allProjects);
