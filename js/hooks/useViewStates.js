@@ -1,6 +1,6 @@
 
 import { useState, useCallback, useEffect, useMemo } from 'react';
-import { findNodeById, getAllExpandableNodeIds, areAllNodesExpanded } from '../utils.js'; // Removed findNodesByTerm
+import { findNodeById, getAllExpandableNodeIds, areAllNodesExpanded } from '../utils.js';
 import { APP_STORAGE_KEYS } from '../constants.js';
 
 export const useViewStates = ({

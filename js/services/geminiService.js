@@ -69,19 +69,6 @@ export const clearActiveApiKey = () => {
     return { success: true, message: "API Key cleared. Provide a new key to enable AI features.", source: null };
 };
 
-export const getApiKeyStatus = () => {
-    if (apiClientState.isKeyAvailable && apiClientState.activeSource && apiClientState.activeKey) {
-        return { available: true, source: apiClientState.activeSource, message: `Using API Key from ${apiClientState.activeSource}. AI features enabled.` };
-    }
-    try {
-        if (typeof process !== 'undefined' && process.env && process.env.API_KEY && apiClientState.activeSource !== 'environment' && !apiClientState.isKeyAvailable) { 
-            return { available: false, source: null, message: "Environment API_KEY detected but not active. Try selecting 'Use Environment API_KEY' or enter manually."};
-        }
-    } catch (e) {
-        // silently ignore, as process.env might not be available
-    }
-    return { available: false, source: null, message: "API Key not set. Provide a valid API Key for AI features." };
-};
 
 export const isApiKeySet = () => apiClientState.isKeyAvailable && apiClientState.client !== null;
 
