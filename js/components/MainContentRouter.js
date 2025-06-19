@@ -1,3 +1,4 @@
+import React from 'react';
 import WorkspaceTabContent from './tabs/WorkspaceTabContent.js';
 import GraphViewComponent from './GraphViewComponent.js';
 import ListViewTabContent from './tabs/ListViewTab.js';
