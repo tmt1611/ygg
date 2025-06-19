@@ -155,6 +155,7 @@ const GraphViewComponent = ({
     if (isAppBusy || d.isProxy) return;
     const nodeId = d.data.id;
     if (nodeId) {
+        onSelectNode(nodeId); // Select the node on right-click
         let linkSourceInfo = null;
         if (treeData && nodeId === treeData.id && activeProjectId) { 
             linkSourceInfo = findLinkSource(activeProjectId, projects);
@@ -163,7 +164,7 @@ const GraphViewComponent = ({
     } else {
         console.warn("Node ID not found on D3GraphNode data in context menu handler", d);
     }
-  }, [isAppBusy, onOpenContextMenu, treeData, activeProjectId, projects, findLinkSource]);
+  }, [isAppBusy, onOpenContextMenu, treeData, activeProjectId, projects, findLinkSource, onSelectNode]);
 
   // Effect for drawing the main graph structure
   useEffect(() => {
@@ -250,12 +251,21 @@ const GraphViewComponent = ({
           const rotation = -(d.x * 180 / Math.PI - 90);
           return `rotate(${rotation})`;
       })
+      .style("dominant-baseline", d => {
+          if (d.isProxy) return "middle";
+          // If node is in the top half of the layout, anchor text from its bottom edge, otherwise from its top edge.
+          const isTopHalf = d.x > Math.PI;
+          return isTopHalf ? "text-after-edge" : "text-before-edge";
+      })
       .attr("x", 0) // Center horizontally relative to the node's origin
       .attr("dy", d => {
-          // Position below the circle for normal nodes, or centered for proxy nodes
           if (d.isProxy) return "0.3em";
-          // This dy is for the <text> element, it positions the first line.
-          return getNodeRadius(d) + 5;
+          
+          const isTopHalf = d.x > Math.PI;
+          const radius = getNodeRadius(d);
+          const spacing = 7;
+          
+          return isTopHalf ? -(radius + spacing) : (radius + spacing);
       })
       .text(d => d.isProxy ? d.data.name : null) // Set proxy names, but clear others for tspan wrapping
       .each(function(d) {

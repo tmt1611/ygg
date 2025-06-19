@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { APP_STORAGE_KEYS } from '../constants.js';
 
 class ErrorBoundary extends Component {
   constructor(props) {
@@ -45,6 +46,21 @@ ${errorInfo?.componentStack || 'Not available'}
       });
   };
 
+  handleHardReset = () => {
+    try {
+      console.warn("Yggdrasil: Performing hard reset. Clearing all application data from localStorage.");
+      Object.values(APP_STORAGE_KEYS).forEach(key => {
+        localStorage.removeItem(key);
+      });
+      sessionStorage.clear();
+      console.log("Yggdrasil: localStorage and sessionStorage cleared.");
+    } catch (e) {
+      console.error("Yggdrasil: Failed to clear application storage.", e);
+    } finally {
+      window.location.reload();
+    }
+  };
+
   render() {
     if (this.state.hasError) {
       const copyButtonClass = this.state.copyFeedback.startsWith('Copied') ? "success" : "secondary";
@@ -59,14 +75,20 @@ ${errorInfo?.componentStack || 'Not available'}
               "Yggdrasil encountered an unexpected error and cannot continue."
             ),
             React.createElement("p", { className: "error-boundary-subtext" },
-              "An unexpected error has occurred. Reloading the application may fix the issue. Your work is auto-saved up to the last successful action, so you can often continue safely after a reload."
+              "An unexpected error has occurred. Reloading may fix it. If the error persists, it might be due to corrupted local data. You can try a hard reset, but this will clear all your saved projects and settings."
             ),
             React.createElement("div", { className: "error-boundary-actions" },
               React.createElement("button", {
                 onClick: () => window.location.reload(),
-                className: "danger"
+                className: "primary"
               },
                 "Reload Application"
+              ),
+              React.createElement("button", {
+                onClick: this.handleHardReset,
+                className: "danger"
+              },
+                "Clear Data & Reload"
               ),
               this.state.error && React.createElement("button", {
                 onClick: this.handleCopyError,

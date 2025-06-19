@@ -1014,7 +1014,6 @@ html[data-theme='nebula'] .graph-view-node.highlighted text.node-label {
   stroke-linejoin: round;
   text-shadow: 0 0 3px var(--app-bg); /* Soften the edges a bit */
   font-weight: 500;
-  dominant-baseline: text-before-edge; /* Better for text positioned below a point */
 }
 .graph-view-node:not(.proxy) text.node-label tspan {
   paint-order: stroke;
