@@ -1,17 +1,16 @@
 
 import React from 'react';
-// import { TechTreeNode, NodeStatus, Project } from '../types.js'; // Types removed
 import TechTreeListItem from './TechTreeListItem.js'; 
-// import { LinkSourceInfo } from '../hooks/useProjectLinking.js'; // Types removed
 
 const TechTreeListViewComponent = ({
-    treeData, showDescriptions, onToggleLock, onNodeStatusChange,
+    treeData, showDescriptions, onToggleLock, onAddQuickChild, onNodeImportanceChange,
     onOpenNodeEditModal, searchTerm, isAppBusy, collapsedNodeIds, onToggleCollapseNode,
     onSwitchToFocusView,
     onNavigateToLinkedProject,
     onOpenContextMenu,
     onSelectListItem,
-    projects, 
+    selectedNodeId,
+    projects,
     activeProjectId,
     treeDataRootId,
     findLinkSource,
@@ -34,19 +33,20 @@ const TechTreeListViewComponent = ({
         React.createElement(TechTreeListItem, {
             key: treeData.id, node: treeData,
             showDescriptionsGlobal: showDescriptions,
-            onToggleLock: onToggleLock, onNodeStatusChange: onNodeStatusChange,
+            onToggleLock: onToggleLock, onAddQuickChild: onAddQuickChild, onNodeImportanceChange: onNodeImportanceChange,
             onOpenNodeEditModal: onOpenNodeEditModal, level: 0,
             searchTerm: searchTerm, isAppBusy: isAppBusy,
             collapsedNodeIds: collapsedNodeIds, onToggleCollapseNode: onToggleCollapseNode,
-            onSwitchToFocusView: onSwitchToFocusView, 
-            onNavigateToLinkedProject: onNavigateToLinkedProject, 
+            onSwitchToFocusView: onSwitchToFocusView,
+            onNavigateToLinkedProject: onNavigateToLinkedProject,
             onOpenContextMenu: onOpenContextMenu,
             onSelectListItem: onSelectListItem,
-            projects: projects, 
-            activeProjectId: activeProjectId, 
-            treeDataRootId: treeDataRootId, 
-            findLinkSource: findLinkSource, 
-            handleNavigateToSourceNode: handleNavigateToSourceNode 
+            selectedNodeId: selectedNodeId,
+            projects: projects,
+            activeProjectId: activeProjectId,
+            treeDataRootId: treeDataRootId,
+            findLinkSource: findLinkSource,
+            handleNavigateToSourceNode: handleNavigateToSourceNode
         })
       )
     )

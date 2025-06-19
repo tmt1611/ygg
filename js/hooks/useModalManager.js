@@ -1,6 +1,5 @@
 
 import { useState, useCallback, useRef } from 'react';
-// import { NodeEditModalConfig, LinkProjectModalConfig, TechTreeNode, ConfirmModalConfig, ProjectModalConfig } from '../types.js'; // Types removed
 
 export const useModalManager = () => {
   const lastFocusedElementRef = useRef(null);
@@ -20,6 +19,7 @@ export const useModalManager = () => {
   const [isContextMenuOpen, setIsContextMenuOpen] = useState(false);
   const [contextMenuPosition, setContextMenuPosition] = useState(null);
   const [contextMenuNodeId, setContextMenuNodeId] = useState(null);
+  const [contextMenuLinkSourceInfo, setContextMenuLinkSourceInfo] = useState(null);
   
   const [isTechExtractionModalOpen, setIsTechExtractionModalOpen] = useState(false);
   const [extractedTechsContent, setExtractedTechsContent] = useState('');
@@ -65,11 +65,11 @@ export const useModalManager = () => {
     setIsNodeEditModalOpen(false); setNodeEditModalConfig(null); restoreFocus();
   }, [restoreFocus]);
 
-  const openContextMenu = useCallback((nodeId, position) => {
-    captureFocus(); setContextMenuNodeId(nodeId); setContextMenuPosition(position); setIsContextMenuOpen(true);
+  const openContextMenu = useCallback((nodeId, position, linkSourceInfo = null) => {
+    captureFocus(); setContextMenuNodeId(nodeId); setContextMenuPosition(position); setContextMenuLinkSourceInfo(linkSourceInfo); setIsContextMenuOpen(true);
   }, [captureFocus]);
   const closeContextMenu = useCallback(() => {
-    setIsContextMenuOpen(false); setContextMenuNodeId(null); setContextMenuPosition(null); restoreFocus();
+    setIsContextMenuOpen(false); setContextMenuNodeId(null); setContextMenuPosition(null); setContextMenuLinkSourceInfo(null); restoreFocus();
   }, [restoreFocus]);
   
   const openTechExtractionModal = useCallback((content, title, mode) => {
@@ -92,7 +92,7 @@ export const useModalManager = () => {
     isAiSuggestionModalOpen, pendingAiSuggestion, openAiSuggestionModal, closeAiSuggestionModal, setPendingAiSuggestion,
     isConfirmModalOpen, confirmModalConfig, openConfirmModal, closeConfirmModal,
     isNodeEditModalOpen, nodeEditModalConfig, openNodeEditModal, closeNodeEditModal,
-    isContextMenuOpen, contextMenuPosition, contextMenuNodeId, openContextMenu, closeContextMenu,
+    isContextMenuOpen, contextMenuPosition, contextMenuNodeId, contextMenuLinkSourceInfo, openContextMenu, closeContextMenu,
     isTechExtractionModalOpen, extractedTechsContent, extractionModalTitle, extractionMode, openTechExtractionModal, closeTechExtractionModal, setExtractionMode,
     isLinkProjectModalOpen, linkProjectModalConfig, openLinkProjectModal, closeLinkProjectModal,
     restoreFocus,

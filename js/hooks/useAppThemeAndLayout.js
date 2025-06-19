@@ -1,12 +1,13 @@
 
 import { useState, useCallback, useEffect } from 'react';
 import { APP_STORAGE_KEYS } from '../constants.js';
-// import { ThemeMode, YggdrasilViewMode, ActiveOverlayPanel, HistoryActionType } from '../types.js'; // Types removed
+
+const THEME_CYCLE = ['dark', 'light', 'sol', 'nebula'];
 
 export const useAppThemeAndLayout = (addHistoryEntry) => {
   const [themeMode, setThemeMode] = useState(() => {
     const savedTheme = localStorage.getItem(APP_STORAGE_KEYS.THEME_MODE);
-    return savedTheme || 'dark';
+    return THEME_CYCLE.includes(savedTheme) ? savedTheme : 'dark';
   });
 
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(() => {
@@ -25,15 +26,7 @@ export const useAppThemeAndLayout = (addHistoryEntry) => {
 
   useEffect(() => {
     localStorage.setItem(APP_STORAGE_KEYS.SIDEBAR_COLLAPSED_STATE, JSON.stringify(isSidebarCollapsed));
-     const appContainer = document.querySelector('.yggdrasil-app-container'); 
-    if (appContainer) {
-        if (isSidebarCollapsed) appContainer.classList.add('sidebar-collapsed');
-        else appContainer.classList.remove('sidebar-collapsed');
-    } else { 
-        const bodyElement = document.querySelector('.yggdrasil-app-body') || document.body;
-        if (isSidebarCollapsed) bodyElement.classList.add('sidebar-collapsed');
-        else bodyElement.classList.remove('sidebar-collapsed');
-    }
+    // The class is now applied directly in App.js to avoid race conditions or incorrect element selection.
   }, [isSidebarCollapsed]);
   
   useEffect(() => { localStorage.setItem(APP_STORAGE_KEYS.ACTIVE_MAIN_VIEW, yggdrasilViewMode); }, [yggdrasilViewMode]);
@@ -45,7 +38,9 @@ export const useAppThemeAndLayout = (addHistoryEntry) => {
 
   const toggleTheme = useCallback(() => {
     setThemeMode(prevMode => {
-        const newMode = prevMode === 'light' ? 'dark' : 'light';
+        const currentIndex = THEME_CYCLE.indexOf(prevMode);
+        const nextIndex = (currentIndex + 1) % THEME_CYCLE.length;
+        const newMode = THEME_CYCLE[nextIndex];
         addHistoryEntry('THEME_CHANGED', `Theme switched to ${newMode} mode.`);
         return newMode;
     });

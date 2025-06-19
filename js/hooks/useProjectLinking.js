@@ -1,11 +1,6 @@
 
 import { useCallback } from 'react';
-// import { Project, TechTreeNode, YggdrasilViewMode, ActiveOverlayPanel } from '../types.js'; // Types removed
 import { findNodeById, updateNodeInTree, getAllNodesAsMap } from '../utils.js';
-// import { UseModalManagerReturn } from './useModalManager.js'; // Types removed
-// import { UseHistoryManagerReturn } from './useHistoryManager.js'; // Types removed
-// import { UseProjectManagementReturn } from './useProjectManagement.js'; // Types removed
-// import { UseViewStatesReturn } from './useViewStates.js'; // Types removed
 
 export const useProjectLinking = ({
   techTreeData,

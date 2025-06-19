@@ -6,8 +6,9 @@ class ErrorBoundary extends Component {
     super(props);
     this.state = {
       hasError: false,
-      error: undefined,
-      errorInfo: undefined
+      error: null,
+      errorInfo: null,
+      copyFeedback: ''
     };
   }
 
@@ -16,73 +17,71 @@ class ErrorBoundary extends Component {
   }
 
   componentDidCatch(error, errorInfo) {
-    console.error("Uncaught error:", error, errorInfo);
+    console.error("Yggdrasil Uncaught Error:", error, errorInfo);
     this.setState({ error, errorInfo });
   }
 
+  handleCopyError = () => {
+    const { error, errorInfo } = this.state;
+    if (!error) return;
+
+    const errorText = `
+--- YGGDRASIL ERROR REPORT ---
+Date: ${new Date().toISOString()}
+Error: ${error.toString()}
+Stack Trace:
+${error.stack}
+Component Stack:
+${errorInfo?.componentStack || 'Not available'}
+------------------------------
+    `;
+    navigator.clipboard.writeText(errorText.trim())
+      .then(() => {
+        this.setState({ copyFeedback: 'Copied to clipboard!' });
+        setTimeout(() => this.setState({ copyFeedback: '' }), 2500);
+      })
+      .catch(err => {
+        this.setState({ copyFeedback: 'Failed to copy.' });
+        console.error('Failed to copy error report:', err);
+      });
+  };
+
   render() {
     if (this.state.hasError) {
+      const copyButtonClass = this.state.copyFeedback.startsWith('Copied') ? "success" : "secondary";
       return (
-        React.createElement("div", { style: { 
-            minHeight: '100vh', 
-            background: 'var(--app-bg, #F0F2F5)', 
-            color: 'var(--text-primary, #1E1E3F)', 
-            display: 'flex', 
-            flexDirection: 'column', 
-            alignItems: 'center', 
-            justifyContent: 'center', 
-            padding: '20px', 
-            boxSizing: 'border-box',
-            fontFamily: 'var(--font-family-sans, sans-serif)'
-        }},
-          React.createElement("div", { style: { 
-              background: 'var(--panel-bg, #FFFFFF)', 
-              padding: '30px 40px', 
-              borderRadius: 'calc(var(--border-radius, 4px) * 2)', 
-              border: '1px solid var(--error-color, #DC3545)', 
-              textAlign: 'center', 
-              maxWidth: '650px', 
-              boxShadow: 'var(--box-shadow-md, 0 4px 6px rgba(0,0,0,0.1))' 
-          }},
-            React.createElement("h1", { style: { 
-                fontSize: '2em', 
-                fontWeight: 'bold', 
-                color: 'var(--error-color, #DC3545)', 
-                marginBottom: '20px' 
-            }},
-              "Oops! Something went wrong."
+        React.createElement("div", { className: "error-boundary-container" },
+          React.createElement("div", { className: "error-boundary-content" },
+            React.createElement("div", { className: "error-boundary-icon" }, "⚡️"),
+            React.createElement("h1", { className: "error-boundary-title" },
+              "A Branch has Broken"
             ),
-            React.createElement("p", { style: { 
-                fontSize: '1.05em', 
-                color: 'var(--text-secondary, #4A4A6A)', 
-                marginBottom: '30px', 
-                lineHeight: '1.6' 
-            }},
-              "We encountered an unexpected issue. Please try refreshing the page. If the problem persists, you can check the console for more details or report this issue."
+            React.createElement("p", { className: "error-boundary-message" },
+              "Yggdrasil encountered an unexpected error and cannot continue."
             ),
-            React.createElement("button", {
-              onClick: () => window.location.reload(),
-              className: "primary", 
-              style: { padding: '10px 20px', fontSize: '1.05em' }
-            },
-              "Refresh Page"
+            React.createElement("p", { className: "error-boundary-subtext" },
+              "Reloading the application may fix the issue. Your work should be auto-saved up to the last successful action."
             ),
-            process.env.NODE_ENV === 'development' && this.state.error && (
-              React.createElement("details", { style: { 
-                  marginTop: '25px', 
-                  textAlign: 'left', 
-                  fontSize: '0.85em', 
-                  background: 'var(--panel-alt-bg, #F8F9FA)', 
-                  padding: '12px', 
-                  borderRadius: 'var(--border-radius, 4px)', 
-                  border: '1px solid var(--border-color, #D1D5DB)', 
-                  maxHeight: '250px', 
-                  overflowY: 'auto' 
-              }},
-                React.createElement("summary", { style: { cursor: 'pointer', fontWeight: 500, color: 'var(--text-primary, #1E1E3F)' }}, "Error Details (Development)"),
-                React.createElement("pre", { style: { marginTop: '10px', whiteSpace: 'pre-wrap', lineHeight: '1.4', color: 'var(--text-secondary, #4A4A6A)' }},
+            React.createElement("div", { className: "error-boundary-actions" },
+              React.createElement("button", {
+                onClick: () => window.location.reload(),
+                className: "danger"
+              },
+                "Reload Application"
+              ),
+              this.state.error && React.createElement("button", {
+                onClick: this.handleCopyError,
+                className: copyButtonClass
+              },
+                this.state.copyFeedback || "Copy Error Details"
+              )
+            ),
+            this.state.error && (
+              React.createElement("details", { className: "error-boundary-details" },
+                React.createElement("summary", null, "Technical Details"),
+                React.createElement("pre", null,
                   this.state.error.toString(),
-                  this.state.errorInfo && this.state.errorInfo.componentStack
+                  this.state.errorInfo?.componentStack
                 )
               )
             )

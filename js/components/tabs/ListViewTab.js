@@ -1,37 +1,37 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import TechTreeListView from '../TechTreeListView.js';
-// import { TechTreeNode, NodeStatus, Project } from '../../types.js'; // Types removed
 import { filterTree, areAllNodesExpanded } from '../../utils.js'; 
-// import { LinkSourceInfo } from '../../hooks/useProjectLinking.js'; // Types removed
 
 const ListViewTabContent = ({
   techTreeData,
   showListDescriptionsGlobal,
   onToggleNodeLock,
-  onNodeStatusChange,
+  onAddQuickChild,
+  onNodeImportanceChange,
   onOpenNodeEditModal,
-  searchTerm,
   isAppBusy,
   collapsedNodeIds,
   onToggleCollapseNode,
   onSwitchToFocusView, 
   onNavigateToLinkedProject, 
   onOpenContextMenu,
-  onSelectListItem, 
+  onSelectListItem,
+  selectedNodeId,
   projects,
   activeProjectId,
   findLinkSource,
   handleNavigateToSourceNode,
-  handleToggleAllNodesList, 
+  handleToggleAllNodesList,
 }) => {
+  const [searchTerm, setSearchTerm] = useState('');
 
   if (!techTreeData && !isAppBusy) {
     return (
       React.createElement("div", { style: { textAlign: 'center', padding: '30px', color: 'var(--text-secondary)', background: 'var(--panel-alt-bg)', borderRadius: 'var(--border-radius)', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }},
         React.createElement("span", {style: {fontSize: '2.5em', marginBottom: '15px'}}, "🍃"),
         React.createElement("p", {style: {fontSize: '1.2em', color: 'var(--text-primary)'}}, "No Structure Data"),
-        React.createElement("p", null, "Generate or load a structure using the Sanctum (Workspace) to see it here.")
+        React.createElement("p", null, "Generate or load a structure using the Workspace to see it here.")
       )
     );
   }
@@ -44,11 +44,24 @@ const ListViewTabContent = ({
       techTreeData && (
         React.createElement("div", { style: { 
             display: 'flex', 
-            justifyContent: 'flex-end', 
+            justifyContent: 'space-between', 
+            alignItems: 'center',
             paddingBottom: '8px', 
             borderBottom: '1px solid var(--border-color)', 
-            marginBottom: '8px' 
+            marginBottom: '8px',
+            gap: '12px'
         }},
+          React.createElement("div", { style: { flexGrow: 1, maxWidth: '400px' }},
+            React.createElement("input", {
+              type: "search",
+              placeholder: "Filter list by name/description...",
+              value: searchTerm,
+              onChange: (e) => setSearchTerm(e.target.value),
+              style: { width: '100%' },
+              "aria-label": "Filter list of nodes",
+              disabled: isAppBusy || !techTreeData
+            })
+          ),
           React.createElement("button", { 
             onClick: handleToggleAllNodesList, 
             disabled: isAppBusy || !techTreeData,
@@ -65,18 +78,20 @@ const ListViewTabContent = ({
         React.createElement("div", { style: { flexGrow: 1, overflow: 'hidden' }},
             React.createElement(TechTreeListView, {
               treeData: displayedTreeData,
-              showDescriptions: showListDescriptionsGlobal, 
+              showDescriptions: showListDescriptionsGlobal,
               onToggleLock: onToggleNodeLock,
-              onNodeStatusChange: onNodeStatusChange,
+              onAddQuickChild: onAddQuickChild,
+              onNodeImportanceChange: onNodeImportanceChange,
               onOpenNodeEditModal: onOpenNodeEditModal,
               searchTerm: searchTerm,
               isAppBusy: isAppBusy,
               collapsedNodeIds: collapsedNodeIds,
               onToggleCollapseNode: onToggleCollapseNode,
-              onSwitchToFocusView: onSwitchToFocusView, 
-              onNavigateToLinkedProject: onNavigateToLinkedProject, 
+              onSwitchToFocusView: onSwitchToFocusView,
+              onNavigateToLinkedProject: onNavigateToLinkedProject,
               onOpenContextMenu: onOpenContextMenu,
-              onSelectListItem: onSelectListItem, 
+              onSelectListItem: onSelectListItem,
+              selectedNodeId: selectedNodeId,
               projects: projects,
               activeProjectId: activeProjectId,
               treeDataRootId: techTreeData?.id,

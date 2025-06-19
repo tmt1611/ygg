@@ -1,17 +1,13 @@
 
-import React from 'react';
-// import { ThemeMode, SidebarTabId, HistoryEntry, TechTreeNode, AiInsightData } from '../types.js'; // Types removed
-import ModificationPromptInput from './ModificationPromptInput.js';
-import AiInsightsPanel from './AiInsightsPanel.js';
+import React, { useState, useEffect } from 'react';
+import AiToolsTab from './tabs/AiToolsTab.js';
+import AiInsightsTab from './tabs/AiInsightsTab.js';
 import HistoryViewTabContent from './tabs/HistoryViewTab.js';
-import LoadingSpinner from './LoadingSpinner.js';
-import ErrorMessage from './ErrorMessage.js';
-import ContextualHelpTooltip from './ContextualHelpTooltip.js';
-
+import { APP_STORAGE_KEYS } from '../constants.js';
 
 const sidebarTabs = [
     { id: 'ai-tools', label: 'AI Ops', icon: '🧠' },
-    { id: 'ai-insights', label: 'Node Insight', icon: '💡' }, 
+    { id: 'ai-insights', label: 'Node Insight', icon: '💡' },
     { id: 'history', label: 'History', icon: '📜' },
 ];
 
@@ -27,7 +23,6 @@ const KnowledgeBranchSidebar = ({
   selectedNodeForInsights, aiInsightsData, aiInsightsIsLoading, aiInsightsError, onGenerateAiNodeInsights,
   onUseSuggestedDescription, onUseAlternativeName, onAddSuggestedChildFromInsight,
   history,
-  onClearHistory,
 }) => {
 
   const canGenerateStrategicSuggestions = apiKeyIsSet && !!initialPromptForStrategy?.trim() && !isAppBusy && !isFetchingStrategicSuggestions;
@@ -44,25 +39,25 @@ const KnowledgeBranchSidebar = ({
   return (
     React.createElement("aside", { className: `knowledge-branch-sidebar ${isCollapsed ? 'collapsed' : ''}` },
       React.createElement("div", { className: "sidebar-header" },
-        React.createElement("button", { 
-          onClick: onToggleSidebar, 
-          className: "sidebar-toggle-main base-icon-button", 
+        React.createElement("button", {
+          onClick: onToggleSidebar,
+          className: "sidebar-toggle-main base-icon-button",
           title: isCollapsed ? "Expand Sidebar" : "Collapse Sidebar",
           "aria-label": isCollapsed ? "Expand Sidebar" : "Collapse Sidebar"
         },
           isCollapsed ? '➡️' : '⬅️'
         ),
         isCollapsed && (
-            React.createElement("svg", { viewBox: "0 0 100 100", className: "sidebar-header-logo", "aria-label": "Yggdrasil Project Collapsed" },
-              React.createElement("defs", null,
-                React.createElement("radialGradient", { id: "collapsedIconGradientSidebar", cx: "50%", cy: "50%", r: "50%" },
-                  React.createElement("stop", { offset: "0%", stopColor: "currentColor", stopOpacity: "0.7" }),
-                  React.createElement("stop", { offset: "100%", stopColor: "currentColor", stopOpacity: "0.4" })
-                )
-              ),
-              React.createElement("ellipse", { cx: "50", cy: "50", rx: "22", ry: "32", fill: "url(#collapsedIconGradientSidebar)" }),
-              React.createElement("path", { d: "M50 22 Q 54 37, 50 50 Q 46 37, 50 22 Z", fill: "currentColor", fillOpacity: "0.2" })
-            )
+          React.createElement("svg", { viewBox: "0 0 100 100", className: "sidebar-header-logo", "aria-label": "Yggdrasil Project Collapsed" },
+            React.createElement("defs", null,
+              React.createElement("radialGradient", { id: "collapsedIconGradientSidebar", cx: "50%", cy: "50%", r: "50%" },
+                React.createElement("stop", { offset: "0%", stopColor: "currentColor", stopOpacity: "0.7" }),
+                React.createElement("stop", { offset: "100%", stopColor: "currentColor", stopOpacity: "0.4" })
+              )
+            ),
+            React.createElement("ellipse", { cx: "50", cy: "50", rx: "22", ry: "32", fill: "url(#collapsedIconGradientSidebar)" }),
+            React.createElement("path", { d: "M50 22 Q 54 37, 50 50 Q 46 37, 50 22 Z", fill: "currentColor", fillOpacity: "0.2" })
+          )
         )
       ),
 
@@ -84,113 +79,43 @@ const KnowledgeBranchSidebar = ({
           ),
           React.createElement("div", { className: "sidebar-tools-area" },
             activeSidebarTab === 'ai-tools' && (
-              React.createElement("div", {style: {display: 'flex', flexDirection: 'column', gap: '20px'}},
-                React.createElement(ModificationPromptInput, {
-                  prompt: modificationPrompt,
-                  setPrompt: setModificationPrompt,
-                  onModify: onModifyAiTree,
-                  isLoading: isAiModifying,
-                  disabled: !hasTechTreeData || !apiKeyIsSet || isAiModifying || isAppBusy,
-                  isApiKeySet: apiKeyIsSet,
-                  hasTreeData: hasTechTreeData
-                }),
-                hasTechTreeData && canUndoAiMod && (
-                  React.createElement("button", { onClick: onUndoAiModification, disabled: isAiModifying || isAppBusy, className: "secondary", style: { width: '100%'}},
-                    "Undo Last AI Mod"
-                  )
-                ),
-
-                React.createElement("div", { className: "panel", style:{padding: '10px'}},
-                   React.createElement("h3", { className: "panel-header", style:{fontSize: '1em', marginBottom: '10px'}},
-                      "Project AI",
-                      React.createElement(ContextualHelpTooltip, { helpText: "Get AI-powered suggestions for high-level next steps or new development pathways for your project based on its current context and structure." })
-                    ),
-                  React.createElement("button", {
-                    onClick: onGenerateStrategicSuggestions,
-                    disabled: !canGenerateStrategicSuggestions,
-                    className: "primary panel-button",
-                     title:
-                      !apiKeyIsSet ? "API Key required for AI suggestions." :
-                      !initialPromptForStrategy?.trim() ? "Project context (name/topic) must be set." :
-                      isAppBusy || isFetchingStrategicSuggestions ? "Processing another task..." :
-                      "Generate AI suggestions for project development"
-                  },
-                    "✨ Generate Strategic Ideas"
-                  ),
-
-                  isFetchingStrategicSuggestions && React.createElement(LoadingSpinner, { message: "Analyzing Project..." }),
-                  strategicSuggestionsError && React.createElement(ErrorMessage, { message: strategicSuggestionsError }),
-
-                  strategicSuggestions && strategicSuggestions.length > 0 && (
-                    React.createElement("div", {style:{marginTop: '15px'}},
-                      React.createElement("h4", { className: "panel-sub-header", style: { marginTop: '0', marginBottom: '8px', fontSize: '0.9em' } }, "Suggested Pathways:"),
-                      React.createElement("ul", { style: { listStyle: 'disc', paddingLeft: '20px', margin: 0, display: 'flex', flexDirection: 'column', gap: '6px' } },
-                        strategicSuggestions.map((suggestion, index) => (
-                          React.createElement("li", { key: index, style: {
-                            fontSize: '0.85em',
-                            color: 'var(--text-on-dark-bg)', 
-                          }},
-                            suggestion
-                          )
-                        ))
-                      ),
-                      !isFetchingStrategicSuggestions && (
-                        React.createElement("button", {
-                          onClick: handlePasteStrategicSuggestionsToModPrompt,
-                          disabled: isAppBusy,
-                          className: "secondary panel-button",
-                          style: { marginTop: '10px', width: '100%' },
-                          title: "Copy these strategic ideas to the 'Edit AI' input for further refinement."
-                        },
-                          "📝 Use these Ideas for Edit AI"
-                        )
-                      )
-                    )
-                  ),
-                  !isFetchingStrategicSuggestions && !strategicSuggestionsError && !strategicSuggestions && (
-                     React.createElement(React.Fragment, null,
-                        !apiKeyIsSet && (
-                            React.createElement("p", { style: { textAlign: 'center', fontSize: '0.8em', color: 'var(--warning-color)', marginTop: '8px' }},
-                            "API Key not set."
-                            )
-                        ),
-                        apiKeyIsSet && !initialPromptForStrategy?.trim() && (
-                            React.createElement("p", { style: { textAlign: 'center', fontSize: '0.8em', color: 'var(--warning-color)', marginTop: '8px' }},
-                            "Project context empty."
-                            )
-                        ),
-                        canGenerateStrategicSuggestions && (
-                            React.createElement("p", { style: { textAlign: 'center', fontSize: '0.8em', color: 'var(--text-tertiary)', fontStyle: 'italic', marginTop: '8px' }},
-                            "Click button to get ideas."
-                            )
-                        )
-                     )
-                  )
-                )
-              )
+              React.createElement(AiToolsTab, {
+                modificationPrompt: props.modificationPrompt,
+                setModificationPrompt: props.setModificationPrompt,
+                onModifyAiTree: props.onModifyAiTree,
+                isAiModifying: props.isAiModifying,
+                canUndoAiMod: props.canUndoAiMod,
+                onUndoAiModification: props.onUndoAiModification,
+                isAiSuggestionModalOpen: props.isAiSuggestionModalOpen,
+                initialPromptForStrategy: props.initialPromptForStrategy,
+                strategicSuggestions: props.strategicSuggestions,
+                isFetchingStrategicSuggestions: props.isFetchingStrategicSuggestions,
+                strategicSuggestionsError: props.strategicSuggestionsError,
+                onGenerateStrategicSuggestions: props.onGenerateStrategicSuggestions,
+                onApplyStrategicSuggestion: props.onApplyStrategicSuggestion,
+                apiKeyIsSet: apiKeyIsSet,
+                hasTechTreeData: hasTechTreeData,
+                isAppBusy: isAppBusy,
+                collapsedPanels: collapsedPanels,
+                onTogglePanel: handleTogglePanel,
+              })
             ),
-            
             activeSidebarTab === 'ai-insights' && (
-              selectedNodeForInsights ? (
-                React.createElement(AiInsightsPanel, {
-                  node: selectedNodeForInsights,
-                  insightsData: aiInsightsData,
-                  isLoading: aiInsightsIsLoading,
-                  error: aiInsightsError,
-                  onGenerateInsights: onGenerateAiNodeInsights,
-                  onUseDescription: onUseSuggestedDescription,
-                  onUseAlternativeName: onUseAlternativeName,
-                  onAddSuggestedChild: onAddSuggestedChildFromInsight,
-                  isAppBusy: isAppBusy,
-                  apiKeyIsSet: apiKeyIsSet
-                })
-              ) : (
-                React.createElement("p", {style: {textAlign: 'center', color: 'var(--text-secondary)', fontSize: '0.9em', padding: '15px 5px'}}, "Select a node in Graph/List/Focus view to see Node Insight.")
-              )
+              React.createElement(AiInsightsTab, {
+                node: props.selectedNodeForInsights,
+                insightsData: props.aiInsightsData,
+                isLoading: props.aiInsightsIsLoading,
+                error: props.aiInsightsError,
+                onGenerateInsights: props.onGenerateAiNodeInsights,
+                onUseDescription: props.onUseSuggestedDescription,
+                onUseAlternativeName: props.onUseAlternativeName,
+                onAddSuggestedChild: props.onAddSuggestedChildFromInsight,
+                isAppBusy: isAppBusy,
+                apiKeyIsSet: apiKeyIsSet
+              })
             ),
-            
             activeSidebarTab === 'history' && (
-              React.createElement(HistoryViewTabContent, { history: history, onClearHistory: onClearHistory })
+              React.createElement(HistoryViewTabContent, { history: history })
             )
           )
         )

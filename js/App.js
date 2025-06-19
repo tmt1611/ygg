@@ -25,10 +25,9 @@ import { useApiKey } from './hooks/useApiKey.js';
 
 // Services & Utils
 import * as geminiService from './services/geminiService.js';
-import { findNodeById, countNodesInTree, getTreeDepth, getLockedNodeIds, countNodesByStatus } from './utils.js';
+import { findNodeById, countNodesInTree, getTreeDepth, getLockedNodeIds, countNodesByImportance, areAllNodesLocked } from './utils.js';
 
-// Types (imports will be preserved but types themselves are gone from types.js)
-// import { TechTreeNode, NodeStatus, Project, WorkspaceSubTab, YggdrasilViewMode, ActiveOverlayPanel, SidebarTabId } from './types.js';
+
 
 
 const App = () => {
@@ -73,7 +72,7 @@ const App = () => {
 
   const viewStates = useViewStates({
     techTreeData, setError, modalManager, addHistoryEntry,
-    setYggdrasilViewMode, setActiveOverlayPanel
+    setYggdrasilViewMode, setActiveOverlayPanel, activeOverlayPanel
   });
   const { focusNodeId, selectedGraphNodeId, setSelectedGraphNodeId, handleSwitchToFocusView } = viewStates;
 
@@ -187,11 +186,13 @@ const App = () => {
 
   const currentTreeStats = useMemo(() => {
       if (!techTreeData) return null;
+      const totalNodes = countNodesInTree(techTreeData);
       return {
-          totalNodes: techTreeData ? countNodesInTree(techTreeData) : 0,
-          depth: techTreeData ? getTreeDepth(techTreeData) : 0,
-          lockedCount: techTreeData ? getLockedNodeIds(techTreeData).length : 0,
-          statusCounts: techTreeData ? countNodesByStatus(techTreeData) : {small:0, medium:0, large:0},
+          totalNodes: totalNodes,
+          depth: getTreeDepth(techTreeData),
+          lockedCount: getLockedNodeIds(techTreeData).length,
+          importanceCounts: countNodesByImportance(techTreeData),
+          isAllLocked: totalNodes > 0 ? areAllNodesLocked(techTreeData) : false,
       };
   }, [techTreeData]);
 
@@ -201,6 +202,21 @@ const App = () => {
     }
     return initialPrompt || "Unsaved Project";
   }, [activeProjectId, projects, initialPrompt]);
+
+  const handleClearHistoryWithConfirmation = useCallback(() => {
+    modalManager.openConfirmModal({
+        title: "Clear History?",
+        message: "This will permanently delete all history entries for this session. This action cannot be undone.",
+        confirmText: "Clear History",
+        confirmButtonStyle: 'danger',
+        onConfirm: () => {
+            clearHistory();
+            addHistoryEntry('HISTORY_CLEARED', 'History log cleared by user.');
+            modalManager.closeConfirmModal();
+        },
+        onCancel: modalManager.closeConfirmModal,
+    });
+  }, [modalManager, clearHistory, addHistoryEntry]);
 
   const handleGenerateStrategicSuggestions = useCallback(async () => {
     if (!apiKeyHook.status.isSet || !initialPrompt.trim()) {
@@ -225,6 +241,17 @@ const App = () => {
       setIsFetchingStrategicSuggestions(false);
     }
   }, [apiKeyHook.status.isSet, initialPrompt, techTreeData, addHistoryEntry]);
+
+  const handleApplyStrategicSuggestion = useCallback((suggestion) => {
+    if (!techTreeData) {
+      setError("Cannot apply suggestion: No active tree.");
+      return;
+    }
+    const fullPrompt = `Based on the strategic idea "${suggestion}", please apply relevant modifications to the current tree structure. For example, consider creating new main branches, adding key technologies under existing nodes, or expanding on underdeveloped areas related to this idea.`;
+    setModificationPrompt(fullPrompt);
+    treeOperationsAI.handleApplyAiModification(fullPrompt);
+    setActiveSidebarTab('ai-tools');
+  }, [techTreeData, treeOperationsAI, setModificationPrompt, setActiveSidebarTab, setError]);
 
   const canUndoAiModForSidebar = !!previousTreeStateForUndo || !!pendingAiSuggestion;
 
@@ -252,22 +279,21 @@ const App = () => {
           onToggleSidebar: toggleSidebar,
           activeSidebarTab: activeSidebarTab,
           setActiveSidebarTab: setActiveSidebarTab,
-          themeMode: themeMode, 
+          // AI Tools Tab Props
           modificationPrompt: modificationPrompt,
           setModificationPrompt: setModificationPrompt,
           onModifyAiTree: () => treeOperationsAI.handleApplyAiModification(modificationPrompt),
           isAiModifying: isModifying,
           canUndoAiMod: canUndoAiModForSidebar,
           onUndoAiModification: treeOperationsAI.handleUndoAiModification,
+          isAiSuggestionModalOpen: modalManager.isAiSuggestionModalOpen,
           initialPromptForStrategy: initialPrompt,
-          techTreeDataForStrategy: techTreeData,
           strategicSuggestions: strategicSuggestions,
           isFetchingStrategicSuggestions: isFetchingStrategicSuggestions,
           strategicSuggestionsError: strategicSuggestionsError,
           onGenerateStrategicSuggestions: handleGenerateStrategicSuggestions,
-          apiKeyIsSet: apiKeyHook.status.isSet,
-          hasTechTreeData: !!techTreeData,
-          isAppBusy: isLoading || isModifying || isFetchingStrategicSuggestions,
+          onApplyStrategicSuggestion: handleApplyStrategicSuggestion,
+          // AI Insights Tab Props
           selectedNodeForInsights: selectedNodeForInsights,
           aiInsightsData: aiInsightsData,
           aiInsightsIsLoading: aiInsightsIsLoading,
@@ -276,39 +302,32 @@ const App = () => {
           onUseSuggestedDescription: (desc) => aiInsightsHook.handleUseSuggestedDescription(selectedNodeForInsights.id, desc),
           onUseAlternativeName: (altName) => aiInsightsHook.handleUseAlternativeName(selectedNodeForInsights.id, altName),
           onAddSuggestedChildFromInsight: (name, desc) => aiInsightsHook.handleAddSuggestedChildFromInsight(selectedNodeForInsights.id, name, desc),
-          history: historyManager.history,
-          onClearHistory: clearHistory
+          history: historyManager.history
         }),
         
         React.createElement("main", { className: "yggdrasil-core-canvas" },
-          isLoading && React.createElement(LoadingSpinner, { message: "Generating Structure..." }),
-          isModifying && !isAiSuggestionModalOpen && React.createElement(LoadingSpinner, { message: "AI Applying Modifications..." }),
           error && React.createElement(ErrorMessage, { message: error }),
 
           React.createElement(MainContentRouter, {
-            yggdrasilViewMode: yggdrasilViewMode,
-            activeOverlayPanel: activeOverlayPanel,
-            setActiveOverlayPanel: setActiveOverlayPanel,
-            techTreeData: techTreeData,
-            isLoading: isLoading,
-            isModifying: isModifying,
-            isAppBusy: isLoading || isModifying || isFetchingStrategicSuggestions,
-            projectManager: projectManager,
-            initialPrompt: initialPrompt,
-            setInitialPrompt: setInitialPrompt,
-            currentTreeStats: currentTreeStats,
-            nodeOperations: nodeOperations,
-            viewStates: viewStates,
-            treeOperationsAI: treeOperationsAI,
-            apiKeyHook: apiKeyHook,
-            onExtractData: handleExtractData,
-            extractionMode: modalManager.extractionMode,
-            setExtractionMode: modalManager.setExtractionMode,
-            isSummarizing: isSummarizing,
-            projectLinkingHook: projectLinkingHook,
-            handleNodeSelectedForInsightsOrActions: handleNodeSelectedForInsightsOrActions,
-            onToggleNodeActionsPanel: toggleNodeActionsPanelVisibility,
-            modalManager: modalManager
+            appState: {
+              techTreeData, isLoading, isModifying,
+              isAppBusy: isLoading || isModifying || isFetchingStrategicSuggestions,
+              initialPrompt, setInitialPrompt, currentTreeStats,
+              isSummarizing
+            },
+            appHooks: {
+              projectManager, nodeOperations, viewStates,
+              treeOperationsAI, apiKeyHook, projectLinkingHook,
+              modalManager
+            },
+            appCallbacks: {
+              handleExtractData, handleNodeSelectedForInsightsOrActions,
+              toggleNodeActionsPanelVisibility,
+              handleDeleteNodeWithConfirmation: nodeOperations.handleDeleteNodeWithConfirmation
+            },
+            viewControls: {
+              yggdrasilViewMode, activeOverlayPanel, setActiveOverlayPanel
+            }
           })
         )
       ), 
@@ -319,11 +338,11 @@ const App = () => {
           treeData: techTreeData,
           onOpenNodeEditModal: modalManager.openNodeEditModal,
           onToggleLock: nodeOperations.handleToggleNodeLock,
-          onNodeStatusChange: nodeOperations.handleNodeStatusChange,
+          onNodeImportanceChange: nodeOperations.handleNodeImportanceChange,
           onLinkToProject: projectLinkingHook.handleOpenLinkProjectModal,
           onGoToLinkedProject: projectLinkingHook.handleNavigateToLinkedProject,
           onUnlinkProject: projectLinkingHook.handleUnlinkProjectFromNode,
-          onDeleteNode: nodeOperations.handleDeleteNodeAndChildren,
+          onDeleteNode: nodeOperations.handleDeleteNodeWithConfirmation,
           onSetFocusNode: viewStates.handleSwitchToFocusView,
           onGenerateInsights: handleGenerateAiInsights,
           isAppBusy: isLoading || isModifying || isFetchingStrategicSuggestions,
@@ -348,9 +367,12 @@ const App = () => {
         projectLinkingHook: projectLinkingHook,
         techTreeData: techTreeData,
         nodeOperations: nodeOperations,
+        onDeleteNodeWithConfirmation: nodeOperations.handleDeleteNodeWithConfirmation,
         handleSwitchToFocusView: viewStates.handleSwitchToFocusView,
         projects: projectManager.projects,
-        activeProjectId: projectManager.activeProjectId
+        activeProjectId: projectManager.activeProjectId,
+        yggdrasilViewMode: yggdrasilViewMode,
+        activeOverlayPanel: activeOverlayPanel,
       })
     )
   );

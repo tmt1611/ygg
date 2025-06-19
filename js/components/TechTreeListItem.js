@@ -1,23 +1,22 @@
 
 import React, { useMemo, useCallback, useState, useEffect } from 'react';
-// import { TechTreeNode, NodeStatus, Project } from '../types.js'; // Types removed
-// import { LinkSourceInfo } from '../hooks/useProjectLinking.js'; // Types removed
 
-const RUNE_STATUS_OPTIONS = [
-    { value: 'small', label: 'Small', rune: '🌱' },
-    { value: 'medium', label: 'Medium', rune: '🌿' },
-    { value: 'large', label: 'Large', rune: '🌳' },
+const RUNE_IMPORTANCE_OPTIONS = [
+    { value: 'minor', label: 'Minor', rune: '🌱' },
+    { value: 'common', label: 'Common', rune: '🌿' },
+    { value: 'major', label: 'Major', rune: '🌳' },
 ];
 
 const TechTreeListItemComponent = ({
     node, showDescriptionsGlobal,
-    onToggleLock,
-    onNodeStatusChange,
+    onToggleLock, onAddQuickChild,
+    onNodeImportanceChange,
     onOpenNodeEditModal, level, searchTerm, isAppBusy, collapsedNodeIds, onToggleCollapseNode,
     onSwitchToFocusView,
     onNavigateToLinkedProject,
     onOpenContextMenu,
-    onSelectListItem, 
+    onSelectListItem,
+    selectedNodeId,
     projects,
     activeProjectId,
     treeDataRootId,
@@ -40,10 +39,11 @@ const TechTreeListItemComponent = ({
 
   const isCollapsed = collapsedNodeIds.has(node.id);
   const hasChildren = !!(node.children && node.children.length > 0);
+  const isSelected = node.id === selectedNodeId;
 
-  const handleStatusChange = useCallback((e) => {
-    onNodeStatusChange(node.id, e.target.value);
-  }, [node.id, onNodeStatusChange]);
+  const handleImportanceChange = useCallback((e) => {
+    onNodeImportanceChange(node.id, e.target.value);
+  }, [node.id, onNodeImportanceChange]);
 
   const handleEditNameAndDescriptionClick = useCallback(() => {
     onOpenNodeEditModal({
@@ -59,16 +59,20 @@ const TechTreeListItemComponent = ({
     });
   }, [node.id, node.name, node.description, onOpenNodeEditModal]);
 
-  const handleAddChildClick = useCallback(() => {
-    onOpenNodeEditModal({
-        mode: 'addChild',
-        targetNodeId: node.id,
-        parentNodeName: node.name,
-        title: `Add Child to: ${node.name}`,
-        label: "New Child Name",
-        placeholder: "Enter new child name",
-    });
-  }, [node.id, node.name, onOpenNodeEditModal]);
+  const handleAddChildClick = useCallback((event) => {
+    if (event.shiftKey) {
+      onAddQuickChild(node.id);
+    } else {
+      onOpenNodeEditModal({
+          mode: 'addChild',
+          targetNodeId: node.id,
+          parentNodeName: node.name,
+          title: `Add Child to: ${node.name}`,
+          label: "New Child Name",
+          placeholder: "Enter new child name",
+      });
+    }
+  }, [node.id, node.name, onOpenNodeEditModal, onAddQuickChild]);
 
   const handleNodeCollapseToggle = useCallback((event) => {
     if (hasChildren) {
@@ -110,24 +114,19 @@ const TechTreeListItemComponent = ({
     );
   }, []);
 
-  const handleNodeNameClick = useCallback(() => {
-    if (onSelectListItem) {
+  const handleNodeNameClick = useCallback((e) => {
+    if (e.detail === 2) { // Double click
+      onSwitchToFocusView(node.id);
+    } else if (onSelectListItem) {
       onSelectListItem(node.id);
     }
-    if (hasChildren) {
-      onToggleCollapseNode(node.id, false); 
-    }
-  }, [node.id, hasChildren, onSelectListItem, onToggleCollapseNode]);
+  }, [node.id, onSelectListItem, onSwitchToFocusView]);
 
   const handleContextMenu = useCallback((event) => {
     event.preventDefault();
     if (onSelectListItem) onSelectListItem(node.id); 
     onOpenContextMenu(node.id, { x: event.clientX, y: event.clientY }, incomingLinkSource);
   }, [node.id, onOpenContextMenu, onSelectListItem, incomingLinkSource]);
-
-  const itemStyle = {
-    marginLeft: `${level * 8}px`, 
-  };
 
   const itemContentVisible = (node.description && isEffectivelyDescriptionVisible) || hasChildren;
 
@@ -138,11 +137,11 @@ const TechTreeListItemComponent = ({
     nodeNameTitle += ` (↩️ Linked from: ${incomingLinkSource.sourceProjectName} / ${incomingLinkSource.sourceNodeName})`;
   }
 
-  const currentStatusObject = RUNE_STATUS_OPTIONS.find(opt => opt.value === (node.status || 'medium')) || RUNE_STATUS_OPTIONS[1];
+  const currentImportanceObject = RUNE_IMPORTANCE_OPTIONS.find(opt => opt.value === (node.importance || 'common')) || RUNE_IMPORTANCE_OPTIONS[1];
 
 
   return (
-    React.createElement("li", { className: "list-view-item", style: itemStyle, "aria-labelledby": `node-name-${node.id}`, onContextMenu: handleContextMenu },
+    React.createElement("li", { className: "list-view-item", "aria-labelledby": `node-name-${node.id}`, onContextMenu: handleContextMenu },
       React.createElement("div", { className: `list-view-item-header ${itemContentVisible && !isCollapsed ? 'expanded' : ''}`},
         React.createElement("div", { className: "list-view-name-section" },
           hasChildren && (
@@ -153,7 +152,7 @@ const TechTreeListItemComponent = ({
               isCollapsed ? '▶' : '▼'
             )
           ),
-          !hasChildren && React.createElement("span", { style: { display: 'inline-block', width: '26px', height: '26px', marginRight: '2px' }}, " "),
+          !hasChildren && React.createElement("span", { style: { display: 'inline-block', width: '28px' }}),
           
           node.linkedProjectId && (
             React.createElement("span", { style: { fontSize: '1em', marginRight: '4px', color: 'var(--primary-accent)' }, title: `Links to project: ${node.linkedProjectName || 'Unknown'}`}, "🔗")
@@ -163,7 +162,7 @@ const TechTreeListItemComponent = ({
           ),
 
           React.createElement("span", { id: `node-name-${node.id}`,
-             className: `list-view-node-name ${hasChildren || onSelectListItem ? 'clickable' : ''} ${node.isLocked ? 'locked' : ''}`,
+             className: `list-view-node-name ${onSelectListItem ? 'clickable' : ''} ${node.isLocked ? 'locked' : ''}`,
              title: nodeNameTitle,
              onClick: handleNodeNameClick 
           },
@@ -172,57 +171,47 @@ const TechTreeListItemComponent = ({
         ),
 
         React.createElement("div", { className: "list-view-actions" },
-           React.createElement("button", { onClick: handleLockToggle, disabled: isAppBusy,
+          node.description && React.createElement("button", { 
+            onClick: handleToggleLocalDescription, disabled: isAppBusy, className: "list-item-action-icon base-icon-button",
+            style: { opacity: isEffectivelyDescriptionVisible ? 1 : 0.5 },
+            "aria-pressed": isEffectivelyDescriptionVisible,
+            "aria-label": isEffectivelyDescriptionVisible ? `Hide description for ${node.name}` : `Show description for ${node.name}`,
+            title: isEffectivelyDescriptionVisible ? `Hide Description` : `Show Description`
+          }, '📄'),
+          React.createElement("button", { onClick: handleLockToggle, disabled: isAppBusy,
             className: `list-item-action-icon base-icon-button ${node.isLocked ? 'locked' : ''}`,
             "aria-pressed": !!node.isLocked,
             "aria-label": node.isLocked ? `Unlock node ${node.name}` : `Lock node ${node.name}`,
             title: node.isLocked ? `Unlock Node` : `Lock Node`},
             node.isLocked ? '🔒' : '🔓'
           ),
-           React.createElement("div", { className: "list-view-status-select-wrapper" },
-              React.createElement("select", {
-                value: node.status || 'medium',
-                onChange: handleStatusChange,
-                disabled: isAppBusy,
-                className: `list-view-status-select status-${node.status || 'medium'}`,
-                "aria-label": `Status for ${node.name}`,
-                title: `Current status: ${currentStatusObject.rune} ${currentStatusObject.label}. Click to change.`
-              },
-                RUNE_STATUS_OPTIONS.map(opt => React.createElement("option", { key: opt.value, value: opt.value }, opt.rune, " ", opt.label))
-              )
-            ),
-           React.createElement("button", { onClick: handleToggleLocalDescription, disabled: isAppBusy || !node.description, className: "list-item-action-icon base-icon-button",
-            "aria-pressed": isEffectivelyDescriptionVisible,
-            "aria-label": isEffectivelyDescriptionVisible ? `Hide description for ${node.name}` : `Show description for ${node.name}`,
-            title: node.description ? (isEffectivelyDescriptionVisible ? `Hide Description` : `Show Description`) : "No description available"},
-            isEffectivelyDescriptionVisible ? '👁️' : '👁️‍🗨️'
-          ),
-          React.createElement("button", { onClick: handleEditNameAndDescriptionClick, disabled: isAppBusy, className: "list-item-action-icon primary-action base-icon-button",
-            "aria-label": `Edit ${node.name}`, title: `Edit Name & Description`},
-            "✏️"
-          ),
-          React.createElement("button", { onClick: handleAddChildClick, disabled: isAppBusy, className: "list-item-action-icon base-icon-button",
-            "aria-label": `Add child to ${node.name}`, title: `Add Child Node`},
-            "✨"
-          ),
-           React.createElement("button", { onClick: handleFocusNodeClick, disabled: isAppBusy, className: "list-item-action-icon primary-action base-icon-button", 
-            "aria-label": `Focus on ${node.name}`, title: `Focus on Node`},
-            "🎯"
-          ),
-          (node.linkedProjectId || incomingLinkSource) && (onNavigateToLinkedProject || handleNavigateToSourceNode) && (
-            React.createElement("button", { onClick: handleGoToLinkedProjectClick, disabled: isAppBusy, className: "list-item-action-icon base-icon-button",
-              "aria-label": incomingLinkSource ? `Go to source: ${incomingLinkSource.sourceProjectName}` : `Go to linked project: ${node.linkedProjectName}`, 
-              title: incomingLinkSource ? `Go to Source: ${incomingLinkSource.sourceProjectName} / ${incomingLinkSource.sourceNodeName}` : `Go to Linked Project: ${node.linkedProjectName || 'Unknown'}`},
-              incomingLinkSource ? '↩️' : '↪️'
-            )
+          React.createElement("button", { 
+            onClick: handleAddChildClick, 
+            disabled: isAppBusy, 
+            className: "list-item-action-icon base-icon-button",
+            "aria-label": `Add child to ${node.name}. Hold Shift to add without a prompt.`, 
+            title: `Add Child Node (Shift+Click for quick add)`
+          }, '➕'),
+          React.createElement("select", {
+            value: node.importance || 'common',
+            onChange: handleImportanceChange,
+            disabled: isAppBusy || node.isLocked,
+            className: `list-view-importance-select importance-${node.importance || 'common'}`,
+            "aria-label": `Importance for ${node.name}`,
+            title: `Importance: ${currentImportanceObject.label}. Right-click for more actions.`,
+            onClick: (e) => e.stopPropagation() // Prevent row selection when clicking select
+          },
+            RUNE_IMPORTANCE_OPTIONS.map(opt => React.createElement("option", { key: opt.value, value: opt.value }, opt.rune, " ", opt.label))
           )
         )
       ),
 
       !isCollapsed && node.description && isEffectivelyDescriptionVisible && (
-        React.createElement("div", { className: "list-view-item-content" },
+        React.createElement("div", { 
+          className: "list-view-item-content", 
+        },
           React.createElement("div", { className: "list-view-description-area" }, 
-            React.createElement("div", { className: "list-view-description" },
+            React.createElement("p", { className: "list-view-description" },
                 getHighlightedText(node.description, searchTerm)
             )
           )
@@ -232,18 +221,20 @@ const TechTreeListItemComponent = ({
       hasChildren && !isCollapsed && (
         React.createElement("ul", { id: `children-of-${node.id}`, className: "list-view-child-container" },
           node.children.map(child => (
-            React.createElement(TechTreeListItem, { 
+            React.createElement(TechTreeListItem, {
               key: child.id, node: child,
               showDescriptionsGlobal: showDescriptionsGlobal,
               onToggleLock: onToggleLock,
-              onNodeStatusChange: onNodeStatusChange,
+              onAddQuickChild: onAddQuickChild,
+              onNodeImportanceChange: onNodeImportanceChange,
               onOpenNodeEditModal: onOpenNodeEditModal, level: level + 1,
               searchTerm: searchTerm, isAppBusy: isAppBusy,
               collapsedNodeIds: collapsedNodeIds, onToggleCollapseNode: onToggleCollapseNode,
-              onSwitchToFocusView: onSwitchToFocusView, 
+              onSwitchToFocusView: onSwitchToFocusView,
               onNavigateToLinkedProject: onNavigateToLinkedProject,
               onOpenContextMenu: onOpenContextMenu,
-              onSelectListItem: onSelectListItem, 
+              onSelectListItem: onSelectListItem,
+              selectedNodeId: selectedNodeId,
               projects: projects,
               activeProjectId: activeProjectId,
               treeDataRootId: treeDataRootId,

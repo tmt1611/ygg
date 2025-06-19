@@ -1,11 +1,7 @@
 
 import { useState, useCallback, useEffect } from 'react';
-// import { Project, TechTreeNode } from '../types.js'; // Types removed
 import { generateUUID, initializeNodes, findNodeById, updateNodeInTree } from '../utils.js';
 import { APP_STORAGE_KEYS, ELF_WARFARE_STRUCTURE_JSON_STRING, ADVANCED_NATURE_MAGIC_JSON_STRING } from '../constants.js';
-// import { UseModalManagerReturn } from './useModalManager.js'; // Types removed
-// import { UseHistoryManagerReturn } from './useHistoryManager.js'; // Types removed
-// import { UseViewStatesReturn } from './useViewStates.js'; // Types removed
 
 export const useProjectManagement = ({
   modalManager,
@@ -67,124 +63,139 @@ export const useProjectManagement = ({
     }
   }, [activeProjectId, setTechTreeData, setContextText, setInitialPromptFromHook]);
 
-
-  const initializeDefaultProjects = useCallback(() => {
-    const startupLogged = localStorage.getItem(APP_STORAGE_KEYS.STARTUP_LOAD_LOGGED);
-    const logId = `startup-project-load-${new Date().toISOString()}`;
-    let loadedProjects = [];
-    let activeProjectHasBeenSet = false;
-
+  const _loadProjectsFromStorage = useCallback(() => {
     try {
       const storedProjects = localStorage.getItem(APP_STORAGE_KEYS.PROJECT_COLLECTION);
       if (storedProjects) {
         const parsed = JSON.parse(storedProjects);
         if (Array.isArray(parsed) && parsed.every(p => p.id && p.name && p.treeData && p.lastModified)) {
-          loadedProjects = parsed.map(p => ({ ...p, treeData: initializeNodes(p.treeData) }));
-        } else {
-          if (!startupLogged) addHistoryEntry('PROJECT_LOADED', 'Invalid project collection found, reset.', { source: 'localStorage-error', logId });
-        }
-      }
-
-      const elfDataParsed = JSON.parse(ELF_WARFARE_STRUCTURE_JSON_STRING);
-      const natureMagicDataParsed = JSON.parse(ADVANCED_NATURE_MAGIC_JSON_STRING);
-
-      let elfWarfareProject = loadedProjects.find(p => p.treeData.id === elfDataParsed.tree.id && p.isExample);
-      if (!elfWarfareProject) {
-        elfWarfareProject = {
-          id: generateUUID(), name: elfDataParsed.tree.name || "Elven Warfare Doctrines",
-          treeData: initializeNodes(elfDataParsed.tree), lastModified: new Date().toISOString(), isExample: true,
-        };
-        loadedProjects.push(elfWarfareProject);
-        if (!startupLogged) addHistoryEntry('PROJECT_CREATED', `Initialized example: "${elfWarfareProject.name}".`, { source: 'auto-init', logId });
-      }
-
-      let natureMagicProject = loadedProjects.find(p => p.treeData.id === natureMagicDataParsed.tree.id && p.isExample);
-      if (!natureMagicProject) {
-        natureMagicProject = {
-          id: generateUUID(), name: natureMagicDataParsed.tree.name || "Advanced Nature Magic",
-          treeData: initializeNodes(natureMagicDataParsed.tree), lastModified: new Date().toISOString(), isExample: true,
-        };
-        loadedProjects.push(natureMagicProject);
-        if (!startupLogged) addHistoryEntry('PROJECT_CREATED', `Initialized example: "${natureMagicProject.name}".`, { source: 'auto-init', logId });
-      }
-      
-      let finalLoadedProjects = [...loadedProjects]; 
-
-      const ewProject = finalLoadedProjects.find(p => p.id === elfWarfareProject.id);
-      const anmProject = finalLoadedProjects.find(p => p.id === natureMagicProject.id);
-
-      if (ewProject && anmProject) {
-        const nodeToLinkInEW = findNodeById(ewProject.treeData, "natures-embrace");
-        if (nodeToLinkInEW) {
-          if (nodeToLinkInEW.linkedProjectId !== anmProject.id || nodeToLinkInEW.linkedProjectName !== anmProject.name) {
-            const updatedEWTree = updateNodeInTree(ewProject.treeData, "natures-embrace", {
-              linkedProjectId: anmProject.id,
-              linkedProjectName: anmProject.name,
-            });
-            const ewIndex = finalLoadedProjects.findIndex(p => p.id === ewProject.id);
-            finalLoadedProjects[ewIndex] = { ...ewProject, treeData: updatedEWTree, lastModified: new Date().toISOString() };
-          }
-        }
-
-        if (anmProject.treeData.linkedProjectId !== ewProject.id || anmProject.treeData.linkedProjectName !== ewProject.name) {
-            const updatedANMRootTree = {
-                ...anmProject.treeData,
-                linkedProjectId: ewProject.id,
-                linkedProjectName: ewProject.name,
-            };
-            const anmIndex = finalLoadedProjects.findIndex(p => p.id === anmProject.id);
-            finalLoadedProjects[anmIndex] = { ...anmProject, treeData: updatedANMRootTree, lastModified: new Date().toISOString() };
-        }
-        
-        const currentEWProjectForRootUpdate = finalLoadedProjects.find(p => p.id === ewProject.id);
-        if (currentEWProjectForRootUpdate && (currentEWProjectForRootUpdate.treeData.linkedProjectId !== anmProject.id || currentEWProjectForRootUpdate.treeData.linkedProjectName !== anmProject.name)) {
-            const updatedEWRootTree = {
-                ...currentEWProjectForRootUpdate.treeData,
-                linkedProjectId: anmProject.id,
-                linkedProjectName: anmProject.name,
-            };
-            const ewIndex = finalLoadedProjects.findIndex(p => p.id === ewProject.id);
-            finalLoadedProjects[ewIndex] = { ...currentEWProjectForRootUpdate, treeData: updatedEWRootTree, lastModified: new Date().toISOString() };
-        }
-      }
-
-      setProjects(finalLoadedProjects); 
-
-      const storedActiveId = localStorage.getItem(APP_STORAGE_KEYS.ACTIVE_PROJECT_ID);
-      if (storedActiveId) {
-        const activeProj = finalLoadedProjects.find(p => p.id === storedActiveId && !p.isExample);
-        if (activeProj) {
-          setActiveProjectId(activeProj.id); setTechTreeData(activeProj.treeData);
-          setContextText(activeProj.name); setInitialPromptFromHook(activeProj.name);
-          if (!startupLogged) addHistoryEntry('PROJECT_LOADED', `Loaded project "${activeProj.name}".`, { source: 'localStorage-active', logId, projectId: activeProj.id });
-          activeProjectHasBeenSet = true;
-        }
-      }
-
-      if (!activeProjectHasBeenSet) {
-        const firstUserProject = finalLoadedProjects.find(p => !p.isExample);
-        if (firstUserProject) {
-          setActiveProjectId(firstUserProject.id); setTechTreeData(firstUserProject.treeData);
-          setContextText(firstUserProject.name); setInitialPromptFromHook(firstUserProject.name);
-          if (!startupLogged) addHistoryEntry('PROJECT_LOADED', `Loaded first available project "${firstUserProject.name}".`, { source: 'localStorage-fallback', logId, projectId: firstUserProject.id });
-          activeProjectHasBeenSet = true;
-        }
-      }
-      if (!activeProjectHasBeenSet && finalLoadedProjects.some(p => p.isExample)) {
-        const exampleToLoad = finalLoadedProjects.find(p => p.isExample && p.name === "Elven Warfare Doctrines"); 
-        if (exampleToLoad) {
-          viewStates?.commonViewResetLogic(false); setTechTreeData(exampleToLoad.treeData);
-          setContextText(exampleToLoad.name); setInitialPromptFromHook(exampleToLoad.name); setActiveProjectId(null);
-          if (!startupLogged) addHistoryEntry('PROJECT_EXAMPLE_LOADED', `Started with example: "${exampleToLoad.name}".`, { source: 'auto-example-load', logId, exampleProjectId: exampleToLoad.id });
+          return parsed.map(p => ({ ...p, treeData: initializeNodes(p.treeData) }));
         }
       }
     } catch (e) {
-      console.error("Error loading projects:", e); setError("Failed to load projects.");
-      if (!startupLogged) addHistoryEntry('PROJECT_LOADED', 'Error loading projects.', { error: e.message, logId });
-    } finally {
-      if (!startupLogged) localStorage.setItem(APP_STORAGE_KEYS.STARTUP_LOAD_LOGGED, 'true');
+      console.error("Error loading projects from storage:", e);
+      addHistoryEntry('PROJECT_LOADED', 'Failed to load projects from storage.', { error: e.message });
     }
-  }, [addHistoryEntry, viewStates, setContextText, setError, setInitialPromptFromHook, setTechTreeData]);
+    return [];
+  }, [addHistoryEntry]);
+
+  const _addMissingExampleProjects = useCallback((projectsList) => {
+      let newProjects = [...projectsList];
+      const examplesData = [
+          { parsedData: JSON.parse(ELF_WARFARE_STRUCTURE_JSON_STRING), name: "Elven Warfare Doctrines" },
+          { parsedData: JSON.parse(ADVANCED_NATURE_MAGIC_JSON_STRING), name: "Advanced Nature Magic" },
+      ];
+
+      examplesData.forEach(example => {
+          const exampleExists = newProjects.some(p => p.isExample && p.treeData.id === example.parsedData.tree.id);
+          if (!exampleExists) {
+              newProjects.push({
+                  id: generateUUID(),
+                  name: example.parsedData.tree.name || example.name,
+                  treeData: initializeNodes(example.parsedData.tree),
+                  lastModified: new Date().toISOString(),
+                  isExample: true,
+              });
+          }
+      });
+      return newProjects;
+  }, []);
+
+  const _linkExampleProjects = useCallback((projectsList) => {
+      let linkedProjects = [...projectsList];
+      const ewProject = linkedProjects.find(p => p.isExample && p.treeData.id === 'elf-warfare-root-example-v1');
+      const anmProject = linkedProjects.find(p => p.isExample && p.treeData.id === 'nature-magic-root-example-v1');
+
+      if (!ewProject || !anmProject) return linkedProjects;
+      
+      let ewTree = ewProject.treeData;
+      let anmTree = anmProject.treeData;
+      let modified = false;
+
+      const nodeToLinkInEW = findNodeById(ewTree, "natures-embrace");
+      if (nodeToLinkInEW && nodeToLinkInEW.linkedProjectId !== anmProject.id) {
+          ewTree = updateNodeInTree(ewTree, "natures-embrace", { linkedProjectId: anmProject.id, linkedProjectName: anmProject.name });
+          modified = true;
+      }
+      
+      if (anmTree.linkedProjectId !== ewProject.id) {
+          anmTree = { ...anmTree, linkedProjectId: ewProject.id, linkedProjectName: ewProject.name };
+          modified = true;
+      }
+
+      if (modified) {
+          return linkedProjects.map(p => {
+              if (p.id === ewProject.id) return { ...p, treeData: ewTree, lastModified: new Date().toISOString() };
+              if (p.id === anmProject.id) return { ...p, treeData: anmTree, lastModified: new Date().toISOString() };
+              return p;
+          });
+      }
+      
+      return linkedProjects;
+  }, []);
+
+  const _setActiveInitialProject = useCallback((allProjects) => {
+    const startupLogged = localStorage.getItem(APP_STORAGE_KEYS.STARTUP_LOAD_LOGGED);
+    const logId = `startup-project-load-${new Date().toISOString()}`;
+
+    const loadProjectState = (project, source) => {
+      setActiveProjectId(project.isExample ? null : project.id);
+      setTechTreeData(initializeNodes(project.treeData));
+      setContextText(project.name);
+      setInitialPromptFromHook(project.name);
+      if (!startupLogged) {
+        addHistoryEntry('PROJECT_LOADED', `Loaded project "${project.name}".`, { source, logId, projectId: project.id });
+      }
+    };
+    
+    const findAndLoadProject = () => {
+        const storedActiveId = localStorage.getItem(APP_STORAGE_KEYS.ACTIVE_PROJECT_ID);
+        if (storedActiveId) {
+            const activeProj = allProjects.find(p => p.id === storedActiveId && !p.isExample);
+            if (activeProj) {
+                loadProjectState(activeProj, 'localStorage-active');
+                return true;
+            }
+        }
+    
+        const firstUserProject = allProjects.find(p => !p.isExample);
+        if (firstUserProject) {
+            loadProjectState(firstUserProject, 'fallback-first-user');
+            return true;
+        }
+        
+        const elfExample = allProjects.find(p => p.isExample && p.treeData.id === 'elf-warfare-root-example-v1');
+        if (elfExample) {
+            viewStates?.commonViewResetLogic(false);
+            loadProjectState(elfExample, 'fallback-example');
+            return true;
+        }
+
+        return false;
+    }
+
+    findAndLoadProject();
+
+  }, [setTechTreeData, setContextText, setInitialPromptFromHook, viewStates, addHistoryEntry]);
+
+
+  const initializeDefaultProjects = useCallback(() => {
+    const startupLogged = localStorage.getItem(APP_STORAGE_KEYS.STARTUP_LOAD_LOGGED);
+    try {
+      let projectsFromStorage = _loadProjectsFromStorage();
+      let projectsWithExamples = _addMissingExampleProjects(projectsFromStorage);
+      let allProjects = _linkExampleProjects(projectsWithExamples);
+      
+      setProjects(allProjects);
+      _setActiveInitialProject(allProjects);
+    } catch (e) {
+      console.error("Error initializing projects:", e);
+      setError("A critical error occurred while initializing projects.");
+      addHistoryEntry('APP_ERROR_ENCOUNTERED', 'Project initialization failed.', { error: e.message });
+    } finally {
+        if (!startupLogged) localStorage.setItem(APP_STORAGE_KEYS.STARTUP_LOAD_LOGGED, 'true');
+    }
+  }, [_loadProjectsFromStorage, _addMissingExampleProjects, _linkExampleProjects, _setActiveInitialProject, setError, addHistoryEntry]);
 
 
   const handleSetActiveProject = useCallback((projectId, fromExample = false) => {
@@ -208,10 +219,10 @@ export const useProjectManagement = ({
     }
   }, [projects, viewStates, setTechTreeData, setContextText, setInitialPromptFromHook, addHistoryEntry, setError]);
 
-  const saveCurrentTreeAsProject = useCallback((name, isExample = false) => {
-    if (!currentTechTreeData) { setError("No tree data to save as project."); return null; }
+  const saveNewProject = useCallback((treeToSave, name, isExample = false) => {
+    if (!treeToSave) { setError("No tree data to save as project."); return null; }
     const newProject = {
-      id: generateUUID(), name: name, treeData: currentTechTreeData,
+      id: generateUUID(), name: name, treeData: treeToSave,
       lastModified: new Date().toISOString(), isExample: isExample,
     };
     setProjects(prev => [...prev, newProject]);
@@ -222,24 +233,25 @@ export const useProjectManagement = ({
     }
     addHistoryEntry('PROJECT_CREATED', `${isExample ? 'Example p' : 'P'}roject "${name}" saved.`);
     return newProject;
-  }, [currentTechTreeData, addHistoryEntry, setError, setContextText, setInitialPromptFromHook]);
+  }, [addHistoryEntry, setError, setContextText, setInitialPromptFromHook]);
 
   const internalCreateNewProject = useCallback((name) => {
     resetTreeForNewProjectContext();
     const newEmptyTree = initializeNodes({
-      id: 'root-empty-' + generateUUID().substring(0,8), name: 'New Project Root', description: 'Start building your tech tree.', status: 'medium'
+      id: 'root-empty-' + generateUUID().substring(0,8), name: 'New Project Root', description: 'Start building your tech tree.', importance: 'common'
     });
     setTechTreeData(newEmptyTree); 
     setContextText(name);
     setInitialPromptFromHook(name);
     
-    const savedProject = saveCurrentTreeAsProject(name, false);
+    const savedProject = saveNewProject(newEmptyTree, name, false);
     closeProjectNameModal();
     if (viewStates && savedProject && savedProject.treeData.id) {
         viewStates.setYggdrasilViewMode('treeView');
-        viewStates.handleSwitchToFocusView(savedProject.treeData.id);
+        viewStates.setActiveOverlayPanel(null); // Ensure graph view is active
+        viewStates.setSelectedGraphNodeId(savedProject.treeData.id); // Select the root node
     }
-  }, [resetTreeForNewProjectContext, setTechTreeData, setContextText, setInitialPromptFromHook, saveCurrentTreeAsProject, closeProjectNameModal, viewStates]);
+  }, [resetTreeForNewProjectContext, setTechTreeData, setContextText, setInitialPromptFromHook, saveNewProject, closeProjectNameModal, viewStates]);
 
   const handleCreateNewProject = useCallback(() => {
     openProjectNameModal({ mode: 'create', onConfirm: internalCreateNewProject });
@@ -294,7 +306,7 @@ export const useProjectManagement = ({
         mode: 'create', currentName: currentContextText || "New Project",
         onConfirm: (nameFromModal) => {
           setContextText(nameFromModal); setInitialPromptFromHook(nameFromModal);
-          const newSavedProject = saveCurrentTreeAsProject(nameFromModal, false);
+          const newSavedProject = saveNewProject(currentTechTreeData, nameFromModal, false);
           if (newSavedProject && andDownload) { 
             const filename = `${newSavedProject.name.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.project.json`;
             const jsonStr = JSON.stringify(newSavedProject, null, 2);
@@ -332,7 +344,7 @@ export const useProjectManagement = ({
         link.click(); document.body.removeChild(link); URL.revokeObjectURL(url);
         addHistoryEntry('TREE_DOWNLOADED', `Project "${updatedProject.name}" downloaded.`);
     }
-  }, [activeProjectId, currentTechTreeData, projects, currentContextText, addHistoryEntry, openProjectNameModal, saveCurrentTreeAsProject, closeProjectNameModal, setContextText, setInitialPromptFromHook, setError]);
+  }, [activeProjectId, currentTechTreeData, projects, currentContextText, addHistoryEntry, openProjectNameModal, saveNewProject, closeProjectNameModal, setContextText, setInitialPromptFromHook, setError]);
 
   const internalRenameProject = useCallback((projectId, newName) => {
     const oldProject = projects.find(p => p.id === projectId);
@@ -341,15 +353,6 @@ export const useProjectManagement = ({
     addHistoryEntry('PROJECT_RENAMED', `Project "${oldProject?.name}" renamed to "${newName}".`);
     closeProjectNameModal();
   }, [projects, activeProjectId, addHistoryEntry, closeProjectNameModal, setContextText, setInitialPromptFromHook]);
-
-  const handleRenameActiveProject = useCallback(() => { 
-    const projectToRename = projects.find(p => p.id === activeProjectId && !p.isExample);
-    if(projectToRename){
-        openProjectNameModal({ mode: 'rename', projectId: projectToRename.id, currentName: projectToRename.name, onConfirm: (newName) => internalRenameProject(projectToRename.id, newName) });
-    } else {
-        setError("No active user project selected to rename, or it's an example.");
-    }
-  }, [projects, activeProjectId, openProjectNameModal, internalRenameProject, setError]);
 
   const handleRenameProject = useCallback((projectIdToRename, currentName) => { 
     const projectToRename = projects.find(p => p.id === projectIdToRename && !p.isExample);
@@ -366,7 +369,7 @@ export const useProjectManagement = ({
     if (!projectToDelete) { setError("Project not found for deletion."); return; }
     openConfirmModal({
       title: `Delete ${projectToDelete.isExample ? 'Example' : ''} Project?`, message: `Delete "${projectToDelete.name}"? This cannot be undone.`,
-      confirmText: `Delete ${projectToDelete.isExample ? 'Example' : ''} Project`, cancelText: "Cancel", confirmButtonStyle: { backgroundColor: 'var(--error-color)', borderColor: 'var(--error-color)' },
+      confirmText: `Delete ${projectToDelete.isExample ? 'Example' : ''} Project`, cancelText: "Cancel", confirmButtonStyle: 'danger',
       onConfirm: () => {
         const remainingProjects = projects.filter(p => p.id !== projectId);
         setProjects(remainingProjects);
@@ -391,9 +394,9 @@ export const useProjectManagement = ({
   
   const internalSaveAsExample = useCallback((name) => {
     if (!currentTechTreeData) { setError("No tree data to save as example."); return; }
-    saveCurrentTreeAsProject(name, true);
+    saveNewProject(currentTechTreeData, name, true);
     closeProjectNameModal();
-  }, [currentTechTreeData, saveCurrentTreeAsProject, closeProjectNameModal, setError]);
+  }, [currentTechTreeData, saveNewProject, closeProjectNameModal, setError]);
 
   const handleSaveCurrentTreeAsExampleProject = useCallback(() => {
     if (!currentTechTreeData) { setError("No active tree data to save as an example."); return; }
@@ -415,8 +418,8 @@ export const useProjectManagement = ({
 
   return {
     projects, activeProjectId, setActiveProjectId,
-    handleSetActiveProject, saveCurrentTreeAsProject, handleCreateNewProject,
-    handleAddNewProjectFromFile, handleSaveActiveProject, handleRenameActiveProject, handleRenameProject,
+    handleSetActiveProject, saveNewProject, handleCreateNewProject,
+    handleAddNewProjectFromFile, handleSaveActiveProject, handleRenameProject,
     handleDeleteProject, handleSaveCurrentTreeAsExampleProject, handleLoadAndGoToGraph,
     resetTreeForNewProjectContext, initializeDefaultProjects, saveProjectsToLocalStorage, internalRenameProject,
     updateProjectData, 

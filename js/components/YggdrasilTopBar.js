@@ -1,6 +1,15 @@
 
-import React, { useState, useEffect } from 'react';
-// import { ThemeMode, YggdrasilViewMode, ActiveOverlayPanel } from '../types.js'; // Types removed
+import React, { useState, useEffect, useMemo } from 'react';
+
+const getNextThemeInfo = (currentTheme) => {
+    switch (currentTheme) {
+        case 'dark': return { next: 'Light', icon: '☀️' };
+        case 'light': return { next: 'Sol', icon: '📜' };
+        case 'sol': return { next: 'Nebula', icon: '🌌' };
+        case 'nebula': return { next: 'Dark', icon: '🌙' };
+        default: return { next: 'Light', icon: '☀️' };
+    }
+};
 
 const YggdrasilTopBar = ({
   themeMode, onToggleTheme, apiKeyIsSet, activeProjectName, onSaveActiveProject, 
@@ -12,6 +21,22 @@ const YggdrasilTopBar = ({
   const [saveFeedback, setSaveFeedback] = useState(false);
   const [downloadFeedback, setDownloadFeedback] = useState(false);
 
+  useEffect(() => {
+    if (saveFeedback) {
+      const timer = setTimeout(() => setSaveFeedback(false), 1500);
+      return () => clearTimeout(timer);
+    }
+  }, [saveFeedback]);
+
+  useEffect(() => {
+    if (downloadFeedback) {
+      const timer = setTimeout(() => setDownloadFeedback(false), 1500);
+      return () => clearTimeout(timer);
+    }
+  }, [downloadFeedback]);
+
+  const nextThemeInfo = useMemo(() => getNextThemeInfo(themeMode), [themeMode]);
+
   const handleSaveClick = () => {
     onSaveActiveProject();
     setSaveFeedback(true);
@@ -22,32 +47,13 @@ const YggdrasilTopBar = ({
     setDownloadFeedback(true);
   };
 
-  useEffect(() => {
-    let timer;
-    if (saveFeedback) {
-      timer = setTimeout(() => setSaveFeedback(false), 1500); 
-    }
-    return () => clearTimeout(timer);
-  }, [saveFeedback]);
-
-  useEffect(() => {
-    let timer;
-    if (downloadFeedback) {
-      timer = setTimeout(() => setDownloadFeedback(false), 1500); 
-    }
-    return () => clearTimeout(timer);
-  }, [downloadFeedback]);
-
 
   const handleNavClick = (viewMode, overlay = null) => {
     setYggdrasilViewMode(viewMode);
     setActiveOverlayPanel(overlay);
   };
 
-  const isFocusViewDisabled = !focusNodeId && yggdrasilViewMode === 'treeView' && activeOverlayPanel === 'focus';
-
-
-  return (
+    return (
     React.createElement("header", { className: "yggdrasil-top-bar" },
       React.createElement("div", { className: "yggdrasil-top-bar-section left" },
         React.createElement("h1", { className: "yggdrasil-top-bar-title" }, "Yggdrasil")
@@ -74,13 +80,13 @@ const YggdrasilTopBar = ({
         }, "List"),
         React.createElement("button", {
           className: `yggdrasil-top-bar-nav-button ${yggdrasilViewMode === 'treeView' && activeOverlayPanel === 'focus' ? 'active' : ''}`,
-          onClick: () => focusNodeId ? handleNavClick('treeView', 'focus') : alert("Select a node from Graph or List view to enter Focus View."),
-          disabled:(isAppBusy && !(yggdrasilViewMode === 'treeView' && activeOverlayPanel === 'focus')) || (isFocusViewDisabled && !focusNodeId),
+          onClick: () => focusNodeId ? handleNavClick('treeView', 'focus') : undefined,
+          disabled: (isAppBusy && !(yggdrasilViewMode === 'treeView' && activeOverlayPanel === 'focus')) || !focusNodeId,
           title: focusNodeId ? "Detailed view of the currently focused node" : "Select a node to enable Focus View"
         }, "Focus"),
         activeProjectName && (
           React.createElement("div", { className: "yggdrasil-top-bar-active-project", title: `Currently active project: ${activeProjectName}`},
-            React.createElement("span", null, "🌲 Active:"), " ", activeProjectName
+            React.createElement("span", { className: "yggdrasil-top-bar-project-icon" }, "🌲"), activeProjectName
           )
         )
       ),
@@ -89,26 +95,26 @@ const YggdrasilTopBar = ({
         React.createElement("span", {
           className: `yggdrasil-top-bar-action-item api-status ${apiKeyIsSet ? 'success' : 'error'}`,
           title: apiKeyIsSet ? "Gemini API Key is active." : "Gemini API Key not set. AI features disabled."
-        }, "API: ", apiKeyIsSet ? 'Active' : 'Error'),
+        }, apiKeyIsSet ? '🔑' : '⚠️'),
         React.createElement("button", { 
           onClick: handleSaveClick, 
-          disabled: isAppBusy || !hasTechTreeData || saveFeedback, 
+          disabled: isAppBusy || !hasTechTreeData, 
           className: `yggdrasil-top-bar-action-item primary yggdrasil-top-bar-save-button ${saveFeedback ? 'saved' : ''}`,
           title: hasTechTreeData ? "Save the current state of the active project." : "No active project data to save."
-        }, saveFeedback ? 'Saved ✓' : 'Save'),
+        }, saveFeedback ? '✓' : '💾'),
         React.createElement("button", { 
           onClick: handleDownloadClick, 
-          disabled: isAppBusy || !hasTechTreeData || downloadFeedback, 
+          disabled: isAppBusy || !hasTechTreeData, 
           className: `yggdrasil-top-bar-action-item primary yggdrasil-top-bar-download-button ${downloadFeedback ? 'saved' : ''}`,
           title: hasTechTreeData ? "Save active project and download as .project.json" : "No active project data to download."
-        }, downloadFeedback ? 'Downloaded ✓' : '💾⇩'), 
+        }, downloadFeedback ? '✓' : '📥'), 
         React.createElement("button", {
           onClick: onToggleTheme,
           className: "yggdrasil-top-bar-action-item base-icon-button",
-          title: `Switch to ${themeMode === 'light' ? 'Dark' : 'Light'} Mode`,
-          "aria-label": `Toggle theme to ${themeMode === 'light' ? 'Dark' : 'Light'} Mode`,
+          title: `Switch to ${nextThemeInfo.next} Mode`,
+          "aria-label": `Toggle theme to ${nextThemeInfo.next} Mode`,
           disabled: isAppBusy
-        }, themeMode === 'light' ? '🌙' : '☀️')
+        }, nextThemeInfo.icon)
       )
     )
   );

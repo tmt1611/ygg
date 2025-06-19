@@ -1,9 +1,7 @@
 
 import { useState, useCallback, useEffect } from 'react';
-// import { TechTreeNode, WorkspaceSubTab, YggdrasilViewMode, ActiveOverlayPanel, HistoryActionType } from '../types.js'; // Types removed
 import { findNodeById, getAllExpandableNodeIds, areAllNodesExpanded } from '../utils.js'; // Removed findNodesByTerm
 import { APP_STORAGE_KEYS } from '../constants.js';
-// import { UseModalManagerReturn } from './useModalManager.js'; // Type removed
 
 export const useViewStates = ({
   techTreeData,
@@ -12,11 +10,9 @@ export const useViewStates = ({
   addHistoryEntry,
   setYggdrasilViewMode,
   setActiveOverlayPanel,
+  activeOverlayPanel,
 }) => {
-  const [activeWorkspaceSubTab, setActiveWorkspaceSubTab] = useState(() => (localStorage.getItem(APP_STORAGE_KEYS.ACTIVE_WORKSPACE_SUB_TAB)) || 'projects');
-  
   const [showListDescriptionsGlobal, setShowListDescriptionsGlobal] = useState(true);
-  const [listSearchTerm, setListSearchTerm] = useState('');
   
   const [collapsedNodeIds, setCollapsedNodeIds] = useState(() => {
     const storedCollapsed = localStorage.getItem(APP_STORAGE_KEYS.COLLAPSED_NODES);
@@ -27,8 +23,15 @@ export const useViewStates = ({
   const [selectedNodeInFocusPanelId, setSelectedNodeInFocusPanelId] = useState(null);
   const [selectedGraphNodeId, setSelectedGraphNodeId] = useState(null);
 
-  useEffect(() => { localStorage.setItem(APP_STORAGE_KEYS.ACTIVE_WORKSPACE_SUB_TAB, activeWorkspaceSubTab); }, [activeWorkspaceSubTab]);
   useEffect(() => { localStorage.setItem(APP_STORAGE_KEYS.COLLAPSED_NODES, JSON.stringify(Array.from(collapsedNodeIds))); }, [collapsedNodeIds]);
+
+  useEffect(() => {
+    // If the focus panel is open but there's no longer a valid focus node ID,
+    // close the panel automatically. This can happen if the focused node is deleted.
+    if (activeOverlayPanel === 'focus' && !focusNodeId) {
+      setActiveOverlayPanel(null);
+    }
+  }, [focusNodeId, activeOverlayPanel, setActiveOverlayPanel]);
 
   const commonViewResetLogic = useCallback((forNewProjectContext = false) => {
     setError(null);
@@ -86,9 +89,7 @@ export const useViewStates = ({
   }, [techTreeData, collapsedNodeIds]); 
 
   return {
-    activeWorkspaceSubTab, setActiveWorkspaceSubTab,
     showListDescriptionsGlobal, setShowListDescriptionsGlobal,
-    listSearchTerm, setListSearchTerm, 
     collapsedNodeIds, setCollapsedNodeIds,
     focusNodeId, setFocusNodeId, selectedNodeInFocusPanelId, setSelectedNodeInFocusPanelId,
     selectedGraphNodeId, setSelectedGraphNodeId,

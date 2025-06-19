@@ -1,233 +1,231 @@
 
 import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react';
-// import { TechTreeNode, NodeStatus, Project } from '../types.js'; // Types removed
-// import { LinkSourceInfo } from '../hooks/useProjectLinking.js'; // Types removed
 
-const NODE_SIZE_OPTIONS = [
-    { value: 'small', label: 'Small' },
-    { value: 'medium', label: 'Medium' },
-    { value: 'large', label: 'Large' },
+const NODE_IMPORTANCE_OPTIONS = [
+    { value: 'minor', label: 'Minor' },
+    { value: 'common', label: 'Common' },
+    { value: 'major', label: 'Major' },
 ];
 
 const ContextMenu = ({
-  isOpen, position, node, onClose, onToggleLock, onChangeStatus, onEditName, onAddChild,
-  onSetFocus, onDeleteNode, onLinkToProject, onGoToLinkedProject, onUnlinkProject,  
+  isOpen, position, node, onClose, onToggleLock, onChangeImportance, onEditName, onAddChild,
+  onSetFocus, onDeleteNode, onLinkToProject, onGoToLinkedProject, onUnlinkProject,
   projects, activeProjectId, currentProjectRootId, findLinkSource, handleNavigateToSourceNode,
   linkSourceInfoFromView,
 }) => {
   const menuRef = useRef(null);
-  const [isSizeSubMenuOpen, setIsSizeSubMenuOpen] = useState(false);
-  const [focusedItemIndex, setFocusedItemIndex] = useState(0); 
-  const [focusedSizeIndex, setFocusedSizeIndex] = useState(0);
+  const [isImportanceSubMenuOpen, setIsImportanceSubMenuOpen] = useState(false);
+  const [focusedIndex, setFocusedIndex] = useState(0);
+  const [focusedImportanceIndex, setFocusedImportanceIndex] = useState(0);
   const [menuStyle, setMenuStyle] = useState({});
-  const [copyFeedback, setCopyFeedback] = useState(''); 
+  const [submenuStyle, setSubmenuStyle] = useState({});
+  const [copyFeedback, setCopyFeedback] = useState('');
 
-  const baseMenuStyle = {
-    background: 'var(--panel-bg)', color: 'var(--text-primary)', border: '1px solid var(--border-color-strong)', 
-    borderRadius: 'var(--border-radius)', padding: '5px 0', minWidth: '220px', 
-    boxShadow: 'var(--box-shadow-md)', zIndex: 1010 
-  };
-  
-  const basicButtonStyle = {
-      display: 'block', width: '100%', textAlign: 'left', padding: '10px 15px', 
-      fontSize: '0.95em', background: 'none', border: 'none', cursor: 'pointer',
-      color: 'var(--text-primary)', transition: 'background-color 0.1s ease-in-out', position: 'relative', 
-  };
-  
-  const focusedStyle = { backgroundColor: 'var(--primary-accent-hover-bg)', color: 'var(--primary-accent-dark)' };
-
-  const changeSizeActionRef = useRef(() => { 
-    setIsSizeSubMenuOpen(true); 
-    setFocusedSizeIndex(NODE_SIZE_OPTIONS.findIndex(opt => opt.value === (node?.status || 'medium'))); 
-  });
-
-  const handleCopyNodeId = useCallback(() => {
+  const handleCopy = useCallback((type) => {
     if (!node) return;
-    navigator.clipboard.writeText(node.id).then(() => {
-      setCopyFeedback('ID Copied!'); setTimeout(() => setCopyFeedback(''), 1500); 
-    }).catch(err => {
-      setCopyFeedback('Copy Failed!'); setTimeout(() => setCopyFeedback(''), 1500);
-      console.error('Failed to copy ID: ', err);
-    });
+    let textToCopy = '';
+    switch (type) {
+        case 'id': textToCopy = node.id; break;
+        case 'name': textToCopy = node.name; break;
+        case 'json':
+            const cleanNodeForExport = (nodeToClean) => {
+                const { _parentId, _changeStatus, _modificationDetails, _oldParentId, ...rest } = nodeToClean;
+                const cleanedNode = { ...rest };
+                if (cleanedNode.children) cleanedNode.children = cleanedNode.children.map(cleanNodeForExport);
+                return cleanedNode;
+            };
+            textToCopy = JSON.stringify(cleanNodeForExport(node), null, 2);
+            break;
+        default: return;
+    }
+    navigator.clipboard.writeText(textToCopy).then(() => {
+        setCopyFeedback(type);
+        setTimeout(() => setCopyFeedback(''), 1500);
+    }).catch(err => console.error(`Failed to copy ${type}:`, err));
   }, [node]);
 
   const isCurrentNodeRoot = node?.id === currentProjectRootId;
   const incomingLink = useMemo(() => {
-    if (isCurrentNodeRoot && activeProjectId && node) { 
+    if (isCurrentNodeRoot && activeProjectId && node) {
         return linkSourceInfoFromView || findLinkSource(activeProjectId, projects);
     }
     return null;
   }, [isCurrentNodeRoot, activeProjectId, projects, findLinkSource, node, linkSourceInfoFromView]);
 
+  const menuItems = useMemo(() => {
+    if (!node) return [];
+    
+    const items = [
+        { id: 'edit', label: "Edit Details...", icon: '✏️', action: () => onEditName(node) },
+        { id: 'add-child', label: "Add Child Node...", icon: '➕', action: () => onAddChild(node) },
+        { type: 'separator' },
+        { id: 'toggle-lock', label: node.isLocked ? 'Unlock Node' : 'Lock Node', icon: node.isLocked ? '🔓' : '🔒', action: () => onToggleLock(node.id) },
+        {
+            id: 'change-importance', label: "Change Importance", icon: '⚖️',
+            action: () => {
+                setIsImportanceSubMenuOpen(true);
+                setFocusedImportanceIndex(NODE_IMPORTANCE_OPTIONS.findIndex(opt => opt.value === (node.importance || 'common')));
+            },
+            hasSubmenu: true
+        },
+    ];
 
-  const { menuItemsJsx, menuActions } = useMemo(() => {
-    const items = [];
-    const actions = [];
-    let currentFocusableIndex = 0; 
+    if (onSetFocus) items.push({ id: 'set-focus', label: "Set as Focus Node", icon: '🎯', action: () => onSetFocus(node.id) });
 
-    const addItemToLists = (
-        action, 
-        label, 
-        options = {}
-    ) => {
-        const focusIndex = currentFocusableIndex;
-        actions.push(options.isDisabled ? null : action); 
-        items.push(
-            React.createElement("li", { role: "none", key: options.id || label },
-                React.createElement("button", { 
-                    style: { 
-                        ...basicButtonStyle, 
-                        ...(focusedItemIndex === focusIndex && !options.isDisabled ? focusedStyle : {}),
-                        ...(options.isDestructive && !options.isDisabled ? { color: 'var(--error-color)'} : {}),
-                        ...(options.isDestructive && focusedItemIndex === focusIndex && !options.isDisabled ? { backgroundColor: 'var(--error-bg)', color: 'var(--error-color)'} : {}),
-                        ...(options.hasSubmenu && options.isSubmenuOpen ? {backgroundColor: 'var(--primary-accent-hover-bg)', color: 'var(--primary-accent-dark)'} : {}),
-                        ...(options.isDisabled ? { color: 'var(--disabled-text)', cursor: 'not-allowed', opacity: 0.6 } : {})
-                    }, 
-                    role: "menuitem", 
-                    onClick: !options.isDisabled && action ? () => { action(); if (!options.hasSubmenu) onClose(); } : undefined, 
-                    tabIndex: -1, 
-                    "aria-haspopup": options.hasSubmenu,
-                    "aria-expanded": options.hasSubmenu ? options.isSubmenuOpen : undefined,
-                    disabled: options.isDisabled,
-                    title: options.title || label
-                },
-                    label, " ", options.hasSubmenu && React.createElement("span", { className: "context-menu-submenu-indicator" }, "➡️")
-                )
-            )
-        );
-        if (!options.isDisabled) currentFocusableIndex++;
-    };
-
-    if (node) {
-        addItemToLists(() => onEditName(), "Edit Details...", {id: 'edit'});
-        addItemToLists(() => onAddChild(), "Add Child Node...", {id: 'add-child'});
-        items.push(React.createElement("li", { role: "none", key: "sep1" }, React.createElement("hr", null))); 
-        addItemToLists(() => onToggleLock(), node.isLocked ? 'Unlock Node' : 'Lock Node', {id: 'toggle-lock'});
-        addItemToLists(changeSizeActionRef.current, "Change Size", { hasSubmenu: true, isSubmenuOpen: isSizeSubMenuOpen, id: 'change-size' });
-        
-        if (onSetFocus) addItemToLists(() => onSetFocus(), "Set as Focus Node", {id: 'set-focus'});
-
-        if (node.linkedProjectId) {
-            if (onGoToLinkedProject) addItemToLists(() => onGoToLinkedProject(), `🔗 Go to: ${node.linkedProjectName || 'Linked Project'}`, {id: 'go-to-link'});
-            if (onUnlinkProject) addItemToLists(() => onUnlinkProject(), "🚫 Unlink Outgoing Project", {isDestructive: true, id: 'unlink-outgoing'});
-        } else if (!incomingLink) { 
-            if (onLinkToProject) addItemToLists(() => onLinkToProject(), "🔗 Link to Project...", {id: 'link-project'});
-        }
-
-        if (incomingLink) {
-            addItemToLists(
-                () => handleNavigateToSourceNode(incomingLink.sourceProjectId, incomingLink.sourceNodeId),
-                `↩️ From: ${incomingLink.sourceProjectName.substring(0,12)}${incomingLink.sourceProjectName.length > 12 ? '...' : ''} / ${incomingLink.sourceNodeName.substring(0,10)}${incomingLink.sourceNodeName.length > 10 ? '...' : ''}`,
-                {id: 'go-to-source'}
-            );
-            addItemToLists(null, "🚫 Unlink (Incoming)", { id: 'unlink-incoming-disabled', isDisabled: true, title: "Remove link from source project to unlink." });
-        }
-        
-        items.push(React.createElement("li", { role: "none", key: "sep2" }, React.createElement("hr", null)));
-        addItemToLists(handleCopyNodeId, `Copy Node ID ${copyFeedback ? `(${copyFeedback})` : ''}`, {id: 'copy-id'});
-        if (onDeleteNode) addItemToLists(() => onDeleteNode(), "Delete Node...", {isDestructive: true, id: 'delete-node'});
+    if (node.linkedProjectId) {
+        if (onGoToLinkedProject) items.push({ id: 'go-to-link', label: `Go to: ${node.linkedProjectName || '...'}`, icon: '↪️', title: `Go to project: ${node.linkedProjectName || 'Linked Project'}`, action: () => onGoToLinkedProject(node.linkedProjectId) });
+        if (onUnlinkProject) items.push({ id: 'unlink-outgoing', label: "Unlink Outgoing Project", icon: '🚫', isDestructive: true, action: () => onUnlinkProject(node.id) });
+    } else if (!incomingLink) {
+        if (onLinkToProject) items.push({ id: 'link-project', label: "Link to Project...", icon: '🔗', action: () => onLinkToProject(node.id) });
     }
-    return { menuItemsJsx: items, menuActions: actions.filter(a => a !== null) }; 
-  }, [node, onEditName, onAddChild, onToggleLock, onSetFocus, onLinkToProject, onGoToLinkedProject, onUnlinkProject, onDeleteNode, handleCopyNodeId, copyFeedback, isSizeSubMenuOpen, focusedItemIndex, onClose, incomingLink, handleNavigateToSourceNode]);
 
+    if (incomingLink) {
+        items.push({ id: 'go-to-source', label: `From: ${incomingLink.sourceProjectName.substring(0, 12)}...`, icon: '↩️', title: `From: ${incomingLink.sourceProjectName} / ${incomingLink.sourceNodeName}`, action: () => handleNavigateToSourceNode(incomingLink.sourceProjectId, incomingLink.sourceNodeId) });
+        items.push({ id: 'unlink-incoming-disabled', label: "Unlink (Incoming)", icon: '🚫', isDisabled: true, title: "Remove link from source project to unlink." });
+    }
+
+    items.push(
+        { type: 'separator' },
+        { id: 'copy-name', label: copyFeedback === 'name' ? 'Copied!' : "Copy Name", icon: '📋', action: () => handleCopy('name') },
+        { id: 'copy-id', label: copyFeedback === 'id' ? 'Copied!' : "Copy ID", icon: '🆔', action: () => handleCopy('id') },
+        { id: 'copy-json', label: copyFeedback === 'json' ? 'Copied!' : "Copy as JSON", icon: '📦', action: () => handleCopy('json') }
+    );
+
+    if (onDeleteNode) {
+        items.push({ type: 'separator' });
+        items.push({ id: 'delete-node', label: "Delete Node...", icon: '🗑️', isDestructive: true, action: () => onDeleteNode(node.id) });
+    }
+
+    return items;
+  }, [node, onEditName, onAddChild, onToggleLock, onSetFocus, onLinkToProject, onGoToLinkedProject, onUnlinkProject, onDeleteNode, handleCopy, copyFeedback, incomingLink, handleNavigateToSourceNode]);
+
+  const focusableItems = useMemo(() => menuItems.filter(item => item.type !== 'separator' && !item.isDisabled), [menuItems]);
 
   useEffect(() => {
     if (isOpen && position && menuRef.current) {
-      const menuWidth = menuRef.current.offsetWidth || 220; 
-      const menuHeight = menuRef.current.offsetHeight || 200; 
-      let { x, y } = position;
-      if (x + menuWidth > window.innerWidth - 10) x = window.innerWidth - menuWidth - 10; 
-      if (y + menuHeight > window.innerHeight - 10) y = window.innerHeight - menuHeight - 10; 
-      setMenuStyle({ top: Math.max(5,y), left: Math.max(5,x), position: 'fixed' });
-    }
-  }, [isOpen, position]);
+        const menuWidth = menuRef.current.offsetWidth || 220;
+        const menuHeight = menuRef.current.offsetHeight || 200;
+        const submenuWidth = 120; // Estimated width of submenu
+        let finalX = position.x;
+        let finalY = position.y;
 
+        // Adjust Y position
+        if (finalY + menuHeight > window.innerHeight - 10) {
+            finalY = window.innerHeight - menuHeight - 10;
+        }
+
+        // Adjust X position
+        if (finalX + menuWidth > window.innerWidth - 10) {
+            finalX = window.innerWidth - menuWidth - 10;
+        }
+
+        setMenuStyle({ top: `${Math.max(5, finalY)}px`, left: `${Math.max(5, finalX)}px` });
+
+        // Decide submenu position based on final menu position
+        if ((finalX + menuWidth + submenuWidth) > window.innerWidth - 10 && finalX > submenuWidth) {
+            // Not enough space on the right, but enough on the left to flip
+            setSubmenuStyle({ right: '100%', left: 'auto', marginRight: '2px' });
+        } else {
+            // Default to the right
+            setSubmenuStyle({ left: '100%', right: 'auto', marginLeft: '2px' });
+        }
+    }
+  }, [isOpen, position, isImportanceSubMenuOpen]);
 
   useEffect(() => {
-    if (!isOpen) { setIsSizeSubMenuOpen(false); setFocusedItemIndex(0); setCopyFeedback(''); return; }
+    if (!isOpen) {
+        setIsImportanceSubMenuOpen(false);
+        setFocusedIndex(0);
+        setCopyFeedback('');
+        return;
+    }
     const menuItemsToFocus = menuRef.current?.querySelectorAll('button[role="menuitem"]:not([disabled])');
-    if (menuItemsToFocus && menuItemsToFocus.length > focusedItemIndex) {
-        (menuItemsToFocus[focusedItemIndex])?.focus();
+    if (menuItemsToFocus?.[focusedIndex]) {
+        menuItemsToFocus[focusedIndex].focus();
     }
     const handleClickOutside = (event) => { if (menuRef.current && !menuRef.current.contains(event.target)) onClose(); };
     const handleEscapeKey = (event) => { if (event.key === 'Escape') onClose(); };
-    document.addEventListener('mousedown', handleClickOutside); document.addEventListener('keydown', handleEscapeKey);
+    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('keydown', handleEscapeKey);
     return () => { document.removeEventListener('mousedown', handleClickOutside); document.removeEventListener('keydown', handleEscapeKey); };
-  }, [isOpen, onClose]); 
+  }, [isOpen, onClose, focusedIndex]);
 
   const handleKeyDown = useCallback((event) => {
     if (!isOpen || !node) return;
+    event.preventDefault();
     
-    if (isSizeSubMenuOpen) {
-      switch (event.key) {
-        case 'ArrowUp': event.preventDefault(); setFocusedSizeIndex(prev => Math.max(0, prev - 1)); break;
-        case 'ArrowDown': event.preventDefault(); setFocusedSizeIndex(prev => Math.min(NODE_SIZE_OPTIONS.length - 1, prev + 1)); break;
-        case 'Enter': case ' ': event.preventDefault(); onChangeStatus(NODE_SIZE_OPTIONS[focusedSizeIndex].value); setIsSizeSubMenuOpen(false); onClose(); break;
-        case 'Escape': case 'ArrowLeft': event.preventDefault(); setIsSizeSubMenuOpen(false); 
-            const changeSizeActionIndex = menuActions.findIndex(action => action === changeSizeActionRef.current);
-            if (changeSizeActionIndex !== -1) setFocusedItemIndex(changeSizeActionIndex);
-            break; 
-        default: break;
-      }
-    } else {
-      const currentAction = menuActions[focusedItemIndex];
-      switch (event.key) {
-        case 'ArrowUp': event.preventDefault(); setFocusedItemIndex(prev => Math.max(0, prev - 1)); break;
-        case 'ArrowDown': event.preventDefault(); setFocusedItemIndex(prev => Math.min(menuActions.length - 1, prev + 1)); break;
-        case 'Enter': case ' ':
-          event.preventDefault();
-          if (currentAction) currentAction(); 
-          break;
-        case 'ArrowRight':
-          if (currentAction === changeSizeActionRef.current) {
-            event.preventDefault(); setIsSizeSubMenuOpen(true);
-            setFocusedSizeIndex(NODE_SIZE_OPTIONS.findIndex(opt => opt.value === (node?.status || 'medium')));
-          }
-          break;
-        default: break;
-      }
-    }
-  }, [isOpen, node, isSizeSubMenuOpen, focusedItemIndex, focusedSizeIndex, menuActions, onClose, onChangeStatus]);
-
-
-  useEffect(() => { 
-    if (isOpen && menuRef.current) {
-      if (isSizeSubMenuOpen) {
-        const sizeItems = menuRef.current.querySelectorAll('button[role="menuitemradio"]');
-        (sizeItems[focusedSizeIndex])?.focus();
-      } else {
-        const mainItems = menuRef.current.querySelectorAll('button[role="menuitem"]:not([disabled])');
-        if (mainItems.length > focusedItemIndex) {
-            (mainItems[focusedItemIndex])?.focus();
-        } else if (mainItems.length > 0) { 
-            (mainItems[0])?.focus();
-            setFocusedItemIndex(0);
+    if (isImportanceSubMenuOpen) {
+        switch (event.key) {
+            case 'ArrowUp': setFocusedImportanceIndex(prev => Math.max(0, prev - 1)); break;
+            case 'ArrowDown': setFocusedImportanceIndex(prev => Math.min(NODE_IMPORTANCE_OPTIONS.length - 1, prev + 1)); break;
+            case 'Enter': case ' ': onChangeImportance(node.id, NODE_IMPORTANCE_OPTIONS[focusedImportanceIndex].value); onClose(); break;
+            case 'Escape': case 'ArrowLeft': setIsImportanceSubMenuOpen(false); break;
         }
-      }
+    } else {
+        switch (event.key) {
+            case 'ArrowUp': setFocusedIndex(prev => Math.max(0, prev - 1)); break;
+            case 'ArrowDown': setFocusedIndex(prev => Math.min(focusableItems.length - 1, prev + 1)); break;
+            case 'Enter': case ' ': case 'ArrowRight':
+                const currentItem = focusableItems[focusedIndex];
+                if (currentItem?.action) {
+                    if (currentItem.hasSubmenu) currentItem.action();
+                    else { currentItem.action(); onClose(); }
+                }
+                break;
+        }
     }
-  }, [isOpen, isSizeSubMenuOpen, focusedItemIndex, focusedSizeIndex]);
+  }, [isOpen, node, isImportanceSubMenuOpen, focusedIndex, focusedImportanceIndex, focusableItems, onClose, onChangeImportance]);
 
-
+  useEffect(() => {
+    if (!isOpen || !menuRef.current) return;
+    const focusableElements = isImportanceSubMenuOpen
+        ? menuRef.current.querySelectorAll('.submenu button')
+        : menuRef.current.querySelectorAll('.main-menu button:not([disabled])');
+    const indexToFocus = isImportanceSubMenuOpen ? focusedImportanceIndex : focusedIndex;
+    if (focusableElements?.[indexToFocus]) {
+        focusableElements[indexToFocus].focus();
+    }
+  }, [isOpen, isImportanceSubMenuOpen, focusedIndex, focusedImportanceIndex]);
+  
   if (!isOpen || !position || !node) return null;
 
   return (
-    React.createElement("div", { ref: menuRef, className: "minimal-context-menu", style: { ...baseMenuStyle, ...menuStyle }, role: "menu",
-      "aria-orientation": "vertical", "aria-labelledby": "context-menu-node-name", onKeyDown: handleKeyDown },
-      React.createElement("div", { id: "context-menu-node-name", style: { padding: '8px 15px', fontSize: '0.85em', color: 'var(--text-secondary)', borderBottom: '1px solid var(--border-color)', marginBottom: '4px' }},
-        "Node: ", React.createElement("strong", { style: { color: 'var(--text-primary)' }}, node.name.length > 25 ? node.name.substring(0,22) + '...' : node.name)
+    React.createElement("div", { ref: menuRef, className: "context-menu", style: menuStyle, role: "menu", "aria-orientation": "vertical", "aria-labelledby": "context-menu-node-name", onKeyDown: handleKeyDown },
+      React.createElement("div", { id: "context-menu-node-name", className: "context-menu-header" },
+        "Node: ", React.createElement("strong", null, node.name.length > 25 ? `${node.name.substring(0, 22)}...` : node.name)
       ),
-      React.createElement("ul", { style: { listStyle: 'none', padding: 0, margin: 0 }}, menuItemsJsx),
-      isSizeSubMenuOpen && (
-        React.createElement("div", { style: { position: 'absolute', left: '100%', top: menuRef.current?.children[1]?.children[3] instanceof HTMLElement ? (menuRef.current.children[1].children[3]).offsetTop : 0, background: 'var(--panel-bg)', border: '1px solid var(--border-color-strong)', borderRadius: 'var(--border-radius)', boxShadow: 'var(--box-shadow-md)', padding: '5px 0', zIndex: 1011, minWidth: '120px' }, role: "menu", "aria-orientation": "vertical"},
-          NODE_SIZE_OPTIONS.map((sizeOption, index) => ( 
-            React.createElement("li", { role: "none", key: sizeOption.value },
-                React.createElement("button", { style: { ...basicButtonStyle, ...(focusedSizeIndex === index ? focusedStyle : {}), fontWeight: node.status === sizeOption.value ? '600' : 'normal', color: node.status === sizeOption.value ? 'var(--primary-accent-dark)' : 'var(--text-primary)', }, 
-                    role: "menuitemradio", "aria-checked": node.status === sizeOption.value, 
-                    onClick: () => { onChangeStatus(sizeOption.value); onClose(); }, tabIndex: -1}, 
-                    sizeOption.label 
-                )
-            ))
-          )
+      React.createElement("ul", { className: "main-menu" },
+        menuItems.map((item, index) => {
+          if (item.type === 'separator') return React.createElement("li", { key: `sep-${index}`, role: "separator" }, React.createElement("hr", null));
+          const isFocused = !isImportanceSubMenuOpen && focusableItems[focusedIndex]?.id === item.id;
+          return React.createElement("li", { key: item.id, role: "none" },
+            React.createElement("button", {
+              role: "menuitem",
+              className: `context-menu-item ${isFocused ? 'focused' : ''} ${item.isDestructive ? 'destructive' : ''}`,
+              onClick: item.action ? () => { if(!item.hasSubmenu) onClose(); item.action(); } : undefined,
+              disabled: item.isDisabled,
+              title: item.title || item.label,
+              "aria-haspopup": item.hasSubmenu,
+              "aria-expanded": item.hasSubmenu ? isImportanceSubMenuOpen : undefined,
+            },
+              React.createElement("span", { className: "context-menu-icon" }, item.icon),
+              React.createElement("span", { className: "context-menu-label" }, item.label),
+              item.hasSubmenu && React.createElement("span", { className: "context-menu-submenu-indicator" }, "›")
+            )
+          );
+        })
+      ),
+      isImportanceSubMenuOpen && (
+        React.createElement("div", { className: "context-menu submenu", role: "menu", style: submenuStyle },
+          NODE_IMPORTANCE_OPTIONS.map((opt, index) => (
+            React.createElement("button", {
+              key: opt.value,
+              role: "menuitemradio",
+              className: `context-menu-item ${focusedImportanceIndex === index ? 'focused' : ''}`,
+              "aria-checked": node.importance === opt.value,
+              onClick: () => { onChangeImportance(node.id, opt.value); onClose(); },
+            }, opt.label)
+          ))
         )
       )
     )

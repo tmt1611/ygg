@@ -1,6 +1,5 @@
 
 import React from 'react';
-// import { TechTreeNode, Project } from '../types.js'; // Types removed
 import { findNodeById } from '../utils.js';
 
 // Modal Components
@@ -25,9 +24,12 @@ const AppModals = ({
   projectLinkingHook,
   techTreeData,
   nodeOperations,
+  onDeleteNodeWithConfirmation,
   handleSwitchToFocusView,
   projects,
   activeProjectId,
+  yggdrasilViewMode,
+  activeOverlayPanel,
 }) => {
   const {
     isProjectNameModalOpen, projectModalConfig, closeProjectNameModal,
@@ -36,7 +38,7 @@ const AppModals = ({
     isNodeEditModalOpen, nodeEditModalConfig, closeNodeEditModal,
     isTechExtractionModalOpen, extractedTechsContent, extractionModalTitle, closeTechExtractionModal,
     isLinkProjectModalOpen, linkProjectModalConfig, closeLinkProjectModal,
-    isContextMenuOpen, contextMenuPosition, contextMenuNodeId, closeContextMenu,
+    isContextMenuOpen, contextMenuPosition, contextMenuNodeId, contextMenuLinkSourceInfo, closeContextMenu,
   } = modalManager;
 
   return (
@@ -111,16 +113,17 @@ const AppModals = ({
           isOpen: isContextMenuOpen,
           position: contextMenuPosition,
           node: findNodeById(techTreeData, contextMenuNodeId),
+          linkSourceInfoFromView: contextMenuLinkSourceInfo,
           onClose: closeContextMenu,
-          onToggleLock: () => nodeOperations.handleToggleNodeLock(contextMenuNodeId),
-          onChangeStatus: (status) => nodeOperations.handleNodeStatusChange(contextMenuNodeId, status),
-          onEditName: () => { const n = findNodeById(techTreeData, contextMenuNodeId); if (n) modalManager.openNodeEditModal({mode:'editName', targetNodeId: n.id, currentNodeName: n.name, currentNodeDescription: n.description, title: `Edit: ${n.name}`, label: 'Node Name', placeholder: 'Enter new name', initialValue: n.name, initialDescription: n.description});},
-          onAddChild: () => { const n = findNodeById(techTreeData, contextMenuNodeId); if (n) modalManager.openNodeEditModal({mode:'addChild', targetNodeId: n.id, parentNodeName: n.name, title: `Add Child to: ${n.name}`, label: 'New Child Name', placeholder: 'Enter name'});},
-          onSetFocus: () => handleSwitchToFocusView(contextMenuNodeId),
-          onDeleteNode: () => nodeOperations.handleDeleteNodeAndChildren(contextMenuNodeId),
-          onLinkToProject: () => projectLinkingHook.handleOpenLinkProjectModal(contextMenuNodeId),
-          onGoToLinkedProject: () => { const n = findNodeById(techTreeData, contextMenuNodeId); if (n?.linkedProjectId) projectLinkingHook.handleNavigateToLinkedProject(n.linkedProjectId);},
-          onUnlinkProject: () => projectLinkingHook.handleUnlinkProjectFromNode(contextMenuNodeId),
+          onToggleLock: (nodeId) => nodeOperations.handleToggleNodeLock(nodeId),
+          onChangeImportance: (nodeId, importance) => nodeOperations.handleNodeImportanceChange(nodeId, importance),
+          onEditName: (n) => modalManager.openNodeEditModal({mode:'editName', targetNodeId: n.id, currentNodeName: n.name, currentNodeDescription: n.description, title: `Edit: ${n.name}`, label: 'Node Name', placeholder: 'Enter new name', initialValue: n.name, initialDescription: n.description}),
+          onAddChild: (n) => modalManager.openNodeEditModal({mode:'addChild', targetNodeId: n.id, parentNodeName: n.name, title: `Add Child to: ${n.name}`, label: 'New Child Name', placeholder: 'Enter name'}),
+          onSetFocus: (nodeId) => handleSwitchToFocusView(nodeId),
+          onDeleteNode: (nodeId) => onDeleteNodeWithConfirmation(nodeId),
+          onLinkToProject: (nodeId) => projectLinkingHook.handleOpenLinkProjectModal(nodeId),
+          onGoToLinkedProject: (projectId) => projectLinkingHook.handleNavigateToLinkedProject(projectId),
+          onUnlinkProject: (nodeId) => projectLinkingHook.handleUnlinkProjectFromNode(nodeId),
           projects: projects,
           activeProjectId: activeProjectId,
           currentProjectRootId: techTreeData?.id,

@@ -1,14 +1,13 @@
 
-import React, { useMemo, useEffect, useRef, useState } from 'react';
-// import { TechTreeNode } from '../types.js'; // Types removed
-import { compareAndAnnotateTree, countNodesInTree } from '../utils.js';
+import React, { useMemo, useEffect, useRef, useState, useCallback } from 'react';
+import { compareAndAnnotateTree, countNodesInTree, isValidTechTreeNodeShape, getAllNodesAsMap } from '../utils.js';
 import AiSuggestionPreviewListItem from './AiSuggestionPreviewListItem.js';
-import ModificationPromptInput from './ModificationPromptInput.js'; 
+import ModificationPromptInput from './ModificationPromptInput.js';
 
 const AiSuggestionModal = ({
   isOpen,
   currentTreeForDiff,
-  suggestion, 
+  suggestion,
   onConfirm,
   onCancel,
   onRefineSuggestion,
@@ -17,36 +16,37 @@ const AiSuggestionModal = ({
 }) => {
   const applyButtonRef = useRef(null);
   const [followUpPrompt, setFollowUpPrompt] = useState('');
+  const [isRemovedNodesCollapsed, setIsRemovedNodesCollapsed] = useState(true);
 
   const comparisonResult = useMemo(() => {
     if (!isOpen || !suggestion) return null;
-    
-    if (typeof suggestion !== 'object' || suggestion === null || typeof suggestion.name !== 'string' || 
-        (suggestion.children !== undefined && suggestion.children !== null && !Array.isArray(suggestion.children))) {
+
+    if (!isValidTechTreeNodeShape(suggestion)) {
         console.error("Invalid raw suggestion structure passed to AiSuggestionModal:", suggestion);
-        const errorNode = { 
-            id: 'error-root-' + Date.now(), name: 'Invalid AI Suggestion Structure', 
-            description: 'AI returned data that is malformed or not a valid tree structure. Cannot display detailed preview.',
-            children: [], isLocked: false, status: 'medium', _changeStatus: 'unchanged', 
-            _modificationDetails: ["The AI's suggestion was not a valid tree object."] 
+        const errorNode = {
+            id: 'error-root-' + Date.now(), name: 'Invalid AI Suggestion Structure',
+            description: 'AI returned data that is malformed or not a valid tree structure. This can happen if the AI fails to generate a response with all the required fields (like name, description, children, etc.).',
+            children: [], isLocked: false, importance: 'common', _changeStatus: 'unchanged',
+            _modificationDetails: ["The AI's suggestion was not a valid tree object."],
+            _isErrorNode: true
         };
-        return { 
-            annotatedTree: errorNode, 
-            removedNodes: currentTreeForDiff ? [currentTreeForDiff] : [], 
-            newNodes: [errorNode], 
-            modifiedContentNodes: [], 
-            lockedContentChangedNodes: [], 
-            structureModifiedNodes: [], 
+        return {
+            annotatedTree: errorNode,
+            removedNodes: currentTreeForDiff ? [...getAllNodesAsMap(currentTreeForDiff).values()] : [],
+            newNodes: [],
+            modifiedContentNodes: [],
+            lockedContentChangedNodes: [],
+            structureModifiedNodes: [],
             reparentedNodes: []
         };
     }
-    return compareAndAnnotateTree(currentTreeForDiff, suggestion); 
+    return compareAndAnnotateTree(currentTreeForDiff, suggestion);
   }, [currentTreeForDiff, suggestion, isOpen]);
 
   useEffect(() => {
     if (isOpen) {
-      applyButtonRef.current?.focus(); 
-      setFollowUpPrompt(''); 
+      applyButtonRef.current?.focus();
+      setFollowUpPrompt('');
       const handleEscape = (event) => { if (event.key === 'Escape') onCancel(); };
       document.addEventListener('keydown', handleEscape);
       return () => document.removeEventListener('keydown', handleEscape);
@@ -55,23 +55,26 @@ const AiSuggestionModal = ({
 
   if (!isOpen || !comparisonResult) return null;
 
-  const { annotatedTree, removedNodes, newNodes, modifiedContentNodes, lockedContentChangedNodes, structureModifiedNodes, reparentedNodes } = comparisonResult;
-  
+  const { annotatedTree, removedNodes, newNodes, modifiedContentNodes, lockedContentChangedNodes, structureModifiedNodes, reparentedNodes, lockedNodesRemoved } = comparisonResult;
+
   const currentTotalNodes = currentTreeForDiff ? countNodesInTree(currentTreeForDiff) : 0;
-  const suggestedTotalNodes = annotatedTree ? countNodesInTree(annotatedTree) : 0; 
+  const suggestedTotalNodes = annotatedTree ? countNodesInTree(annotatedTree) : 0;
   const netChange = suggestedTotalNodes - currentTotalNodes;
 
-  const netChangeStyle = { color: netChange > 0 ? 'var(--success-color)' : netChange < 0 ? 'var(--error-color)' : 'var(--text-secondary)', fontWeight: 'bold' };
-  
-  const summarySectionStyle = { fontSize: '0.95em', padding: '12px', background: 'var(--panel-alt-bg)', border: '1px solid var(--border-color)', borderRadius: 'var(--border-radius)' };
-  const refinementSectionStyle = { paddingTop: '0px' }; 
+  const netChangeStyle = { color: netChange > 0 ? 'var(--success-color)' : netChange < 0 ? 'var(--error-color)' : 'var(--text-secondary)'};
 
-  const renderSummaryItem = (label, count, color, boldValue = true) => count > 0 && (
-    React.createElement("li", null,
-      React.createElement("strong", { style: color ? {color} : {} }, label, ":"), ' ',
-      React.createElement("span", { style: { fontWeight: boldValue ? 'bold' : 'normal', ...(color && {color})}}, count), " node(s)"
-    )
-  );
+  const renderSummaryItem = (label, count, color, icon) => {
+    if (count <= 0) return null;
+    return (
+      React.createElement("div", { key: label, className: "ai-suggestion-modal-summary-item", style: { backgroundColor: color ? `${color}1A` : 'transparent' } },
+        React.createElement("span", { className: "summary-label" },
+          React.createElement("span", { className: "summary-icon", style: { color: color || 'var(--text-secondary)'} }, icon),
+          label
+        ),
+        React.createElement("span", { className: "summary-value", style: { color: color || 'var(--text-primary)' } }, count)
+      )
+    );
+  };
 
   const handleInternalRefine = () => {
     if (followUpPrompt.trim()) {
@@ -81,32 +84,46 @@ const AiSuggestionModal = ({
 
   return (
     React.createElement("div", { className: "modal-overlay-basic", role: "dialog", "aria-modal": "true", "aria-labelledby": "ai-suggestion-modal-title", "aria-describedby": "ai-suggestion-summary" },
-      React.createElement("div", { className: "modal-content-basic", style: { display: 'flex', flexDirection: 'column', width: 'clamp(700px, 90vw, 1100px)', maxHeight: '85vh' }},
-        React.createElement("h2", { id: "ai-suggestion-modal-title", style: { fontSize: '1.4em', color: 'var(--text-primary)', marginBottom: '15px', flexShrink: 0 }},
+      React.createElement("div", { className: "modal-content-basic large"},
+        React.createElement("h2", { id: "ai-suggestion-modal-title", className: "modal-title"},
           "AI Modification Preview"
         ),
-        
-        React.createElement("div", { style: { display: 'flex', flexGrow: 1, gap: '20px', overflow: 'hidden' }},
-          React.createElement("div", { style: { flex: '0 0 60%', display: 'flex', flexDirection: 'column', overflow: 'hidden', border: '1px solid var(--border-color)', borderRadius: 'var(--border-radius)', background: 'var(--app-bg)' }},
-            React.createElement("h3", { style: { fontSize: '1.15em', fontWeight: '600', color: 'var(--text-primary)', padding: '10px', margin: 0, borderBottom: '1px solid var(--border-color)', flexShrink: 0 }},
-              "Suggested Structure (Visual Diff):"
+
+        React.createElement("div", { className: "ai-suggestion-modal-layout" },
+          React.createElement("div", { className: "ai-suggestion-modal-preview-panel" },
+            React.createElement("h3", { className: "ai-suggestion-modal-header" },
+              "Preview of Changes"
             ),
-            React.createElement("div", { style: { flexGrow: 1, overflowY: 'auto', padding: '10px' }, "aria-live": "polite", "aria-atomic": "true" },
-              annotatedTree && annotatedTree.id !== 'error-root-' + Date.now() ? (
+            React.createElement("div", { className: "ai-suggestion-modal-content-area", "aria-live": "polite", "aria-atomic": "true" },
+              annotatedTree && !annotatedTree._isErrorNode ? (
                 React.createElement("ul", { style: { listStyle: 'none', padding: 0, margin: 0 }},
                     React.createElement(AiSuggestionPreviewListItem, { node: annotatedTree, level: 0, isVisualDiff: true })
                 )
               ) : (
-                React.createElement("p", {style: {color: 'var(--error-color)', fontWeight: 'bold', padding: '10px'}}, annotatedTree?.description || "Could not display preview due to malformed AI suggestion.")
+                React.createElement("div", { className: "error-message-inline", style: { margin: '1em' } },
+                  React.createElement("div", { className: "error-icon" }, "⚠️"),
+                  React.createElement("div", null,
+                    React.createElement("strong", null, "AI Suggestion Error:"), " ",
+                    annotatedTree?.description || "Could not display preview due to a malformed AI suggestion. The AI may have returned data that is not a valid tree structure (e.g. missing required fields). You can try refining your prompt."
+                  )
+                )
               ),
               removedNodes.length > 0 && (
-                React.createElement("div", { style: { marginTop: '15px', paddingTop: '10px', borderTop: '1px solid var(--border-color)' }},
-                    React.createElement("h4", { style: { fontSize: '0.95em', fontWeight: '600', color: 'var(--error-color)', marginBottom: '8px' }}, "Nodes To Be Removed (", removedNodes.length, "):"),
-                    React.createElement("ul", { style: { fontSize: '0.85em', color: 'var(--text-secondary)', listStyle: 'none', padding: 0, maxHeight: '120px', overflowY: 'auto' }},
-                        removedNodes.map(node => (
-                            React.createElement("li", { key: `removed-${node.id}`, style: { padding: '3px 0', borderBottom: '1px dotted var(--border-color)', textDecoration: 'line-through' }}, 
+                React.createElement("div", { className: "ai-suggestion-modal-removed-nodes-section" },
+                    React.createElement("h4", { 
+                      className: `ai-suggestion-modal-removed-nodes-title ${isRemovedNodesCollapsed ? 'collapsed' : ''}`,
+                      onClick: () => setIsRemovedNodesCollapsed(!isRemovedNodesCollapsed),
+                      "aria-expanded": !isRemovedNodesCollapsed,
+                      role: "button",
+                      tabIndex: 0,
+                      onKeyDown: (e) => { if (e.key === 'Enter' || e.key === ' ') setIsRemovedNodesCollapsed(!isRemovedNodesCollapsed); }
+                    }, "Nodes To Be Removed (", removedNodes.length, "):"),
+                    React.createElement("ul", { className: `ai-suggestion-modal-removed-nodes-list ${isRemovedNodesCollapsed ? 'collapsed' : ''}` },
+                        !isRemovedNodesCollapsed && removedNodes.map(node => (
+                            React.createElement("li", { key: `removed-${node.id}`},
+                              node.isLocked && React.createElement("span", { title: "Locked Node", style: { marginRight: '4px', color: 'var(--error-color)', fontWeight: 'bold' } }, "🔒"),
                               React.createElement("strong", null, node.name), " ", node.description && `- "${node.description.substring(0, 40)}${node.description.length > 40 ? '...' : ''}"`,
-                              React.createElement("span", {style: {color: 'var(--error-color)', fontSize: '0.8em'}}, " (ID: ", node.id.substring(0,8), "...)")
+                              React.createElement("span", { className: "node-id" }, " (ID: ", node.id.substring(0,8), "...)")
                             )
                         ))
                     )
@@ -115,49 +132,60 @@ const AiSuggestionModal = ({
             )
           ),
 
-          React.createElement("div", { style: { flex: '1 1 40%', display: 'flex', flexDirection: 'column', gap: '15px', overflowY: 'auto', padding: '0 5px 5px 0' }},
-            React.createElement("div", { id: "ai-suggestion-summary", style: summarySectionStyle },
-              React.createElement("p", { style: { fontWeight: '600', fontSize: '1.05em', marginBottom: '8px', color: 'var(--text-primary)' }}, "Summary of Changes (vs Previous):"),
-              React.createElement("ul", { style: { listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '5px' }},
-                React.createElement("li", null, React.createElement("strong", null, "Node Count:"), " ", currentTotalNodes, " → ", suggestedTotalNodes, " (Net: ", React.createElement("span", { style: netChangeStyle }, netChange >= 0 ? '+' : '', netChange), ")"),
-                renderSummaryItem("Added", newNodes.length, 'var(--success-color)'),
-                renderSummaryItem("Removed", removedNodes.length, 'var(--error-color)'),
-                renderSummaryItem("Unlocked Content Modified", modifiedContentNodes.length, 'var(--primary-accent)'),
-                renderSummaryItem("Structure Modified", structureModifiedNodes.length, 'var(--secondary-accent-dark)'),
-                renderSummaryItem("Moved/Re-parented", reparentedNodes.length, 'var(--warning-color)')
+          React.createElement("div", { className: "ai-suggestion-modal-summary-panel" },
+            React.createElement("div", { id: "ai-suggestion-summary", className: "ai-suggestion-modal-summary-section" },
+              React.createElement("h4", { className: "ai-suggestion-modal-summary-title" }, "Summary of Changes"),
+              !annotatedTree?._isErrorNode ? (
+                React.createElement("div", { className: "ai-suggestion-modal-summary-grid" },
+                  React.createElement("div", null, React.createElement("strong", null, "Node Count:")),
+                  React.createElement("div", { className: "summary-value" }, currentTotalNodes, " → ", suggestedTotalNodes, " (", React.createElement("span", { style: netChangeStyle, className: "ai-suggestion-modal-summary-net-change" }, netChange >= 0 ? '+' : '', netChange), ")"),
+
+                  renderSummaryItem("Added", newNodes.length, 'var(--success-color)', '➕'),
+                  renderSummaryItem("Removed", removedNodes.length, 'var(--error-color)', '➖'),
+                  renderSummaryItem("Content Modified", modifiedContentNodes.length, 'var(--primary-accent)', '✏️'),
+                  renderSummaryItem("Structure Modified", structureModifiedNodes.length, 'var(--secondary-accent-dark)', '📂'),
+                  renderSummaryItem("Moved / Reparented", reparentedNodes.length, 'var(--warning-color)', '↪️')
+                )
+              ) : (
+                React.createElement("p", { style: { fontStyle: 'italic', color: 'var(--text-secondary)'} }, "Summary unavailable due to suggestion error.")
               ),
-              lockedContentChangedNodes.length > 0 && 
-                React.createElement("p", { style: { fontWeight: 'bold', color: 'var(--error-color)', padding: '8px', background: 'var(--error-bg)', border: '1px solid var(--error-color)', borderRadius: 'var(--border-radius)', marginTop: '10px' }},
-                  "CRITICAL: Locked Node Content Modified: ", React.createElement("span", { style: { fontSize: '1.1em', marginLeft:'5px' }}, lockedContentChangedNodes.length), " node(s)"
+              lockedContentChangedNodes.length > 0 &&
+                React.createElement("div", { className: "ai-suggestion-modal-critical-warning" },
+                  React.createElement("strong", null, "CRITICAL: Locked Node Content Modified: ", React.createElement("span", { className: "count" }, lockedContentChangedNodes.length))
+                ),
+              lockedNodesRemoved && lockedNodesRemoved.length > 0 &&
+                React.createElement("div", { className: "ai-suggestion-modal-critical-warning" },
+                  React.createElement("strong", null, "CRITICAL: Locked Nodes REMOVED: ", React.createElement("span", { className: "count" }, lockedNodesRemoved.length))
                 )
             ),
-            
-            React.createElement("div", { style: refinementSectionStyle },
+
+            React.createElement("div", { className: "ai-suggestion-modal-refinement-section ai-suggestion-modal-summary-section" },
                 React.createElement(ModificationPromptInput, {
                     prompt: followUpPrompt,
                     setPrompt: setFollowUpPrompt,
                     onModify: handleInternalRefine,
                     isLoading: isRefining,
-                    disabled: !apiKeyIsSet || isRefining || annotatedTree?.id.startsWith('error-root-'),
+                    disabled: !apiKeyIsSet || isRefining,
                     isApiKeySet: apiKeyIsSet,
-                    hasTreeData: !!suggestion, 
+                    hasTreeData: !!suggestion,
                     labelOverride: "Refine This Suggestion:"
                 })
             ),
-            
-            React.createElement("p", { style: { fontSize: '0.85em', color: 'var(--text-secondary)', marginTop: 'auto', flexShrink: 0 }},
-              "Review carefully. Applying overwrites the current state. Locked node content should NOT be changed."
+
+            React.createElement("p", { className: "ai-suggestion-modal-footer-note" },
+              annotatedTree?._isErrorNode
+                ? "An error occurred with the AI suggestion. Please refine your prompt or reject this suggestion."
+                : "Review carefully. Applying overwrites the current state. Locked node content should NOT be changed."
             )
           )
         ),
-        
-        React.createElement("div", { style: { display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '20px', paddingTop: '15px', borderTop: '1px solid var(--border-color)', flexShrink: 0 }},
+
+        React.createElement("div", { className: "ai-suggestion-modal-footer-actions" },
           React.createElement("button", { type: "button", onClick: onCancel, className: "secondary" }, "Reject Suggestion"),
-          React.createElement("button", { ref: applyButtonRef, type: "button", onClick: onConfirm, className: "primary",
-            style: { background: 'var(--success-color)', borderColor: 'var(--success-color)' },
-            disabled: annotatedTree?.id.startsWith('error-root-') || isRefining
+          React.createElement("button", { ref: applyButtonRef, type: "button", onClick: onConfirm, className: "success",
+            disabled: !!annotatedTree?._isErrorNode || isRefining
             },
-            "Apply Changes to Project"
+            isRefining ? "Refining..." : "Apply Changes to Project"
           )
         )
       )

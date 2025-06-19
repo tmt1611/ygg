@@ -1,11 +1,7 @@
 
 import { useState, useCallback } from 'react';
-// import { TechTreeNode, AiInsightData } from '../types.js'; // Types removed
 import * as geminiService from '../services/geminiService.js';
 import { getAllNodesAsMap, findNodeById, updateNodeInTree } from '../utils.js';
-// import { UseHistoryManagerReturn } from './useHistoryManager.js'; // Types removed
-// import { UseNodeOperationsReturn } from './useNodeOperations.js'; // Types removed
-// import { UseModalManagerReturn } from './useModalManager.js'; // Types removed
 
 export const useAiInsights = ({
   apiKeyIsSet,
@@ -58,7 +54,7 @@ export const useAiInsights = ({
         }
         return prevTree;
     });
-    setAiInsightsData(prev => prev ? { ...prev, suggested_description: "" } : null);
+    // The suggestion is intentionally not cleared, allowing the user to see what they applied.
   }, [setTechTreeData, addHistoryEntry]);
 
   const handleUseAlternativeName = useCallback((nodeId, alternativeName) => {
@@ -73,7 +69,7 @@ export const useAiInsights = ({
         }
         return prevTree;
     });
-    setAiInsightsData(prev => prev ? { ...prev, alternative_names: prev.alternative_names.filter(n => n !== alternativeName) } : null);
+    // The suggestion is intentionally not cleared, allowing the user to see what they applied.
   }, [setTechTreeData, addHistoryEntry]);
 
   const handleAddSuggestedChildFromInsight = useCallback((parentNodeId, childName, childDescription) => {

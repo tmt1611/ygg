@@ -1,29 +1,49 @@
-
 import React from 'react';
-// import { TechTreeNode, YggdrasilViewMode, ActiveOverlayPanel, NodeStatus, WorkspaceSubTab } from '../types.js'; // Types removed
-// Hooks are imported but their specific type definitions for return values are not part of the JS runtime.
-
 import WorkspaceTabContent from './tabs/WorkspaceTabContent.js';
 import GraphViewComponent from './GraphViewComponent.js';
 import ListViewTabContent from './tabs/ListViewTab.js';
 import FocusViewComponent from './FocusViewComponent.js';
 import OverlayPanelView from './OverlayPanelView.js';
+import LoadingSpinner from './LoadingSpinner.js';
 
 const MainContentRouter = ({
-  yggdrasilViewMode, activeOverlayPanel, setActiveOverlayPanel,
-  techTreeData, isLoading, isModifying, isAppBusy,
-  projectManager, initialPrompt, setInitialPrompt, currentTreeStats,
-  nodeOperations, viewStates, treeOperationsAI, apiKeyHook,
-  onExtractData, extractionMode, setExtractionMode, isSummarizing,
-  projectLinkingHook, handleNodeSelectedForInsightsOrActions, onToggleNodeActionsPanel,
-  modalManager,
+  appState,
+  appHooks,
+  appCallbacks,
+  viewControls,
 }) => {
+  const {
+    techTreeData, isLoading, isModifying, isAppBusy,
+    initialPrompt, setInitialPrompt, currentTreeStats,
+    isSummarizing
+  } = appState;
 
-  if (yggdrasilViewMode === 'workspace' && !isLoading && !isModifying) {
+  const {
+    projectManager, nodeOperations, viewStates,
+    treeOperationsAI, apiKeyHook, projectLinkingHook,
+    modalManager
+  } = appHooks;
+
+  const {
+    handleExtractData, handleNodeSelectedForInsightsOrActions,
+    toggleNodeActionsPanelVisibility,
+    handleDeleteNodeWithConfirmation
+  } = appCallbacks;
+
+  const {
+    yggdrasilViewMode, activeOverlayPanel, setActiveOverlayPanel
+  } = viewControls;
+
+  if (yggdrasilViewMode === 'workspace') {
+    if (isLoading) {
+        return React.createElement(LoadingSpinner, { message: "Generating Structure..." });
+    }
+    if (isModifying && !modalManager.isAiSuggestionModalOpen) {
+        return React.createElement(LoadingSpinner, { message: "AI Applying Modifications..." });
+    }
+    
     return (
       React.createElement(WorkspaceTabContent, {
-        activeSubTab: viewStates.activeWorkspaceSubTab,
-        setActiveSubTab: viewStates.setActiveWorkspaceSubTab,
         projects: projectManager.projects,
         activeProjectId: projectManager.activeProjectId,
         onLoadProject: (id) => projectManager.handleSetActiveProject(id),
@@ -39,97 +59,108 @@ const MainContentRouter = ({
         isLoadingInitial: isLoading,
         handleDownloadTree: () => projectManager.handleSaveActiveProject(true),
         apiKeyHook: apiKeyHook,
-        onExtractData: onExtractData,
-        extractionMode: extractionMode,
-        setExtractionMode: setExtractionMode,
+        onExtractData: handleExtractData,
+        extractionMode: modalManager.extractionMode,
+        setExtractionMode: modalManager.setExtractionMode,
         isSummarizing: isSummarizing,
         isAppBusy: isAppBusy,
         currentTreeStats: currentTreeStats,
-        contextText: initialPrompt
+        contextText: initialPrompt,
+        handleToggleAllLock: nodeOperations.handleToggleAllLock,
       })
     );
   }
 
-  if (yggdrasilViewMode === 'treeView' && techTreeData && !isLoading && !isModifying) {
-    if (activeOverlayPanel === null) {
-      return (
+  // Fallback for when data is loading/modifying, or when not in workspace view
+  return (
+    React.createElement(React.Fragment, null,
+      React.createElement("div", {
+        className: `yggdrasil-view-content-wrapper ${yggdrasilViewMode} ${activeOverlayPanel ? `overlay-active-${activeOverlayPanel}` : ''}`,
+        style: {
+            display: yggdrasilViewMode !== 'treeView' ? 'none' : 'block',
+            height: '100%'
+        }
+      },
         React.createElement(GraphViewComponent, {
-          treeData: techTreeData,
+          treeData,
           activeNodeId: viewStates.selectedGraphNodeId,
           onSelectNode: handleNodeSelectedForInsightsOrActions,
           onSwitchToFocusView: viewStates.handleSwitchToFocusView,
-          onOpenNodeEditModal: modalManager.openNodeEditModal,
-          onToggleLock: nodeOperations.handleToggleNodeLock,
-          onNodeStatusChange: nodeOperations.handleNodeStatusChange,
           onOpenContextMenu: modalManager.openContextMenu,
-          onNavigateToLinkedProject: projectLinkingHook.handleNavigateToLinkedProject,
-          onUnlinkProjectFromNode: projectLinkingHook.handleUnlinkProjectFromNode,
           isAppBusy: isAppBusy,
-          onToggleNodeActionsPanel: onToggleNodeActionsPanel, 
+          onToggleNodeActionsPanel: toggleNodeActionsPanelVisibility,
           projects: projectManager.projects,
           activeProjectId: projectManager.activeProjectId,
           findLinkSource: projectLinkingHook.findLinkSource,
-          handleNavigateToSourceNode: projectLinkingHook.handleNavigateToSourceNode
+          handleNavigateToSourceNode: projectLinkingHook.handleNavigateToSourceNode,
+          onNavigateToLinkedProject: projectLinkingHook.handleNavigateToLinkedProject
         })
-      );
-    }
+      ),
 
-    if (activeOverlayPanel === 'list') {
-      return (
-        React.createElement(OverlayPanelView, { title: "List View", isOpen: true, onClosePanel: () => setActiveOverlayPanel(null), onRestoreFocus: modalManager.restoreFocus },
-             React.createElement(ListViewTabContent, {
-                techTreeData: techTreeData,
-                showListDescriptionsGlobal: viewStates.showListDescriptionsGlobal, 
-                onToggleNodeLock: nodeOperations.handleToggleNodeLock,
-                onNodeStatusChange: nodeOperations.handleNodeStatusChange,
-                onOpenNodeEditModal: modalManager.openNodeEditModal,
-                searchTerm: viewStates.listSearchTerm, 
-                isAppBusy: isAppBusy,
-                collapsedNodeIds: viewStates.collapsedNodeIds,
-                onToggleCollapseNode: viewStates.handleToggleCollapseNode,
-                onSwitchToFocusView: viewStates.handleSwitchToFocusView,
-                onNavigateToLinkedProject: projectLinkingHook.handleNavigateToLinkedProject,
-                onOpenContextMenu: modalManager.openContextMenu,
-                onSelectListItem: handleNodeSelectedForInsightsOrActions,
-                projects: projectManager.projects,
-                activeProjectId: projectManager.activeProjectId,
-                findLinkSource: projectLinkingHook.findLinkSource,
-                handleNavigateToSourceNode: projectLinkingHook.handleNavigateToSourceNode,
-                handleToggleAllNodesList: viewStates.handleToggleAllNodesList 
-             })
-        )
-      );
-    }
-
-    if (activeOverlayPanel === 'focus' && viewStates.focusNodeId) {
-      return (
-        React.createElement(OverlayPanelView, { title: "Focus View", isOpen: true, onClosePanel: () => setActiveOverlayPanel(null), onRestoreFocus: modalManager.restoreFocus },
-            React.createElement(FocusViewComponent, {
-                treeData: techTreeData,
-                focusNodeId: viewStates.focusNodeId,
-                selectedNodeInPanelId: viewStates.selectedNodeInFocusPanelId,
-                onSelectNodeInPanel: (nodeId) => { viewStates.setSelectedNodeInFocusPanelId(nodeId); if(nodeId) {handleNodeSelectedForInsightsOrActions(nodeId);}},
-                onChangeFocusNode: (nodeId) => { viewStates.setFocusNodeId(nodeId); viewStates.setSelectedNodeInFocusPanelId(nodeId); if(nodeId) {handleNodeSelectedForInsightsOrActions(nodeId);}},
-                onExitFocusView: () => setActiveOverlayPanel(null),
-                onOpenNodeEditModal: modalManager.openNodeEditModal,
-                onToggleLock: nodeOperations.handleToggleNodeLock,
-                onNodeStatusChange: nodeOperations.handleNodeStatusChange,
-                isAppBusy: isAppBusy,
-                onNavigateToLinkedProject: projectLinkingHook.handleNavigateToLinkedProject,
-                onUnlinkProjectFromNode: projectLinkingHook.handleUnlinkProjectFromNode,
-                onOpenContextMenu: modalManager.openContextMenu,
-                onOpenLinkProjectModal: projectLinkingHook.handleOpenLinkProjectModal,
-                onDeleteNode: nodeOperations.handleDeleteNodeAndChildren,
-                projects: projectManager.projects,
-                activeProjectId: projectManager.activeProjectId,
-                findLinkSource: projectLinkingHook.findLinkSource,
-                handleNavigateToSourceNode: projectLinkingHook.handleNavigateToSourceNode
+      activeOverlayPanel && (
+        React.createElement(OverlayPanelView, {
+          title: activeOverlayPanel === 'list' ? "List View" : activeOverlayPanel === 'focus' ? "Focus View" : "Panel",
+          isOpen: !!activeOverlayPanel,
+          onClosePanel: () => setActiveOverlayPanel(null),
+          onRestoreFocus: modalManager.restoreFocus,
+          pathDisplayProps: activeOverlayPanel === 'focus' && viewStates.focusNodeId ? {
+            treeData: techTreeData,
+            currentNodeId: viewStates.selectedNodeInFocusPanelId || viewStates.focusNodeId,
+            onSelectPathNode: viewStates.handleSwitchToFocusView,
+            pathContext: 'stellar',
+          } : null,
+        },
+          activeOverlayPanel === 'list' && (
+            React.createElement(ListViewTabContent, {
+              techTreeData: techTreeData,
+              showListDescriptionsGlobal: viewStates.showListDescriptionsGlobal,
+              onToggleNodeLock: nodeOperations.handleToggleNodeLock,
+              onAddQuickChild: nodeOperations.handleQuickAddChild,
+              onNodeImportanceChange: nodeOperations.handleNodeImportanceChange,
+              onOpenNodeEditModal: modalManager.openNodeEditModal,
+              isAppBusy: isAppBusy,
+              collapsedNodeIds: viewStates.collapsedNodeIds,
+              onToggleCollapseNode: viewStates.handleToggleCollapseNode,
+              handleToggleAllNodesList: viewStates.handleToggleAllNodesList,
+              onSwitchToFocusView: viewStates.handleSwitchToFocusView,
+              onNavigateToLinkedProject: projectLinkingHook.handleNavigateToLinkedProject,
+              onOpenContextMenu: modalManager.openContextMenu,
+              onSelectListItem: (nodeId) => viewStates.setSelectedGraphNodeId(nodeId),
+              selectedNodeId: viewStates.selectedGraphNodeId,
+              projects: projectManager.projects,
+              activeProjectId: projectManager.activeProjectId,
+              treeDataRootId: techTreeData?.id,
+              findLinkSource: projectLinkingHook.findLinkSource,
+              handleNavigateToSourceNode: projectLinkingHook.handleNavigateToSourceNode
             })
+          ),
+          activeOverlayPanel === 'focus' && viewStates.focusNodeId && (
+            React.createElement(FocusViewComponent, {
+              treeData: techTreeData,
+              focusNodeId: viewStates.focusNodeId,
+              selectedNodeInPanelId: viewStates.selectedNodeInFocusPanelId,
+              onSelectNodeInPanel: viewStates.setSelectedNodeInFocusPanelId,
+              onChangeFocusNode: (id) => viewStates.handleSwitchToFocusView(id, techTreeData),
+              onExitFocusView: () => setActiveOverlayPanel(null),
+              onOpenNodeEditModal: modalManager.openNodeEditModal,
+              onToggleLock: nodeOperations.handleToggleNodeLock,
+              onNodeImportanceChange: nodeOperations.handleNodeImportanceChange,
+              isAppBusy: isAppBusy,
+              onNavigateToLinkedProject: projectLinkingHook.handleNavigateToLinkedProject,
+              onUnlinkProjectFromNode: projectLinkingHook.handleUnlinkProjectFromNode,
+              onOpenLinkProjectModal: projectLinkingHook.handleOpenLinkProjectModal,
+              onDeleteNode: handleDeleteNodeWithConfirmation,
+              onOpenContextMenu: modalManager.openContextMenu,
+              projects: projectManager.projects,
+              activeProjectId: projectManager.activeProjectId,
+              findLinkSource: projectLinkingHook.findLinkSource,
+              handleNavigateToSourceNode: projectLinkingHook.handleNavigateToSourceNode
+            })
+          )
         )
-      );
-    }
-  }
-  return null; 
+      )
+    )
+  );
 };
 
 export default MainContentRouter;

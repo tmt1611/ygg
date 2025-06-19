@@ -1,9 +1,4 @@
-
 import React from 'react';
-// import { NodeStatus } from '../types.js'; // Types removed
-import LoadingSpinner from './LoadingSpinner.js';
-import ErrorMessage from './ErrorMessage.js';
-import ContextualHelpTooltip from './ContextualHelpTooltip.js';
 
 const StatDisplay = ({ label, value, valueClassName }) => (
   React.createElement("div", { className: "stat-item" },
@@ -15,31 +10,36 @@ const StatDisplay = ({ label, value, valueClassName }) => (
 const ProjectOverviewPanel = ({
   stats,
   projectName,
-  strategicSuggestions, 
-  isFetchingStrategicSuggestions, 
-  strategicSuggestionsError, 
-  onGenerateStrategicSuggestions, 
-  isApiKeySet, 
-  isAppBusy,   
+  onToggleAllLock,
+  isAppBusy,
 }) => {
   const showStats = !!stats;
 
   return (
-    React.createElement("div", { className: "panel", style: {display: 'flex', flexDirection: 'column', gap: '20px'} },
-      React.createElement("fieldset", null,
-        React.createElement("legend", null, "Project Statistics"),
+    React.createElement("div", null,
         showStats ? (
           React.createElement(React.Fragment, null,
-            React.createElement("h3", { className: "panel-header", style: {margin: '0 0 15px 0', fontSize: '1.2em'}},
-              "Overview: ", projectName || 'Current Project'
+            React.createElement("div", { style: {display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px'}},
+                React.createElement("h3", { className: "panel-header", style: {margin: 0, fontSize: '1.2em'}},
+                  "Overview: ", projectName || 'Current Project'
+                ),
+                React.createElement("button", { 
+                    onClick: onToggleAllLock, 
+                    disabled: isAppBusy, 
+                    className: "secondary panel-button",
+                    style: {padding: '5px 10px', fontSize: '0.9em'},
+                    title: stats.isAllLocked ? 'Unlock all nodes in the current project' : 'Lock all nodes in the current project to prevent changes'
+                },
+                    stats.isAllLocked ? '🔓 Unlock All' : '🔒 Lock All'
+                )
             ),
             React.createElement("div", { className: "project-stats-grid" },
               React.createElement(StatDisplay, { label: "Total Nodes", value: stats.totalNodes }),
               React.createElement(StatDisplay, { label: "Maximum Depth", value: stats.depth }),
               React.createElement(StatDisplay, { label: "Locked Nodes", value: stats.lockedCount, valueClassName: stats.lockedCount > 0 ? 'locked' : '' }),
-              React.createElement(StatDisplay, { label: "Small Nodes", value: stats.statusCounts.small, valueClassName: "status-small" }),
-              React.createElement(StatDisplay, { label: "Medium Nodes", value: stats.statusCounts.medium, valueClassName: "status-medium" }),
-              React.createElement(StatDisplay, { label: "Large Nodes", value: stats.statusCounts.large, valueClassName: "status-large" })
+              React.createElement(StatDisplay, { label: "Minor Nodes", value: stats.importanceCounts.minor, valueClassName: "importance-minor" }),
+              React.createElement(StatDisplay, { label: "Common Nodes", value: stats.importanceCounts.common, valueClassName: "importance-common" }),
+              React.createElement(StatDisplay, { label: "Major Nodes", value: stats.importanceCounts.major, valueClassName: "importance-major" })
             )
           )
         ) : (
@@ -47,7 +47,6 @@ const ProjectOverviewPanel = ({
             "Load or create a project to view its statistics."
           )
         )
-      )
     )
   );
 };

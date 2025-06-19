@@ -1,130 +1,97 @@
-
 import { useState, useCallback, useEffect } from 'react';
 import * as geminiService from '../services/geminiService.js';
-// import { HistoryActionType } from '../types.js'; // Type import removed
 
 export const useApiKey = (addHistoryEntry) => {
   const [selectedMode, setSelectedMode] = useState('environment');
   const [inputKey, setInputKey] = useState('');
-  const [status, setStatus] = useState({ message: null, type: null, isSet: false });
-  const [isProcessing, setIsProcessing] = useState(false);
+  const [status, setStatus] = useState({ message: 'Initializing...', type: 'info', isSet: false, source: null });
+  const [isProcessing, setIsProcessing] = useState(true);
 
-  const _updateStatusFromService = useCallback((serviceResult, context) => {
-    const message = serviceResult.message || "Status could not be determined.";
+  const _updateStatus = useCallback((serviceResult, context) => {
+    const { success, message, source } = serviceResult;
     setStatus({
-      message: message,
-      type: serviceResult.success ? 'success' : (message.toLowerCase().includes("invalid") || message.toLowerCase().includes("failed") ? 'error' : 'info'),
-      isSet: serviceResult.success,
+      message: message || "Status could not be determined.",
+      type: success ? 'success' : (message?.toLowerCase().includes("invalid") || message?.toLowerCase().includes("failed") ? 'error' : 'info'),
+      isSet: success,
+      source: source || null,
     });
-    if (serviceResult.success && serviceResult.source) {
-      setSelectedMode(serviceResult.source);
-      if(addHistoryEntry && context !== 'initial_silent_load') {
-          addHistoryEntry('API_KEY_STATUS_CHANGED', `API Key from ${serviceResult.source} set successfully.`);
-      }
-    } else if (!serviceResult.success && context !== 'initial_silent_load' && addHistoryEntry) {
-        let historyMessage = `API Key update: ${message}`;
-        if (serviceResult.source) {
-            historyMessage = `API Key from ${serviceResult.source} failed: ${message}`;
-        }
-        addHistoryEntry('API_KEY_STATUS_CHANGED', historyMessage);
+
+    if (context === 'initial_silent_load') return;
+
+    if (success && addHistoryEntry) {
+      addHistoryEntry('API_KEY_STATUS_CHANGED', `API Key from ${source} set successfully.`);
+    } else if (!success && addHistoryEntry) {
+      const historyMessage = `API Key update failed: ${message}`;
+      addHistoryEntry('API_KEY_STATUS_CHANGED', historyMessage);
     }
   }, [addHistoryEntry]);
-  
-  const refreshStatus = useCallback(() => {
-    setIsProcessing(true);
-    const currentServiceStatus = geminiService.getApiKeyStatus();
-    _updateStatusFromService({
-        success: currentServiceStatus.available,
-        message: currentServiceStatus.message,
-        source: currentServiceStatus.source
-    }, 'refresh'); 
-    if (!currentServiceStatus.available && selectedMode === 'environment' && !process.env.API_KEY) {
-        setSelectedMode('pasted'); 
-    }
-    setIsProcessing(false);
-  }, [_updateStatusFromService, selectedMode]);
-
 
   useEffect(() => {
-    const init = async () => {
+    const initializeApiKey = async () => {
       setIsProcessing(true);
       const result = await geminiService.attemptLoadEnvKey();
-      _updateStatusFromService(result, 'initial_silent_load'); 
+      _updateStatus(result, 'initial_silent_load');
       if (!result.success) {
-          const currentServiceStatus = geminiService.getApiKeyStatus();
-          if(!currentServiceStatus.available) { 
-            setSelectedMode('pasted'); 
-             setStatus(prev => ({
-                ...prev, 
-                message: prev.message || "Environment API_KEY not found or invalid. Select 'Enter API Key Manually' or set it in your environment.", 
-                type: 'info'
-            }));
-          }
+        setSelectedMode('pasted');
+      } else {
+        setSelectedMode(result.source);
       }
       setIsProcessing(false);
     };
-    init();
-  }, [_updateStatusFromService]); 
+    initializeApiKey();
+  }, [_updateStatus]);
 
-  const changeMode = useCallback(async (newMode) => {
-    setIsProcessing(true);
+  const changeMode = useCallback((newMode) => {
+    if (selectedMode === newMode) return;
     setSelectedMode(newMode);
-    if (newMode === 'environment') {
-      const result = await geminiService.attemptLoadEnvKey();
-      _updateStatusFromService(result, 'mode_change_env');
-    } else { 
-      const currentServiceStatus = geminiService.getApiKeyStatus();
-      if (currentServiceStatus.available && currentServiceStatus.source === 'environment') {
-        setStatus({ message: "Manual input selected. Enter API Key to override active environment key, or clear the environment key if you wish to only use pasted keys.", type: 'info', isSet: true });
-      } else if (inputKey.trim()) {
-        const result = await geminiService.setPastedApiKey(inputKey);
-        _updateStatusFromService(result, 'mode_change_pasted_with_key');
-      } else {
-        geminiService.clearActiveApiKey(); 
-        const result = geminiService.getApiKeyStatus();
-         _updateStatusFromService({success: result.available, message: result.message || "Manual input selected. Enter API Key.", source: null}, 'mode_change_pasted_no_key');
-      }
+    // If user selects 'environment', re-check it, but don't clear a valid pasted key.
+    if (newMode === 'environment' && status.source !== 'environment') {
+        const checkEnv = async () => {
+            setIsProcessing(true);
+            const result = await geminiService.attemptLoadEnvKey();
+            if (result.success) {
+                _updateStatus(result, 'mode_change_env_success');
+            }
+            // If it fails, we just keep the current status (which might be a valid pasted key)
+            // and let the user see the 'environment' radio selected.
+            setIsProcessing(false);
+        };
+        checkEnv();
     }
-    setIsProcessing(false);
-  }, [_updateStatusFromService, inputKey]);
+  }, [selectedMode, status.source, _updateStatus]);
 
   const submitPastedKey = useCallback(async (keyToSubmit) => {
     setIsProcessing(true);
     const key = (keyToSubmit || inputKey).trim();
     if (!key) {
-        _updateStatusFromService({success: false, message: "Pasted API Key cannot be empty.", source: null}, 'submit_pasted_empty');
-        setIsProcessing(false);
-        return;
+      _updateStatus({ success: false, message: "Pasted API Key cannot be empty.", source: null }, 'submit_pasted_empty');
+      setIsProcessing(false);
+      return;
     }
     const result = await geminiService.setPastedApiKey(key);
-    _updateStatusFromService(result, 'submit_pasted');
+    _updateStatus(result, 'submit_pasted');
     if (result.success) {
-      setInputKey(key); 
+      setInputKey(key);
+      setSelectedMode('pasted');
     }
     setIsProcessing(false);
-  }, [_updateStatusFromService, inputKey]);
+  }, [_updateStatus, inputKey]);
 
   const clearActiveUserKey = useCallback(async () => {
     setIsProcessing(true);
-    geminiService.clearActiveApiKey(); 
+    geminiService.clearActiveApiKey();
     if (addHistoryEntry) addHistoryEntry('API_KEY_STATUS_CHANGED', 'API Key cleared by user.');
     const envResult = await geminiService.attemptLoadEnvKey();
-    _updateStatusFromService(envResult, 'clear_key');
-    
-    if (envResult.success && envResult.source === 'environment') {
-        setSelectedMode('environment');
+    if (envResult.success) {
+      _updateStatus(envResult, 'clear_and_reinit_env');
+      setSelectedMode('environment');
     } else {
-        setSelectedMode('pasted'); 
-        const finalStatus = geminiService.getApiKeyStatus(); 
-        setStatus({ 
-            message: finalStatus.message || "API Key cleared. Provide a new key or set environment variable.",
-            type: 'info',
-            isSet: false
-        });
+      _updateStatus({ success: false, message: "API Key cleared. Provide a new key or set environment variable.", source: null }, 'clear_and_reinit_pasted');
+      setSelectedMode('pasted');
     }
-    setInputKey(''); 
+    setInputKey('');
     setIsProcessing(false);
-  }, [_updateStatusFromService, addHistoryEntry]);
+  }, [_updateStatus, addHistoryEntry]);
 
   const hookReturn = {
     selectedMode,
@@ -135,9 +102,7 @@ export const useApiKey = (addHistoryEntry) => {
     setInputKey,
     submitPastedKey,
     clearActiveUserKey,
-    refreshStatus,
   };
-  if(addHistoryEntry) hookReturn.addHistoryEntry = addHistoryEntry;
-
+  
   return hookReturn;
 };

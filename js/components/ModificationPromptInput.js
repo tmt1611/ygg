@@ -20,11 +20,14 @@ const ModificationPromptInput = ({
       disabledMessage = "No base structure to modify. Generate or load a structure first, or ensure a suggestion is active.";
     }
   }
+  
+  const showLabel = labelOverride !== null;
+  const labelText = labelOverride !== undefined ? labelOverride : "Editor AI";
 
   return (
     React.createElement("div", { style: { display: 'flex', flexDirection: 'column', gap: '10px' }},
-      React.createElement("label", { htmlFor: "techTreeModificationPrompt" },
-        labelOverride || "Editor AI" 
+      showLabel && React.createElement("label", { htmlFor: "techTreeModificationPrompt" },
+        labelText
       ),
       React.createElement("textarea", {
         id: "techTreeModificationPrompt",

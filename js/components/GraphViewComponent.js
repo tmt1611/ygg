@@ -1,14 +1,11 @@
 import React, { useEffect, useRef, useMemo, useCallback } from 'react';
-import { linkHorizontal } from 'd3'; // Assuming d3 is globally available or managed by import map
-// import { TechTreeNode, D3GraphNode, D3GraphLink, NodeStatus, NodeEditModalConfig, Project } from '../types.js'; // Types removed
+import { linkRadial, select } from 'd3';
 import { useD3Tree } from '../hooks/useD3Tree.js';
-// import { findNodeById } from '../utils.js'; // Not directly used
-// import { LinkSourceInfo } from '../hooks/useProjectLinking.js'; // Types removed
 
-const NODE_STATUS_RUNES = {
-  small: '🌱',
-  medium: '🌿',
-  large: '🌳',
+const NODE_IMPORTANCE_RUNES = {
+  minor: '🌱',
+  common: '🌿',
+  major: '🌳',
 };
 
 const GraphViewComponent = ({
@@ -23,16 +20,12 @@ const GraphViewComponent = ({
   activeProjectId,
   findLinkSource,
   onNavigateToLinkedProject,
-  handleNavigateToSourceNode,
+  handleNavigateToSourceNode
 }) => {
   const svgContainerDivRef = useRef(null); 
   const svgRef = useRef(null); 
   
-  const { g, nodes, links, config, resetZoom, zoomIn, zoomOut } = useD3Tree(svgRef, treeData, { 
-    nodeRadius: 10,
-    horizontalSpacing: 220, 
-    verticalSpacing: 90,
-  });
+  const { g, nodes, links, config, resetZoom, zoomIn, zoomOut } = useD3Tree(svgRef, treeData);
 
   const { nodeRadius } = config; 
 
@@ -41,36 +34,40 @@ const GraphViewComponent = ({
         return { proxyNodes: [], projectLinks: [] };
     }
 
-    const createAcronym = (name) => (name || '').split(' ').filter(Boolean).map(word => word[0]).join('').toUpperCase();
+    const createAcronym = (name) => {
+        if (!name) return '??';
+        const words = name.split(' ').filter(Boolean);
+        if (words.length > 1) {
+            return words.map(word => word[0]).join('').toUpperCase().substring(0, 3);
+        }
+        return name.substring(0, 3).toUpperCase();
+    };
 
     const proxyNodes = [];
     const projectLinks = [];
     const PROXY_OFFSET_X = 10;
-    const PROXY_DISTANCE_Y = 45;  // Much shorter line
-    let proxyIndex = 0;
+    const PROXY_DISTANCE_R = 60; // Radial distance for proxy nodes
 
     nodes.forEach(node => {
         if (node.data.linkedProjectId) {
             const targetProject = projects.find(p => p.id === node.data.linkedProjectId);
             if (targetProject) {
-                // Alternate placing proxy nodes above and below the source node
-                const yDirection = (proxyIndex % 2 === 0) ? -1 : 1;
+                // For radial, we just extend the radius and keep the angle
                 const proxyNode = {
                     id: `proxy-target-${node.data.id}`,
-                    x: node.x + PROXY_OFFSET_X, 
-                    y: node.y + (yDirection * PROXY_DISTANCE_Y),
+                    x: node.x, // angle
+                    y: node.y + PROXY_DISTANCE_R, // radius
                     isProxy: true,
                     data: {
                         name: createAcronym(targetProject.name),
                         fullName: targetProject.name,
-                        id: `proxy-data-${targetProject.id}`, status: 'medium',
+                        id: `proxy-data-${targetProject.id}`, importance: 'common',
                         isOutgoingLink: true, realProjectId: targetProject.id, realNodeId: targetProject.treeData.id,
                     },
-                    parent: node 
+                    parent: node
                 };
                 proxyNodes.push(proxyNode);
                 projectLinks.push({ source: node, target: proxyNode, isProjectLink: true });
-                proxyIndex++;
             }
         }
     });
@@ -79,15 +76,30 @@ const GraphViewComponent = ({
     if (rootNode) {
         const linkSource = findLinkSource(activeProjectId, projects);
         if (linkSource) {
+            let proxyAngle = Math.PI; // Default to bottom
+            const childrenOfRoot = rootNode.children;
+            if (childrenOfRoot && childrenOfRoot.length > 0) {
+                // Simplified logic: calculate the average angle of children and place the proxy opposite to it.
+                // This is more robust than finding the largest gap.
+                let sumX = 0;
+                let sumY = 0;
+                childrenOfRoot.forEach(child => {
+                    sumX += Math.cos(child.x);
+                    sumY += Math.sin(child.x);
+                });
+                const avgAngle = Math.atan2(sumY, sumX);
+                proxyAngle = (avgAngle + Math.PI) % (2 * Math.PI); // Opposite angle
+            }
+
             const proxyNode = {
                 id: `proxy-source-${linkSource.sourceProjectId}`,
-                x: rootNode.x - PROXY_OFFSET_X, // To the left of the root
-                y: rootNode.y - PROXY_DISTANCE_Y, // Above the root
+                x: proxyAngle,
+                y: PROXY_DISTANCE_R,
                 isProxy: true,
                 data: {
                     name: createAcronym(linkSource.sourceProjectName),
                     fullName: linkSource.sourceProjectName,
-                    id: `proxy-data-${linkSource.sourceProjectId}`, status: 'medium',
+                    id: `proxy-data-${linkSource.sourceProjectId}`, importance: 'common',
                     isIncomingLink: true, realProjectId: linkSource.sourceProjectId, realNodeId: linkSource.sourceNodeId,
                 },
                 parent: rootNode
@@ -147,125 +159,129 @@ const GraphViewComponent = ({
     }
   }, [isAppBusy, onOpenContextMenu, treeData.id, activeProjectId, projects, findLinkSource]);
 
+  // Effect for drawing the main graph structure
   useEffect(() => {
     if (!g || !nodes || !links) return;
 
     const allNodes = [...nodes, ...projectLinksAndProxyNodes.proxyNodes];
     const allLinks = [...links, ...projectLinksAndProxyNodes.projectLinks];
 
-    g.selectAll(".graph-view-link, .graph-view-project-link").remove(); 
-    g.selectAll(".graph-view-node").remove(); 
-
-    g.selectAll(".graph-view-all-links")
+    // Draw links
+    g.selectAll(".graph-view-link, .graph-view-project-link")
       .data(allLinks, (d) => `${d.source.id}-${d.target.id}`)
       .join(
         (enter) =>
-          enter
-            .append("path")
+          enter.append("path")
             .attr("class", d => d.isProjectLink ? "graph-view-project-link" : "graph-view-link")
             .attr("fill", "none")
-            .attr("stroke", d => d.isProjectLink ? null : "var(--graph-link-stroke)")
             .attr("stroke-width", d => d.isProjectLink ? 2 : 1.5)
-            .attr("stroke-opacity", 0.7) // Unified opacity
+            .attr("stroke-opacity", 0.7)
             .attr("stroke-dasharray", d => d.isProjectLink ? "4,4" : "none"),
         (update) => update,
         (exit) => exit.remove()
       )
-      .attr("d", linkHorizontal()
-        .x((d_node) => d_node.x)
-        .y((d_node) => d_node.y)
-      );
+      .attr("d", linkRadial().angle(d => d.x).radius(d => d.y));
 
+    // Draw node groups
     const nodeGroups = g
       .selectAll(".graph-view-node")
-      .data(allNodes, (d_node) => d_node.id) 
+      .data(allNodes, (d) => d.id)
       .join(
         (enter) => {
           const group = enter.append("g")
             .attr("class", d => d.isProxy ? "graph-view-node proxy" : "graph-view-node");
           
-          group.append("title"); // For tooltips
+          group.append("title");
 
-          group.append("circle")
-            .attr("r", nodeRadius)
-            .attr("stroke-width", 1.5)
-            .style("cursor", "pointer");
+          group.each(function(d) {
+            const el = select(this);
+            if (d.isProxy) {
+              el.append("rect").attr("width", nodeRadius * 2.5).attr("height", nodeRadius * 2.5)
+                .attr("x", -nodeRadius * 1.25).attr("y", -nodeRadius * 1.25)
+                .attr("rx", 3).attr("ry", 3).style("cursor", "pointer");
+            } else {
+              el.append("circle").attr("r", nodeRadius).attr("stroke-width", 1.5).style("cursor", "pointer");
+            }
+          });
 
-          group.append("text")
-            .attr("class", "node-label")
-            .attr("dy", "0.31em")
-            .attr("text-anchor", "middle")
-            .attr("font-size", "10px")
-            .style("pointer-events", "none")
-            .style("user-select", "none");
+          group.append("text").attr("class", "node-label").attr("dy", "0.31em").attr("font-size", "10px")
+            .style("pointer-events", "none").style("user-select", "none");
           
-          group.append("text")
-            .attr("class", "node-rune-icon")
-            .attr("dy", "0.35em") 
-            .attr("text-anchor", "middle")
-            .attr("font-size", `${nodeRadius * 1.2}px`) 
-            .style("pointer-events", "none")
-            .style("user-select", "none");
+          group.append("text").attr("class", "node-rune-icon").attr("dy", "0.35em")
+            .attr("font-size", `${nodeRadius * 1.2}px`).style("pointer-events", "none").style("user-select", "none");
 
-          group.append("text")
-            .attr("class", "node-icon node-lock-icon")
-            .attr("dy", `${nodeRadius * 0.4}px`) 
-            .attr("dx", `${-nodeRadius * 0.9}px`)
-            .attr("text-anchor", "middle")
-            .attr("font-size", `${nodeRadius * 0.8}px`)
-            .attr("fill", "var(--text-tertiary)")
-            .style("pointer-events", "none");
+          group.append("text").attr("class", "node-icon node-lock-icon").attr("dy", `${nodeRadius * 0.4}px`)
+            .attr("dx", `${-nodeRadius * 0.9}px`).attr("font-size", `${nodeRadius * 0.8}px`)
+            .attr("fill", "var(--text-tertiary)").style("pointer-events", "none");
+
           return group;
-        },
-        (update) => update,
-        (exit) => exit.remove()
+        }
       );
 
+    // Apply static attributes and event handlers
     nodeGroups
-      .attr("transform", (d_node) => `translate(${d_node.x},${d_node.y})`)
-      .classed("selected", (d_node) => !d_node.isProxy && d_node.data.id === activeNodeId)
-      .on("click", handleNodeClick) 
+      .attr("transform", d => `translate(${d.y * Math.cos(d.x - Math.PI / 2)}, ${d.y * Math.sin(d.x - Math.PI / 2)})`)
+      .on("click", handleNodeClick)
       .on("dblclick", handleNodeDoubleClick)
       .on("contextmenu", handleNodeContextMenu);
 
     nodeGroups.select("title").text(d => d.isProxy ? `Project: ${d.data.fullName}\n(Click to navigate)` : `${d.data.name}\n(Double-click for Focus View)`);
 
-    nodeGroups.select("circle")
-      .attr("fill", (d_node) => {
-          if (d_node.isProxy) return null;
-          if (d_node.data.status === 'small') return 'var(--status-small-bg)';
-          if (d_node.data.status === 'large') return 'var(--status-large-bg)';
-          return 'var(--status-medium-bg)';
-      })
-      .attr("stroke", (d_node) => {
-          if (d_node.isProxy) return null;
-          return d_node.data.id === activeNodeId ? 'var(--graph-node-selected-stroke)' : 'var(--graph-node-stroke)';
-      });
+    nodeGroups.select("circle").attr("fill", d => {
+        if (d.data.importance === 'minor') return 'var(--importance-minor-bg)';
+        if (d.data.importance === 'major') return 'var(--importance-major-bg)';
+        return 'var(--importance-common-bg)';
+    });
 
     nodeGroups.select(".node-label")
-      .text((d_node) => d_node.data.name) 
+      .text(d => d.data.name)
       .attr("fill", d => d.isProxy ? null : "var(--graph-node-text)")
-      .attr("x", (d_node) => {
-        if (d_node.isProxy) return 0;
-        return d_node.children ? -(nodeRadius + 5) : (nodeRadius + 5);
+      .attr("transform", d => {
+          if (d.isProxy) return null;
+          const angle = d.x * 180 / Math.PI;
+          const rotate = angle > 90 && angle < 270 ? angle + 180 : angle;
+          return `rotate(${rotate})`;
       })
-      .attr("text-anchor", (d_node) => {
-        if (d_node.isProxy) return "middle";
-        return d_node.children ? "end" : "start";
+      .attr("x", d => {
+        if (d.isProxy) return 0;
+        const angle = d.x * 180 / Math.PI;
+        return (angle > 90 && angle < 270) ? -(nodeRadius + 5) : (nodeRadius + 5);
+      })
+      .attr("text-anchor", d => {
+        if (d.isProxy) return "middle";
+        const angle = d.x * 180 / Math.PI;
+        return (angle > 90 && angle < 270) ? "end" : "start";
       });
-    
+
     nodeGroups.select(".node-rune-icon")
-        .text((d_node) => d_node.isProxy ? '' : NODE_STATUS_RUNES[d_node.data.status || 'medium'])
-        .attr("fill", (d_node) => {
-            if (d_node.isProxy) return null;
-            if (d_node.data.status === 'small') return 'var(--status-small-text)';
-            if (d_node.data.status === 'large') return 'var(--status-large-text)';
-            return 'var(--status-medium-text)';
-        });
+      .text(d => d.isProxy ? '' : NODE_IMPORTANCE_RUNES[d.data.importance || 'common'])
+      .attr("fill", d => {
+        if (d.isProxy) return null;
+        if (d.data.importance === 'minor') return 'var(--importance-minor-text)';
+        if (d.data.importance === 'major') return 'var(--importance-major-text)';
+        return 'var(--importance-common-text)';
+      });
 
-    nodeGroups.select(".node-lock-icon").text((d_node) => (d_node.data.isLocked && !d_node.isProxy ? "🔒" : ""));
+    nodeGroups.select(".node-lock-icon").text(d => (d.data.isLocked && !d.isProxy ? "🔒" : ""));
 
-  }, [g, nodes, links, nodeRadius, activeNodeId, handleNodeClick, handleNodeDoubleClick, handleNodeContextMenu, treeData.id, activeProjectId, projects, findLinkSource, projectLinksAndProxyNodes]);
+  }, [g, nodes, links, nodeRadius, handleNodeClick, handleNodeDoubleClick, handleNodeContextMenu, projectLinksAndProxyNodes]);
+
+  // Effect for dynamic styling (selection, search highlight)
+  useEffect(() => {
+    if (!g) return;
+
+    const nodeSelection = g.selectAll(".graph-view-node");
+    
+    nodeSelection
+      .classed("selected", d => !d.isProxy && d.data.id === activeNodeId)
+      .classed("highlighted", false); // No search term, so nothing is highlighted
+
+    nodeSelection.select("circle")
+      .attr("stroke", d => {
+          return d.isProxy ? null : (d.data.id === activeNodeId ? 'var(--graph-node-selected-stroke)' : 'var(--graph-node-stroke)');
+      });
+
+  }, [g, activeNodeId, nodes]); // Using 'nodes' to re-run on data change.
 
 
   if (!treeData) {

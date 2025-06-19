@@ -1,111 +1,96 @@
+import React, { useState } from 'react';
 
-import React from 'react';
-// import { TechTreeNode } from '../types.js'; // Types removed
+const DiffDetail = ({ detail }) => {
+  const renderValue = (value) => {
+    if (value === null || value === undefined || value === '') {
+      return React.createElement("i", { style: { opacity: 0.7 } }, "(empty)");
+    }
+    const strValue = String(value);
+    return strValue.length > 70 ? `${strValue.substring(0, 67)}...` : strValue;
+  };
+
+  return (
+    React.createElement("li", { className: "diff-details-item" },
+      React.createElement("strong", null, detail.label, ":"),
+      detail.type === 'critical' ? (
+        React.createElement("span", { className: "diff-to", style: { fontWeight: 'bold' } }, detail.to)
+      ) : (
+        React.createElement("span", null,
+          React.createElement("span", { className: "diff-from" }, renderValue(detail.from)),
+          React.createElement("span", { className: "diff-arrow" }, " → "),
+          React.createElement("span", { className: "diff-to" }, renderValue(detail.to))
+        )
+      )
+    )
+  );
+};
+
 
 const AiSuggestionPreviewListItem = ({ node, level, isVisualDiff = false }) => {
-  let itemStyle = { 
-    padding: '6px 8px', 
-    margin: '3px 0',
-    borderRadius: 'var(--border-radius)',
-    border: '1px solid transparent',
-    marginLeft: isVisualDiff ? `${level * 20}px` : `${level * 18}px`, 
-    position: 'relative', 
-    overflow: 'hidden', 
+  const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
+
+  const hasLongDescription = node.description && node.description.length > 120; // Set a threshold for when to collapse
+  const isDescriptionEffectivelyCollapsed = hasLongDescription && !isDescriptionExpanded;
+
+  const changeStatusMap = {
+    new: { icon: '➕', title: "This node is newly added." },
+    content_modified: { icon: '✏️', title: "Name, description, importance, or link of this unlocked node has changed." },
+    structure_modified: { icon: '📂', title: "The direct children of this node have changed (added, removed, or reordered)." },
+    reparented: { icon: '↪️', title: `This node has been moved. Original parent ID: ${node._oldParentId || 'root'}.` },
+    locked_content_changed: { icon: '❗', title: "CRITICAL: Content of this LOCKED node was modified by AI!" },
+    removed: { icon: '➖', title: "This node was marked for removal but still appears in suggested tree structure (potential error)." },
+    unchanged: { icon: '', title: node.description || node.name }
   };
-  let changeStatusText = "";
-  let changeStatusTextStyle = { color: 'var(--text-primary)', fontWeight: 'normal' };
-  let titleText = node.description || node.name;
 
-  let nodeNameStyle = { fontWeight: 500, fontSize: '0.95em' };
-
-  switch (node._changeStatus) {
-    case 'new':
-      itemStyle.backgroundColor = 'var(--success-bg)';
-      itemStyle.borderColor = 'var(--success-color)';
-      changeStatusText = " (New)";
-      changeStatusTextStyle.color = 'var(--success-color)';
-      nodeNameStyle.color = 'var(--success-color)';
-      titleText = "This node is newly added.";
-      break;
-    case 'content_modified':
-      itemStyle.backgroundColor = 'var(--primary-accent-hover-bg)'; 
-      itemStyle.borderColor = 'var(--primary-accent-light)';
-      changeStatusText = " (Content Modified)";
-      changeStatusTextStyle.color = 'var(--primary-accent)';
-      nodeNameStyle.color = 'var(--primary-accent-dark)';
-      titleText = "Name, description, status, or link of this unlocked node has changed.";
-      break;
-    case 'structure_modified':
-      itemStyle.backgroundColor = 'var(--panel-alt-bg)'; 
-      itemStyle.borderColor = 'var(--secondary-accent-dark)';
-      changeStatusText = " (Children Changed)"; 
-      changeStatusTextStyle.color = 'var(--secondary-accent-dark)';
-      titleText = "The direct children of this node have changed (added, removed, or reordered).";
-      break;
-    case 'reparented':
-      itemStyle.backgroundColor = 'var(--warning-bg)';
-      itemStyle.borderColor = 'var(--warning-color)';
-      changeStatusText = " (Moved)";
-      changeStatusTextStyle.color = 'var(--warning-color)';
-      nodeNameStyle.color = 'var(--text-primary)'; 
-      titleText = `This node has been moved. Original parent ID: ${node._oldParentId || 'root'}.`;
-      break;
-    case 'locked_content_changed':
-      itemStyle.backgroundColor = 'var(--error-bg)';
-      itemStyle.borderColor = 'var(--error-color)';
-      changeStatusText = " (ERROR: Locked Content Modified!)";
-      changeStatusTextStyle.color = 'var(--error-color)';
-      nodeNameStyle.color = 'var(--error-color)';
-      nodeNameStyle.fontWeight = 'bold';
-      titleText = "CRITICAL: Content of this LOCKED node was modified by AI!";
-      break;
-    case 'removed': 
-      itemStyle.backgroundColor = 'rgba(220, 53, 69, 0.1)'; 
-      itemStyle.borderColor = 'var(--error-color)';
-      itemStyle.opacity = 0.7;
-      nodeNameStyle.textDecoration = 'line-through';
-      nodeNameStyle.color = 'var(--error-color)';
-      changeStatusText = " (Error: Should Be Removed)";
-      changeStatusTextStyle.color = 'var(--error-color)';
-      titleText = "This node was marked for removal but still appears in suggested tree structure (potential error).";
-      break;
-    case 'unchanged':
-    default:
-      itemStyle.border = '1px solid var(--border-color)'; 
-      break;
-  }
-  const nodeSizeText = node.status ? ` (Size: ${node.status.charAt(0).toUpperCase() + node.status.slice(1)})` : '';
-  const linkedProjectText = node.linkedProjectId && node.linkedProjectName ? ` (🔗 ${node.linkedProjectName})` : '';
+  const { icon: changeStatusIcon, title: titleText } = changeStatusMap[node._changeStatus] || changeStatusMap.unchanged;
+  const nodeImportanceText = node.importance ? ` (${node.importance.charAt(0).toUpperCase()})` : '';
+  const linkedProjectText = node.linkedProjectId && node.linkedProjectName ? ` (🔗)` : '';
+  
+  const itemClassName = `diff-list-item status-${node._changeStatus || 'unchanged'}`;
+  const itemStyle = {
+    marginLeft: `${level * 18}px`,
+  };
 
   return (
     React.createElement("li", { style: { listStyle: 'none' }, "aria-label": `Node: ${node.name}, Change Status: ${node._changeStatus || 'Unchanged'}`}, 
-      React.createElement("div", { style: itemStyle, title: titleText },
-        React.createElement("div", { style: { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'nowrap', gap: '5px' }},
-            React.createElement("span", { style: { ...nodeNameStyle, flexShrink: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }},
-              node.isLocked && React.createElement("span", { style: { marginRight: '4px', color: node._changeStatus === 'locked_content_changed' ? 'var(--error-color)' : 'var(--text-tertiary)'}, title: "Locked" }, "🔒"),
+      React.createElement("div", { style: itemStyle, className: itemClassName, title: titleText },
+        React.createElement("div", { className: "diff-list-item-header" },
+            React.createElement("span", { className: "diff-list-item-name-section" },
+              changeStatusIcon && React.createElement("span", { className: "diff-change-icon", "aria-hidden": "true" }, changeStatusIcon),
+              node.isLocked && React.createElement("span", { className: "diff-lock-icon", title: "Locked" }, "🔒"),
               node.name
             ),
-            React.createElement("span", { style: { fontSize: '0.85em', color: 'var(--text-secondary)', marginLeft: 'auto', whiteSpace: 'nowrap', flexShrink: 0 }},
-                nodeSizeText,
-                linkedProjectText,
-                changeStatusText && React.createElement("span", { style: { marginLeft: '8px', ...changeStatusTextStyle, fontWeight: '500' }}, changeStatusText)
+            React.createElement("span", { className: "diff-list-item-meta" },
+                nodeImportanceText,
+                linkedProjectText
             )
         ),
         node.description && (
-          React.createElement("p", { style: { fontSize: '0.9em', color: 'var(--text-secondary)', marginTop: '3px', marginBottom: '2px', whiteSpace: 'pre-wrap', wordBreak: 'break-word', paddingLeft: '15px' }},
-            node.description
+          React.createElement("div", { className: "diff-list-item-desc-wrapper" },
+            hasLongDescription && (
+              React.createElement("button", {
+                className: "diff-list-item-desc-toggle",
+                onClick: (e) => { e.stopPropagation(); setIsDescriptionExpanded(!isDescriptionExpanded); },
+                "aria-expanded": isDescriptionExpanded
+              },
+                isDescriptionExpanded ? "Show less" : "Show full description..."
+              )
+            ),
+            React.createElement("div", { className: `diff-list-item-desc ${isDescriptionEffectivelyCollapsed ? 'collapsed' : ''}` },
+              node.description
+            )
           )
         ),
         node._modificationDetails && node._modificationDetails.length > 0 && isVisualDiff && (
-          React.createElement("ul", { style: { listStyle: 'disc', listStylePosition: 'inside', marginLeft: '15px', marginTop: '4px', fontSize: '0.8em', color: 'var(--text-tertiary)' }},
+          React.createElement("ul", { className: "diff-details-list" },
             node._modificationDetails.map((detail, index) => (
-              React.createElement("li", { key: index, style: { lineHeight: '1.3', marginBottom: '2px' }}, detail)
+              React.createElement(DiffDetail, { key: index, detail: detail })
             ))
           )
         )
       ),
       isVisualDiff && node.children && node.children.length > 0 && (
-        React.createElement("ul", { style: { marginTop: '0px', paddingLeft: '0px' }},
+        React.createElement("ul", { className: "diff-list-child-container" },
           node.children.map(child => (
             React.createElement(AiSuggestionPreviewListItem, {
               key: `${child.id}-${child._changeStatus || 'child'}-${level+1}`,

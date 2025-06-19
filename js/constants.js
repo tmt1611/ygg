@@ -1,6 +1,4 @@
 
-// import { TechTreeNode, NodeStatus } from './types.js'; // Types removed
-
 export const APP_STORAGE_KEYS = {
   PROJECT_COLLECTION: 'yggdrasilProjectCollection_v2.1',
   ACTIVE_PROJECT_ID: 'yggdrasilActiveProjectId_v2.1',
@@ -11,7 +9,6 @@ export const APP_STORAGE_KEYS = {
   SIDEBAR_COLLAPSED_STATE: 'yggdrasilSidebarCollapsedState_v2.1',
   SIDEBAR_PANEL_STATES: 'yggdrasilSidebarPanelStates_v2.1', 
   ACTIVE_MAIN_VIEW: 'yggdrasilActiveMainView_v2.1',
-  ACTIVE_WORKSPACE_SUB_TAB: 'yggdrasilActiveWorkspaceSubTab_v2.1', 
 };
 
 export const ELF_WARFARE_STRUCTURE_JSON_STRING = `
@@ -20,20 +17,20 @@ export const ELF_WARFARE_STRUCTURE_JSON_STRING = `
     "id": "elf-warfare-root-example-v1",
     "name": "Elven Warfare Doctrines",
     "description": "Core principles of elven combat strategies, focusing on agility, precision, and harmony with nature.",
-    "status": "large",
+    "importance": "major",
     "isLocked": false,
     "children": [
       {
         "id": "elf-archery-example-v1",
         "name": "Masterful Archery",
         "description": "Techniques for elven longbows, including volley fire, pinpoint accuracy, and enchanted arrows.",
-        "status": "medium",
+        "importance": "common",
         "children": [
           {
             "id": "elf-arrow-crafting-example-v1",
             "name": "Arrow Crafting & Enchantment",
             "description": "Fletching specialized arrows and imbuing them with minor magical properties.",
-            "status": "small",
+            "importance": "minor",
             "children": []
           }
         ]
@@ -42,14 +39,14 @@ export const ELF_WARFARE_STRUCTURE_JSON_STRING = `
         "id": "natures-embrace",
         "name": "Nature's Embrace",
         "description": "Integration of natural magic and creatures into military operations. This branch can explore links to deeper nature magic.",
-        "status": "medium",
+        "importance": "common",
         "children": [
           {
             "id": "druidic-healing",
             "name": "Druidic Healing",
             "description": "Develop advanced nature-based healing for troops.",
             "isLocked": false,
-            "status": "medium",
+            "importance": "common",
             "children": []
           }
         ]
@@ -58,7 +55,7 @@ export const ELF_WARFARE_STRUCTURE_JSON_STRING = `
         "id": "elf-blade-dancing-example-v1",
         "name": "Blade Dancing Combat",
         "description": "Fluid and graceful close-quarters combat with dual blades or sword and dagger.",
-        "status": "medium",
+        "importance": "common",
         "children": []
       }
     ]
@@ -66,33 +63,81 @@ export const ELF_WARFARE_STRUCTURE_JSON_STRING = `
 }
 `;
 
+export const EVENT_TYPE_INFO = {
+    // AI
+    'TREE_INIT_AI': { icon: '🧠', color: 'var(--primary-accent)', isKey: true, keywords: ['generated'] },
+    'AI_MOD_CONFIRMED': { icon: '🤖', color: 'var(--primary-accent)', isKey: true, keywords: ['applied'] },
+    'AI_MOD_REJECTED': { icon: '🚫', color: 'var(--text-tertiary)', isKey: false, keywords: ['rejected', 'discarded'] },
+    'AI_MOD_UNDONE': { icon: '↩️', color: 'var(--warning-color)', isKey: true, keywords: ['undone', 'reverted', 'cancelled'] },
+    'NODE_INSIGHTS_GENERATED': { icon: '💡', color: 'var(--primary-accent-dark)', isKey: true, keywords: ['generated'] },
+    'AI_STRATEGY_GEN': { icon: '✨', color: 'var(--primary-accent-dark)', isKey: true, keywords: ['generated'] },
+    'AI_SUMMARY_GEN': { icon: '📜', color: 'var(--primary-accent-dark)', isKey: true, keywords: ['generated'] },
+    'TREE_MOD_AI': { icon: '🤖', color: 'var(--text-secondary)', isKey: true, keywords: ['proposed', 'modifications'] },
+
+    // Node Ops
+    'NODE_CREATED': { icon: '➕', color: 'var(--success-color)', isKey: true, keywords: ['created', 'added'] },
+    'NODE_UPDATED': { icon: '✏️', color: 'var(--text-secondary)', isKey: true, keywords: ['updated', 'changed', 'renamed'] },
+    'NODE_DELETED': { icon: '🗑️', color: 'var(--error-color)', isKey: true, keywords: ['deleted', 'removed'] },
+    'NODE_LOCK_TOGGLED': { icon: '🔒', color: 'var(--text-secondary)', isKey: true, keywords: ['locked', 'unlocked'] },
+    'NODE_IMPORTANCE_CHANGED': { icon: '⚖️', color: 'var(--text-secondary)', isKey: true, keywords: ['changed'] },
+
+    // Project Linking
+    'NODE_PROJECT_LINK_CREATED': { icon: '🔗', color: 'var(--secondary-accent-dark)', isKey: true, keywords: ['linked'] },
+    'NODE_PROJECT_LINK_REMOVED': { icon: '🚫', color: 'var(--secondary-accent-dark)', isKey: true, keywords: ['unlinked'] },
+
+    // Tree-wide
+    'TREE_LOCK_ALL': { icon: '🛡️', color: 'var(--warning-color)', isKey: true, keywords: ['locked'] },
+    'TREE_UNLOCK_ALL': { icon: '🛡️', color: 'var(--warning-color)', isKey: true, keywords: ['unlocked'] },
+    'TREE_DOWNLOADED': { icon: '📥', color: 'var(--text-secondary)', isKey: false, keywords: ['downloaded'] },
+    'TREE_DATA_EXTRACTED': { icon: '📤', color: 'var(--text-secondary)', isKey: false, keywords: ['extracted'] },
+
+    // Project Management
+    'PROJECT_CREATED': { icon: '📁', color: 'var(--success-color)', isKey: true, keywords: ['created', 'saved'] },
+    'PROJECT_LOADED': { icon: '📂', color: 'var(--text-primary)', isKey: true, keywords: ['loaded', 'activated'] },
+    'PROJECT_SAVED': { icon: '💾', color: 'var(--text-secondary)', isKey: false, keywords: ['saved'] },
+    'PROJECT_RENAMED': { icon: '✏️', color: 'var(--text-primary)', isKey: true, keywords: ['renamed'] },
+    'PROJECT_DELETED': { icon: '🗑️', color: 'var(--error-color)', isKey: true, keywords: ['deleted'] },
+    'PROJECT_IMPORTED': { icon: '📄', color: 'var(--success-color)', isKey: true, keywords: ['imported'] },
+    'PROJECT_EXAMPLE_LOADED': { icon: '⭐', color: 'var(--text-primary)', isKey: true, keywords: ['started', 'loaded'] },
+
+    // System & Misc
+    'API_KEY_STATUS_CHANGED': { icon: '🔑', color: 'var(--text-secondary)', isKey: false, keywords: ['set', 'cleared'] },
+    'APP_ERROR_ENCOUNTERED': { icon: '⚠️', color: 'var(--error-color)', isKey: true, keywords: ['failed'] },
+    'THEME_CHANGED': { icon: '🎨', color: 'var(--text-tertiary)', isKey: false, keywords: ['switched'] },
+    'VIEW_CHANGED': { icon: '👁️', color: 'var(--text-tertiary)', isKey: false, keywords: ['opened', 'closed', 'changed'] },
+    'HISTORY_CLEARED': { icon: '🧹', color: 'var(--text-tertiary)', isKey: false, keywords: ['cleared'] },
+
+    // Default
+    'default': { icon: '🔹', color: 'var(--text-tertiary)', isKey: false, keywords: [] }
+};
+
 export const ADVANCED_NATURE_MAGIC_JSON_STRING = `
 {
   "tree": {
     "id": "nature-magic-root-example-v1", 
     "name": "Advanced Nature Magic",
     "description": "Deep understanding and manipulation of natural forces, flora, and fauna.",
-    "status": "large",
+    "importance": "major",
     "isLocked": false,
     "children": [
       {
         "id": "elemental-attunement-example-v1",
         "name": "Elemental Attunement",
         "description": "Channeling the power of earth, air, fire, and water for potent spells.",
-        "status": "medium",
+        "importance": "common",
         "children": [
           {
             "id": "geomancy-example-v1",
             "name": "Geomancy",
             "description": "Shaping stone and earth, creating barriers or tremors.",
-            "status": "small",
+            "importance": "minor",
             "children": []
           },
           {
             "id": "aeromancy-example-v1",
             "name": "Aeromancy",
             "description": "Controlling winds, summoning gusts, or creating localized storms.",
-            "status": "small",
+            "importance": "minor",
             "children": []
           }
         ]
@@ -101,14 +146,14 @@ export const ADVANCED_NATURE_MAGIC_JSON_STRING = `
         "id": "druidic-shapeshifting-example-v1",
         "name": "Druidic Shapeshifting",
         "description": "Assuming potent animal forms (bear, wolf, eagle) for various combat and utility purposes.",
-        "status": "medium",
+        "importance": "common",
         "children": []
       },
       {
         "id": "flora-manipulation-example-v1",
         "name": "Verdant Growth & Flora Control",
         "description": "Accelerating plant growth, animating plants for defense, or creating entangling vines.",
-        "status": "medium",
+        "importance": "common",
         "children": []
       }
     ]
