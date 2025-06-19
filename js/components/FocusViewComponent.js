@@ -1,4 +1,3 @@
-
 import React, { useMemo, useCallback, useRef } from 'react';
 import { getAllNodesAsMap } from '../utils.js';
 import FocusNodeDisplay from './FocusNodeDisplay.js';
