@@ -390,7 +390,8 @@ const App = () => {
             },
             appCallbacks: {
               handleExtractData, handleNodeSelectedForInsightsOrActions,
-              handleDeleteNodeWithConfirmation: nodeOperations.handleDeleteNodeWithConfirmation
+              handleDeleteNodeWithConfirmation: nodeOperations.handleDeleteNodeWithConfirmation,
+              onOpenViewContextMenu: modalManager.openViewContextMenu,
             },
             viewControls: {
               yggdrasilViewMode, setYggdrasilViewMode

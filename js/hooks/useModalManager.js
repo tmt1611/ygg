@@ -20,6 +20,9 @@ export const useModalManager = () => {
   const [contextMenuPosition, setContextMenuPosition] = useState(null);
   const [contextMenuNodeId, setContextMenuNodeId] = useState(null);
   const [contextMenuLinkSourceInfo, setContextMenuLinkSourceInfo] = useState(null);
+
+  const [isViewContextMenuOpen, setIsViewContextMenuOpen] = useState(false);
+  const [viewContextMenuConfig, setViewContextMenuConfig] = useState(null);
   
   const [isTechExtractionModalOpen, setIsTechExtractionModalOpen] = useState(false);
   const [extractedTechsContent, setExtractedTechsContent] = useState('');
@@ -71,6 +74,13 @@ export const useModalManager = () => {
   const closeContextMenu = useCallback(() => {
     setIsContextMenuOpen(false); setContextMenuNodeId(null); setContextMenuPosition(null); setContextMenuLinkSourceInfo(null); restoreFocus();
   }, [restoreFocus]);
+
+  const openViewContextMenu = useCallback((config) => {
+    captureFocus(); setViewContextMenuConfig(config); setIsViewContextMenuOpen(true);
+  }, [captureFocus]);
+  const closeViewContextMenu = useCallback(() => {
+    setIsViewContextMenuOpen(false); setViewContextMenuConfig(null); restoreFocus();
+  }, [restoreFocus]);
   
   const openTechExtractionModal = useCallback((content, title, mode) => {
     captureFocus(); setExtractedTechsContent(content); setExtractionModalTitle(title); setExtractionMode(mode); setIsTechExtractionModalOpen(true);
@@ -93,6 +103,7 @@ export const useModalManager = () => {
     isConfirmModalOpen, confirmModalConfig, openConfirmModal, closeConfirmModal,
     isNodeEditModalOpen, nodeEditModalConfig, openNodeEditModal, closeNodeEditModal,
     isContextMenuOpen, contextMenuPosition, contextMenuNodeId, contextMenuLinkSourceInfo, openContextMenu, closeContextMenu,
+    isViewContextMenuOpen, viewContextMenuConfig, openViewContextMenu, closeViewContextMenu,
     isTechExtractionModalOpen, extractedTechsContent, extractionModalTitle, extractionMode, openTechExtractionModal, closeTechExtractionModal, setExtractionMode,
     isLinkProjectModalOpen, linkProjectModalConfig, openLinkProjectModal, closeLinkProjectModal,
     restoreFocus,
@@ -102,6 +113,7 @@ export const useModalManager = () => {
     isConfirmModalOpen, confirmModalConfig, openConfirmModal, closeConfirmModal,
     isNodeEditModalOpen, nodeEditModalConfig, openNodeEditModal, closeNodeEditModal,
     isContextMenuOpen, contextMenuPosition, contextMenuNodeId, contextMenuLinkSourceInfo, openContextMenu, closeContextMenu,
+    isViewContextMenuOpen, viewContextMenuConfig, openViewContextMenu, closeViewContextMenu,
     isTechExtractionModalOpen, extractedTechsContent, extractionModalTitle, extractionMode, openTechExtractionModal, closeTechExtractionModal, setExtractionMode,
     isLinkProjectModalOpen, linkProjectModalConfig, openLinkProjectModal, closeLinkProjectModal,
     restoreFocus,

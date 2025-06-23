@@ -25,7 +25,8 @@ const MainContentRouter = ({
 
   const {
     handleExtractData, handleNodeSelectedForInsightsOrActions,
-    handleDeleteNodeWithConfirmation
+    handleDeleteNodeWithConfirmation,
+    onOpenViewContextMenu,
   } = appCallbacks;
 
   const {
@@ -71,6 +72,7 @@ const MainContentRouter = ({
           onSwitchToFocusView: viewStates.handleSwitchToFocusView,
           onOpenContextMenu: modalManager.openContextMenu,
           onCloseContextMenu: modalManager.closeContextMenu,
+          onOpenViewContextMenu: onOpenViewContextMenu,
           isAppBusy: isAppBusy,
           projects: projectManager.projects,
           activeProjectId: projectManager.activeProjectId,

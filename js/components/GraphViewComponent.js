@@ -92,6 +92,7 @@ const GraphViewComponent = ({
   onSwitchToFocusView,
   onOpenContextMenu,
   onCloseContextMenu,
+  onOpenViewContextMenu,
   isAppBusy,
   projects,
   activeProjectId,
@@ -116,7 +117,18 @@ const GraphViewComponent = ({
   const svgContainerDivRef = useRef(null); 
   const svgRef = useRef(null); 
   
-  const { g, nodes, links, config, resetZoom, zoomIn, zoomOut } = useD3Tree(svgRef, treeData, {}, onCloseContextMenu, layout);
+  const handleBackgroundContextMenu = useCallback((position) => {
+    onOpenViewContextMenu({
+        position,
+        actions: {
+            onResetZoom: resetZoom,
+            onToggleLayout: toggleLayout,
+            nextLayoutInfo: getNextLayoutInfo(layout)
+        }
+    });
+  }, [onOpenViewContextMenu, resetZoom, toggleLayout, layout]);
+
+  const { g, nodes, links, config, resetZoom, zoomIn, zoomOut } = useD3Tree(svgRef, treeData, {}, onCloseContextMenu, handleBackgroundContextMenu, layout);
 
   const toggleLayout = useCallback(() => {
     setLayout(prev => {

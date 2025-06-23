@@ -10,6 +10,7 @@ import NodeEditModal from './NodeEditModal.js';
 import TechExtractionModal from './TechExtractionModal.js';
 import LinkProjectModal from './LinkProjectModal.js';
 import ContextMenu from './ContextMenu.js';
+import ViewContextMenu from './ViewContextMenu.js';
 
 // Hooks and Types (Hook return types removed)
 
@@ -40,6 +41,7 @@ const AppModals = ({
     isTechExtractionModalOpen, extractedTechsContent, extractionModalTitle, closeTechExtractionModal,
     isLinkProjectModalOpen, linkProjectModalConfig, closeLinkProjectModal,
     isContextMenuOpen, contextMenuPosition, contextMenuNodeId, contextMenuLinkSourceInfo, closeContextMenu,
+    isViewContextMenuOpen, viewContextMenuConfig, closeViewContextMenu,
   } = modalManager;
 
   return (
@@ -132,6 +134,13 @@ const AppModals = ({
           currentProjectRootId: techTreeData?.id,
           findLinkSource: projectLinkingHook.findLinkSource,
           handleNavigateToSourceNode: projectLinkingHook.handleNavigateToSourceNode
+        })
+      ),
+      isViewContextMenuOpen && viewContextMenuConfig && (
+        React.createElement(ViewContextMenu, {
+          isOpen: isViewContextMenuOpen,
+          config: viewContextMenuConfig,
+          onClose: closeViewContextMenu,
         })
       )
     )

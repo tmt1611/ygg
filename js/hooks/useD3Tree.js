@@ -13,6 +13,7 @@ export const useD3Tree = (
   treeData,
   config = {},
   onBackgroundClick,
+  onBackgroundContextMenu,
   layout = 'radial' // 'radial', 'vertical', 'horizontal'
 ) => {
   const finalConfig = { ...defaultTreeConfig, ...config };
@@ -94,8 +95,16 @@ export const useD3Tree = (
           }
         });
       }
+      if (onBackgroundContextMenu) {
+        svg.on('contextmenu', (event) => {
+            if (event.target === svg.node()) {
+                event.preventDefault();
+                onBackgroundContextMenu({ x: event.clientX, y: event.clientY });
+            }
+        });
+      }
     }
-  }, [svgRef, onBackgroundClick]); 
+  }, [svgRef, onBackgroundClick, onBackgroundContextMenu]); 
 
   // This new effect handles the initial centering when a new tree is loaded.
   useLayoutEffect(() => {
