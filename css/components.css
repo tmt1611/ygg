@@ -1390,8 +1390,8 @@ html[data-theme='sol'] .panel-variant-sidebar .panel-toggle-button {
 .panel.collapsed .collapsible-panel-header {
     border-bottom-color: transparent;
 }
-.panel .panel-toggle-button.collapsed {
-  transform: rotate(-90deg);
+.panel .panel-toggle-button:not(.collapsed) {
+  transform: rotate(90deg);
 }
 .panel .panel-content-wrapper.collapsed {
   display: none;
