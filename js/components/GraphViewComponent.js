@@ -380,25 +380,34 @@ const GraphViewComponent = ({
       .style("user-select", "none")
       .style("pointer-events", "none")
       .attr("transform", d => {
-        if (d.isProxy) {
-            return null; // Proxies are centered
-        }
+        if (d.isProxy) return null;
         const radius = getNodeRadius(d);
         const spacing = 8;
+        if (layout === 'radial') {
+            const angle = d.x;
+            const isLeftSide = angle > Math.PI / 2 && angle < 3 * Math.PI / 2;
+            const xOffset = isLeftSide ? -(radius + spacing) : (radius + spacing);
+            return `translate(${xOffset}, 0)`;
+        }
         if (layout === 'horizontal') {
             return `translate(${radius + spacing}, 0)`;
         }
-        // For radial and vertical, position below
+        // For vertical, position below
         return `translate(0, ${radius + spacing})`;
       })
       .attr("text-anchor", d => {
         if (d.isProxy) return "middle";
+        if (layout === 'radial') {
+            const angle = d.x;
+            // Check if node is on the left side of the circle (PI/2 to 3PI/2)
+            return (angle > Math.PI / 2 && angle < 3 * Math.PI / 2) ? "end" : "start";
+        }
         if (layout === 'horizontal') return "start";
         return "middle";
       })
       .attr("dominant-baseline", d => {
         if (d.isProxy) return "middle";
-        if (layout === 'horizontal') return "middle";
+        if (layout === 'radial' || layout === 'horizontal') return "middle";
         return "hanging";
       })
       .attr("dy", null) // dy is handled by the wrap function for multi-line text
