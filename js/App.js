@@ -341,7 +341,7 @@ const App = () => {
         }),
         
         React.createElement("main", { className: "yggdrasil-core-canvas" },
-          error && React.createElement(ErrorMessage, { message: error }),
+          error && React.createElement(ErrorMessage, { message: error, onClose: () => setError(null) }),
 
           React.createElement(MainContentRouter, {
             appState: {
