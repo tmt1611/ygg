@@ -1,7 +1,16 @@
 
 import { useState, useCallback, useEffect } from 'react';
-import { generateUUID, initializeNodes, findNodeById, updateNodeInTree, getAllNodesAsMap } from '../utils.js';
+import { generateUUID, initializeNodes, findNodeById, updateNodeInTree, getAllNodesAsMap, downloadObjectAsJson } from '../utils.js';
 import { APP_STORAGE_KEYS, ELF_WARFARE_STRUCTURE_JSON_STRING, ADVANCED_NATURE_MAGIC_JSON_STRING } from '../constants.js';
+
+const downloadProjectFile = (project, addHistoryEntry) => {
+    if (!project) return;
+    const filename = `${project.name.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.project.json`;
+    downloadObjectAsJson(project, filename);
+    if (addHistoryEntry) {
+        addHistoryEntry('TREE_DOWNLOADED', `Project "${project.name}" downloaded.`);
+    }
+};
 
 export const useProjectManagement = ({
   modalManager,
@@ -276,15 +285,8 @@ export const useProjectManagement = ({
         onConfirm: (nameFromModal) => {
           setInitialPrompt(nameFromModal);
           const newSavedProject = saveNewProject(currentTechTreeData, nameFromModal, false);
-          if (newSavedProject && andDownload) { 
-            const filename = `${newSavedProject.name.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.project.json`;
-            const jsonStr = JSON.stringify(newSavedProject, null, 2);
-            const blob = new Blob([jsonStr], { type: "application/json" });
-            const url = URL.createObjectURL(blob);
-            const link = document.createElement("a");
-            link.href = url; link.download = filename; document.body.appendChild(link);
-            link.click(); document.body.removeChild(link); URL.revokeObjectURL(url);
-            addHistoryEntry('TREE_DOWNLOADED', `Project "${newSavedProject.name}" downloaded.`);
+          if (newSavedProject && andDownload) {
+            downloadProjectFile(newSavedProject, addHistoryEntry);
           }
           closeProjectNameModal();
         }
@@ -303,15 +305,8 @@ export const useProjectManagement = ({
     };
     setProjects(prev => { const newProjects = [...prev]; newProjects[projectIndex] = updatedProject; return newProjects; });
     addHistoryEntry('PROJECT_SAVED', `Project "${updatedProject.name}" saved.`);
-    if (andDownload) { 
-        const filename = `${updatedProject.name.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.project.json`;
-        const jsonStr = JSON.stringify(updatedProject, null, 2);
-        const blob = new Blob([jsonStr], { type: "application/json" });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement("a");
-        link.href = url; link.download = filename; document.body.appendChild(link);
-        link.click(); document.body.removeChild(link); URL.revokeObjectURL(url);
-        addHistoryEntry('TREE_DOWNLOADED', `Project "${updatedProject.name}" downloaded.`);
+    if (andDownload) {
+      downloadProjectFile(updatedProject, addHistoryEntry);
     }
   }, [activeProjectId, currentTechTreeData, projects, currentContextText, addHistoryEntry, openProjectNameModal, saveNewProject, closeProjectNameModal, setInitialPrompt, setError]);
 

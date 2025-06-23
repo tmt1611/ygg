@@ -262,6 +262,19 @@ export const isValidTechTreeNodeShape = (node) => {
     return hasName && hasChildren && hasImportance && hasIsLocked && hasDescription && childrenAreValid;
 };
 
+export const downloadObjectAsJson = (exportObj, exportName) => {
+  const jsonStr = JSON.stringify(exportObj, null, 2);
+  const blob = new Blob([jsonStr], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = exportName;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+};
+
 export const compareAndAnnotateTree = (originalTree, modifiedTree) => {
     if (!originalTree) {
         const markAllNew = (node) => {

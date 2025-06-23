@@ -13,7 +13,7 @@ const DiffDetail = ({ detail }) => {
     React.createElement("li", { className: "diff-details-item" },
       React.createElement("strong", null, detail.label, ":"),
       detail.type === 'critical' ? (
-        React.createElement("span", { className: "diff-to", style: { fontWeight: 'bold' } }, detail.to)
+        React.createElement("span", { className: "diff-to critical-change" }, detail.to)
       ) : (
         React.createElement("span", null,
           React.createElement("span", { className: "diff-from" }, renderValue(detail.from)),
