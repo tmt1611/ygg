@@ -21,21 +21,39 @@ function wrap(textSelection, width, maxLines = 3) {
         while ((word = words.pop()) && lineNumber < maxLines) {
             line.push(word);
             tspan.text(line.join(' '));
-            if (tspan.node().getComputedTextLength() > width && line.length > 1) {
-                line.pop();
-                tspan.text(line.join(' '));
-                if (lineNumber + 1 >= maxLines) {
-                    tspan.text(tspan.text() + '…');
-                    break;
+            if (tspan.node().getComputedTextLength() > width) {
+                if (line.length > 1) {
+                    line.pop(); // The last word made it too long
+                    tspan.text(line.join(' '));
+                    
+                    if (lineNumber + 1 >= maxLines) {
+                        tspan.text(tspan.text() + '…');
+                        break; // Stop if we are on the last line
+                    }
+                    
+                    // Start a new line with the popped word
+                    line = [word];
+                    lineNumber++;
+                    tspan = text.append('tspan').attr('x', initialX).attr('dy', `${lineHeight}em`).text(word);
                 }
-                line = [word];
-                lineNumber++;
-                tspan = text.append('tspan').attr('x', initialX).attr('dy', `${lineHeight}em`).text(word);
+                
+                // This handles both a single long word on the first line,
+                // or a single long word on a subsequent line.
+                if (tspan.node().getComputedTextLength() > width) {
+                    let currentText = tspan.text();
+                    while (tspan.node().getComputedTextLength() > width && currentText.length > 1) {
+                        currentText = currentText.slice(0, -1);
+                        tspan.text(currentText + '…');
+                    }
+                }
             }
         }
         
         if (words.length > 0 && lineNumber < maxLines) {
-            tspan.text(tspan.text() + '…');
+            const currentText = tspan.text();
+            if (!currentText.endsWith('…')) {
+                tspan.text(currentText + '…');
+            }
         }
 
         // Adjust for multi-line text to keep it centered on its anchor point
@@ -408,7 +426,7 @@ const GraphViewComponent = ({
       .each(function(d) {
         select(this).selectAll("tspan").remove();
         if (!d.isProxy && d.data.name) {
-            const maxTextWidth = 80;
+            const maxTextWidth = 90;
             const maxLines = 3;
             wrap(select(this), maxTextWidth, maxLines);
         }
