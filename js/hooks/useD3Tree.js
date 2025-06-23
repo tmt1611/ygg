@@ -12,7 +12,8 @@ export const useD3Tree = (
   svgRef,
   treeData,
   config = {},
-  onBackgroundClick
+  onBackgroundClick,
+  layout = 'radial'
 ) => {
   const finalConfig = { ...defaultTreeConfig, ...config };
   const { margin, radialRadiusFactor } = finalConfig;
@@ -30,22 +31,33 @@ export const useD3Tree = (
 
   const treeLayout = useMemo(() => {
     const depth = rootHierarchy ? rootHierarchy.height : 1;
-    // The size is [angle, radius]. 2 * Math.PI is a full circle.
-    // Make radius dependent on depth to avoid clutter
-    return tree()
-      .size([2 * Math.PI, depth * radialRadiusFactor])
-      .separation((a, b) => (a.parent === b.parent ? 2 : 2.5));
-  }, [rootHierarchy, radialRadiusFactor]);
+    if (layout === 'radial') {
+      // The size is [angle, radius]. 2 * Math.PI is a full circle.
+      // Make radius dependent on depth to avoid clutter
+      return tree()
+        .size([2 * Math.PI, depth * radialRadiusFactor])
+        .separation((a, b) => (a.parent === b.parent ? 2 : 2.5));
+    } else { // 'tree' layout
+      // For a top-down tree, nodeSize defines spacing between nodes.
+      return tree().nodeSize([80, 180]); // [width between nodes, height between levels]
+    }
+  }, [rootHierarchy, radialRadiusFactor, layout]);
 
   const resetZoom = useCallback(() => {
     if (svgSelectionRef.current && zoomBehaviorRef.current && svgRef.current && svgRef.current.parentElement) {
       const { clientWidth, clientHeight } = svgRef.current.parentElement;
       if (clientWidth > 0 && clientHeight > 0) {
-        const initialTransform = zoomIdentity.translate(clientWidth / 2, clientHeight / 2).scale(0.8);
+        let initialTransform;
+        if (layout === 'radial') {
+            initialTransform = zoomIdentity.translate(clientWidth / 2, clientHeight / 2).scale(0.8);
+        } else { // tree
+            // Center the tree horizontally, and position it near the top.
+            initialTransform = zoomIdentity.translate(clientWidth / 2, margin.top * 4).scale(0.7);
+        }
         svgSelectionRef.current.transition().duration(750).call(zoomBehaviorRef.current.transform, initialTransform);
       }
     }
-  }, []);
+  }, [layout, margin.top]);
 
   useLayoutEffect(() => {
     if (!svgRef.current) return;
@@ -100,7 +112,8 @@ export const useD3Tree = (
     const treeRoot = treeLayout(rootHierarchy);
     const nodes = treeRoot.descendants();
     const links = treeRoot.links();
-    // For radial, x is angle, y is radius. No swap needed.
+    // For radial, x is angle, y is radius.
+    // For tree, x and y are cartesian coordinates.
     return { nodes, links };
   }, [rootHierarchy, treeLayout]);
 

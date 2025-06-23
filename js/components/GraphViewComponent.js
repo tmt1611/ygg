@@ -1,5 +1,5 @@
-import React, { useEffect, useRef, useMemo, useCallback } from 'react';
-import { linkRadial, select } from 'd3';
+import React, { useEffect, useRef, useMemo, useCallback, useState } from 'react';
+import { linkRadial, select, linkVertical } from 'd3';
 import { useD3Tree } from '../hooks/useD3Tree.js';
 import { NODE_IMPORTANCE_RUNES } from '../constants.js';
 
@@ -79,15 +79,24 @@ const GraphViewComponent = ({
   onNavigateToLinkedProject,
   handleNavigateToSourceNode
 }) => {
-
+  const [layout, setLayout] = useState('radial'); // 'radial' or 'tree'
 
   const svgContainerDivRef = useRef(null); 
   const svgRef = useRef(null); 
   
-  const { g, nodes, links, config, resetZoom, zoomIn, zoomOut } = useD3Tree(svgRef, treeData, {}, onCloseContextMenu);
+  const { g, nodes, links, config, resetZoom, zoomIn, zoomOut } = useD3Tree(svgRef, treeData, {}, onCloseContextMenu, layout);
+
+  const toggleLayout = useCallback(() => {
+    setLayout(prev => {
+      const newLayout = prev === 'radial' ? 'tree' : 'radial';
+      // A brief delay allows the state to update before we recenter the view on the new layout.
+      setTimeout(resetZoom, 50);
+      return newLayout;
+    });
+  }, [resetZoom]);
 
   const projectLinksAndProxyNodes = useMemo(() => {
-    if (!nodes || nodes.length === 0 || !projects) {
+    if (layout !== 'radial' || !nodes || nodes.length === 0 || !projects) {
         return { proxyNodes: [], projectLinks: [] };
     }
 
@@ -238,7 +247,10 @@ const GraphViewComponent = ({
         (update) => update,
         (exit) => exit.remove()
       )
-      .attr("d", linkRadial().angle(d => d.x).radius(d => d.y));
+      .attr("d", layout === 'radial' 
+        ? linkRadial().angle(d => d.x).radius(d => d.y)
+        : linkVertical().x(d => d.x).y(d => d.y)
+      );
 
     // Draw node groups
     const nodeGroups = g
@@ -287,7 +299,13 @@ const GraphViewComponent = ({
         }
         return classes.join(' ');
       })
-      .attr("transform", d => `rotate(${d.x * 180 / Math.PI - 90}) translate(${d.y}, 0)`)
+      .attr("transform", d => {
+        if (layout === 'radial') {
+            return `rotate(${d.x * 180 / Math.PI - 90}) translate(${d.y}, 0)`;
+        } else {
+            return `translate(${d.x}, ${d.y})`;
+        }
+      })
       .on("click", handleNodeClick)
       .on("dblclick", handleNodeDoubleClick)
       .on("contextmenu", handleNodeContextMenu);
@@ -301,54 +319,55 @@ const GraphViewComponent = ({
     });
 
     nodeGroups.select(".node-label")
-      .attr("fill", d => (d.data.importance === 'minor' ? 'var(--importance-minor-text)' : 'var(--graph-node-text)'))
-      .attr("font-size", d => (d.data.importance === 'minor' ? "9px" : "11px"))
+      .attr("fill", 'var(--graph-node-text)')
+      .attr("font-size", "11px")
       .style("user-select", "none")
       .style("pointer-events", "none")
       .attr("transform", d => {
-          const rotation = -(d.x * 180 / Math.PI - 90);
-          if (d.data.importance === 'minor') {
-              return `rotate(${rotation})`; // Just counter-rotate, no translation
-          }
-          const radius = getNodeRadius(d);
-          const spacing = 12;
-          const x = (d.x > Math.PI / 2 && d.x < 3 * Math.PI / 2) ? -radius - spacing : radius + spacing;
-          return `rotate(${rotation}) translate(${x}, 0)`;
+        const rotation = -(d.x * 180 / Math.PI - 90);
+        if (d.isProxy) { // Keep proxy label inside
+            return layout === 'radial' ? `rotate(${rotation})` : null;
+        }
+        if (layout === 'radial') {
+            const radius = getNodeRadius(d);
+            const spacing = 10;
+            const x = (d.x > Math.PI / 2 && d.x < 3 * Math.PI / 2) ? -radius - spacing : radius + spacing;
+            return `rotate(${rotation}) translate(${x}, 0)`;
+        } else { // Tree layout
+            const radius = getNodeRadius(d);
+            const spacing = 8;
+            return `translate(0, ${radius + spacing})`;
+        }
       })
       .attr("text-anchor", d => {
-          if (d.isProxy || d.data.importance === 'minor') return "middle";
+          if (d.isProxy || layout === 'tree') return "middle";
           return (d.x > Math.PI / 2 && d.x < 3 * Math.PI / 2) ? "end" : "start";
       })
-      .attr("dominant-baseline", "middle")
-      .attr("dy", d => d.isProxy ? "0.3em" : null)
+      .attr("dominant-baseline", d => layout === 'tree' && !d.isProxy ? "hanging" : "middle")
+      .attr("dy", d => d.isProxy ? "0.3em" : (layout === 'radial' ? "0.35em" : null))
       .attr("dx", null)
       .text(d => d.isProxy ? d.data.name : (d.data.name || ""))
       .each(function(d) {
         select(this).selectAll("tspan").remove();
         if (!d.isProxy && d.data.name) {
-            if (d.data.importance === 'minor') {
-                const maxTextWidth = getNodeRadius(d) * 1.8; // Tighter width for inside text
-                wrap(select(this), maxTextWidth, 2); // Max 2 lines for minor nodes
-            } else {
-                const maxTextWidth = getNodeRadius(d) * 6;
-                const maxLines = 3;
-                wrap(select(this), maxTextWidth, maxLines);
-            }
+            const maxTextWidth = 80;
+            const maxLines = 3;
+            wrap(select(this), maxTextWidth, maxLines);
         }
       });
 
     nodeGroups.select(".node-rune-icon")
-      .attr("transform", d => `rotate(${-(d.x * 180 / Math.PI - 90)})`)
+      .attr("transform", d => layout === 'radial' ? `rotate(${-(d.x * 180 / Math.PI - 90)})` : null)
       .text(d => {
-        if (d.isProxy || d.data.importance === 'minor') return ''; // Hide for minor nodes
+        if (d.isProxy) return '';
         return NODE_IMPORTANCE_RUNES[d.data.importance] || '•';
       });
 
     nodeGroups.select(".node-lock-icon")
-      .attr("transform", d => `rotate(${-(d.x * 180 / Math.PI - 90)})`)
+      .attr("transform", d => layout === 'radial' ? `rotate(${-(d.x * 180 / Math.PI - 90)})` : null)
       .text(d => (d.data.isLocked && !d.isProxy ? "🔒" : ""));
 
-  }, [g, nodes, links, handleNodeClick, handleNodeDoubleClick, handleNodeContextMenu, projectLinksAndProxyNodes]);
+  }, [g, nodes, links, handleNodeClick, handleNodeDoubleClick, handleNodeContextMenu, projectLinksAndProxyNodes, layout]);
 
   // Effect for dynamic styling (selection, search highlight)
   useEffect(() => {
@@ -365,7 +384,7 @@ const GraphViewComponent = ({
           return d.isProxy ? null : (d.data.id === activeNodeId ? 'var(--graph-node-selected-stroke)' : 'var(--graph-node-stroke)');
       });
 
-  }, [g, activeNodeId, nodes]); // Using 'nodes' to re-run on data change.
+  }, [g, activeNodeId, nodes, layout]); // Using 'nodes' and 'layout' to re-run on data change.
 
 
   if (!treeData) {
@@ -384,6 +403,7 @@ const GraphViewComponent = ({
         React.createElement("svg", { ref: svgRef, style: { display: 'block', width: '100%', height: '100%' }})
       ),
       React.createElement("div", { className: "graph-view-controls" },
+        React.createElement("button", { onClick: toggleLayout, title: "Toggle Layout", disabled: isAppBusy }, layout === 'radial' ? '🌳' : '⭕'),
         React.createElement("button", { onClick: zoomIn, title: "Zoom In", disabled: isAppBusy }, "➕"),
         React.createElement("button", { onClick: zoomOut, title: "Zoom Out", disabled: isAppBusy }, "➖"),
         React.createElement("button", { onClick: resetZoom, title: "Reset Zoom & Pan", disabled: isAppBusy }, "🎯")
