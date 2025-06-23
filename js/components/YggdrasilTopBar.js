@@ -101,7 +101,14 @@ const YggdrasilTopBar = ({
           title: `Switch to ${nextThemeInfo.next} Mode`,
           "aria-label": `Toggle theme to ${nextThemeInfo.next} Mode`,
           disabled: isAppBusy
-        }, nextThemeInfo.icon)
+        }, nextThemeInfo.icon),
+        React.createElement("button", {
+          onClick: () => window.location.reload(),
+          className: "yggdrasil-top-bar-action-item base-icon-button",
+          title: "Reload Application",
+          "aria-label": "Reload Application",
+          disabled: isAppBusy
+        }, "🔄")
       )
     )
   );

@@ -308,7 +308,7 @@ const GraphViewComponent = ({
           // Counter-rotate the text to keep it horizontal
           const rotation = -(d.x * 180 / Math.PI - 90);
           const radius = getNodeRadius(d);
-          const spacing = 8;
+          const spacing = 12; // Increased from 8 to prevent halo overlap
           let x = 0;
           
           // d.x is angle in radians. 0 is right, PI/2 is down, PI is left, 3PI/2 is up.
