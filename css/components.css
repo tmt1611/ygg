@@ -821,30 +821,15 @@ html[data-theme='nebula'] .graph-view-node.highlighted text.node-label {
   animation: errorAppear 0.5s ease-out;
 }
 .graph-view-node:not(.proxy) text.node-label {
-  /* Create a "cutout" effect for readability over lines */
-  paint-order: stroke;
-  stroke: var(--app-bg);
-  stroke-width: 5px; /* Adjust thickness of the "cutout" */
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  text-shadow: 0 0 5px var(--app-bg); /* Soften the edges a bit */
+  /* Create a soft background for readability using a shadow */
+  text-shadow: 0 0 5px var(--app-bg), 0 0 5px var(--app-bg); /* Doubling up for intensity */
   font-weight: 500;
 }
-.graph-view-node:not(.proxy) text.node-label tspan {
-  paint-order: stroke;
-  stroke: var(--app-bg);
-  stroke-width: 5px;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
+/* No tspan rules needed as text-shadow is inherited */
+
 html[data-theme='dark'] .graph-view-node:not(.proxy) text.node-label,
 html[data-theme='nebula'] .graph-view-node:not(.proxy) text.node-label {
-  stroke-width: 6px;
-  text-shadow: 0 0 8px var(--app-bg), 0 0 12px rgba(var(--primary-accent-rgb), 0.3);
-}
-html[data-theme='dark'] .graph-view-node:not(.proxy) text.node-label tspan,
-html[data-theme='nebula'] .graph-view-node:not(.proxy) text.node-label tspan {
-  stroke-width: 6px;
+  text-shadow: 0 0 8px var(--app-bg), 0 0 8px var(--app-bg);
 }
 
 .graph-view-link { stroke: var(--graph-link-stroke-ecosystem); stroke-linecap: round; }

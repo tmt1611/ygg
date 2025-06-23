@@ -101,14 +101,14 @@ const FocusViewComponent = ({
   const focusPos = allNodePositions.get(focusNodeData.id);
 
   const parentPlaceholder = !parentNodeData && focusPos ? (
-    React.createElement("div", { className: "focus-node-placeholder", style: { position: 'absolute', top: `${focusPos.y - focusPos.height / 2 - 20}px`, left: '50%', transform: 'translate(-50%, -100%)' }},
+    React.createElement("div", { className: "focus-node-placeholder", style: { position: 'absolute', top: `${focusPos.y - focusPos.height / 2 - 40}px`, left: '50%', transform: 'translate(-50%, -100%)' }},
       React.createElement("span", { className: "focus-node-placeholder-icon" }, "🌌"),
       "Sector Core (Root)"
     )
   ) : null;
   
   const childrenPlaceholder = childrenNodeData.length === 0 && focusPos ? (
-    React.createElement("div", { className: "focus-node-placeholder", style: { position: 'absolute', top: `${focusPos.y + focusPos.height / 2 + 20}px`, left: '50%', transform: 'translateX(-50%)' }},
+    React.createElement("div", { className: "focus-node-placeholder", style: { position: 'absolute', top: `${focusPos.y + focusPos.height / 2 + 40}px`, left: '50%', transform: 'translateX(-50%)' }},
       React.createElement("span", { className: "focus-node-placeholder-icon" }, "🛰️"),
       "No Subsystems Detected"
     )
