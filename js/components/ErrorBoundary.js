@@ -50,7 +50,7 @@ ${errorInfo?.componentStack || 'Not available'}
   };
 
   handleHardReset = () => {
-    if (window.confirm("Are you sure you want to perform a hard reset?\n\nThis is a last resort option if the app is stuck in an error loop due to corrupted data.\n\nThis will DELETE ALL your saved projects and settings from this browser. This action cannot be undone.")) {
+    if (window.confirm("☢️ DANGER: HARD RESET ☢️\n\nAre you absolutely sure you want to proceed?\n\nThis will DELETE ALL your saved projects and settings from this browser's local storage.\n\nThis action is irreversible and should only be used if the application is completely broken and will not load.\n\nPress 'OK' to permanently delete all data and reload. Press 'Cancel' to go back.")) {
       try {
         console.warn("Yggdrasil: Performing hard reset. Clearing all application data from localStorage.");
         Object.values(APP_STORAGE_KEYS).forEach(key => {
