@@ -26,7 +26,7 @@ const KnowledgeBranchSidebar = (props) => {
     } catch (e) {
         console.error("Failed to parse sidebar panel states from localStorage", e);
     }
-    return new Set(['strategic-advisor']); // Collapse strategic advisor by default
+    return new Set([]); // Keep panels open by default for better discoverability
   });
 
   const handleTogglePanel = useCallback((panelId) => {
