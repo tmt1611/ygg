@@ -334,7 +334,8 @@ const GraphViewComponent = ({
         select(this).selectAll("tspan").remove();
         if (!d.isProxy && d.data.name) {
             const maxTextWidth = getNodeRadius(d) * 6; // Dynamic width based on node size
-            wrap(select(this), maxTextWidth, 3);
+            const maxLines = d.data.importance === 'minor' ? 2 : 3;
+            wrap(select(this), maxTextWidth, maxLines);
         }
       });
 
