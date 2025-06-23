@@ -1,6 +1,5 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
-import PathToRootDisplay from './PathToRootDisplay.js';
 
 const getNextThemeInfo = (currentTheme) => {
     switch (currentTheme) {
@@ -17,8 +16,7 @@ const YggdrasilTopBar = ({
   onDownloadActiveProject, saveFeedback, setSaveFeedback, downloadFeedback, setDownloadFeedback,
   isAppBusy, hasTechTreeData,
   yggdrasilViewMode, setYggdrasilViewMode,
-  focusNodeId,
-  techTreeData, selectedGraphNodeId, onSelectNodeFromPath
+  focusNodeId
 }) => {
 
   useEffect(() => {
@@ -41,8 +39,6 @@ const YggdrasilTopBar = ({
   const handleNavClick = (viewMode) => {
     setYggdrasilViewMode(viewMode);
   };
-
-  const showPathDisplay = (yggdrasilViewMode === 'graph' || yggdrasilViewMode === 'list') && selectedGraphNodeId && techTreeData;
 
     return (
     React.createElement("header", { className: "yggdrasil-top-bar" },
@@ -75,14 +71,7 @@ const YggdrasilTopBar = ({
           disabled: (isAppBusy && yggdrasilViewMode !== 'focus') || !focusNodeId,
           title: focusNodeId ? "Detailed view of the currently focused node" : "Select a node to enable Focus View"
         }, "Focus"),
-        showPathDisplay ? (
-            React.createElement(PathToRootDisplay, {
-                treeData: techTreeData,
-                currentNodeId: selectedGraphNodeId,
-                onSelectPathNode: onSelectNodeFromPath,
-                pathContext: "graph"
-            })
-        ) : activeProjectName ? (
+        activeProjectName ? (
           React.createElement("div", { className: "yggdrasil-top-bar-active-project", title: `Currently active project: ${activeProjectName}`},
             React.createElement("span", { className: "yggdrasil-top-bar-project-icon" }, "🌲"), activeProjectName
           )
