@@ -32,7 +32,7 @@ import { findNodeById, countNodesInTree, getTreeDepth, getLockedNodeIds, countNo
 const App = () => {
   // --- STATE ---
   const [techTreeData, setTechTreeData] = useState(null);
-  const [error, setError] = useState(null);
+  const [error, _setError] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isModifying, setIsModifying] = useState(false);
   const [initialPrompt, setInitialPrompt] = useState('');
@@ -50,6 +50,22 @@ const App = () => {
   const [isFetchingStrategicSuggestions, setIsFetchingStrategicSuggestions] = useState(false);
   const [strategicSuggestionsError, setStrategicSuggestionsError] = useState(null);
 
+
+  const setError = useCallback((err) => {
+    if (err === null) {
+        _setError(null);
+        return;
+    }
+    if (typeof err === 'string') {
+        _setError({ message: err });
+    } else if (err instanceof Error) {
+        _setError({ message: err.message, details: err.stack });
+    } else if (typeof err === 'object' && err !== null && err.message) {
+        _setError({ message: err.message, details: err.details || JSON.stringify(err, null, 2) });
+    } else {
+        _setError({ message: 'An unknown error occurred.', details: JSON.stringify(err, null, 2) });
+    }
+  }, []);
 
   // --- HOOKS ---
   const historyManager = useHistoryManager();
@@ -124,7 +140,7 @@ const App = () => {
         setPendingAiSuggestion(null);
         setPreviousTreeStateForUndo(null);
         setBaseForModalDiff(null);
-        setModificationPrompt(''); 
+        setModificationPrompt('');
         if (isAiSuggestionModalOpen) closeAiSuggestionModal();
     }
   }, [techTreeData, pendingAiSuggestion, previousTreeStateForUndo, baseForModalDiff, isAiSuggestionModalOpen, closeAiSuggestionModal, setPendingAiSuggestion, setModificationPrompt]);
@@ -166,7 +182,7 @@ const App = () => {
         contentToDisplay = await geminiService.summarizeText(projectSummaryContext);
         title = "AI Generated Summary";
         addHistoryEntry('AI_SUMMARY_GEN', 'AI summary generated for the current tree.');
-      } catch (e) { setError(e.message || "Failed to generate summary."); setIsSummarizing(false); return; }
+      } catch (e) { setError(e); setIsSummarizing(false); return; }
       finally { setIsSummarizing(false); }
     } else { // raw
       title = "Raw Project Data (Text)";
@@ -341,7 +357,7 @@ const App = () => {
         }),
         
         React.createElement("main", { className: "yggdrasil-core-canvas" },
-          error && React.createElement(ErrorMessage, { message: error, onClose: () => setError(null) }),
+          error && React.createElement(ErrorMessage, { error: error, onClose: () => setError(null) }),
 
           React.createElement(MainContentRouter, {
             appState: {

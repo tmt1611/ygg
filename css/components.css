@@ -1680,6 +1680,17 @@ html[data-theme='sol'] .panel-variant-sidebar .panel-toggle-button {
   margin-left: auto;
   color: var(--error-color);
 }
+.error-message-inline .error-message-copy-btn {
+  font-size: 1.2em;
+  padding: 0;
+  width: 24px;
+  height: 24px;
+  line-height: 1;
+  flex-shrink: 0;
+  margin-left: 8px;
+  color: var(--error-color);
+}
+.error-message-inline .error-message-copy-btn:hover,
 .error-message-inline .error-message-close-btn:hover {
   background-color: rgba(var(--error-color-rgb, 220, 53, 69), 0.15);
 }

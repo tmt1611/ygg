@@ -59,7 +59,7 @@ export const useTreeOperationsAI = ({
         if (viewStates) {
             viewStates.setYggdrasilViewMode('graph');
         }
-      } catch (e) { setError(e.message || "An unknown error occurred during AI generation."); console.error("Gemini API Error (Generate):", e); } 
+      } catch (e) { setError(e); console.error("Gemini API Error (Generate):", e); } 
       finally { setIsLoading(false); }
     };
 
@@ -120,7 +120,7 @@ export const useTreeOperationsAI = ({
       openAiSuggestionModal(suggestedTree); 
       addHistoryEntry('TREE_MOD_AI', 'AI proposed modifications.', { prompt: modificationPromptValue, projectId: activeProjectId });
     } catch (e) { 
-      setError(e.message || "An unknown error occurred during AI modification."); 
+      setError(e); 
       console.error("Gemini API Error (Modify):", e); 
     }
     finally { setIsModifying(false); }

@@ -254,7 +254,7 @@ export const useProjectManagement = ({
           }
           handleSetActiveProject(newProject.id, newProject.isExample);
           setError(null);
-        } catch (err) { setError(`Error loading project from file: ${err.message}`); console.error("Project File Load Error:", err); }
+        } catch (err) { setError(err); console.error("Project File Load Error:", err); }
         finally { event.target.value = ''; }
       };
       reader.readAsText(file);
