@@ -102,6 +102,17 @@ const GraphViewComponent = ({
   const LAYOUT_CYCLE = ['radial', 'vertical', 'horizontal'];
   const [layout, setLayout] = useState('radial'); // 'radial', 'vertical', or 'horizontal'
 
+  const getNextLayoutInfo = (currentLayout) => {
+    const currentIndex = LAYOUT_CYCLE.indexOf(currentLayout);
+    const nextLayout = LAYOUT_CYCLE[(currentIndex + 1) % LAYOUT_CYCLE.length];
+    switch (nextLayout) {
+        case 'radial': return { icon: '🌳', title: 'Switch to Radial Layout' };
+        case 'vertical': return { icon: '↕️', title: 'Switch to Vertical Layout' };
+        case 'horizontal': return { icon: '↔️', title: 'Switch to Horizontal Layout' };
+        default: return { icon: '🔄', title: 'Toggle Layout' };
+    }
+  };
+
   const svgContainerDivRef = useRef(null); 
   const svgRef = useRef(null); 
   
@@ -451,13 +462,15 @@ const GraphViewComponent = ({
     );
   }
   
+  const nextLayoutInfo = getNextLayoutInfo(layout);
+
   return (
     React.createElement("div", { className: "graph-view-wrapper" },
       React.createElement("div", { ref: svgContainerDivRef, className: "graph-view-svg-container" },
         React.createElement("svg", { ref: svgRef, style: { display: 'block', width: '100%', height: '100%' }})
       ),
       React.createElement("div", { className: "graph-view-controls" },
-        React.createElement("button", { onClick: toggleLayout, title: "Toggle Layout", disabled: isAppBusy }, layout === 'radial' ? '🌳' : (layout === 'vertical' ? '↔️' : '⭕')),
+        React.createElement("button", { onClick: toggleLayout, title: nextLayoutInfo.title, disabled: isAppBusy }, nextLayoutInfo.icon),
         React.createElement("button", { onClick: zoomIn, title: "Zoom In", disabled: isAppBusy }, "➕"),
         React.createElement("button", { onClick: zoomOut, title: "Zoom Out", disabled: isAppBusy }, "➖"),
         React.createElement("button", { onClick: resetZoom, title: "Reset Zoom & Pan", disabled: isAppBusy }, "🎯")
