@@ -363,7 +363,13 @@ const GraphViewComponent = ({
         if (layout === 'vertical') return "hanging";
         return "middle"; // for radial and horizontal
       })
-      .attr("dy", d => d.isProxy ? "0.3em" : (layout === 'radial' || layout === 'horizontal' ? "0.35em" : null))
+      .attr("dy", d => {
+        if (d.isProxy) return "0.3em";
+        if (layout === 'horizontal') return "0.35em";
+        // For radial, dominant-baseline="middle" is enough for single lines. The wrap function handles multi-line.
+        // For vertical, dominant-baseline="hanging" is used.
+        return null;
+      })
       .attr("dx", null)
       .text(d => d.isProxy ? d.data.name : (d.data.name || ""))
       .each(function(d) {
