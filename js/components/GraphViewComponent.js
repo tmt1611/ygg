@@ -281,6 +281,7 @@ const GraphViewComponent = ({
       .attr("class", d => {
         const classes = ['graph-view-node'];
         if (d.isProxy) classes.push('proxy');
+        if (d.data.importance) classes.push(`importance-${d.data.importance}`);
         if (d.data._changeStatus && d.data._changeStatus !== 'unchanged') {
           classes.push(`status-${d.data._changeStatus}`);
         }
@@ -300,30 +301,22 @@ const GraphViewComponent = ({
     });
 
     nodeGroups.select(".node-label")
-      .attr("fill", "var(--graph-node-text)")
-      .attr("font-size", "11px")
+      .attr("fill", d => (d.data.importance === 'minor' ? 'var(--importance-minor-text)' : 'var(--graph-node-text)'))
+      .attr("font-size", d => (d.data.importance === 'minor' ? "9px" : "11px"))
       .style("user-select", "none")
       .style("pointer-events", "none")
       .attr("transform", d => {
-          // Counter-rotate the text to keep it horizontal
           const rotation = -(d.x * 180 / Math.PI - 90);
-          const radius = getNodeRadius(d);
-          const spacing = 12; // Increased from 8 to prevent halo overlap
-          let x = 0;
-          
-          // d.x is angle in radians. 0 is right, PI/2 is down, PI is left, 3PI/2 is up.
-          // Place text on the side that gives it more space (away from the center)
-          if (d.x > Math.PI / 2 && d.x < 3 * Math.PI / 2) { // Left hemisphere
-              x = -radius - spacing;
-          } else { // Right hemisphere
-              x = radius + spacing;
+          if (d.data.importance === 'minor') {
+              return `rotate(${rotation})`; // Just counter-rotate, no translation
           }
-          
+          const radius = getNodeRadius(d);
+          const spacing = 12;
+          const x = (d.x > Math.PI / 2 && d.x < 3 * Math.PI / 2) ? -radius - spacing : radius + spacing;
           return `rotate(${rotation}) translate(${x}, 0)`;
       })
       .attr("text-anchor", d => {
-          if (d.isProxy) return "middle";
-          // If node is on the left, anchor text to the end. If on right, anchor to start.
+          if (d.isProxy || d.data.importance === 'minor') return "middle";
           return (d.x > Math.PI / 2 && d.x < 3 * Math.PI / 2) ? "end" : "start";
       })
       .attr("dominant-baseline", "middle")
@@ -333,17 +326,21 @@ const GraphViewComponent = ({
       .each(function(d) {
         select(this).selectAll("tspan").remove();
         if (!d.isProxy && d.data.name) {
-            const maxTextWidth = getNodeRadius(d) * 6; // Dynamic width based on node size
-            const maxLines = d.data.importance === 'minor' ? 2 : 3;
-            wrap(select(this), maxTextWidth, maxLines);
+            if (d.data.importance === 'minor') {
+                const maxTextWidth = getNodeRadius(d) * 1.8; // Tighter width for inside text
+                wrap(select(this), maxTextWidth, 2); // Max 2 lines for minor nodes
+            } else {
+                const maxTextWidth = getNodeRadius(d) * 6;
+                const maxLines = 3;
+                wrap(select(this), maxTextWidth, maxLines);
+            }
         }
       });
 
     nodeGroups.select(".node-rune-icon")
       .attr("transform", d => `rotate(${-(d.x * 180 / Math.PI - 90)})`)
       .text(d => {
-        if (d.isProxy) return '';
-        // Now that text is outside, the rune can be inside.
+        if (d.isProxy || d.data.importance === 'minor') return ''; // Hide for minor nodes
         return NODE_IMPORTANCE_RUNES[d.data.importance] || '•';
       });
 

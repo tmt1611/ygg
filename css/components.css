@@ -825,6 +825,10 @@ html[data-theme='nebula'] .graph-view-node.highlighted text.node-label {
   text-shadow: 0 0 5px var(--app-bg), 0 0 5px var(--app-bg); /* Doubling up for intensity */
   font-weight: 500;
 }
+.graph-view-node.importance-minor text.node-label {
+  text-shadow: none;
+  font-weight: 600;
+}
 /* No tspan rules needed as text-shadow is inherited */
 
 html[data-theme='dark'] .graph-view-node:not(.proxy) text.node-label,
