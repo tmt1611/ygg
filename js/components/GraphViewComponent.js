@@ -389,7 +389,8 @@ const GraphViewComponent = ({
       .each(function(d) {
         select(this).selectAll("tspan").remove();
         if (!d.isProxy && d.data.name) {
-            const maxTextWidth = 90;
+            const radius = getNodeRadius(d);
+            const maxTextWidth = radius * 5; // Proportional to node size
             const maxLines = 3;
             wrap(select(this), maxTextWidth, maxLines);
         }
