@@ -159,7 +159,7 @@ export const useProjectManagement = ({
     } finally {
         if (!startupLogged) localStorage.setItem(APP_STORAGE_KEYS.STARTUP_LOAD_LOGGED, 'true');
     }
-  }, [_loadProjectsFromStorage, _addMissingExampleProjects, _linkExampleProjects, _setActiveInitialProject, setError, addHistoryEntry]);
+  }, [_loadProjectsFromStorage, _addMissingExampleProjects, _setActiveInitialProject, setError, addHistoryEntry]);
 
 
   const handleSetActiveProject = useCallback((projectId, fromExample = false) => {
