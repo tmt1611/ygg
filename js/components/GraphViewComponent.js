@@ -120,8 +120,7 @@ const GraphViewComponent = ({
   }, [resetZoom]);
 
   const projectLinksAndProxyNodes = useMemo(() => {
-    // NOTE: Project links are currently only visualized in the 'radial' layout for simplicity.
-    if (layout !== 'radial' || !nodes || nodes.length === 0 || !projects) {
+    if (!nodes || nodes.length === 0 || !projects) {
         return { proxyNodes: [], projectLinks: [] };
     }
 
