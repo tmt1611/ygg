@@ -339,26 +339,34 @@ const GraphViewComponent = ({
             const rotation = layout === 'radial' ? -(d.x * 180 / Math.PI - 90) : 0;
             return `rotate(${rotation})`;
         }
+
+        const radius = getNodeRadius(d);
+        const spacing = 10;
+
         if (layout === 'radial') {
+            const angle = d.x;
             const rotation = -(d.x * 180 / Math.PI - 90);
-            const radius = getNodeRadius(d);
-            const spacing = 10;
-            const angle = d.x; // 0 at top, PI at bottom
+
+            // d3.tree radial layout: 0 is top, PI/2 is right, PI is bottom, 3PI/2 is left
             const isTopCone = angle > (1.75 * Math.PI) || angle < (0.25 * Math.PI);
             const isBottomCone = angle > (0.75 * Math.PI) && angle < (1.25 * Math.PI);
 
+            let x = 0;
+            let y = 0;
+
             if (isTopCone) {
-                return `rotate(${rotation}) translate(0, ${radius + spacing})`;
+                y = -radius - spacing;
+            } else if (isBottomCone) {
+                y = radius + spacing;
+            } else { // Left or Right side
+                const isLeft = angle > Math.PI; // Left half of the circle (bottom-to-top)
+                x = isLeft ? -radius - spacing : radius + spacing;
             }
-            if (isBottomCone) {
-                return `rotate(${rotation}) translate(0, ${-radius - spacing})`;
-            }
-            const x = (angle > Math.PI / 2 && angle < 3 * Math.PI / 2) ? -radius - spacing : radius + spacing;
-            return `rotate(${rotation}) translate(${x}, 0)`;
+            
+            return `rotate(${rotation}) translate(${x}, ${y})`;
         }
-        // For vertical and horizontal, no rotation.
-        const radius = getNodeRadius(d);
-        const spacing = 8;
+        
+        // For vertical and horizontal, no rotation in the group, so it's simpler.
         if (layout === 'vertical') {
             return `translate(0, ${radius + spacing})`;
         } else { // horizontal
@@ -369,6 +377,7 @@ const GraphViewComponent = ({
           if (d.isProxy || layout === 'vertical') return "middle";
           if (layout === 'horizontal') return "start";
           
+          // Radial layout
           const angle = d.x;
           const isTopCone = angle > (1.75 * Math.PI) || angle < (0.25 * Math.PI);
           const isBottomCone = angle > (0.75 * Math.PI) && angle < (1.25 * Math.PI);
@@ -376,35 +385,24 @@ const GraphViewComponent = ({
           if (isTopCone || isBottomCone) {
               return "middle";
           }
-          return (angle > Math.PI / 2 && angle < 3 * Math.PI / 2) ? "end" : "start";
+          return (angle > Math.PI) ? "end" : "start"; // Left half is end-anchored
       })
       .attr("dominant-baseline", d => {
         if (d.isProxy) return "middle";
-        if (layout === 'vertical') return "hanging";
         if (layout === 'horizontal') return "middle";
+        if (layout === 'vertical') return "hanging"; // Text is below node
 
         if (layout === 'radial') {
             const angle = d.x;
             const isTopCone = angle > (1.75 * Math.PI) || angle < (0.25 * Math.PI);
             const isBottomCone = angle > (0.75 * Math.PI) && angle < (1.25 * Math.PI);
-            if (isTopCone) return "hanging";
-            if (isBottomCone) return "baseline";
-            return "middle";
+            if (isTopCone) return "baseline"; // Text is above node
+            if (isBottomCone) return "hanging"; // Text is below node
+            return "middle"; // Text is to the side
         }
         return "middle";
       })
-      .attr("dy", d => {
-        if (d.isProxy) return "0.3em";
-        if (layout === 'horizontal') return "0.35em";
-        if (layout === 'radial') {
-            const angle = d.x;
-            const isBottomCone = angle > (0.75 * Math.PI) && angle < (1.25 * Math.PI);
-            if (isBottomCone) {
-                return "-0.3em"; // Shift text up slightly for baseline alignment
-            }
-        }
-        return null;
-      })
+      .attr("dy", null) // dy is handled by the wrap function for multi-line text
       .attr("dx", null)
       .text(d => d.isProxy ? d.data.name : (d.data.name || ""))
       .each(function(d) {
