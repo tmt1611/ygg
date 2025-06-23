@@ -38,7 +38,7 @@ const AiSuggestionPreviewListItem = ({ node, level, isVisualDiff = false }) => {
     structure_modified: { icon: '📂', title: "The direct children of this node have changed (added, removed, or reordered)." },
     reparented: { icon: '↪️', title: `This node has been moved. Original parent ID: ${node._oldParentId || 'root'}.` },
     locked_content_changed: { icon: '❗', title: "CRITICAL: Content of this LOCKED node was modified by AI!" },
-    removed: { icon: '➖', title: "This node was marked for removal but still appears in suggested tree structure (potential error)." },
+    removed: { icon: '➖', title: "This node and its children will be removed from the tree." },
     unchanged: { icon: '', title: node.description || node.name }
   };
 
@@ -94,9 +94,9 @@ const AiSuggestionPreviewListItem = ({ node, level, isVisualDiff = false }) => {
           node.children.map(child => (
             React.createElement(AiSuggestionPreviewListItem, {
               key: `${child.id}-${child._changeStatus || 'child'}-${level+1}`,
-              node: child,
+              node: (node._changeStatus === 'removed') ? {...child, _changeStatus: 'removed'} : child,
               level: level + 1,
-              isVisualDiff: true 
+              isVisualDiff: true
             })
           ))
         )

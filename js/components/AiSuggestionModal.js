@@ -44,6 +44,39 @@ const AiSuggestionModal = ({
     return compareAndAnnotateTree(currentTreeForDiff, suggestion);
   }, [currentTreeForDiff, suggestion, isOpen]);
 
+  const removedNodesTree = useMemo(() => {
+    if (!comparisonResult || !comparisonResult.removedNodes.length) return [];
+    
+    // Add the status to every node first and prepare for tree building
+    const removedNodesWithStatus = comparisonResult.removedNodes.map(n => ({
+        ...n,
+        _changeStatus: 'removed',
+        children: []
+    }));
+
+    const removedNodesById = new Map(removedNodesWithStatus.map(n => [n.id, n]));
+    const rootRemovedNodes = [];
+
+    removedNodesById.forEach(node => {
+        // A node is a root of a removed subtree if its parent is NOT in the removed list.
+        if (!node._parentId || !removedNodesById.has(node._parentId)) {
+            rootRemovedNodes.push(node);
+        } else {
+            // It's a child of another removed node.
+            const parent = removedNodesById.get(node._parentId);
+            if (parent) {
+                // Ensure children are not duplicated if map iteration order is weird
+                if (!parent.children.some(c => c.id === node.id)) {
+                    parent.children.push(node);
+                }
+            }
+        }
+    });
+
+    return rootRemovedNodes;
+  }, [comparisonResult]);
+
+
   useEffect(() => {
     if (isOpen) {
       applyButtonRef.current?.focus();
@@ -119,7 +152,7 @@ const AiSuggestionModal = ({
               ),
               removedNodes.length > 0 && !annotatedTree?._isErrorNode && (
                 React.createElement("div", { className: "ai-suggestion-modal-removed-nodes-section" },
-                    React.createElement("h4", { 
+                    React.createElement("h4", {
                       className: `ai-suggestion-modal-removed-nodes-title ${isRemovedNodesCollapsed ? 'collapsed' : ''}`,
                       onClick: () => setIsRemovedNodesCollapsed(!isRemovedNodesCollapsed),
                       "aria-expanded": !isRemovedNodesCollapsed,
@@ -131,12 +164,13 @@ const AiSuggestionModal = ({
                      " (", removedNodes.length, "):"
                     ),
                     React.createElement("ul", { className: `ai-suggestion-modal-removed-nodes-list ${isRemovedNodesCollapsed ? 'collapsed' : ''}` },
-                        !isRemovedNodesCollapsed && removedNodes.map(node => (
-                            React.createElement("li", { key: `removed-${node.id}`},
-                              node.isLocked && React.createElement("span", { title: "Locked Node", style: { marginRight: '4px', color: 'var(--error-color)', fontWeight: 'bold' } }, "🔒"),
-                              React.createElement("strong", null, node.name), " ", node.description && `- "${node.description.substring(0, 40)}${node.description.length > 40 ? '...' : ''}"`,
-                              React.createElement("span", { className: "node-id" }, " (ID: ", node.id.substring(0,8), "...)")
-                            )
+                        !isRemovedNodesCollapsed && removedNodesTree.map(node => (
+                            React.createElement(AiSuggestionPreviewListItem, {
+                                key: `removed-root-${node.id}`,
+                                node: node,
+                                level: 0,
+                                isVisualDiff: true
+                            })
                         ))
                     )
                 )
