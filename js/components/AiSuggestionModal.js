@@ -106,6 +106,11 @@ const AiSuggestionModal = ({
 
   const netChangeStyle = { color: netChange > 0 ? 'var(--success-color)' : netChange < 0 ? 'var(--error-color)' : 'var(--text-secondary)'};
 
+  const hasCriticalIssues = lockedContentChangedNodes.length > 0 || lockedNodesRemoved.length > 0;
+  const applyButtonClass = hasCriticalIssues ? 'danger' : 'success';
+  const applyButtonText = isRefining ? "Refining..." : (hasCriticalIssues ? "Apply (with Cautions)" : "Apply Changes to Project");
+  const applyButtonTitle = hasCriticalIssues ? "Warning: This suggestion modifies or removes locked nodes. Proceed with caution." : "Apply these changes to your project.";
+
   const renderSummaryItem = (label, count, color, icon) => {
     if (count <= 0) return null;
     return (
@@ -236,10 +241,15 @@ const AiSuggestionModal = ({
 
         React.createElement("div", { className: "ai-suggestion-modal-footer-actions" },
           React.createElement("button", { type: "button", onClick: onCancel, className: "secondary" }, "Reject Suggestion"),
-          React.createElement("button", { ref: applyButtonRef, type: "button", onClick: onConfirm, className: "success",
-            disabled: !!annotatedTree?._isErrorNode || isRefining
-            },
-            isRefining ? "Refining..." : "Apply Changes to Project"
+          React.createElement("button", {
+            ref: applyButtonRef,
+            type: "button",
+            onClick: onConfirm,
+            className: applyButtonClass,
+            disabled: !!annotatedTree?._isErrorNode || isRefining,
+            title: applyButtonTitle
+          },
+            applyButtonText
           )
         )
       )

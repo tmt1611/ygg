@@ -6,19 +6,37 @@ const FocusNodeDisplay = React.forwardRef(
     
     const importanceLabel = node.importance ? node.importance.charAt(0).toUpperCase() + node.importance.slice(1) : 'Common';
     
-    let titleText = `Object: ${node.name}\nImportance: ${importanceLabel}\nDetails: ${node.description?.substring(0,100) || 'N/A'}${node.description && node.description.length > 100 ? '...' : ''}${node.isLocked ? '\nSystem Lock Active' : ''}`;
-    let ariaLabelText = `Celestial Object: ${node.name}, Importance: ${importanceLabel}${node.isLocked ? ', System Lock Active' : ''}. Activate for detailed scan or navigation options.`;
+    const titleLines = [
+        `Object: ${node.name}`,
+        `Importance: ${importanceLabel}`,
+        `Details: ${node.description?.substring(0, 100) || 'N/A'}${node.description && node.description.length > 100 ? '...' : ''}`
+    ];
+    if (node.isLocked) {
+        titleLines.push('System Lock Active');
+    }
+
+    const ariaLabelParts = [
+        `Celestial Object: ${node.name}`,
+        `Importance: ${importanceLabel}`
+    ];
+    if (node.isLocked) {
+        ariaLabelParts.push('System Lock Active');
+    }
+    ariaLabelParts.push('Activate for detailed scan or navigation options.');
 
     let displayLinkIcon = "";
     if (node.linkedProjectId) {
       displayLinkIcon = "🔗";
-      titleText += `\nHyperspace Link (Outgoing): ${node.linkedProjectName || 'Unknown Project'}`;
-      ariaLabelText += `, Hyperspace link to ${node.linkedProjectName || 'Unknown Project'}`;
+      titleLines.push(`Hyperspace Link (Outgoing): ${node.linkedProjectName || 'Unknown Project'}`);
+      ariaLabelParts.push(`Hyperspace link to ${node.linkedProjectName || 'Unknown Project'}`);
     } else if (isRootNode && linkSourceInfo) {
       displayLinkIcon = "↩️";
-      titleText += `\nHyperspace Link (Incoming from): ${linkSourceInfo.sourceProjectName} / ${linkSourceInfo.sourceNodeName}`;
-      ariaLabelText += `, Hyperspace link from ${linkSourceInfo.sourceProjectName}`;
+      titleLines.push(`Hyperspace Link (Incoming from): ${linkSourceInfo.sourceProjectName} / ${linkSourceInfo.sourceNodeName}`);
+      ariaLabelParts.push(`Hyperspace link from ${linkSourceInfo.sourceProjectName}`);
     }
+    
+    const titleText = titleLines.join('\n');
+    const ariaLabelText = ariaLabelParts.join(', ');
     
     const celestialBodyClasses = [
         "celestial-body",

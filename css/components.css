@@ -1433,7 +1433,7 @@ html[data-theme='sol'] .panel-variant-sidebar .panel-toggle-button {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 4px 10px;
+  padding: 4px 6px 4px 12px;
   font-size: 0.8em;
   color: var(--text-secondary);
   border-bottom: 1px solid var(--border-color);
@@ -1446,12 +1446,11 @@ html[data-theme='sol'] .panel-variant-sidebar .panel-toggle-button {
 .context-menu .context-menu-header strong { color: var(--text-primary); }
 .context-menu .context-menu-close-btn {
   padding: 0;
-  width: 22px;
-  height: 22px;
-  font-size: 1.3em;
+  width: 24px;
+  height: 24px;
+  font-size: 1.4em;
   line-height: 1;
   flex-shrink: 0;
-  margin-right: -6px; /* Align to edge */
 }
 .context-menu li[role="separator"] hr { margin: 2px 0; border-top: 1px solid var(--border-color); }
 .context-menu-item {

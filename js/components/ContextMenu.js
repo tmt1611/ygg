@@ -262,6 +262,7 @@ const ContextMenu = ({
           onClick: onClose,
           className: "base-icon-button context-menu-close-btn",
           title: "Close Menu (Esc)",
+          "aria-label": "Close context menu"
         }, "×")
       ),
       React.createElement("ul", { className: "main-menu" },

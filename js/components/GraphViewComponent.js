@@ -3,24 +3,26 @@ import { linkRadial, select, linkVertical, linkHorizontal } from 'd3';
 import { useD3Tree } from '../hooks/useD3Tree.js';
 import { NODE_IMPORTANCE_RUNES } from '../constants.js';
 
-// A simpler, more robust text wrapping function
+// A robust text wrapping function for SVG <text> elements.
 function wrap(textSelection, width, maxLines = 3) {
     const lineHeight = 1.2; // ems
 
     textSelection.each(function() {
         const text = select(this);
         const words = text.text().split(/\s+/).reverse();
-        text.text(null); // Clear original text
+        text.text(null); // Clear original text content
 
         let tspan = text.append('tspan').attr('x', 0);
         let line = [];
         let lineNumber = 0;
         let word;
 
+        // Core wrapping loop
         while ((word = words.pop())) {
             line.push(word);
             tspan.text(line.join(' '));
 
+            // If line is too long and has more than one word, wrap it
             if (tspan.node().getComputedTextLength() > width && line.length > 1) {
                 line.pop(); // remove the word that made it too long
                 tspan.text(line.join(' '));
@@ -30,7 +32,7 @@ function wrap(textSelection, width, maxLines = 3) {
                     line = [word]; // start new line with the popped word
                     tspan = text.append('tspan').attr('x', 0).attr('dy', `${lineHeight}em`).text(word);
                 } else {
-                    // We are on the last line and it's full. Add ellipsis and stop.
+                    // We are on the last allowed line and it's full. Add ellipsis and stop.
                     tspan.text(tspan.text() + '…');
                     words.length = 0; // empty the words array to exit loop
                     break;
@@ -38,15 +40,12 @@ function wrap(textSelection, width, maxLines = 3) {
             }
         }
         
-        // After loop, check if there are still words left (means we hit maxLines)
-        if (words.length > 0) {
-            const currentText = tspan.text();
-            if (!currentText.endsWith('…')) {
-                 tspan.text(currentText + '…');
-            }
+        // Post-loop cleanup for ellipsis if we exited due to maxLines
+        if (words.length > 0 && !tspan.text().endsWith('…')) {
+            tspan.text(tspan.text() + '…');
         }
 
-        // Handle single very long word
+        // Edge case: Handle a single word that is longer than the allowed width
         if (text.selectAll('tspan').size() === 1 && tspan.node().getComputedTextLength() > width) {
             let currentText = tspan.text();
             while(tspan.node().getComputedTextLength() > width && currentText.length > 3) {
@@ -55,18 +54,19 @@ function wrap(textSelection, width, maxLines = 3) {
             }
         }
 
-        // Vertical centering adjustment
+        // Adjust vertical alignment for multi-line text based on dominant-baseline
         const numLines = text.selectAll('tspan').size();
-        const dominantBaseline = text.attr('dominant-baseline');
         if (numLines > 1) {
+            const dominantBaseline = text.attr('dominant-baseline');
             const firstTspan = text.select('tspan');
             const totalExtraHeightEms = (numLines - 1) * lineHeight;
             
-            if (dominantBaseline === 'hanging') {
-                // Default is correct, no adjustment needed.
-            } else if (dominantBaseline === 'middle') {
+            // 'hanging' is the default for text below nodes, no adjustment needed.
+            if (dominantBaseline === 'middle') {
+                // Shift the entire text block up by half its height
                 firstTspan.attr('dy', `-${totalExtraHeightEms / 2}em`);
             } else if (dominantBaseline === 'baseline') {
+                // Shift up by the full height of all but the first line
                 firstTspan.attr('dy', `-${totalExtraHeightEms}em`);
             }
         }
