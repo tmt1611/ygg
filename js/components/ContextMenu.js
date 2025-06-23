@@ -14,6 +14,7 @@ const ContextMenu = ({
   const [menuStyle, setMenuStyle] = useState({});
   const [submenuStyle, setSubmenuStyle] = useState({});
   const [copyFeedback, setCopyFeedback] = useState('');
+  const [copyError, setCopyError] = useState('');
 
   const handleCopy = useCallback((type) => {
     if (!node) return;
@@ -34,8 +35,14 @@ const ContextMenu = ({
     }
     navigator.clipboard.writeText(textToCopy).then(() => {
         setCopyFeedback(type);
+        setCopyError('');
         setTimeout(() => setCopyFeedback(''), 1500);
-    }).catch(err => console.error(`Failed to copy ${type}:`, err));
+    }).catch(err => {
+        console.error(`Failed to copy ${type}:`, err);
+        setCopyError(type);
+        setCopyFeedback('');
+        setTimeout(() => setCopyError(''), 1500);
+    });
   }, [node]);
 
   const isCurrentNodeRoot = node?.id === currentProjectRootId;
@@ -83,9 +90,9 @@ const ContextMenu = ({
 
     items.push(
         { type: 'separator' },
-        { id: 'copy-name', label: "Copy Name", icon: '📋', action: () => handleCopy('name') },
-        { id: 'copy-id', label: "Copy ID", icon: '🆔', action: () => handleCopy('id') },
-        { id: 'copy-json', label: "Copy as JSON", icon: '📦', action: () => handleCopy('json') }
+        { id: 'copy-name', label: "Copy Name", icon: '📋', action: () => handleCopy('name'), title: "Copy node name to clipboard" },
+        { id: 'copy-id', label: "Copy ID", icon: '🆔', action: () => handleCopy('id'), title: "Copy node's unique ID to clipboard" },
+        { id: 'copy-json', label: "Copy as JSON", icon: '📦', action: () => handleCopy('json'), title: "Copy this node and its children as a JSON object" }
     );
 
     if (onDeleteNode) {
@@ -94,7 +101,7 @@ const ContextMenu = ({
     }
 
     return items;
-  }, [node, onEditName, onAddChild, onToggleLock, onSetFocus, onLinkToProject, onGoToLinkedProject, onUnlinkProject, onDeleteNode, onGenerateInsights, onSwitchToAiOps, handleCopy, copyFeedback, incomingLink, handleNavigateToSourceNode]);
+  }, [node, onEditName, onAddChild, onToggleLock, onSetFocus, onLinkToProject, onGoToLinkedProject, onUnlinkProject, onDeleteNode, onGenerateInsights, onSwitchToAiOps, handleCopy, incomingLink, handleNavigateToSourceNode]);
 
   const focusableItems = useMemo(() => menuItems.filter(item => item.type !== 'separator' && !item.isDisabled), [menuItems]);
 
@@ -134,6 +141,7 @@ const ContextMenu = ({
         setIsImportanceSubMenuOpen(false);
         setFocusedIndex(0);
         setCopyFeedback('');
+        setCopyError('');
         return;
     }
     const menuItemsToFocus = menuRef.current?.querySelectorAll('button[role="menuitem"]:not([disabled])');
@@ -201,6 +209,7 @@ const ContextMenu = ({
           if (item.type === 'separator') return React.createElement("li", { key: `sep-${index}`, role: "separator" }, React.createElement("hr", null));
           const isFocused = !isImportanceSubMenuOpen && focusableItems[focusedIndex]?.id === item.id;
           const isCopied = item.id.startsWith('copy-') && copyFeedback === item.id.substring(5);
+          const hasCopyError = item.id.startsWith('copy-') && copyError === item.id.substring(5);
           return React.createElement("li", { key: item.id, role: "none" },
             React.createElement("button", {
               role: "menuitem",
@@ -211,7 +220,7 @@ const ContextMenu = ({
               "aria-haspopup": item.hasSubmenu,
               "aria-expanded": item.hasSubmenu ? isImportanceSubMenuOpen : undefined,
             },
-              React.createElement("span", { className: "context-menu-icon" }, isCopied ? '✅' : item.icon),
+              React.createElement("span", { className: "context-menu-icon" }, isCopied ? '✅' : (hasCopyError ? '❌' : item.icon)),
               React.createElement("span", { className: "context-menu-label" }, item.label),
               item.hasSubmenu && React.createElement("span", { className: "context-menu-submenu-indicator" }, "›")
             )
