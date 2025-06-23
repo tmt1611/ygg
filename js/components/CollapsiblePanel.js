@@ -47,10 +47,9 @@ const CollapsiblePanel = ({
         React.createElement("button", {
           className: `panel-toggle-button ${isCollapsed ? 'collapsed' : ''}`,
           "aria-label": `${isCollapsed ? 'Expand' : 'Collapse'} ${title}`,
-          onClick: (e) => {
-            e.stopPropagation(); // Stop this event from bubbling to the header...
-            onToggle(panelId);   // ...and toggle the panel directly.
-          },
+          // The onClick is inherited from the header, no need to stop propagation or define it here.
+          // This makes the button a part of the larger clickable header area.
+          tabIndex: -1, // Prevent tabbing to this button since the header is already focusable.
         },
           React.createElement("svg", { viewBox: "0 0 24 24", fill: "currentColor", width: "1em", height: "1em", style: { display: 'block', pointerEvents: 'none' } },
             React.createElement("path", { d: "M7.41 8.59 12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z" })
