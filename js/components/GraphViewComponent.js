@@ -357,7 +357,7 @@ const GraphViewComponent = ({
         }
 
         const radius = getNodeRadius(d);
-        const spacing = 8; // A bit closer
+        const spacing = 10; // A bit more breathing room
 
         if (layout === 'radial') {
             // Always position text below the node, but keep it horizontal

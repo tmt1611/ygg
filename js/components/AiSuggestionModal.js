@@ -145,9 +145,14 @@ const AiSuggestionModal = ({
                 className: `base-icon-button toggle-summary-btn ${!isSummaryVisible ? 'collapsed' : ''}`,
                 onClick: () => setIsSummaryVisible(!isSummaryVisible),
                 title: isSummaryVisible ? "Hide Summary Panel" : "Show Summary Panel",
+                "aria-label": isSummaryVisible ? "Hide Summary Panel" : "Show Summary Panel",
                 "aria-controls": "ai-suggestion-summary-panel",
                 "aria-expanded": isSummaryVisible
-              }, "›")
+              },
+                React.createElement("svg", { viewBox: "0 0 24 24", fill: "currentColor", width: "1.2em", height: "1.2em", style: { display: 'block' } },
+                  React.createElement("path", { d: "M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6z" })
+                )
+              )
             ),
             React.createElement("div", { className: "ai-suggestion-modal-content-area", "aria-live": "polite", "aria-atomic": "true" },
               annotatedTree && !annotatedTree._isErrorNode ? (

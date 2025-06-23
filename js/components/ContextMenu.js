@@ -68,12 +68,6 @@ const ContextMenu = ({
         { id: 'ai-modify', label: "Modify with AI...", icon: '🤖', action: () => { onSwitchToAiOps(node); } },
     ];
     
-    const copySubmenu = [
-        { id: 'copy-name', label: "Copy Name", icon: '📋', action: () => handleCopy('name') },
-        { id: 'copy-id', label: "Copy ID", icon: '🆔', action: () => handleCopy('id') },
-        { id: 'copy-json', label: "Copy as JSON", icon: '📦', action: () => handleCopy('json') }
-    ];
-
     const items = [
         { id: 'edit', label: "Edit Details...", icon: '✏️', action: () => onEditName(node) },
         { id: 'add-child', label: "Add Child Node...", icon: '➕', action: () => onAddChild(node) },
@@ -100,7 +94,10 @@ const ContextMenu = ({
         items.push({ id: 'link-actions', label: "Project Linking...", icon: '🔗', hasSubmenu: true, submenu: linkSubmenu });
     }
 
-    items.push({ id: 'copy-actions', label: "Copy...", icon: '📋', hasSubmenu: true, submenu: copySubmenu });
+    items.push({ type: 'separator' });
+    items.push({ id: 'copy-name', label: "Copy Name", icon: '📋', action: () => handleCopy('name') });
+    items.push({ id: 'copy-id', label: "Copy ID", icon: '🆔', action: () => handleCopy('id') });
+    items.push({ id: 'copy-json', label: "Copy as JSON", icon: '📦', action: () => handleCopy('json') });
 
     if (onDeleteNode) {
         items.push({ type: 'separator' });
