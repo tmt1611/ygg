@@ -310,6 +310,9 @@ const GraphViewComponent = ({
           
           group.append("title");
 
+          // Add label background rect first, so it's behind the text
+          group.append("rect").attr("class", "node-label-bg").attr("rx", 3).attr("ry", 3).style("pointer-events", "none");
+
           group.each(function(d) {
             const el = select(this);
             if (d.isProxy) {
@@ -451,6 +454,35 @@ const GraphViewComponent = ({
             wrap(select(this), maxTextWidth, maxLines);
         }
       });
+
+    // Size and position background rects
+    nodeGroups.each(function(d) {
+        if (d.isProxy) {
+            select(this).select(".node-label-bg").style("display", "none");
+            return;
+        }
+        const group = select(this);
+        const textEl = group.select(".node-label");
+        const bgRect = group.select(".node-label-bg");
+
+        try {
+            const bbox = textEl.node().getBBox();
+            if (bbox.width > 0 && bbox.height > 0) {
+                const padding = { x: 4, y: 2 };
+                bgRect
+                    .attr("x", bbox.x - padding.x)
+                    .attr("y", bbox.y - padding.y)
+                    .attr("width", bbox.width + padding.x * 2)
+                    .attr("height", bbox.height + padding.y * 2)
+                    .attr("transform", textEl.attr("transform")) // Apply same transform as text
+                    .style("display", "block");
+            } else {
+                bgRect.style("display", "none");
+            }
+        } catch (e) {
+            bgRect.style("display", "none");
+        }
+    });
 
     nodeGroups.select(".node-rune-icon")
       .attr("transform", null) // No rotation needed for any layout

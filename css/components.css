@@ -921,17 +921,12 @@ html[data-theme='nebula'] .graph-view-node.highlighted text.node-label {
   filter: drop-shadow(0 0 8px var(--error-color));
   animation: errorAppear 0.5s ease-out;
 }
-.graph-view-node:not(.proxy) text.node-label {
-  /* Create a soft background for readability using a shadow */
-  text-shadow: 0 0 6px var(--app-bg), 0 0 6px var(--app-bg), 0 0 6px var(--app-bg); /* Tripling up for intensity */
-  font-weight: 500;
+.graph-view-node:not(.proxy) .node-label-bg {
+  fill: var(--app-bg);
+  fill-opacity: 0.8;
 }
-
-/* No tspan rules needed as text-shadow is inherited */
-
-html[data-theme='dark'] .graph-view-node:not(.proxy) text.node-label,
-html[data-theme='nebula'] .graph-view-node:not(.proxy) text.node-label {
-  text-shadow: 0 0 10px var(--app-bg), 0 0 10px var(--app-bg);
+.graph-view-node:not(.proxy) text.node-label {
+  font-weight: 500;
 }
 
 .graph-view-link { stroke: var(--graph-link-stroke-ecosystem); stroke-linecap: round; }
