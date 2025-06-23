@@ -329,7 +329,11 @@ const App = () => {
         hasTechTreeData: !!techTreeData,
         yggdrasilViewMode: yggdrasilViewMode,
         setYggdrasilViewMode: setYggdrasilViewMode,
-        focusNodeId: focusNodeId
+        focusNodeId: focusNodeId,
+        // Props for PathToRootDisplay in top bar
+        techTreeData: techTreeData,
+        selectedGraphNodeId: viewStates.selectedGraphNodeId,
+        onSelectNodeFromPath: viewStates.setSelectedGraphNodeId
       }),
       React.createElement("div", { className: `yggdrasil-app-body theme-${themeMode} view-mode-${yggdrasilViewMode} ${isSidebarCollapsed ? 'sidebar-collapsed' : ''}` },
         React.createElement(KnowledgeBranchSidebar, {
