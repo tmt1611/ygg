@@ -677,8 +677,16 @@ html[data-theme='sol'] .panel-header-icon { color: var(--primary-accent-dark); f
   flex-grow: 1; display: flex; align-items: center;
   gap: 12px; min-width: 0; flex-wrap: wrap;
 }
-.focus-view-header h3 { margin: 0; font-size: 1.15em; color: var(--primary-accent); }
+.focus-view-header h3 { margin: 0; font-size: 1.15em; color: var(--primary-accent); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .focus-view-header .overlay-panel-header-actions .base-icon-button { font-size: 1.2em; padding: 4px; }
+
+.focus-view-breadcrumb-bar {
+  padding: 4px 12px;
+  background-color: var(--app-bg);
+  border-bottom: 1px solid var(--border-color);
+  flex-shrink: 0;
+  display: flex;
+}
 
 .focus-node-display { /* Styles for the button wrapper of the celestial body */
   background-color: transparent;
@@ -1564,6 +1572,28 @@ html[data-theme='sol'] .panel-variant-sidebar .panel-toggle-button {
   overflow-x: auto;
   max-width: 50vw; /* Prevent it from taking too much space */
   position: relative;
+}
+.path-to-root-display.context-focus-view {
+  max-width: 100%;
+  width: 100%;
+  background-color: transparent;
+  border: none;
+  padding: 2px 0;
+}
+.path-to-root-display.context-focus-view .path-segment {
+  background-color: var(--button-default-bg);
+  border: 1px solid var(--border-color);
+}
+.path-to-root-display.context-focus-view .path-segment:hover {
+  background-color: var(--primary-accent-hover-bg);
+  color: var(--primary-accent-dark);
+  border-color: var(--primary-accent);
+}
+.path-to-root-display.context-focus-view .path-segment.current-focus-path-node {
+  background-color: var(--primary-accent);
+  color: var(--text-on-accent);
+  border-color: var(--primary-accent-dark);
+  font-weight: 600;
 }
 .path-to-root-display::-webkit-scrollbar { height: 0; width: 0; }
 .path-to-root-display { scrollbar-width: none; }

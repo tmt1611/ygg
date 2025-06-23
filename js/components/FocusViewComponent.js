@@ -75,7 +75,7 @@ const FocusViewComponent = ({
     treeData,
     currentNodeId: selectedNodeInPanelId || focusNodeId,
     onSelectPathNode: (id) => onChangeFocusNode(id, treeData),
-    pathContext: 'stellar',
+    pathContext: 'focus-view',
   }), [treeData, selectedNodeInPanelId, focusNodeId, onChangeFocusNode]);
 
   if (!focusNodeData) {
@@ -118,8 +118,7 @@ const FocusViewComponent = ({
     React.createElement("div", { className: "focus-view-page-container" },
       React.createElement("div", { className: "focus-view-header" },
         React.createElement("div", { className: "focus-view-header-main" },
-            React.createElement("h3", { id: "focus-view-title" }, "Focus View"),
-            React.createElement(PathToRootDisplay, { ...pathDisplayProps })
+            React.createElement("h3", { id: "focus-view-title" }, "Focus View: ", React.createElement("span", { style: { color: 'var(--focus-panel-text)', fontWeight: 500 }}, focusNodeData.name))
         ),
         React.createElement("div", { className: "overlay-panel-header-actions" },
             React.createElement("button", {
@@ -129,6 +128,9 @@ const FocusViewComponent = ({
                 title: "Close Focus View and return to Graph View"
             }, "×")
         )
+      ),
+      React.createElement("div", { className: "focus-view-breadcrumb-bar" },
+        React.createElement(PathToRootDisplay, { ...pathDisplayProps })
       ),
       React.createElement("div", { className: "focus-view-container" },
         React.createElement("div", { className: "focus-view-main-area" },
