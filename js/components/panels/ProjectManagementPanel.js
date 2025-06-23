@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 import ContextualHelpTooltip from '../ContextualHelpTooltip.js';
 import ProjectListItem from './ProjectListItem.js';
 
@@ -7,9 +7,22 @@ const ProjectManagementPanel = ({
   onAddNewProjectFromFile, onCreateEmptyProject, onSaveAsExample, onLoadAndGoToGraph,
   isAppBusy, currentTreeExists
 }) => {
+  const [searchTerm, setSearchTerm] = useState('');
 
-  const userProjects = projects.filter(p => !p.isExample);
-  const exampleProjects = projects.filter(p => p.isExample);
+  const { userProjects, exampleProjects } = useMemo(() => {
+    if (!searchTerm.trim()) {
+      return {
+        userProjects: projects.filter(p => !p.isExample),
+        exampleProjects: projects.filter(p => p.isExample)
+      };
+    }
+    const lowerCaseSearchTerm = searchTerm.toLowerCase();
+    const filtered = projects.filter(p => p.name.toLowerCase().includes(lowerCaseSearchTerm));
+    return {
+      userProjects: filtered.filter(p => !p.isExample),
+      exampleProjects: filtered.filter(p => p.isExample)
+    };
+  }, [projects, searchTerm]);
 
   const handleImportButtonClick = () => {
     if (!isAppBusy) {
@@ -32,8 +45,22 @@ const ProjectManagementPanel = ({
         )
       ),
 
+      React.createElement("div", { style: { marginBottom: '15px' }},
+        React.createElement("input", {
+          type: "search",
+          placeholder: "Filter projects by name...",
+          value: searchTerm,
+          onChange: e => setSearchTerm(e.target.value),
+          style: { width: '100%' },
+          "aria-label": "Filter projects by name",
+          disabled: isAppBusy
+        })
+      ),
+
       (userProjects.length === 0 && exampleProjects.length === 0) ? (
-        React.createElement("p", { style: { textAlign: 'center', color: 'var(--text-secondary)', marginTop: '10px' }}, "No projects found. Create one, import a .json file, or start from an example.")
+        React.createElement("p", { style: { textAlign: 'center', color: 'var(--text-secondary)', marginTop: '10px' }}, 
+          searchTerm.trim() ? `No projects match your search for "${searchTerm}".` : "No projects found. Create one, import a .json file, or start from an example."
+        )
       ) : (
         React.createElement(React.Fragment, null,
           userProjects.length > 0 && (
