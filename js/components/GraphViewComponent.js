@@ -381,67 +381,15 @@ const GraphViewComponent = ({
       .style("pointer-events", "none")
       .attr("transform", d => {
         if (d.isProxy) {
-            return null; // Proxies are handled by their own label logic
+            return null; // Proxies are centered
         }
-
+        // Consistent label position below the node for all layouts
         const radius = getNodeRadius(d);
-        const spacing = 10;
-
-        if (layout === 'radial') {
-            // Position text radially outward from the node center, keeping it horizontal.
-            // The angle is adjusted because the d3.tree layout for radial starts from the right (0 rad) and goes clockwise.
-            // We want 0 to be at the top.
-            const angle = d.x - Math.PI / 2;
-            const offset = radius + spacing;
-            const xOffset = offset * Math.cos(angle);
-            const yOffset = offset * Math.sin(angle);
-            return `translate(${xOffset}, ${yOffset})`;
-        }
-        
-        if (layout === 'vertical') {
-            return `translate(0, ${radius + spacing})`;
-        } else { // horizontal
-            return `translate(${radius + spacing}, 0)`;
-        }
+        const spacing = 8;
+        return `translate(0, ${radius + spacing})`;
       })
-      .attr("text-anchor", d => {
-        if (d.isProxy) return "middle";
-        if (layout === 'horizontal') return "start";
-        if (layout === 'vertical') return "middle";
-        
-        // Radial layout: d.x is angle from d3.tree (0=top, PI/2=right, PI=bottom, 3PI/2=left)
-        const angle = d.x;
-        const tolerance = Math.PI / 12; // 15 degrees tolerance for pure top/bottom
-
-        if (angle < tolerance || angle > (2 * Math.PI - tolerance)) {
-            return "middle"; // Top
-        }
-        if (angle > (Math.PI - tolerance) && angle < (Math.PI + tolerance)) {
-            return "middle"; // Bottom
-        }
-        if (angle > Math.PI) {
-            return "end"; // Left side
-        }
-        return "start"; // Right side
-      })
-      .attr("dominant-baseline", d => {
-        if (d.isProxy) return "middle";
-        if (layout === 'horizontal') return "middle";
-        
-        if (layout === 'radial') {
-            const angle = d.x;
-            const tolerance = Math.PI / 12;
-
-            if (angle < tolerance || angle > (2 * Math.PI - tolerance)) {
-                return 'text-after-edge'; // Top (anchor text above the point)
-            }
-            if (angle > (Math.PI - tolerance) && angle < (Math.PI + tolerance)) {
-                return 'hanging'; // Bottom (anchor text below the point)
-            }
-            return 'middle'; // Sides
-        }
-        return "hanging"; // For vertical
-      })
+      .attr("text-anchor", d => d.isProxy ? "middle" : "middle")
+      .attr("dominant-baseline", d => d.isProxy ? "middle" : "hanging")
       .attr("dy", null) // dy is handled by the wrap function for multi-line text
       .attr("dx", null)
       .text(d => d.isProxy ? d.data.name : (d.data.name || ""))
