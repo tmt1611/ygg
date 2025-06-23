@@ -13,7 +13,7 @@ export const useD3Tree = (
   treeData,
   config = {},
   onBackgroundClick,
-  layout = 'radial'
+  layout = 'radial' // 'radial', 'vertical', 'horizontal'
 ) => {
   const finalConfig = { ...defaultTreeConfig, ...config };
   const { margin, radialRadiusFactor } = finalConfig;
@@ -37,9 +37,12 @@ export const useD3Tree = (
       return tree()
         .size([2 * Math.PI, depth * radialRadiusFactor])
         .separation((a, b) => (a.parent === b.parent ? 2 : 2.5));
-    } else { // 'tree' layout
+    } else if (layout === 'vertical') {
       // For a top-down tree, nodeSize defines spacing between nodes.
       return tree().nodeSize([80, 180]); // [width between nodes, height between levels]
+    } else { // 'horizontal' layout
+      // For a left-to-right tree, nodeSize is [height between nodes, width between levels]
+      return tree().nodeSize([80, 220]);
     }
   }, [rootHierarchy, radialRadiusFactor, layout]);
 
@@ -50,14 +53,17 @@ export const useD3Tree = (
         let initialTransform;
         if (layout === 'radial') {
             initialTransform = zoomIdentity.translate(clientWidth / 2, clientHeight / 2).scale(0.8);
-        } else { // tree
+        } else if (layout === 'vertical') {
             // Center the tree horizontally, and position it near the top.
             initialTransform = zoomIdentity.translate(clientWidth / 2, margin.top * 4).scale(0.7);
+        } else { // horizontal
+            // Center the tree vertically, and position it near the left.
+            initialTransform = zoomIdentity.translate(margin.left * 6, clientHeight / 2).scale(0.7);
         }
         svgSelectionRef.current.transition().duration(750).call(zoomBehaviorRef.current.transform, initialTransform);
       }
     }
-  }, [layout, margin.top]);
+  }, [layout, margin.top, margin.left]);
 
   useLayoutEffect(() => {
     if (!svgRef.current) return;

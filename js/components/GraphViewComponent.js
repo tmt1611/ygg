@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useMemo, useCallback, useState } from 'react';
-import { linkRadial, select, linkVertical } from 'd3';
+import { linkRadial, select, linkVertical, linkHorizontal } from 'd3';
 import { useD3Tree } from '../hooks/useD3Tree.js';
 import { NODE_IMPORTANCE_RUNES } from '../constants.js';
 
@@ -79,7 +79,8 @@ const GraphViewComponent = ({
   onNavigateToLinkedProject,
   handleNavigateToSourceNode
 }) => {
-  const [layout, setLayout] = useState('radial'); // 'radial' or 'tree'
+  const LAYOUT_CYCLE = ['radial', 'vertical', 'horizontal'];
+  const [layout, setLayout] = useState('radial'); // 'radial', 'vertical', or 'horizontal'
 
   const svgContainerDivRef = useRef(null); 
   const svgRef = useRef(null); 
@@ -88,7 +89,8 @@ const GraphViewComponent = ({
 
   const toggleLayout = useCallback(() => {
     setLayout(prev => {
-      const newLayout = prev === 'radial' ? 'tree' : 'radial';
+      const currentIndex = LAYOUT_CYCLE.indexOf(prev);
+      const newLayout = LAYOUT_CYCLE[(currentIndex + 1) % LAYOUT_CYCLE.length];
       // A brief delay allows the state to update before we recenter the view on the new layout.
       setTimeout(resetZoom, 50);
       return newLayout;
@@ -96,6 +98,7 @@ const GraphViewComponent = ({
   }, [resetZoom]);
 
   const projectLinksAndProxyNodes = useMemo(() => {
+    // NOTE: Project links are currently only visualized in the 'radial' layout for simplicity.
     if (layout !== 'radial' || !nodes || nodes.length === 0 || !projects) {
         return { proxyNodes: [], projectLinks: [] };
     }
@@ -247,10 +250,12 @@ const GraphViewComponent = ({
         (update) => update,
         (exit) => exit.remove()
       )
-      .attr("d", layout === 'radial' 
-        ? linkRadial().angle(d => d.x).radius(d => d.y)
-        : linkVertical().x(d => d.x).y(d => d.y)
-      );
+      .attr("d", d => {
+        if (layout === 'radial') return linkRadial().angle(n => n.x).radius(n => n.y)(d);
+        if (layout === 'vertical') return linkVertical().x(n => n.x).y(n => n.y)(d);
+        // For horizontal, we swap x and y for d3.linkHorizontal
+        return linkHorizontal().x(n => n.y).y(n => n.x)(d);
+      });
 
     // Draw node groups
     const nodeGroups = g
@@ -302,8 +307,10 @@ const GraphViewComponent = ({
       .attr("transform", d => {
         if (layout === 'radial') {
             return `rotate(${d.x * 180 / Math.PI - 90}) translate(${d.y}, 0)`;
-        } else {
+        } else if (layout === 'vertical') {
             return `translate(${d.x}, ${d.y})`;
+        } else { // horizontal
+            return `translate(${d.y}, ${d.x})`;
         }
       })
       .on("click", handleNodeClick)
@@ -324,27 +331,39 @@ const GraphViewComponent = ({
       .style("user-select", "none")
       .style("pointer-events", "none")
       .attr("transform", d => {
-        const rotation = -(d.x * 180 / Math.PI - 90);
-        if (d.isProxy) { // Keep proxy label inside
-            return layout === 'radial' ? `rotate(${rotation})` : null;
+        if (d.isProxy) {
+            const rotation = layout === 'radial' ? -(d.x * 180 / Math.PI - 90) : 0;
+            return `rotate(${rotation})`;
         }
         if (layout === 'radial') {
+            const rotation = -(d.x * 180 / Math.PI - 90);
             const radius = getNodeRadius(d);
             const spacing = 10;
             const x = (d.x > Math.PI / 2 && d.x < 3 * Math.PI / 2) ? -radius - spacing : radius + spacing;
             return `rotate(${rotation}) translate(${x}, 0)`;
-        } else { // Tree layout
-            const radius = getNodeRadius(d);
-            const spacing = 8;
+        }
+        // For vertical and horizontal, no rotation.
+        const radius = getNodeRadius(d);
+        const spacing = 8;
+        if (layout === 'vertical') {
             return `translate(0, ${radius + spacing})`;
+        } else { // horizontal
+            // Position text to the right of the node
+            return `translate(${radius + spacing}, 0)`;
         }
       })
       .attr("text-anchor", d => {
-          if (d.isProxy || layout === 'tree') return "middle";
+          if (d.isProxy || layout === 'vertical') return "middle";
+          if (layout === 'horizontal') return "start"; // Always start (left) aligned for horizontal
+          // radial logic
           return (d.x > Math.PI / 2 && d.x < 3 * Math.PI / 2) ? "end" : "start";
       })
-      .attr("dominant-baseline", d => layout === 'tree' && !d.isProxy ? "hanging" : "middle")
-      .attr("dy", d => d.isProxy ? "0.3em" : (layout === 'radial' ? "0.35em" : null))
+      .attr("dominant-baseline", d => {
+        if (d.isProxy) return "middle";
+        if (layout === 'vertical') return "hanging";
+        return "middle"; // for radial and horizontal
+      })
+      .attr("dy", d => d.isProxy ? "0.3em" : (layout === 'radial' || layout === 'horizontal' ? "0.35em" : null))
       .attr("dx", null)
       .text(d => d.isProxy ? d.data.name : (d.data.name || ""))
       .each(function(d) {
@@ -357,14 +376,20 @@ const GraphViewComponent = ({
       });
 
     nodeGroups.select(".node-rune-icon")
-      .attr("transform", d => layout === 'radial' ? `rotate(${-(d.x * 180 / Math.PI - 90)})` : null)
+      .attr("transform", d => {
+        if (layout === 'radial') return `rotate(${-(d.x * 180 / Math.PI - 90)})`;
+        return null; // No rotation for vertical or horizontal
+      })
       .text(d => {
         if (d.isProxy) return '';
         return NODE_IMPORTANCE_RUNES[d.data.importance] || '•';
       });
 
     nodeGroups.select(".node-lock-icon")
-      .attr("transform", d => layout === 'radial' ? `rotate(${-(d.x * 180 / Math.PI - 90)})` : null)
+      .attr("transform", d => {
+        if (layout === 'radial') return `rotate(${-(d.x * 180 / Math.PI - 90)})`;
+        return null; // No rotation for vertical or horizontal
+      })
       .text(d => (d.data.isLocked && !d.isProxy ? "🔒" : ""));
 
   }, [g, nodes, links, handleNodeClick, handleNodeDoubleClick, handleNodeContextMenu, projectLinksAndProxyNodes, layout]);
@@ -403,7 +428,7 @@ const GraphViewComponent = ({
         React.createElement("svg", { ref: svgRef, style: { display: 'block', width: '100%', height: '100%' }})
       ),
       React.createElement("div", { className: "graph-view-controls" },
-        React.createElement("button", { onClick: toggleLayout, title: "Toggle Layout", disabled: isAppBusy }, layout === 'radial' ? '🌳' : '⭕'),
+        React.createElement("button", { onClick: toggleLayout, title: "Toggle Layout", disabled: isAppBusy }, layout === 'radial' ? '🌳' : (layout === 'vertical' ? '↔️' : '⭕')),
         React.createElement("button", { onClick: zoomIn, title: "Zoom In", disabled: isAppBusy }, "➕"),
         React.createElement("button", { onClick: zoomOut, title: "Zoom Out", disabled: isAppBusy }, "➖"),
         React.createElement("button", { onClick: resetZoom, title: "Reset Zoom & Pan", disabled: isAppBusy }, "🎯")
