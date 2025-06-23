@@ -1481,7 +1481,7 @@ html[data-theme='sol'] .panel-variant-sidebar .panel-toggle-button {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 4px 6px 4px 12px;
+  padding: 6px 8px;
   font-size: 0.8em;
   color: var(--text-secondary);
   border-bottom: 1px solid var(--border-color);
@@ -1489,7 +1489,7 @@ html[data-theme='sol'] .panel-variant-sidebar .panel-toggle-button {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  gap: 8px;
+  gap: 6px;
 }
 .context-menu .context-menu-header strong { color: var(--text-primary); }
 .context-menu .context-menu-close-btn {

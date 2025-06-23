@@ -212,6 +212,8 @@ const ContextMenu = ({
   
   if (!isOpen || !position || !node) return null;
 
+  const importanceRune = (NODE_IMPORTANCE_OPTIONS.find(opt => opt.value === (node.importance || 'common')) || {}).rune || '•';
+
   const renderMenuItem = (item, index, isSubmenu = false) => {
     if (item.type === 'separator') return React.createElement("li", { key: `sep-${index}`, role: "separator" }, React.createElement("hr", null));
     
@@ -258,7 +260,8 @@ const ContextMenu = ({
   return (
     React.createElement("div", { ref: menuRef, className: "context-menu", style: menuStyle, role: "menu", "aria-orientation": "vertical", "aria-labelledby": "context-menu-node-name", onKeyDown: handleKeyDown, onMouseLeave: () => setOpenSubmenuId(null) },
       React.createElement("div", { id: "context-menu-node-name", className: "context-menu-header" },
-        React.createElement("span", { style: { flexGrow: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis' } }, "Node: ", React.createElement("strong", { title: node.name }, node.name.length > 25 ? `${node.name.substring(0, 22)}...` : node.name)),
+        React.createElement("span", { className: "context-menu-icon", "aria-hidden": "true" }, importanceRune),
+        React.createElement("strong", { title: node.name, style: { flexGrow: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis' } }, node.name.length > 25 ? `${node.name.substring(0, 22)}...` : node.name),
         React.createElement("button", {
           onClick: onClose,
           className: "base-icon-button context-menu-close-btn",
