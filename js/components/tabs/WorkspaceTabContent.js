@@ -1,9 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import ProjectManagementPanel from '../panels/ProjectManagementPanel.js';
 import ApiKeySetupPanel from '../panels/ApiKeySetupPanel.js';
 import AiGenerationPanel from '../panels/AiGenerationPanel.js';
 import DataOperationsPanel from '../panels/DataOperationsPanel.js';
 import CollapsiblePanel from '../CollapsiblePanel.js';
+import ContextualHelpTooltip from '../ContextualHelpTooltip.js';
+import { APP_STORAGE_KEYS } from '../../constants.js';
 
 const StatDisplay = ({ label, value, valueClassName }) => (
   React.createElement("div", { className: "stat-item" },
@@ -23,7 +25,22 @@ const WorkspaceTabContent = ({
   handleToggleAllLock,
 }) => {
 
-  const [collapsedPanels, setCollapsedPanels] = useState(new Set(['api-key-setup']));
+  const [collapsedPanels, setCollapsedPanels] = useState(() => {
+    const savedState = localStorage.getItem(APP_STORAGE_KEYS.WORKSPACE_PANEL_STATES);
+    try {
+        if (savedState) {
+            const parsed = JSON.parse(savedState);
+            return new Set(Array.isArray(parsed) ? parsed : []);
+        }
+    } catch (e) {
+        console.error("Failed to parse workspace panel states from localStorage", e);
+    }
+    return new Set(['api-key-setup']); // Collapse API key setup by default
+  });
+
+  useEffect(() => {
+    localStorage.setItem(APP_STORAGE_KEYS.WORKSPACE_PANEL_STATES, JSON.stringify(Array.from(collapsedPanels)));
+  }, [collapsedPanels]);
 
   const handleTogglePanel = (panelId) => {
     setCollapsedPanels(prev => {
@@ -88,7 +105,8 @@ const WorkspaceTabContent = ({
             title: "Project Management",
             icon: "🗂️",
             isCollapsed: collapsedPanels.has('project-management'),
-            onToggle: handleTogglePanel
+            onToggle: handleTogglePanel,
+            headerActions: React.createElement(ContextualHelpTooltip, { helpText: "Manage your saved projects and examples. Create new projects, import from files, or load existing work." })
           },
             React.createElement(ProjectManagementPanel, {
               projects, activeProjectId, onLoadProject, onRenameProject, onDeleteProject, 
@@ -101,7 +119,8 @@ const WorkspaceTabContent = ({
             title: "AI Structure Generation",
             icon: "🧠",
             isCollapsed: collapsedPanels.has('ai-generation'),
-            onToggle: handleTogglePanel
+            onToggle: handleTogglePanel,
+            headerActions: React.createElement(ContextualHelpTooltip, { helpText: "Use AI to generate a new tree structure from a topic or regenerate the structure for the current project's context." })
           },
             React.createElement(AiGenerationPanel, {
               initialPrompt, setInitialPrompt, handleGenerateTree, isLoadingInitial,
@@ -113,7 +132,8 @@ const WorkspaceTabContent = ({
             title: "Data Operations",
             icon: "📤",
             isCollapsed: collapsedPanels.has('data-operations'),
-            onToggle: handleTogglePanel
+            onToggle: handleTogglePanel,
+            headerActions: React.createElement(ContextualHelpTooltip, { helpText: "Save and download the active project, or extract data as raw text or an AI-generated summary." })
           },
             React.createElement(DataOperationsPanel, {
               handleDownloadTree, onExtractData, extractionMode, setExtractionMode, isSummarizing,
@@ -125,7 +145,8 @@ const WorkspaceTabContent = ({
             title: "API Key Setup",
             icon: "🔑",
             isCollapsed: collapsedPanels.has('api-key-setup'),
-            onToggle: handleTogglePanel
+            onToggle: handleTogglePanel,
+            headerActions: React.createElement(ContextualHelpTooltip, { helpText: "Configure your Gemini API Key to enable all AI-powered features in the application." })
           },
             React.createElement(ApiKeySetupPanel, { apiKeyHook, controlsDisabled })
           )

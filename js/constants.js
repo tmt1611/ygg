@@ -7,7 +7,8 @@ export const APP_STORAGE_KEYS = {
   THEME_MODE: 'themeMode_v2.1',
   STARTUP_LOAD_LOGGED: 'startup_load_logged_v2.1',
   SIDEBAR_COLLAPSED_STATE: 'yggdrasilSidebarCollapsedState_v2.1',
-  SIDEBAR_PANEL_STATES: 'yggdrasilSidebarPanelStates_v2.1', 
+  SIDEBAR_PANEL_STATES: 'yggdrasilSidebarPanelStates_v2.1',
+  WORKSPACE_PANEL_STATES: 'yggdrasilWorkspacePanelStates_v2.1',
   ACTIVE_MAIN_VIEW: 'yggdrasilActiveMainView_v2.1',
 };
 
