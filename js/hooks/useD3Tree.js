@@ -97,21 +97,17 @@ export const useD3Tree = (
     }
   }, [svgRef, onBackgroundClick]); 
 
-  // This new effect handles the initial centering.
+  // This new effect handles the initial centering when a new tree is loaded.
   useLayoutEffect(() => {
     if (treeData && g) {
       // Center the graph on first load of a new tree.
       // A small delay helps ensure the parent container has its final dimensions.
       const timer = setTimeout(() => {
         resetZoom();
-      }, 50); 
-      initialDataLoadedForSession.current = true;
+      }, 50);
       return () => clearTimeout(timer);
-    } else if (!treeData) {
-      // Reset the flag if data is unloaded, allowing re-centering on next load.
-      initialDataLoadedForSession.current = false;
     }
-  }, [treeData, g, resetZoom]);
+  }, [treeData, g, resetZoom]); // resetZoom is stable but depends on layout, so this effect runs on treeData or layout change.
 
   const nodesAndLinks = useMemo(() => {
     if (!rootHierarchy) return { nodes: [], links: [] };

@@ -1,5 +1,5 @@
 
-import React, { useMemo, useEffect, useRef, useState, useCallback } from 'react';
+import React, { useMemo, useEffect, useRef, useState } from 'react';
 import { compareAndAnnotateTree, countNodesInTree, isValidTechTreeNodeShape, getAllNodesAsMap } from '../utils.js';
 import AiSuggestionPreviewListItem from './AiSuggestionPreviewListItem.js';
 import ModificationPromptInput from './ModificationPromptInput.js';
@@ -17,6 +17,7 @@ const AiSuggestionModal = ({
   const applyButtonRef = useRef(null);
   const [followUpPrompt, setFollowUpPrompt] = useState('');
   const [isRemovedNodesCollapsed, setIsRemovedNodesCollapsed] = useState(true);
+  const [isSummaryVisible, setIsSummaryVisible] = useState(true);
 
   const comparisonResult = useMemo(() => {
     if (!isOpen || !suggestion) return null;
@@ -131,10 +132,17 @@ const AiSuggestionModal = ({
           "AI Modification Preview"
         ),
 
-        React.createElement("div", { className: "ai-suggestion-modal-layout" },
+        React.createElement("div", { className: `ai-suggestion-modal-layout ${!isSummaryVisible ? 'summary-hidden' : ''}` },
           React.createElement("div", { className: "ai-suggestion-modal-preview-panel" },
             React.createElement("h3", { className: "ai-suggestion-modal-header" },
-              "Preview of Changes"
+              React.createElement("span", null, "Preview of Changes"),
+              React.createElement("button", {
+                className: `base-icon-button toggle-summary-btn ${!isSummaryVisible ? 'collapsed' : ''}`,
+                onClick: () => setIsSummaryVisible(!isSummaryVisible),
+                title: isSummaryVisible ? "Hide Summary Panel" : "Show Summary Panel",
+                "aria-controls": "ai-suggestion-summary-panel",
+                "aria-expanded": isSummaryVisible
+              }, "▶")
             ),
             React.createElement("div", { className: "ai-suggestion-modal-content-area", "aria-live": "polite", "aria-atomic": "true" },
               annotatedTree && !annotatedTree._isErrorNode ? (
@@ -178,7 +186,7 @@ const AiSuggestionModal = ({
             )
           ),
 
-          React.createElement("div", { className: "ai-suggestion-modal-summary-panel" },
+          isSummaryVisible && React.createElement("div", { id: "ai-suggestion-summary-panel", className: "ai-suggestion-modal-summary-panel" },
             React.createElement("div", { id: "ai-suggestion-summary", className: "ai-suggestion-modal-summary-section" },
               React.createElement("h4", { className: "ai-suggestion-modal-summary-title" }, "Summary of Changes"),
               !annotatedTree?._isErrorNode ? (

@@ -3,74 +3,72 @@ import { linkRadial, select, linkVertical, linkHorizontal } from 'd3';
 import { useD3Tree } from '../hooks/useD3Tree.js';
 import { NODE_IMPORTANCE_RUNES } from '../constants.js';
 
-// Helper function to wrap SVG text
+// A simpler, more robust text wrapping function
 function wrap(textSelection, width, maxLines = 3) {
+    const lineHeight = 1.2; // ems
+
     textSelection.each(function() {
         const text = select(this);
         const words = text.text().split(/\s+/).reverse();
-        let word;
-        let line = [];
-        let lineNumber = 0;
-        const lineHeight = 1.2; // ems
-        
-        const initialX = text.attr('x') || 0;
         text.text(null); // Clear original text
 
-        let tspan = text.append('tspan').attr('x', initialX);
+        let tspan = text.append('tspan').attr('x', 0);
+        let line = [];
+        let lineNumber = 0;
+        let word;
 
-        while ((word = words.pop()) && lineNumber < maxLines) {
+        while ((word = words.pop())) {
             line.push(word);
             tspan.text(line.join(' '));
-            if (tspan.node().getComputedTextLength() > width) {
-                if (line.length > 1) {
-                    line.pop(); // The last word made it too long
-                    tspan.text(line.join(' '));
-                    
-                    if (lineNumber + 1 >= maxLines) {
-                        tspan.text(tspan.text() + '…');
-                        break; // Stop if we are on the last line
-                    }
-                    
-                    // Start a new line with the popped word
-                    line = [word];
+
+            if (tspan.node().getComputedTextLength() > width && line.length > 1) {
+                line.pop(); // remove the word that made it too long
+                tspan.text(line.join(' '));
+
+                if (lineNumber + 1 < maxLines) {
                     lineNumber++;
-                    tspan = text.append('tspan').attr('x', initialX).attr('dy', `${lineHeight}em`).text(word);
-                }
-                
-                // This handles both a single long word on the first line,
-                // or a single long word on a subsequent line.
-                if (tspan.node().getComputedTextLength() > width) {
-                    let currentText = tspan.text();
-                    while (tspan.node().getComputedTextLength() > width && currentText.length > 1) {
-                        currentText = currentText.slice(0, -1);
-                        tspan.text(currentText + '…');
-                    }
+                    line = [word]; // start new line with the popped word
+                    tspan = text.append('tspan').attr('x', 0).attr('dy', `${lineHeight}em`).text(word);
+                } else {
+                    // We are on the last line and it's full. Add ellipsis and stop.
+                    tspan.text(tspan.text() + '…');
+                    words.length = 0; // empty the words array to exit loop
+                    break;
                 }
             }
         }
         
-        if (words.length > 0 && lineNumber < maxLines) {
+        // After loop, check if there are still words left (means we hit maxLines)
+        if (words.length > 0) {
             const currentText = tspan.text();
             if (!currentText.endsWith('…')) {
+                 tspan.text(currentText + '…');
+            }
+        }
+
+        // Handle single very long word
+        if (text.selectAll('tspan').size() === 1 && tspan.node().getComputedTextLength() > width) {
+            let currentText = tspan.text();
+            while(tspan.node().getComputedTextLength() > width && currentText.length > 3) {
+                currentText = currentText.slice(0, -1);
                 tspan.text(currentText + '…');
             }
         }
 
-        // Adjust for multi-line text to keep it centered on its anchor point
+        // Vertical centering adjustment
         const numLines = text.selectAll('tspan').size();
+        const dominantBaseline = text.attr('dominant-baseline');
         if (numLines > 1) {
-            const dominantBaseline = text.attr('dominant-baseline');
             const firstTspan = text.select('tspan');
             const totalExtraHeightEms = (numLines - 1) * lineHeight;
-
-            if (dominantBaseline === 'middle') {
-                // Shift up by half the total height of the extra lines
+            
+            if (dominantBaseline === 'hanging') {
+                // Default is correct, no adjustment needed.
+            } else if (dominantBaseline === 'middle') {
                 firstTspan.attr('dy', `-${totalExtraHeightEms / 2}em`);
             } else if (dominantBaseline === 'baseline') {
-                // For text placed above the node, shift the entire block up
                 firstTspan.attr('dy', `-${totalExtraHeightEms}em`);
             }
-            // For 'hanging', no adjustment is needed as it's already anchored at the top.
         }
     });
 }
@@ -353,37 +351,22 @@ const GraphViewComponent = ({
       .style("pointer-events", "none")
       .attr("transform", d => {
         if (d.isProxy) {
+            // Keep proxy labels horizontal by counter-rotating them inside the transformed group
             const rotation = layout === 'radial' ? -(d.x * 180 / Math.PI - 90) : 0;
             return `rotate(${rotation})`;
         }
 
         const radius = getNodeRadius(d);
-        const spacing = 10;
+        const spacing = 8; // A bit closer
 
         if (layout === 'radial') {
-            const angle = d.x;
+            // Always position text below the node, but keep it horizontal
             const rotation = -(d.x * 180 / Math.PI - 90);
-
-            // d3.tree radial layout: 0 is top, PI/2 is right, PI is bottom, 3PI/2 is left
-            const isTopCone = angle > (1.75 * Math.PI) || angle < (0.25 * Math.PI);
-            const isBottomCone = angle > (0.75 * Math.PI) && angle < (1.25 * Math.PI);
-
-            let x = 0;
-            let y = 0;
-
-            if (isTopCone) {
-                y = -radius - spacing;
-            } else if (isBottomCone) {
-                y = radius + spacing;
-            } else { // Left or Right side
-                const isLeft = angle > Math.PI; // Left half of the circle (bottom-to-top)
-                x = isLeft ? -radius - spacing : radius + spacing;
-            }
-            
-            return `rotate(${rotation}) translate(${x}, ${y})`;
+            const y = radius + spacing;
+            return `rotate(${rotation}) translate(0, ${y})`;
         }
         
-        // For vertical and horizontal, no rotation in the group, so it's simpler.
+        // For vertical and horizontal, it's simpler.
         if (layout === 'vertical') {
             return `translate(0, ${radius + spacing})`;
         } else { // horizontal
@@ -391,33 +374,14 @@ const GraphViewComponent = ({
         }
       })
       .attr("text-anchor", d => {
-          if (d.isProxy || layout === 'vertical') return "middle";
-          if (layout === 'horizontal') return "start";
-          
-          // Radial layout
-          const angle = d.x;
-          const isTopCone = angle > (1.75 * Math.PI) || angle < (0.25 * Math.PI);
-          const isBottomCone = angle > (0.75 * Math.PI) && angle < (1.25 * Math.PI);
-
-          if (isTopCone || isBottomCone) {
-              return "middle";
-          }
-          return (angle > Math.PI) ? "end" : "start"; // Left half is end-anchored
+        if (d.isProxy) return "middle";
+        if (layout === 'horizontal') return "start";
+        return "middle"; // For both vertical and radial (since it's always below)
       })
       .attr("dominant-baseline", d => {
         if (d.isProxy) return "middle";
         if (layout === 'horizontal') return "middle";
-        if (layout === 'vertical') return "hanging"; // Text is below node
-
-        if (layout === 'radial') {
-            const angle = d.x;
-            const isTopCone = angle > (1.75 * Math.PI) || angle < (0.25 * Math.PI);
-            const isBottomCone = angle > (0.75 * Math.PI) && angle < (1.25 * Math.PI);
-            if (isTopCone) return "baseline"; // Text is above node
-            if (isBottomCone) return "hanging"; // Text is below node
-            return "middle"; // Text is to the side
-        }
-        return "middle";
+        return "hanging"; // For both vertical and radial (since it's below)
       })
       .attr("dy", null) // dy is handled by the wrap function for multi-line text
       .attr("dx", null)
