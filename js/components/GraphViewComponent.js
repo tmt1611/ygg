@@ -48,7 +48,11 @@ function wrap(textSelection, width, maxLines = 3) {
             if (dominantBaseline === 'middle') {
                 // Shift up by half the total height of the extra lines
                 firstTspan.attr('dy', `-${totalExtraHeightEms / 2}em`);
+            } else if (dominantBaseline === 'baseline') {
+                // For text placed above the node, shift the entire block up
+                firstTspan.attr('dy', `-${totalExtraHeightEms}em`);
             }
+            // For 'hanging', no adjustment is needed as it's already anchored at the top.
         }
     });
 }
@@ -339,7 +343,17 @@ const GraphViewComponent = ({
             const rotation = -(d.x * 180 / Math.PI - 90);
             const radius = getNodeRadius(d);
             const spacing = 10;
-            const x = (d.x > Math.PI / 2 && d.x < 3 * Math.PI / 2) ? -radius - spacing : radius + spacing;
+            const angle = d.x; // 0 at top, PI at bottom
+            const isTopCone = angle > (1.75 * Math.PI) || angle < (0.25 * Math.PI);
+            const isBottomCone = angle > (0.75 * Math.PI) && angle < (1.25 * Math.PI);
+
+            if (isTopCone) {
+                return `rotate(${rotation}) translate(0, ${radius + spacing})`;
+            }
+            if (isBottomCone) {
+                return `rotate(${rotation}) translate(0, ${-radius - spacing})`;
+            }
+            const x = (angle > Math.PI / 2 && angle < 3 * Math.PI / 2) ? -radius - spacing : radius + spacing;
             return `rotate(${rotation}) translate(${x}, 0)`;
         }
         // For vertical and horizontal, no rotation.
@@ -348,26 +362,47 @@ const GraphViewComponent = ({
         if (layout === 'vertical') {
             return `translate(0, ${radius + spacing})`;
         } else { // horizontal
-            // Position text to the right of the node
             return `translate(${radius + spacing}, 0)`;
         }
       })
       .attr("text-anchor", d => {
           if (d.isProxy || layout === 'vertical') return "middle";
-          if (layout === 'horizontal') return "start"; // Always start (left) aligned for horizontal
-          // radial logic
-          return (d.x > Math.PI / 2 && d.x < 3 * Math.PI / 2) ? "end" : "start";
+          if (layout === 'horizontal') return "start";
+          
+          const angle = d.x;
+          const isTopCone = angle > (1.75 * Math.PI) || angle < (0.25 * Math.PI);
+          const isBottomCone = angle > (0.75 * Math.PI) && angle < (1.25 * Math.PI);
+
+          if (isTopCone || isBottomCone) {
+              return "middle";
+          }
+          return (angle > Math.PI / 2 && angle < 3 * Math.PI / 2) ? "end" : "start";
       })
       .attr("dominant-baseline", d => {
         if (d.isProxy) return "middle";
         if (layout === 'vertical') return "hanging";
-        return "middle"; // for radial and horizontal
+        if (layout === 'horizontal') return "middle";
+
+        if (layout === 'radial') {
+            const angle = d.x;
+            const isTopCone = angle > (1.75 * Math.PI) || angle < (0.25 * Math.PI);
+            const isBottomCone = angle > (0.75 * Math.PI) && angle < (1.25 * Math.PI);
+            if (isTopCone) return "hanging";
+            if (isBottomCone) return "baseline";
+            return "middle";
+        }
+        return "middle";
       })
       .attr("dy", d => {
         if (d.isProxy) return "0.3em";
         if (layout === 'horizontal') return "0.35em";
-        // For radial, dominant-baseline="middle" is enough for single lines. The wrap function handles multi-line.
-        // For vertical, dominant-baseline="hanging" is used.
+        if (layout === 'radial') {
+            const angle = d.x;
+            const isBottomCone = angle > (0.75 * Math.PI) && angle < (1.25 * Math.PI);
+            if (isBottomCone) {
+                return "-0.3em"; // Shift text up slightly for baseline alignment
+            }
+        }
         return null;
       })
       .attr("dx", null)
