@@ -368,19 +368,24 @@ const GraphViewComponent = ({
         }
 
         const radius = getNodeRadius(d);
-        const spacing = 10; // A bit more breathing room
+        const spacing = 10;
 
         if (layout === 'radial') {
-            // Position text outside the circle, and keep it horizontal
             const rotation = -(d.x * 180 / Math.PI - 90);
-            // d.x is angle in radians. 0 is top. PI is bottom.
-            // Bottom half is roughly PI/2 to 3*PI/2.
-            const isBottomHalf = d.x > Math.PI / 2 && d.x < 3 * Math.PI / 2;
-            const y = isBottomHalf ? (radius + spacing) : -(radius + spacing);
-            return `rotate(${rotation}) translate(0, ${y})`;
+            const epsilon = 0.01;
+            const isRight = d.x > epsilon && d.x < Math.PI - epsilon;
+            const isLeft = d.x > Math.PI + epsilon && d.x < 2 * Math.PI - epsilon;
+            
+            let xOffset = 0;
+            let yOffset = 0;
+
+            if (isRight) xOffset = radius + spacing;
+            else if (isLeft) xOffset = -(radius + spacing);
+            else yOffset = (d.x > Math.PI / 2 && d.x < 3 * Math.PI / 2) ? (radius + spacing) : -(radius + spacing);
+            
+            return `rotate(${rotation}) translate(${xOffset}, ${yOffset})`;
         }
         
-        // For vertical and horizontal, it's simpler.
         if (layout === 'vertical') {
             return `translate(0, ${radius + spacing})`;
         } else { // horizontal
@@ -390,15 +395,27 @@ const GraphViewComponent = ({
       .attr("text-anchor", d => {
         if (d.isProxy) return "middle";
         if (layout === 'horizontal') return "start";
-        return "middle"; // For both vertical and radial (since it's always below)
+        if (layout === 'vertical') return "middle";
+        
+        // Radial layout logic
+        const epsilon = 0.01;
+        if (d.x > epsilon && d.x < Math.PI - epsilon) return "start"; // Right
+        if (d.x > Math.PI + epsilon && d.x < 2 * Math.PI - epsilon) return "end"; // Left
+        return "middle"; // Top or Bottom
       })
       .attr("dominant-baseline", d => {
         if (d.isProxy) return "middle";
         if (layout === 'horizontal') return "middle";
+        
         if (layout === 'radial') {
-            // d.x is angle in radians. 0 is top. PI is bottom.
-            const isBottomHalf = d.x > Math.PI / 2 && d.x < 3 * Math.PI / 2;
-            return isBottomHalf ? 'hanging' : 'text-after-edge';
+            const epsilon = 0.01;
+            const isSide = (d.x > epsilon && d.x < Math.PI - epsilon) || (d.x > Math.PI + epsilon && d.x < 2 * Math.PI - epsilon);
+            if (isSide) {
+                return 'middle';
+            } else {
+                // Top or Bottom
+                return (d.x > Math.PI / 2 && d.x < 3 * Math.PI / 2) ? 'hanging' : 'text-after-edge';
+            }
         }
         return "hanging"; // For vertical
       })
