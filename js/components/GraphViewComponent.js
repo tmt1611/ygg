@@ -378,27 +378,20 @@ const GraphViewComponent = ({
       .style("pointer-events", "none")
       .attr("transform", d => {
         if (d.isProxy) {
-            // No rotation needed as parent group is not rotated in radial layout
-            return null;
+            return null; // Proxies are handled by their own label logic
         }
 
         const radius = getNodeRadius(d);
         const spacing = 10;
 
         if (layout === 'radial') {
-            // No rotation needed. Just calculate offset based on quadrant.
-            const epsilon = 0.01;
-            const isRight = d.x > epsilon && d.x < Math.PI - epsilon;
-            const isLeft = d.x > Math.PI + epsilon && d.x < 2 * Math.PI - epsilon;
-            
-            let xOffset = 0;
-            let yOffset = 0;
-
-            // Position text to the side of the node
-            if (isRight) xOffset = radius + spacing;
-            else if (isLeft) xOffset = -(radius + spacing);
-            else yOffset = (d.x > Math.PI / 2 && d.x < 3 * Math.PI / 2) ? (radius + spacing) : -(radius + spacing);
-            
+            // Position text radially outward from the node center, keeping it horizontal.
+            // The angle is adjusted because the d3.tree layout for radial starts from the right (0 rad) and goes clockwise.
+            // We want 0 to be at the top.
+            const angle = d.x - Math.PI / 2;
+            const offset = radius + spacing;
+            const xOffset = offset * Math.cos(angle);
+            const yOffset = offset * Math.sin(angle);
             return `translate(${xOffset}, ${yOffset})`;
         }
         
@@ -413,25 +406,36 @@ const GraphViewComponent = ({
         if (layout === 'horizontal') return "start";
         if (layout === 'vertical') return "middle";
         
-        // Radial layout logic
-        const epsilon = 0.01;
-        if (d.x > epsilon && d.x < Math.PI - epsilon) return "start"; // Right
-        if (d.x > Math.PI + epsilon && d.x < 2 * Math.PI - epsilon) return "end"; // Left
-        return "middle"; // Top or Bottom
+        // Radial layout: d.x is angle from d3.tree (0=top, PI/2=right, PI=bottom, 3PI/2=left)
+        const angle = d.x;
+        const tolerance = Math.PI / 12; // 15 degrees tolerance for pure top/bottom
+
+        if (angle < tolerance || angle > (2 * Math.PI - tolerance)) {
+            return "middle"; // Top
+        }
+        if (angle > (Math.PI - tolerance) && angle < (Math.PI + tolerance)) {
+            return "middle"; // Bottom
+        }
+        if (angle > Math.PI) {
+            return "end"; // Left side
+        }
+        return "start"; // Right side
       })
       .attr("dominant-baseline", d => {
         if (d.isProxy) return "middle";
         if (layout === 'horizontal') return "middle";
         
         if (layout === 'radial') {
-            const epsilon = 0.01;
-            const isSide = (d.x > epsilon && d.x < Math.PI - epsilon) || (d.x > Math.PI + epsilon && d.x < 2 * Math.PI - epsilon);
-            if (isSide) {
-                return 'middle';
-            } else {
-                // Top or Bottom
-                return (d.x > Math.PI / 2 && d.x < 3 * Math.PI / 2) ? 'hanging' : 'text-after-edge';
+            const angle = d.x;
+            const tolerance = Math.PI / 12;
+
+            if (angle < tolerance || angle > (2 * Math.PI - tolerance)) {
+                return 'text-after-edge'; // Top (anchor text above the point)
             }
+            if (angle > (Math.PI - tolerance) && angle < (Math.PI + tolerance)) {
+                return 'hanging'; // Bottom (anchor text below the point)
+            }
+            return 'middle'; // Sides
         }
         return "hanging"; // For vertical
       })
