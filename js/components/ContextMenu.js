@@ -67,6 +67,12 @@ const ContextMenu = ({
         { id: 'ai-insights', label: "Node Insights", icon: '💡', action: () => { onGenerateInsights(node); } },
         { id: 'ai-modify', label: "Modify with AI...", icon: '🤖', action: () => { onSwitchToAiOps(node); } },
     ];
+
+    const copySubmenu = [
+        { id: 'copy-name', label: "Name", icon: '📋', action: () => handleCopy('name') },
+        { id: 'copy-id', label: "ID", icon: '🆔', action: () => handleCopy('id') },
+        { id: 'copy-json', label: "as JSON", icon: '📦', action: () => handleCopy('json') },
+    ];
     
     const items = [
         { id: 'edit', label: "Edit Details...", icon: '✏️', action: () => onEditName(node) },
@@ -95,9 +101,7 @@ const ContextMenu = ({
     }
 
     items.push({ type: 'separator' });
-    items.push({ id: 'copy-name', label: "Copy Name", icon: '📋', action: () => handleCopy('name') });
-    items.push({ id: 'copy-id', label: "Copy ID", icon: '🆔', action: () => handleCopy('id') });
-    items.push({ id: 'copy-json', label: "Copy as JSON", icon: '📦', action: () => handleCopy('json') });
+    items.push({ id: 'copy-actions', label: "Copy...", icon: '📋', hasSubmenu: true, submenu: copySubmenu });
 
     if (onDeleteNode) {
         items.push({ type: 'separator' });

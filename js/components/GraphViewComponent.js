@@ -336,7 +336,11 @@ const GraphViewComponent = ({
       })
       .attr("transform", d => {
         if (layout === 'radial') {
-            return `rotate(${d.x * 180 / Math.PI - 90}) translate(${d.y}, 0)`;
+            // Use cartesian coordinates for radial layout to keep text horizontal
+            const angle = d.x - Math.PI / 2; // Adjust angle to start from top
+            const x = d.y * Math.cos(angle);
+            const y = d.y * Math.sin(angle);
+            return `translate(${x}, ${y})`;
         } else if (layout === 'vertical') {
             return `translate(${d.x}, ${d.y})`;
         } else { // horizontal
@@ -362,16 +366,15 @@ const GraphViewComponent = ({
       .style("pointer-events", "none")
       .attr("transform", d => {
         if (d.isProxy) {
-            // Keep proxy labels horizontal by counter-rotating them inside the transformed group
-            const rotation = layout === 'radial' ? -(d.x * 180 / Math.PI - 90) : 0;
-            return `rotate(${rotation})`;
+            // No rotation needed as parent group is not rotated in radial layout
+            return null;
         }
 
         const radius = getNodeRadius(d);
         const spacing = 10;
 
         if (layout === 'radial') {
-            const rotation = -(d.x * 180 / Math.PI - 90);
+            // No rotation needed. Just calculate offset based on quadrant.
             const epsilon = 0.01;
             const isRight = d.x > epsilon && d.x < Math.PI - epsilon;
             const isLeft = d.x > Math.PI + epsilon && d.x < 2 * Math.PI - epsilon;
@@ -379,11 +382,12 @@ const GraphViewComponent = ({
             let xOffset = 0;
             let yOffset = 0;
 
+            // Position text to the side of the node
             if (isRight) xOffset = radius + spacing;
             else if (isLeft) xOffset = -(radius + spacing);
             else yOffset = (d.x > Math.PI / 2 && d.x < 3 * Math.PI / 2) ? (radius + spacing) : -(radius + spacing);
             
-            return `rotate(${rotation}) translate(${xOffset}, ${yOffset})`;
+            return `translate(${xOffset}, ${yOffset})`;
         }
         
         if (layout === 'vertical') {
@@ -433,20 +437,14 @@ const GraphViewComponent = ({
       });
 
     nodeGroups.select(".node-rune-icon")
-      .attr("transform", d => {
-        if (layout === 'radial') return `rotate(${-(d.x * 180 / Math.PI - 90)})`;
-        return null; // No rotation for vertical or horizontal
-      })
+      .attr("transform", null) // No rotation needed for any layout
       .text(d => {
         if (d.isProxy) return '';
         return NODE_IMPORTANCE_RUNES[d.data.importance] || '•';
       });
 
     nodeGroups.select(".node-lock-icon")
-      .attr("transform", d => {
-        if (layout === 'radial') return `rotate(${-(d.x * 180 / Math.PI - 90)})`;
-        return null; // No rotation for vertical or horizontal
-      })
+      .attr("transform", null) // No rotation needed for any layout
       .text(d => (d.data.isLocked && !d.isProxy ? "🔒" : ""));
 
   }, [g, nodes, links, handleNodeClick, handleNodeDoubleClick, handleNodeContextMenu, projectLinksAndProxyNodes, layout]);
