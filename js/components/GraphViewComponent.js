@@ -61,14 +61,14 @@ function wrap(textSelection, width, maxLines = 3) {
             const firstTspan = text.select('tspan');
             const totalExtraHeightEms = (numLines - 1) * lineHeight;
             
-            // 'hanging' is the default for text below nodes, no adjustment needed.
             if (dominantBaseline === 'middle') {
                 // Shift the entire text block up by half its height
                 firstTspan.attr('dy', `-${totalExtraHeightEms / 2}em`);
-            } else if (dominantBaseline === 'baseline') {
-                // Shift up by the full height of all but the first line
+            } else if (dominantBaseline === 'baseline' || dominantBaseline === 'auto' || dominantBaseline === 'alphabetic' || dominantBaseline === 'text-after-edge') {
+                // For baselines at the bottom of the text, shift the whole block up.
                 firstTspan.attr('dy', `-${totalExtraHeightEms}em`);
             }
+            // 'hanging' and 'text-before-edge' are fine by default, as text flows down from the top.
         }
     });
 }
@@ -360,9 +360,12 @@ const GraphViewComponent = ({
         const spacing = 10; // A bit more breathing room
 
         if (layout === 'radial') {
-            // Always position text below the node, but keep it horizontal
+            // Position text outside the circle, and keep it horizontal
             const rotation = -(d.x * 180 / Math.PI - 90);
-            const y = radius + spacing;
+            // d.x is angle in radians. 0 is top. PI is bottom.
+            // Bottom half is roughly PI/2 to 3*PI/2.
+            const isBottomHalf = d.x > Math.PI / 2 && d.x < 3 * Math.PI / 2;
+            const y = isBottomHalf ? (radius + spacing) : -(radius + spacing);
             return `rotate(${rotation}) translate(0, ${y})`;
         }
         
@@ -381,7 +384,12 @@ const GraphViewComponent = ({
       .attr("dominant-baseline", d => {
         if (d.isProxy) return "middle";
         if (layout === 'horizontal') return "middle";
-        return "hanging"; // For both vertical and radial (since it's below)
+        if (layout === 'radial') {
+            // d.x is angle in radians. 0 is top. PI is bottom.
+            const isBottomHalf = d.x > Math.PI / 2 && d.x < 3 * Math.PI / 2;
+            return isBottomHalf ? 'hanging' : 'text-after-edge';
+        }
+        return "hanging"; // For vertical
       })
       .attr("dy", null) // dy is handled by the wrap function for multi-line text
       .attr("dx", null)
