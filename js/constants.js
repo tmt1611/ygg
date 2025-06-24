@@ -1,4 +1,3 @@
-
 export const APP_STORAGE_KEYS = {
   PROJECT_COLLECTION: 'yggdrasilProjectCollection_v2.1',
   ACTIVE_PROJECT_ID: 'yggdrasilActiveProjectId_v2.1',

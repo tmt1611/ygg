@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback } from 'react';
 import AiToolsTab from './tabs/AiToolsTab.js';
 import AiInsightsTab from './tabs/AiInsightsTab.js';

@@ -1,9 +1,9 @@
 import React from 'react';
 import WorkspaceTabContent from './tabs/WorkspaceTabContent.js';
-import GraphViewComponent from './GraphViewComponent.js';
+import GraphViewComponent from './components/GraphViewComponent.js';
 import ListViewTabContent from './tabs/ListViewTab.js';
-import FocusViewComponent from './FocusViewComponent.js';
-import LoadingSpinner from './LoadingSpinner.js';
+import FocusViewComponent from './components/FocusViewComponent.js';
+import LoadingSpinner from './components/LoadingSpinner.js';
 
 const MainContentRouter = ({
   appState,

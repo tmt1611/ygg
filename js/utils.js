@@ -193,6 +193,23 @@ export const countNodesByImportance = (tree) => {
     return counts;
 };
 
+export const countNodesByImportance = (tree) => {
+    const counts = { minor: 0, common: 0, major: 0 };
+    const traverse = (node) => {
+        if (node) {
+            const importance = node.importance || 'common';
+            if (counts[importance] !== undefined) {
+                counts[importance]++;
+            }
+            if (node.children) {
+                node.children.forEach(traverse);
+            }
+        }
+    };
+    traverse(tree);
+    return counts;
+};
+
 
 export const getTreeDepth = (node) => {
     if (!node || !node.children || node.children.length === 0) {
