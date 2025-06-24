@@ -15,9 +15,7 @@ export const useD3Tree = (
   config = {},
   onBackgroundClick,
   onBackgroundContextMenu,
-  layout = 'radial', // 'radial', 'vertical', 'horizontal'
-  isFocusMode,
-  activeNodeId
+  layout = 'radial' // 'radial', 'vertical', 'horizontal'
 ) => {
   const finalConfig = { ...defaultTreeConfig, ...config };
   const { margin, radialRadiusFactor } = finalConfig;
@@ -29,41 +27,10 @@ export const useD3Tree = (
 
   const rootHierarchy = useMemo(() => {
     if (!treeData) return null;
-    if (isFocusMode && activeNodeId) {
-        const allNodesMap = getAllNodesAsMap(treeData);
-        const focusNode = allNodesMap.get(activeNodeId);
-
-        if (focusNode) {
-            const parentNode = focusNode._parentId ? allNodesMap.get(focusNode._parentId) : null;
-            
-            let temporaryTree;
-            
-            if (parentNode) {
-                // Reconstruct parent with focus node and its siblings
-                const siblingNodes = parentNode.children.map(c => allNodesMap.get(c.id));
-                temporaryTree = { 
-                    ...parentNode, 
-                    children: siblingNodes.map(sibling => {
-                        if (sibling.id === focusNode.id) {
-                            // For the focus node, include its children
-                            return {
-                                ...focusNode,
-                                children: focusNode.children ? [...focusNode.children] : []
-                            };
-                        }
-                        // For siblings, show them but not their children
-                        return { ...sibling, children: [] };
-                    })
-                };
-            } else {
-                // focusNode is the root, so it's the root of our temporary tree
-                temporaryTree = { ...focusNode };
-            }
-            return hierarchy(temporaryTree);
-        }
-    }
+    // The hierarchy is now always based on the full treeData.
+    // Focus mode will be handled by dimming, not by changing the data.
     return hierarchy(treeData);
-  }, [treeData, isFocusMode, activeNodeId]);
+  }, [treeData]);
 
   const treeLayout = useMemo(() => {
     const depth = rootHierarchy ? rootHierarchy.height : 1;
@@ -103,7 +70,7 @@ export const useD3Tree = (
     const { clientWidth, clientHeight } = svgRef.current.parentElement;
     const currentTransform = select(svgRef.current).property('__zoom');
     const scale = currentTransform ? currentTransform.k : 1;
-    const effectiveLayout = isFocusMode ? 'vertical' : layout;
+    const effectiveLayout = layout;
 
     let x, y;
     if (effectiveLayout === 'radial') {
@@ -124,21 +91,21 @@ export const useD3Tree = (
       .translate(-x, -y);
 
     svgSelectionRef.current.transition().duration(750).call(zoomBehaviorRef.current.transform, transform);
-  }, [nodesAndLinks, layout, isFocusMode]);
+  }, [nodesAndLinks, layout]);
 
   const resetZoom = useCallback(() => {
     if (svgSelectionRef.current && zoomBehaviorRef.current && svgRef.current && svgRef.current.parentElement) {
       const { clientWidth, clientHeight } = svgRef.current.parentElement;
       if (clientWidth > 0 && clientHeight > 0) {
         let initialTransform;
-        const effectiveLayout = isFocusMode ? 'vertical' : layout; // Use the same logic as treeLayout
+        const effectiveLayout = layout;
 
         if (effectiveLayout === 'radial') {
             initialTransform = zoomIdentity.translate(clientWidth / 2, clientHeight / 2).scale(0.65);
         } else if (effectiveLayout === 'vertical') {
             // Center the tree horizontally, and position it near the top.
-            const yOffset = isFocusMode ? margin.top * 4 : margin.top * 4;
-            initialTransform = zoomIdentity.translate(clientWidth / 2, yOffset).scale(isFocusMode ? 0.9 : 0.65);
+            const yOffset = margin.top * 4;
+            initialTransform = zoomIdentity.translate(clientWidth / 2, yOffset).scale(0.65);
         } else { // horizontal
             // Center the tree vertically, and position it near the left.
             initialTransform = zoomIdentity.translate(margin.left * 6, clientHeight / 2).scale(0.6);
@@ -146,7 +113,7 @@ export const useD3Tree = (
         svgSelectionRef.current.transition().duration(750).call(zoomBehaviorRef.current.transform, initialTransform);
       }
     }
-  }, [layout, isFocusMode, margin.top, margin.left]);
+  }, [layout, margin.top, margin.left]);
 
   useLayoutEffect(() => {
     if (!svgRef.current) return;

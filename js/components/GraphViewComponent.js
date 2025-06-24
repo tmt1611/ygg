@@ -53,9 +53,7 @@ const GraphViewComponent = ({
     {}, 
     onCloseContextMenu, 
     handleBackgroundContextMenu, 
-    layout,
-    isFocusMode,
-    activeNodeId
+    layout
   );
 
   useEffect(() => {
@@ -80,21 +78,16 @@ const GraphViewComponent = ({
             // If turning on focus mode without a selected node, do nothing.
             return false;
         }
-        // When toggling focus mode, reset the zoom to re-center the view.
-        setTimeout(resetZoom, 50);
+        // Center on the active node when entering focus mode
+        if (newMode && activeNodeId) {
+            centerOnNode(activeNodeId);
+        }
         return newMode;
     });
-  }, [activeNodeId, resetZoom]);
-
-  const handlePathNodeSelect = useCallback((nodeId) => {
-    onSelectNode(nodeId);
-    // The activeNodeId change will cause useD3Tree to re-render with the new focus.
-    // We reset zoom to re-center on the new focus root.
-    setTimeout(resetZoom, 50);
-  }, [onSelectNode, resetZoom]);
+  }, [activeNodeId, centerOnNode]);
 
   const projectLinksAndProxyNodes = useMemo(() => {
-    if (isFocusMode || !nodes || nodes.length === 0 || !projects) {
+    if (!nodes || nodes.length === 0 || !projects) {
         return { proxyNodes: [], projectLinks: [] };
     }
 
@@ -174,7 +167,7 @@ const GraphViewComponent = ({
     }
 
     return { proxyNodes, projectLinks };
-  }, [nodes, projects, activeProjectId, findLinkSource, isFocusMode]);
+  }, [nodes, projects, activeProjectId, findLinkSource]);
 
 
   const handleNodeClick = useCallback((event, d) => {
@@ -228,7 +221,7 @@ const GraphViewComponent = ({
   useEffect(() => {
     if (!g || !nodes || !links) return;
 
-    const effectiveLayout = isFocusMode ? 'vertical' : layout;
+    const effectiveLayout = layout;
 
     const allNodes = [...nodes, ...projectLinksAndProxyNodes.proxyNodes];
     const allLinks = [...links, ...projectLinksAndProxyNodes.projectLinks];
@@ -429,16 +422,40 @@ const GraphViewComponent = ({
       .attr("transform", null) // No rotation needed for any layout
       .text(d => (d.data.isLocked && !d.isProxy ? "🔒" : ""));
 
-  }, [g, nodes, links, handleNodeClick, handleNodeDoubleClick, handleNodeContextMenu, projectLinksAndProxyNodes, layout, isFocusMode]);
+  }, [g, nodes, links, handleNodeClick, handleNodeDoubleClick, handleNodeContextMenu, projectLinksAndProxyNodes, layout]);
 
-  // Effect for dynamic styling (selection, search highlight)
+  // Effect for dynamic styling (selection, search highlight, focus mode)
   useEffect(() => {
     if (!g) return;
 
     const nodeSelection = g.selectAll(".graph-view-node");
     const linkSelection = g.selectAll(".graph-view-link, .graph-view-project-link");
 
-    if (searchTerm?.trim()) {
+    // Reset classes
+    nodeSelection.classed("highlighted", false).classed("dimmed", false);
+    linkSelection.classed("dimmed", false);
+
+    if (isFocusMode && activeNodeId) {
+        const focusNode = nodes.find(n => n.data.id === activeNodeId);
+        if (focusNode) {
+            const inFocusIds = new Set([activeNodeId]);
+            if (focusNode.parent) {
+                inFocusIds.add(focusNode.parent.data.id);
+                // Add siblings
+                focusNode.parent.children.forEach(sibling => inFocusIds.add(sibling.data.id));
+            }
+            if (focusNode.children) {
+                focusNode.children.forEach(child => inFocusIds.add(child.data.id));
+            }
+
+            nodeSelection.classed("dimmed", d => !d.isProxy && !inFocusIds.has(d.data.id));
+            linkSelection.classed("dimmed", d => {
+                const sourceInFocus = d.source.isProxy || inFocusIds.has(d.source.data.id);
+                const targetInFocus = d.target.isProxy || inFocusIds.has(d.target.data.id);
+                return !(sourceInFocus && targetInFocus);
+            });
+        }
+    } else if (searchTerm?.trim()) {
         const lowerCaseSearchTerm = searchTerm.toLowerCase();
         const matchingNodeIds = new Set();
         
@@ -465,10 +482,6 @@ const GraphViewComponent = ({
                 const targetIsMatch = d.target.isProxy || matchingNodeIds.has(d.target.data.id);
                 return !(sourceIsMatch && targetIsMatch);
             });
-
-    } else {
-        nodeSelection.classed("highlighted", false).classed("dimmed", false);
-        linkSelection.classed("dimmed", false);
     }
     
     nodeSelection
@@ -511,7 +524,7 @@ const GraphViewComponent = ({
                 React.createElement(PathToRootDisplay, {
                     treeData: treeData,
                     currentNodeId: activeNodeId,
-                    onSelectPathNode: handlePathNodeSelect,
+                    onSelectPathNode: onSelectNode, // Clicking path now just selects, doesn't force re-layout
                     pathContext: "graph-focus"
                 })
             )
