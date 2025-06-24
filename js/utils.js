@@ -95,6 +95,25 @@ export const removeNodeAndChildrenFromTree = (tree, nodeIdToRemove) => {
     return removeRecursively(tree);
 };
 
+export const updateAllChildren = (tree, parentId, updates) => {
+    const updateRecursively = (node) => {
+        if (node.id === parentId) {
+            if (!node.children || node.children.length === 0) return node;
+            const updatedChildren = node.children.map(child => ({ ...child, ...updates }));
+            return { ...node, children: updatedChildren };
+        }
+        if (node.children) {
+            return { ...node, children: node.children.map(child => updateRecursively(child)) };
+        }
+        return node;
+    };
+    return updateRecursively(tree);
+};
+
+export const deleteAllChildren = (tree, parentId) => {
+    return updateNodeInTree(tree, parentId, { children: [] });
+};
+
 export const lockAllNodesInTree = (tree) => {
     const lockRecursively = (node) => {
         const lockedNode = { ...node, isLocked: true };

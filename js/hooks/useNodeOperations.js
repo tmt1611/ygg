@@ -1,5 +1,5 @@
 import { useCallback } from 'react';
-import { findNodeById, updateNodeInTree, addNodeToParent, lockAllNodesInTree, unlockAllNodesInTree, areAllNodesLocked, removeNodeAndChildrenFromTree } from '../utils.js';
+import { findNodeById, updateNodeInTree, addNodeToParent, lockAllNodesInTree, unlockAllNodesInTree, areAllNodesLocked, removeNodeAndChildrenFromTree, updateAllChildren, deleteAllChildren } from '../utils.js';
 
 export const useNodeOperations = ({
   techTreeData, 
@@ -170,6 +170,57 @@ export const useNodeOperations = ({
     });
   }, [techTreeData, modalManager]);
 
+  const handleLockAllChildren = useCallback((parentId) => {
+    if (!techTreeData) return;
+    const parentNode = findNodeById(techTreeData, parentId);
+    if (!parentNode || !parentNode.children || parentNode.children.length === 0) return;
+    const updatedTree = updateAllChildren(techTreeData, parentId, { isLocked: true });
+    setTechTreeData(updatedTree);
+    handleSaveActiveProject(false);
+    addHistoryEntry('NODE_UPDATED', `All children of "${parentNode.name}" have been locked.`);
+  }, [techTreeData, setTechTreeData, handleSaveActiveProject, addHistoryEntry]);
+
+  const handleUnlockAllChildren = useCallback((parentId) => {
+    if (!techTreeData) return;
+    const parentNode = findNodeById(techTreeData, parentId);
+    if (!parentNode || !parentNode.children || parentNode.children.length === 0) return;
+    const updatedTree = updateAllChildren(techTreeData, parentId, { isLocked: false });
+    setTechTreeData(updatedTree);
+    handleSaveActiveProject(false);
+    addHistoryEntry('NODE_UPDATED', `All children of "${parentNode.name}" have been unlocked.`);
+  }, [techTreeData, setTechTreeData, handleSaveActiveProject, addHistoryEntry]);
+
+  const handleChangeImportanceOfAllChildren = useCallback((parentId, importance) => {
+    if (!techTreeData) return;
+    const parentNode = findNodeById(techTreeData, parentId);
+    if (!parentNode || !parentNode.children || parentNode.children.length === 0) return;
+    const updatedTree = updateAllChildren(techTreeData, parentId, { importance });
+    setTechTreeData(updatedTree);
+    handleSaveActiveProject(false);
+    addHistoryEntry('NODE_UPDATED', `Importance of all children of "${parentNode.name}" set to ${importance}.`);
+  }, [techTreeData, setTechTreeData, handleSaveActiveProject, addHistoryEntry]);
+
+  const handleDeleteAllChildren = useCallback((parentId) => {
+    if (!techTreeData) return;
+    const parentNode = findNodeById(techTreeData, parentId);
+    if (!parentNode || !parentNode.children || parentNode.children.length === 0) return;
+    
+    openConfirmModal({
+        title: "Delete All Children?",
+        message: `Delete all direct children of "${parentNode.name}"? This action cannot be undone.`,
+        confirmText: "Delete All",
+        confirmButtonStyle: 'danger',
+        onConfirm: () => {
+            const updatedTree = deleteAllChildren(techTreeData, parentId);
+            setTechTreeData(updatedTree);
+            handleSaveActiveProject(false);
+            addHistoryEntry('NODE_DELETED', `All children of "${parentNode.name}" deleted.`);
+            closeConfirmModal();
+        },
+        onCancel: closeConfirmModal,
+    });
+  }, [techTreeData, setTechTreeData, handleSaveActiveProject, addHistoryEntry, openConfirmModal, closeConfirmModal]);
+
 
   return {
     handleToggleNodeLock,
@@ -179,5 +230,9 @@ export const useNodeOperations = ({
     handleQuickAddChild,
     handleToggleAllLock,
     handleAddNodeToRoot,
+    handleLockAllChildren,
+    handleUnlockAllChildren,
+    handleChangeImportanceOfAllChildren,
+    handleDeleteAllChildren,
   };
 };

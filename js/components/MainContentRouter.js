@@ -26,7 +26,6 @@ const MainContentRouter = ({
 
   const {
     handleExtractData, handleNodeSelectedForInsightsOrActions,
-    handleDeleteNodeWithConfirmation,
     onOpenViewContextMenu,
     onAddNodeToRoot,
   } = appCallbacks;
@@ -141,7 +140,7 @@ const MainContentRouter = ({
           onNavigateToLinkedProject: projectLinkingHook.handleNavigateToLinkedProject,
           onUnlinkProjectFromNode: projectLinkingHook.handleUnlinkProjectFromNode,
           onOpenLinkProjectModal: projectLinkingHook.handleOpenLinkProjectModal,
-          onDeleteNode: handleDeleteNodeWithConfirmation,
+          onDeleteNode: nodeOperations.handleDeleteNodeWithConfirmation,
           onOpenContextMenu: modalManager.openContextMenu,
           projects: projectManager.projects,
           activeProjectId: projectManager.activeProjectId,

@@ -5,6 +5,7 @@ import { getNodePathString } from '../utils.js';
 const ContextMenu = ({
   isOpen, position, node, techTreeData, onClose, onToggleLock, onChangeImportance, onEditName, onAddChild,
   onSetFocus, onDeleteNode, onLinkToProject, onGoToLinkedProject, onUnlinkProject, onGenerateInsights, onSwitchToAiOps,
+  onLockAllChildren, onUnlockAllChildren, onChangeImportanceOfAllChildren, onDeleteAllChildren,
   projects, activeProjectId, currentProjectRootId, findLinkSource, handleNavigateToSourceNode,
   linkSourceInfoFromView,
 }) => {
@@ -58,6 +59,8 @@ const ContextMenu = ({
   const menuItems = useMemo(() => {
     if (!node) return [];
 
+    const hasChildren = node.children && node.children.length > 0;
+
     const importanceSubmenu = NODE_IMPORTANCE_OPTIONS.map(opt => ({
         id: `importance-${opt.value}`,
         label: opt.label,
@@ -106,13 +109,34 @@ const ContextMenu = ({
     items.push({ type: 'separator' });
     items.push({ id: 'copy-actions', label: "Copy...", icon: '📋', hasSubmenu: true, submenu: copySubmenu });
 
+    items.push({ type: 'separator' });
+    items.push({ id: 'copy-actions', label: "Copy...", icon: '📋', hasSubmenu: true, submenu: copySubmenu });
+
+    if (hasChildren) {
+        const bulkImportanceSubmenu = NODE_IMPORTANCE_OPTIONS.map(opt => ({
+            id: `bulk-importance-${opt.value}`,
+            label: opt.label,
+            action: () => onChangeImportanceOfAllChildren(node.id, opt.value),
+        }));
+
+        const bulkActionsSubmenu = [
+            { id: 'bulk-lock', label: "Lock All Children", icon: '🔒', action: () => onLockAllChildren(node.id) },
+            { id: 'bulk-unlock', label: "Unlock All Children", icon: '🔓', action: () => onUnlockAllChildren(node.id) },
+            { id: 'bulk-set-importance', label: "Set Importance for All...", icon: '⚖️', hasSubmenu: true, submenu: bulkImportanceSubmenu },
+            { type: 'separator' },
+            { id: 'bulk-delete', label: "Delete All Children...", icon: '🗑️', isDestructive: true, action: () => onDeleteAllChildren(node.id) },
+        ];
+        items.push({ type: 'separator' });
+        items.push({ id: 'bulk-actions', label: "Actions on Children...", icon: '⚡️', hasSubmenu: true, submenu: bulkActionsSubmenu });
+    }
+
     if (onDeleteNode) {
         items.push({ type: 'separator' });
         items.push({ id: 'delete-node', label: "Delete Node...", icon: '🗑️', isDestructive: true, action: () => onDeleteNode(node.id) });
     }
 
     return items.filter(item => item.condition !== false);
-  }, [node, onEditName, onAddChild, onToggleLock, onSetFocus, onLinkToProject, onGoToLinkedProject, onUnlinkProject, onDeleteNode, onGenerateInsights, onSwitchToAiOps, handleCopy, incomingLink, handleNavigateToSourceNode, onChangeImportance]);
+  }, [node, onEditName, onAddChild, onToggleLock, onSetFocus, onLinkToProject, onGoToLinkedProject, onUnlinkProject, onDeleteNode, onGenerateInsights, onSwitchToAiOps, handleCopy, incomingLink, handleNavigateToSourceNode, onChangeImportance, onLockAllChildren, onUnlockAllChildren, onChangeImportanceOfAllChildren, onDeleteAllChildren]);
 
   const focusableItems = useMemo(() => menuItems.filter(item => item.type !== 'separator' && !item.isDisabled), [menuItems]);
   const openSubmenuItems = useMemo(() => {
