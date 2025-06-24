@@ -12,6 +12,7 @@ const ContextMenu = ({
   linkSourceInfoFromView,
 }) => {
   const menuRef = useRef(null);
+  const submenuTimerRef = useRef(null);
   const [openSubmenuId, setOpenSubmenuId] = useState(null);
   const [focusedIndex, setFocusedIndex] = useState(-1);
   const [focusedSubmenuIndex, setFocusedSubmenuIndex] = useState(-1);
@@ -222,6 +223,7 @@ const ContextMenu = ({
         setFocusedSubmenuIndex(-1);
         setCopyFeedback('');
         setCopyError('');
+        if (submenuTimerRef.current) clearTimeout(submenuTimerRef.current);
         return;
     }
     
@@ -312,12 +314,17 @@ const ContextMenu = ({
             }
         },
         onMouseEnter: () => {
+            if (submenuTimerRef.current) clearTimeout(submenuTimerRef.current);
             if (isSubmenu) {
                 setFocusedSubmenuIndex(index);
             } else {
                 setFocusedIndex(focusableItems.findIndex(fi => fi.id === item.id));
-                if (item.hasSubmenu) setOpenSubmenuId(item.id);
-                else setOpenSubmenuId(null);
+                if (item.hasSubmenu) {
+                    setOpenSubmenuId(item.id);
+                } else {
+                    // This is handled by the main div's onMouseLeave timer now
+                    // setOpenSubmenuId(null);
+                }
             }
         },
         disabled: item.isDisabled,
@@ -333,8 +340,20 @@ const ContextMenu = ({
     );
   };
 
+  const handleMouseLeaveMenu = () => {
+    submenuTimerRef.current = setTimeout(() => {
+      setOpenSubmenuId(null);
+    }, 200);
+  };
+
+  const handleMouseEnterMenu = () => {
+    if (submenuTimerRef.current) {
+      clearTimeout(submenuTimerRef.current);
+    }
+  };
+
   return (
-    React.createElement("div", { ref: menuRef, className: "context-menu", style: menuStyle, role: "menu", "aria-orientation": "vertical", "aria-labelledby": "context-menu-node-name", onKeyDown: handleKeyDown, onMouseLeave: () => setOpenSubmenuId(null) },
+    React.createElement("div", { ref: menuRef, className: "context-menu", style: menuStyle, role: "menu", "aria-orientation": "vertical", "aria-labelledby": "context-menu-node-name", onKeyDown: handleKeyDown, onMouseLeave: handleMouseLeaveMenu, onMouseEnter: handleMouseEnterMenu },
       React.createElement("div", { id: "context-menu-node-name", className: "context-menu-header" },
         React.createElement("span", { className: "context-menu-icon", "aria-hidden": "true" }, importanceRune),
         React.createElement("strong", { title: node.name, style: { flexGrow: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis' } }, node.name.length > 25 ? `${node.name.substring(0, 22)}...` : node.name),
@@ -349,7 +368,7 @@ const ContextMenu = ({
         menuItems.map((item) => renderMenuItem(item, -1, false))
       ),
       openSubmenuId && openSubmenuItems.length > 0 && (
-        React.createElement("div", { className: "context-menu submenu", role: "menu", style: submenuStyle },
+        React.createElement("div", { className: "context-menu submenu", role: "menu", style: submenuStyle, onMouseEnter: handleMouseEnterMenu },
           React.createElement("ul", null,
             openSubmenuItems.map((item, index) => renderMenuItem(item, index, true))
           )

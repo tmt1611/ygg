@@ -6,7 +6,8 @@ export const generateUUID = () => uuidv4();
 export const initializeNodes = (node, parentId = null) => {
   if (!node) return null;
   const newNode = { ...node, _parentId: parentId };
-  if (!newNode.id) {
+  // Assign a new UUID if the node has no ID or has the placeholder ID from AI.
+  if (!newNode.id || newNode.id === 'NEW_NODE') {
     newNode.id = generateUUID();
   }
   if (newNode.children && newNode.children.length > 0) {
