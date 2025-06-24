@@ -320,25 +320,27 @@ const GraphViewComponent = ({
             const xOffset = isLeftSide ? -(radius + spacing) : (radius + spacing);
             return `translate(${xOffset}, 0)`;
         }
-        if (layout === 'horizontal') {
+        // For vertical layout, position text to the side to avoid link overlap
+        if (layout === 'vertical') {
             return `translate(${radius + spacing}, 0)`;
         }
-        // For vertical, position below
+        // For horizontal layout, position text below the node
         return `translate(0, ${radius + spacing})`;
       })
       .attr("text-anchor", d => {
         if (d.isProxy) return "middle";
         if (layout === 'radial') {
             const angle = d.x;
-            // Check if node is on the left side of the circle (PI/2 to 3PI/2)
             return (angle > Math.PI / 2 && angle < 3 * Math.PI / 2) ? "end" : "start";
         }
-        if (layout === 'horizontal') return "start";
+        if (layout === 'vertical') return "start";
+        // For horizontal layout, text is below and centered
         return "middle";
       })
       .attr("dominant-baseline", d => {
         if (d.isProxy) return "middle";
-        if (layout === 'radial' || layout === 'horizontal') return "middle";
+        if (layout === 'radial' || layout === 'vertical') return "middle";
+        // For horizontal layout, text is below, so baseline is 'hanging'
         return "hanging";
       })
       .attr("dy", null) // dy is handled by the wrap function for multi-line text
