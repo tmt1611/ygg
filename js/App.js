@@ -58,7 +58,18 @@ const App = () => {
     if (typeof err === 'string') {
         _setError({ message: err });
     } else if (err instanceof Error) {
-        _setError({ message: err.message, details: err.stack });
+        let details = err.stack;
+        if (err.prompt || err.rawResponse) {
+            details = '';
+            if (err.prompt) {
+                details += `--- PROMPT SENT TO AI ---\n${err.prompt}\n\n`;
+            }
+            if (err.rawResponse) {
+                details += `--- RAW RESPONSE FROM AI ---\n${err.rawResponse}\n\n`;
+            }
+            details += `--- STACK TRACE ---\n${err.stack}`;
+        }
+        _setError({ message: err.message, details: details });
     } else if (typeof err === 'object' && err !== null && err.message) {
         _setError({ message: err.message, details: err.details || JSON.stringify(err, null, 2) });
     } else {

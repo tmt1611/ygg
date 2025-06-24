@@ -72,12 +72,17 @@ export const clearActiveApiKey = () => {
 
 export const isApiKeySet = () => apiClientState.isKeyAvailable && apiClientState.client !== null;
 
-const constructApiError = (error, baseMessage) => {
-  let detailedMessage = baseMessage;
+const constructApiError = (error, baseMessage, context = {}) => {
+  const errorToThrow = new Error();
+  if (context.prompt) errorToThrow.prompt = context.prompt;
+  if (context.rawResponse) errorToThrow.rawResponse = context.rawResponse;
+
   if (!isApiKeySet()) {
-     return new Error("API Key not set or invalid. Please provide a valid API Key in 'Workspace' -> 'Project Management'.");
+     errorToThrow.message = "API Key not set or invalid. Please provide a valid API Key in 'Workspace' -> 'API Key Setup'.";
+     return errorToThrow;
   }
   
+  let detailedMessage = baseMessage;
   if (error?.message) {
     const errorMsgLower = error.message.toLowerCase();
     if (!error.message.startsWith("AI returned invalid JSON")) {
@@ -88,7 +93,8 @@ const constructApiError = (error, baseMessage) => {
     const quotaIndicators = ["quota", "user_rate_limit", "resource_exhausted", "rate limit"];
     if (quotaIndicators.some(indicator => errorMsgLower.includes(indicator)) || error.status === 429) {
       detailedMessage = `API quota exceeded or rate limit hit. Please check your Gemini API usage and limits, or try again later. (Source: ${apiClientState.activeSource || 'current key'})`;
-      return new Error(detailedMessage);
+      errorToThrow.message = detailedMessage;
+      return errorToThrow;
     }
     
     const invalidKeyIndicators = ["api key not valid", "provide an api key", "api_key_invalid", "permission denied", "authentication failed", "invalid api key", "api key authorization failed"];
@@ -101,7 +107,8 @@ const constructApiError = (error, baseMessage) => {
       detailedMessage = `The API Key (from ${previousSource || 'previous source'}) is invalid or lacks permissions, and has been cleared. Please set a new key in Workspace > API Key Setup.`;
     }
   }
-  return new Error(detailedMessage);
+  errorToThrow.message = detailedMessage;
+  return errorToThrow;
 };
 
 
@@ -160,7 +167,9 @@ const parseGeminiJsonResponse = (responseText, forModification = false) => {
     return parsed;
   } catch(e) {
     console.error("Gemini JSON parsing critical error. Raw text:", responseText, "Attempted to parse:", jsonStr, "Error:", e);
-    throw new Error(`AI returned invalid JSON. ${e.message || 'Parsing failed.'} Check console for raw response.`);
+    const newError = new Error(`AI returned invalid JSON. ${e.message || 'Parsing failed.'} Check console for raw response.`);
+    newError.rawResponse = responseText;
+    throw newError;
   }
 };
 
@@ -200,13 +209,13 @@ Strict JSON Rules:
 1. Keys and string values in DOUBLE QUOTES. No trailing commas.
 2. Valid importances: "minor", "common", "major". Default: "common" for new nodes.
 3. Output ONLY the single JSON object (for new tree) or the complete modified tree's root JSON object. NO extra text/markdown.
-4. ALL nodes MUST have: "id", "name", "description" (use "" if empty), "isLocked" (boolean), "importance" (string), "children" (array, can be empty []).
+4. Every single node, from the root to the deepest child, MUST contain all of these exact keys: "id", "name", "description", "isLocked", "importance", "children". If a node has no description, use an empty string: "description": "".
 5. Ensure all string values are properly escaped for JSON.
 `;
 
 export const generateTechTree = async (userPrompt) => {
   if (!apiClientState.client || !apiClientState.isKeyAvailable) {
-    throw new Error("Gemini API client not initialized. Set a valid API Key in 'Workspace' -> 'Project Management'.");
+    throw new Error("Gemini API client not initialized. Set a valid API Key in 'Workspace' -> 'API Key Setup'.");
   }
 
   try {
@@ -315,13 +324,13 @@ Output the complete, modified JSON for the tech tree, adhering to ALL rules abov
 
   } catch (error) {
     console.error("Error modifying tech tree via Gemini API:", error);
-    throw constructApiError(error, "Failed to modify tech tree using AI.");
+    throw constructApiError(error, "Failed to modify tech tree using AI.", { prompt: fullPrompt, rawResponse: error.rawResponse });
   }
 };
 
 export const summarizeText = async (textToSummarize) => {
   if (!apiClientState.client || !apiClientState.isKeyAvailable) {
-    throw new Error("Gemini API client not initialized. Set a valid API Key in 'Workspace' -> 'Project Management'.");
+    throw new Error("Gemini API client not initialized. Set a valid API Key in 'Workspace' -> 'API Key Setup'.");
   }
 
   const prompt = `You are a helpful assistant. Summarize the following text, which describes a hierarchical tech tree or skill tree. 
