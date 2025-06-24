@@ -391,6 +391,27 @@ html[data-theme='ocean'] .panel-header-icon { color: var(--primary-accent-dark);
 
 @keyframes modalFadeIn { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
 
+/* AI Quick Edit Modal */
+.ai-quick-edit-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 15px 0; }
+.ai-quick-edit-prompt-section, .ai-quick-edit-preview-section { display: flex; flex-direction: column; gap: 8px; }
+.ai-quick-edit-prompt-section textarea { min-height: 120px; resize: vertical; }
+.ai-quick-edit-preview-section { background-color: var(--panel-alt-bg); border: 1px solid var(--border-color); border-radius: var(--border-radius); padding: 10px; min-height: 200px; }
+.ai-quick-edit-preview-title { font-size: 1em; font-weight: 600; color: var(--text-primary); margin: 0 0 10px 0; padding-bottom: 5px; border-bottom: 1px solid var(--border-color); }
+.ai-quick-edit-placeholder { text-align: center; color: var(--text-tertiary); font-style: italic; margin-top: 20px; }
+.ai-quick-edit-diff-container { display: flex; flex-direction: column; gap: 12px; }
+.quick-edit-diff-item { font-size: 0.9em; }
+.quick-edit-diff-label { color: var(--text-secondary); text-transform: uppercase; font-size: 0.8em; font-weight: 600; }
+.quick-edit-diff-content { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 4px; }
+.quick-edit-diff-content pre { margin: 0; padding: 6px 8px; border-radius: var(--border-radius); white-space: pre-wrap; word-break: break-word; font-size: 0.9em; line-height: 1.4; }
+.diff-from pre { background-color: var(--error-bg); border: 1px solid var(--error-color); opacity: 0.8; }
+.diff-to pre { background-color: var(--success-bg); border: 1px solid var(--success-color); }
+.diff-tag { font-size: 0.7em; font-weight: bold; color: var(--text-tertiary); margin-bottom: 2px; display: block; }
+.quick-edit-children-diff { padding: 6px 8px; border: 1px solid var(--border-color); border-radius: var(--border-radius); background-color: var(--app-bg); }
+.quick-edit-children-diff p { margin: 2px 0; font-family: monospace; font-size: 0.9em; }
+.diff-child-added { color: var(--success-color); }
+.diff-child-removed { color: var(--error-color); text-decoration: line-through; }
+.diff-child-changed { color: var(--primary-accent-dark); }
+
 
 /* AI Suggestion Modal Styles */
 .ai-suggestion-modal-layout { display: flex; flex-grow: 1; gap: 15px; overflow: hidden; transition: gap 0.3s ease; }

@@ -466,3 +466,56 @@ Respond ONLY with the JSON array. No extra text or markdown.
     throw constructApiError(error, "Failed to generate AI strategic suggestions.");
   }
 };
+
+export const quickEditNode = async (nodeToEdit, modificationPrompt) => {
+  if (!apiClientState.client || !apiClientState.isKeyAvailable) {
+    throw new Error("Gemini API client not initialized. Set a valid API Key.");
+  }
+
+  const systemInstruction = `You are an AI assistant that modifies a single JSON node object from a tech tree based on a user instruction.
+**MANDATORY RULES:**
+1.  **Preserve IDs:** RETAIN the 'id' of the main node and any existing children. For NEW children you add, use "NEW_NODE" as the 'id' value.
+2.  **Locked Node:** The provided node is NOT locked. You are free to change its 'name', 'description', and 'importance'.
+3.  **Node Importance:** Must be one of "minor", "common", or "major".
+4.  **Mandatory Fields:** The returned node object MUST have these fields: 'id', 'name', 'description', 'isLocked', 'importance', and 'children'.
+5.  **Output Format:** Respond ONLY with a single, valid JSON object for the modified node. NO EXTRA TEXT, explanations, or markdown fences.
+6.  **JSON Syntax:** Strictly follow JSON rules.
+`;
+
+  const fullPrompt = `
+Current Node JSON:
+\`\`\`json
+${JSON.stringify(nodeToEdit, null, 2)}
+\`\`\`
+User instruction: "${modificationPrompt}"
+
+Output the complete, modified JSON for this single node, adhering to ALL rules. Respond ONLY with the JSON.
+`;
+
+  try {
+    const model = apiClientState.client.getGenerativeModel({ 
+      model: "gemini-1.5-flash-latest",
+      systemInstruction: { parts: [{ text: systemInstruction }], role: "model" },
+      generationConfig: { 
+        responseMimeType: "application/json", 
+        temperature: 0.3, topK: 40, topP: 0.95 
+      },
+    });
+
+    const result = await model.generateContent(fullPrompt);
+    const response = result.response;
+    
+    const parsedData = parseGeminiJsonResponse(response.text(), true);
+
+    if (!isValidTechTreeNodeShape(parsedData)) {
+        console.error("Gemini quick edit resulted in invalid JSON node structure.", parsedData);
+        throw new Error("AI suggestion has an invalid node structure (e.g., name/children/importance missing or invalid type).");
+    }
+    
+    return parsedData;
+
+  } catch (error) {
+    console.error("Error quick editing node via Gemini API:", error);
+    throw constructApiError(error, "Failed to quick edit node using AI.");
+  }
+};
