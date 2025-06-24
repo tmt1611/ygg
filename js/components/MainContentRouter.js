@@ -78,7 +78,8 @@ const MainContentRouter = ({
           activeProjectId: projectManager.activeProjectId,
           findLinkSource: projectLinkingHook.findLinkSource,
           handleNavigateToSourceNode: projectLinkingHook.handleNavigateToSourceNode,
-          onNavigateToLinkedProject: projectLinkingHook.handleNavigateToLinkedProject
+          onNavigateToLinkedProject: projectLinkingHook.handleNavigateToLinkedProject,
+          modalManager: modalManager
         });
 
       case 'list':

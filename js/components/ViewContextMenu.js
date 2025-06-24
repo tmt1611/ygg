@@ -8,11 +8,20 @@ const ViewContextMenu = ({ isOpen, config, onClose }) => {
     const menuItems = React.useMemo(() => {
         if (!config || !config.actions) return [];
         const { actions } = config;
-        return [
+        const items = [
             { id: 'reset-zoom', label: 'Reset View', icon: '🎯', action: actions.onResetZoom },
             { id: 'toggle-layout', label: `Layout: ${actions.nextLayoutInfo.next}`, icon: actions.nextLayoutInfo.icon, action: actions.onToggleLayout },
         ];
+
+        if (actions.onAddChildToRoot) {
+            items.push({ type: 'separator' });
+            items.push({ id: 'add-child-to-root', label: 'Add Node to Root', icon: '➕', action: actions.onAddChildToRoot });
+        }
+
+        return items;
     }, [config]);
+
+    const focusableItems = React.useMemo(() => menuItems.filter(item => item.type !== 'separator'), [menuItems]);
 
     useEffect(() => {
         if (isOpen && config.position && menuRef.current) {
@@ -43,29 +52,29 @@ const ViewContextMenu = ({ isOpen, config, onClose }) => {
     }, [isOpen, onClose]);
 
     const handleKeyDown = useCallback((event) => {
-        if (!isOpen || menuItems.length === 0) return;
+        if (!isOpen || focusableItems.length === 0) return;
         event.preventDefault();
         switch (event.key) {
             case 'ArrowUp':
-                setFocusedIndex(prev => (prev - 1 + menuItems.length) % menuItems.length);
+                setFocusedIndex(prev => (prev - 1 + focusableItems.length) % focusableItems.length);
                 break;
             case 'ArrowDown':
-                setFocusedIndex(prev => (prev + 1) % menuItems.length);
+                setFocusedIndex(prev => (prev + 1) % focusableItems.length);
                 break;
             case 'Enter':
             case ' ':
-                const item = menuItems[focusedIndex];
+                const item = focusableItems[focusedIndex];
                 if (item?.action) {
                     item.action();
                     onClose();
                 }
                 break;
         }
-    }, [isOpen, menuItems, focusedIndex, onClose]);
+    }, [isOpen, focusableItems, focusedIndex, onClose]);
 
     useEffect(() => {
         if (!isOpen || !menuRef.current || focusedIndex < 0) return;
-        const items = menuRef.current.querySelectorAll('.context-menu-item');
+        const items = menuRef.current.querySelectorAll('button[role="menuitem"]');
         items[focusedIndex]?.focus();
     }, [isOpen, focusedIndex]);
 
@@ -78,19 +87,25 @@ const ViewContextMenu = ({ isOpen, config, onClose }) => {
                 React.createElement("button", { onClick: onClose, className: "base-icon-button context-menu-close-btn", title: "Close Menu (Esc)", "aria-label": "Close context menu" }, "×")
             ),
             React.createElement("ul", null,
-                menuItems.map((item, index) => (
-                    React.createElement("li", { key: item.id, role: "none" },
-                        React.createElement("button", {
-                            role: "menuitem",
-                            className: `context-menu-item ${focusedIndex === index ? 'focused' : ''}`,
-                            onClick: () => { if (item.action) { item.action(); onClose(); } },
-                            onMouseEnter: () => setFocusedIndex(index),
-                        },
-                            React.createElement("span", { className: "context-menu-icon" }, item.icon),
-                            React.createElement("span", { className: "context-menu-label" }, item.label)
+                menuItems.map((item, index) => {
+                    if (item.type === 'separator') {
+                        return React.createElement("li", { key: `sep-${index}`, role: "separator" }, React.createElement("hr", null));
+                    }
+                    const isFocused = focusedIndex === focusableItems.findIndex(fi => fi.id === item.id);
+                    return (
+                        React.createElement("li", { key: item.id, role: "none" },
+                            React.createElement("button", {
+                                role: "menuitem",
+                                className: `context-menu-item ${isFocused ? 'focused' : ''}`,
+                                onClick: () => { if (item.action) { item.action(); onClose(); } },
+                                onMouseEnter: () => setFocusedIndex(focusableItems.findIndex(fi => fi.id === item.id)),
+                            },
+                                React.createElement("span", { className: "context-menu-icon" }, item.icon),
+                                React.createElement("span", { className: "context-menu-label" }, item.label)
+                            )
                         )
-                    )
-                ))
+                    );
+                })
             )
         )
     );
