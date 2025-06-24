@@ -340,10 +340,26 @@ const GraphViewComponent = ({
         
         if (layout === 'radial') {
             const labelWidth = getNodeRadius(d) * 6;
-            const angle = d.x;
+            const labelHeight = 50; // The height of the foreignObject
+            const angle = d.x; // Radians from d3.tree
+
+            // Define zones for label placement to reduce overlaps
+            const isTopZone = angle > Math.PI / 4 && angle < 3 * Math.PI / 4;
+            const isBottomZone = angle > 5 * Math.PI / 4 && angle < 7 * Math.PI / 4;
             const isLeftSide = angle > Math.PI / 2 && angle < 3 * Math.PI / 2;
+
+            if (isTopZone) {
+                // Place label above the node
+                return `translate(-${labelWidth / 2}, -${radius + spacing + labelHeight})`;
+            }
+            if (isBottomZone) {
+                // Place label below the node
+                return `translate(-${labelWidth / 2}, ${radius + spacing})`;
+            }
+            
+            // Default to left/right placement for side nodes
             const xOffset = isLeftSide ? -(radius + spacing + labelWidth) : (radius + spacing);
-            return `translate(${xOffset}, -25)`; // Center vertically
+            return `translate(${xOffset}, -${labelHeight / 2})`; // Center vertically
         }
         if (layout === 'vertical') {
             const isLeaf = !d.children || d.children.length === 0;
@@ -363,6 +379,12 @@ const GraphViewComponent = ({
     nodeGroups.select(".node-label-wrapper")
       .html(d => d.isProxy ? "" : (d.data.name || ""))
       .style("text-align", d => {
+        if (layout === 'radial') {
+            const angle = d.x;
+            const isTopZone = angle > Math.PI / 4 && angle < 3 * Math.PI / 4;
+            const isBottomZone = angle > 5 * Math.PI / 4 && angle < 7 * Math.PI / 4;
+            if (isTopZone || isBottomZone) return "center";
+        }
         if (layout === 'vertical' && (!d.children || d.children.length === 0)) {
           return "center";
         }

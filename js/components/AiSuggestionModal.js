@@ -17,7 +17,14 @@ const AiSuggestionModal = ({
   const applyButtonRef = useRef(null);
   const [followUpPrompt, setFollowUpPrompt] = useState('');
   const [isRemovedNodesCollapsed, setIsRemovedNodesCollapsed] = useState(true);
-  const [isSummaryVisible, setIsSummaryVisible] = useState(true);
+  const [isSummaryVisible, setIsSummaryVisible] = useState(() => {
+    const saved = sessionStorage.getItem('aiSuggestionModalSummaryVisible');
+    return saved !== null ? JSON.parse(saved) : true;
+  });
+
+  useEffect(() => {
+    sessionStorage.setItem('aiSuggestionModalSummaryVisible', JSON.stringify(isSummaryVisible));
+  }, [isSummaryVisible]);
 
   const comparisonResult = useMemo(() => {
     if (!isOpen || !suggestion) return null;
