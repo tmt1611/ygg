@@ -6,11 +6,6 @@ const ErrorMessage = ({ error, onClose }) => {
   if (!error || !error.message) return null;
 
   const handleCopy = () => {
-    if (!error.details) {
-      setCopyFeedback('No details');
-      setTimeout(() => setCopyFeedback(''), 2000);
-      return;
-    }
     const errorDetails = `Error: ${error.message}\n\nDetails:\n${error.details}`;
     navigator.clipboard.writeText(errorDetails).then(() => {
       setCopyFeedback('Copied!');

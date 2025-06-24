@@ -17,14 +17,7 @@ const AiSuggestionModal = ({
   const applyButtonRef = useRef(null);
   const [followUpPrompt, setFollowUpPrompt] = useState('');
   const [isRemovedNodesCollapsed, setIsRemovedNodesCollapsed] = useState(true);
-  const [isSummaryVisible, setIsSummaryVisible] = useState(() => {
-    const saved = sessionStorage.getItem('aiSuggestionModalSummaryVisible');
-    return saved !== null ? JSON.parse(saved) : true;
-  });
-
-  useEffect(() => {
-    sessionStorage.setItem('aiSuggestionModalSummaryVisible', JSON.stringify(isSummaryVisible));
-  }, [isSummaryVisible]);
+  const [isSummaryVisible, setIsSummaryVisible] = useState(true);
 
   const comparisonResult = useMemo(() => {
     if (!isOpen || !suggestion) return null;
@@ -51,6 +44,26 @@ const AiSuggestionModal = ({
     }
     return compareAndAnnotateTree(currentTreeForDiff, suggestion);
   }, [currentTreeForDiff, suggestion, isOpen]);
+
+  useEffect(() => {
+    if (isOpen) {
+      const hasCriticalIssues = comparisonResult?.lockedContentChangedNodes?.length > 0 || comparisonResult?.lockedNodesRemoved?.length > 0;
+      if (hasCriticalIssues) {
+        setIsSummaryVisible(true); // Force open on critical issues
+      } else {
+        // For non-critical cases, respect the stored preference
+        const saved = sessionStorage.getItem('aiSuggestionModalSummaryVisible');
+        setIsSummaryVisible(saved !== null ? JSON.parse(saved) : true);
+      }
+    }
+  }, [isOpen, comparisonResult]);
+
+  useEffect(() => {
+    // Persist user's choice to storage
+    if (isOpen) {
+      sessionStorage.setItem('aiSuggestionModalSummaryVisible', JSON.stringify(isSummaryVisible));
+    }
+  }, [isSummaryVisible, isOpen]);
 
   const removedNodesTree = useMemo(() => {
     if (!comparisonResult || !comparisonResult.removedNodes.length) return [];
@@ -113,7 +126,7 @@ const AiSuggestionModal = ({
 
   const netChangeStyle = { color: netChange > 0 ? 'var(--success-color)' : netChange < 0 ? 'var(--error-color)' : 'var(--text-secondary)'};
 
-  const hasCriticalIssues = lockedContentChangedNodes.length > 0 || lockedNodesRemoved.length > 0;
+  const hasCriticalIssues = comparisonResult?.lockedContentChangedNodes.length > 0 || comparisonResult?.lockedNodesRemoved.length > 0;
   const applyButtonClass = hasCriticalIssues ? 'danger' : 'success';
   const applyButtonText = isRefining ? "Refining..." : (hasCriticalIssues ? "Apply (with Cautions)" : "Apply Changes to Project");
   const applyButtonTitle = hasCriticalIssues ? "Warning: This suggestion modifies or removes locked nodes. Proceed with caution." : "Apply these changes to your project.";
