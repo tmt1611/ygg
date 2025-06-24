@@ -1127,6 +1127,47 @@ html[data-theme='dark'] .graph-view-node.proxy rect {
   color: var(--text-on-accent);
 }
 
+/* Graph Mini-map */
+.graph-minimap-container {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  background-color: rgba(var(--panel-bg-rgb), 0.85);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  box-shadow: var(--box-shadow-md);
+  z-index: 10;
+  pointer-events: auto;
+  backdrop-filter: blur(3px);
+  overflow: hidden;
+  transition: opacity 0.3s;
+}
+
+.graph-minimap-container svg {
+  display: block;
+}
+
+.minimap-links line {
+  stroke: var(--border-color-strong);
+  stroke-width: 1px; /* Scaled by viewBox, so needs to be thicker */
+  stroke-opacity: 0.6;
+}
+
+.minimap-nodes circle {
+  fill: var(--text-tertiary);
+  fill-opacity: 0.7;
+  stroke: var(--panel-bg);
+  stroke-width: 0.5px;
+}
+
+.minimap-view-rect {
+  fill: rgba(var(--primary-accent-rgb), 0.2);
+  stroke: var(--primary-accent);
+  stroke-width: 2px; /* Scaled by viewBox */
+  cursor: move;
+}
+
+
 /* AI Insights Tab Styles */
 .ai-insights-panel {
   display: flex; flex-direction: column; gap: 12px;

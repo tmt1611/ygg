@@ -24,6 +24,7 @@ export const useD3Tree = (
   const gSelectionRef = useRef(null);
   const zoomBehaviorRef = useRef(null);
   const [g, setG] = useState(null);
+  const [currentTransform, setCurrentTransform] = useState(zoomIdentity);
 
   const rootHierarchy = useMemo(() => {
     if (!treeData) return null;
@@ -154,6 +155,7 @@ export const useD3Tree = (
           if (gSelectionRef.current) {
             gSelectionRef.current.attr("transform", event.transform);
           }
+          setCurrentTransform(event.transform);
           // Close context menu on pan/zoom
           if (onBackgroundClick) {
             onBackgroundClick();
@@ -201,7 +203,13 @@ export const useD3Tree = (
     if (svgSelectionRef.current && zoomBehaviorRef.current) {
       svgSelectionRef.current.transition().duration(250).call(zoomBehaviorRef.current.scaleBy, 1 / 1.2);
     }
-  }, []); 
+  }, []);
+
+  const translateTo = useCallback((x, y) => {
+    if (svgSelectionRef.current && zoomBehaviorRef.current) {
+        svgSelectionRef.current.transition().duration(750).call(zoomBehaviorRef.current.translateTo, x, y);
+    }
+  }, []);
 
 
   return { 
@@ -213,5 +221,7 @@ export const useD3Tree = (
     zoomIn,
     zoomOut,
     centerOnNode,
+    currentTransform,
+    translateTo,
   };
 };

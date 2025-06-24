@@ -3,6 +3,7 @@ import { linkRadial, select, linkVertical, linkHorizontal } from 'd3';
 import { useD3Tree } from '../hooks/useD3Tree.js';
 import { NODE_IMPORTANCE_RUNES } from '../constants.js';
 import PathToRootDisplay from './PathToRootDisplay.js';
+import GraphMiniMap from './GraphMiniMap.js';
 
 
 const getNodeRadius = (node) => {
@@ -36,9 +37,10 @@ const GraphViewComponent = ({
   const [layout, setLayout] = useState('radial'); // 'radial', 'vertical', or 'horizontal'
   const [isFocusMode, setIsFocusMode] = useState(false);
 
-  const svgContainerDivRef = useRef(null); 
-  const svgRef = useRef(null); 
+  const svgContainerDivRef = useRef(null);
+  const svgRef = useRef(null);
   const contextMenuActionsRef = useRef({});
+  const [mainViewportSize, setMainViewportSize] = useState({ width: 0, height: 0 });
   
   const handleBackgroundContextMenu = useCallback((position) => {
     onOpenViewContextMenu({
@@ -47,7 +49,7 @@ const GraphViewComponent = ({
     });
   }, [onOpenViewContextMenu]);
 
-  const { g, nodes, links, config, resetZoom, zoomIn, zoomOut, centerOnNode } = useD3Tree(
+  const { g, nodes, links, config, resetZoom, zoomIn, zoomOut, centerOnNode, currentTransform, translateTo } = useD3Tree(
     svgRef, 
     treeData, 
     {}, 
@@ -62,6 +64,21 @@ const GraphViewComponent = ({
       onAddChildToRoot: onAddNodeToRoot,
     };
   }, [resetZoom, onAddNodeToRoot]);
+
+  useEffect(() => {
+    const container = svgContainerDivRef.current;
+    if (!container) return;
+
+    const resizeObserver = new ResizeObserver(entries => {
+      if (entries[0]) {
+        const { width, height } = entries[0].contentRect;
+        setMainViewportSize({ width, height });
+      }
+    });
+
+    resizeObserver.observe(container);
+    return () => resizeObserver.unobserve(container);
+  }, []);
 
   const handleSetLayout = useCallback((newLayout) => {
     if (newLayout !== layout) {
@@ -556,7 +573,15 @@ const GraphViewComponent = ({
             React.createElement("button", { onClick: zoomOut, title: "Zoom Out", disabled: isAppBusy }, "➖"),
             React.createElement("button", { onClick: resetZoom, title: "Reset Zoom & Pan", disabled: isAppBusy }, "🎯")
         )
-      )
+      ),
+      React.createElement(GraphMiniMap, {
+        nodes: nodes,
+        links: links,
+        layout: layout,
+        viewTransform: currentTransform,
+        translateTo: translateTo,
+        mainViewportSize: mainViewportSize
+      })
     )
   );
 };
