@@ -889,15 +889,7 @@ html[data-theme='sol'] .graph-view-svg-container {
   stroke-width: 3px;
   filter: drop-shadow(0 0 8px var(--graph-node-highlight-stroke));
 }
-.graph-view-node.highlighted text.node-label {
-    font-weight: bold;
-    fill: var(--graph-node-highlight-stroke);
-}
-
-html[data-theme='dark'] .graph-view-node.highlighted text.node-label,
-html[data-theme='nebula'] .graph-view-node.highlighted text.node-label {
-    text-shadow: 0 0 5px var(--graph-node-highlight-stroke);
-}
+/* This is now handled by .node-label-wrapper styles */
 
 /* Change status highlights */
 .graph-view-node.status-new circle {
@@ -921,12 +913,32 @@ html[data-theme='nebula'] .graph-view-node.highlighted text.node-label {
   filter: drop-shadow(0 0 8px var(--error-color));
   animation: errorAppear 0.5s ease-out;
 }
-.graph-view-node:not(.proxy) .node-label-bg {
-  fill: var(--app-bg);
-  fill-opacity: 0.8;
-}
-.graph-view-node:not(.proxy) text.node-label {
+/* .node-label-bg is no longer used, background is handled by foreignObject's div */
+.graph-view-node:not(.proxy) .node-label-wrapper {
   font-weight: 500;
+  font-size: 11px;
+  line-height: 1.3;
+  color: var(--graph-node-text);
+  background-color: rgba(var(--app-bg-rgb), 0.85);
+  padding: 3px 5px;
+  border-radius: var(--border-radius);
+  text-align: left;
+  hyphens: auto;
+  word-break: break-word;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3; /* Limit to 3 lines */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-height: 4.0em; /* approx 3 lines * 1.3 line-height */
+}
+.graph-view-node.highlighted .node-label-wrapper {
+    font-weight: bold;
+    color: var(--graph-node-highlight-stroke);
+}
+html[data-theme='dark'] .graph-view-node.highlighted .node-label-wrapper,
+html[data-theme='nebula'] .graph-view-node.highlighted .node-label-wrapper {
+    text-shadow: 0 0 5px var(--graph-node-highlight-stroke);
 }
 
 .graph-view-link { stroke: var(--graph-link-stroke-ecosystem); stroke-linecap: round; }
@@ -972,8 +984,7 @@ html[data-theme='dark'] .graph-view-node.proxy rect {
   font-size: 11px; /* Slightly larger */
   font-weight: 600;
   text-transform: uppercase;
-  dominant-baseline: middle;
-  text-anchor: middle;
+  /* dominant-baseline and text-anchor are set in JS */
   stroke-width: 0 !important; /* No stroke for proxy labels */
   text-shadow: none !important;
 }

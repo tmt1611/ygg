@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useMemo, useCallback, useState } from 'react'
 import { linkRadial, select, linkVertical, linkHorizontal } from 'd3';
 import { useD3Tree } from '../hooks/useD3Tree.js';
 import { NODE_IMPORTANCE_RUNES } from '../constants.js';
-import { wrapSvgText } from '../utils.js';
+// wrapSvgText is no longer needed
 
 
 const getNodeRadius = (node) => {
@@ -248,22 +248,29 @@ const GraphViewComponent = ({
           
           group.append("title");
 
-          // Add label background rect first, so it's behind the text
-          group.append("rect").attr("class", "node-label-bg").attr("rx", 3).attr("ry", 3).style("pointer-events", "none");
-
           group.each(function(d) {
             const el = select(this);
             if (d.isProxy) {
               el.append("rect").attr("width", 32).attr("height", 32)
                 .attr("x", -16).attr("y", -16)
                 .attr("rx", 3).attr("ry", 3).style("cursor", "pointer");
+              
+              // Proxy nodes get a simple text label, not a foreignObject
+              el.append("text").attr("class", "node-label")
+                .style("pointer-events", "none").style("user-select", "none")
+                .attr("text-anchor", "middle").attr("dominant-baseline", "middle");
+
             } else {
               el.append("circle").attr("r", getNodeRadius).attr("stroke-width", 1.5).style("cursor", "pointer");
+              
+              // Regular nodes get the foreignObject for advanced wrapping
+              el.append("foreignObject")
+                .attr("class", "node-label-foreign-object")
+                .style("pointer-events", "none")
+                .append("xhtml:div")
+                .attr("class", "node-label-wrapper");
             }
           });
-
-          group.append("text").attr("class", "node-label")
-            .style("pointer-events", "none").style("user-select", "none");
           
           group.append("text").attr("class", "node-rune-icon").attr("dy", "0.35em")
             .attr("font-size", d => `${getNodeRadius(d) * 0.9}px`).style("pointer-events", "none").style("user-select", "none");
@@ -312,85 +319,36 @@ const GraphViewComponent = ({
         return 'var(--importance-common-bg)';
     });
 
-    nodeGroups.select(".node-label")
-      .attr("fill", 'var(--graph-node-text)')
-      .attr("font-size", "11px")
-      .style("user-select", "none")
-      .style("pointer-events", "none")
+    // Handle proxy node labels (simple text)
+    nodeGroups.select("text.node-label")
+      .text(d => d.isProxy ? d.data.name : "");
+
+    // Position the foreignObject for regular node labels
+    nodeGroups.select(".node-label-foreign-object")
+      .attr("width", d => getNodeRadius(d) * 6)
+      .attr("height", 50) // Fixed height, CSS will handle overflow
       .attr("transform", d => {
-        if (d.isProxy) return null;
+        if (d.isProxy) return null; // Should not happen due to conditional creation
         const radius = getNodeRadius(d);
         const spacing = 8;
+        const labelWidth = getNodeRadius(d) * 6;
+
         if (layout === 'radial') {
             const angle = d.x;
             const isLeftSide = angle > Math.PI / 2 && angle < 3 * Math.PI / 2;
-            const xOffset = isLeftSide ? -(radius + spacing) : (radius + spacing);
-            return `translate(${xOffset}, 0)`;
+            const xOffset = isLeftSide ? -(radius + spacing + labelWidth) : (radius + spacing);
+            return `translate(${xOffset}, -25)`; // Center vertically
         }
-        // For vertical layout, position text to the side to avoid link overlap
         if (layout === 'vertical') {
-            return `translate(${radius + spacing}, 0)`;
+            return `translate(${radius + spacing}, -25)`;
         }
-        // For horizontal layout, position text below the node
-        return `translate(0, ${radius + spacing})`;
-      })
-      .attr("text-anchor", d => {
-        if (d.isProxy) return "middle";
-        if (layout === 'radial') {
-            const angle = d.x;
-            return (angle > Math.PI / 2 && angle < 3 * Math.PI / 2) ? "end" : "start";
-        }
-        if (layout === 'vertical') return "start";
-        // For horizontal layout, text is below and centered
-        return "middle";
-      })
-      .attr("dominant-baseline", d => {
-        if (d.isProxy) return "middle";
-        if (layout === 'radial' || layout === 'vertical') return "middle";
-        // For horizontal layout, text is below, so baseline is 'hanging'
-        return "hanging";
-      })
-      .attr("dy", null) // dy is handled by the wrap function for multi-line text
-      .attr("dx", null)
-      .text(d => d.isProxy ? d.data.name : (d.data.name || ""))
-      .each(function(d) {
-        select(this).selectAll("tspan").remove();
-        if (!d.isProxy && d.data.name) {
-            const radius = getNodeRadius(d);
-            const maxTextWidth = radius * 5; // Proportional to node size
-            const maxLines = 3;
-            wrapSvgText(select(this), maxTextWidth, maxLines);
-        }
+        // horizontal
+        return `translate(-${labelWidth / 2}, ${radius + spacing})`;
       });
 
-    // Size and position background rects
-    nodeGroups.each(function(d) {
-        if (d.isProxy) {
-            select(this).select(".node-label-bg").style("display", "none");
-            return;
-        }
-        const group = select(this);
-        const textEl = group.select(".node-label");
-        const bgRect = group.select(".node-label-bg");
-
-        try {
-            const bbox = textEl.node().getBBox();
-            if (bbox.width > 0 && bbox.height > 0) {
-                const padding = { x: 4, y: 2 };
-                bgRect
-                    .attr("x", bbox.x - padding.x)
-                    .attr("y", bbox.y - padding.y)
-                    .attr("width", bbox.width + padding.x * 2)
-                    .attr("height", bbox.height + padding.y * 2)
-                    .attr("transform", textEl.attr("transform")) // Apply same transform as text
-                    .style("display", "block");
-            } else {
-                bgRect.style("display", "none");
-            }
-        } catch (e) {
-            bgRect.style("display", "none");
-        }
-    });
+    // Set the text content for the div inside the foreignObject
+    nodeGroups.select(".node-label-wrapper")
+      .html(d => d.isProxy ? "" : (d.data.name || ""));
 
     nodeGroups.select(".node-rune-icon")
       .attr("transform", null) // No rotation needed for any layout
