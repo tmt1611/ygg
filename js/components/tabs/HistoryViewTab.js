@@ -3,25 +3,26 @@ import HistoryItem from '../HistoryItem.js';
 import HistoryControls from '../HistoryControls.js';
 import { EVENT_TYPE_INFO } from '../../constants.js';
 
-const KEY_EVENT_TYPES = Object.keys(EVENT_TYPE_INFO).filter(key => EVENT_TYPE_INFO[key].isKey);
+const KEY_EVENT_TYPES = [
+  'TREE_INIT_AI', 'AI_MOD_CONFIRMED', 'AI_SUMMARY_GEN', 'NODE_INSIGHTS_GENERATED',
+  'AI_STRATEGY_GEN', 'NODE_CREATED', 'NODE_UPDATED', 'NODE_DELETED', 'NODE_LOCK_TOGGLED',
+  'NODE_STATUS_CHANGED', 'NODE_PROJECT_LINK_CREATED', 'NODE_PROJECT_LINK_REMOVED',
+  'TREE_LOCK_ALL', 'TREE_UNLOCK_ALL', 'PROJECT_CREATED', 'PROJECT_LOADED',
+  'PROJECT_SAVED', 'PROJECT_RENAMED', 'PROJECT_DELETED', 'PROJECT_IMPORTED',
+  'PROJECT_EXAMPLE_LOADED', 'TREE_DOWNLOADED', 'API_KEY_STATUS_CHANGED',
+  'APP_ERROR_ENCOUNTERED', 
+];
 
 const HistoryViewTabContent = ({ history, onClearHistory }) => {
   const [filterMode, setFilterMode] = useState('key');
   const [searchTerm, setSearchTerm] = useState('');
 
   const filteredHistory = useMemo(() => {
-    let tempHistory = history;
     if (filterMode === 'key') {
-      tempHistory = tempHistory.filter(entry => KEY_EVENT_TYPES.includes(entry.type));
+      return history.filter(entry => KEY_EVENT_TYPES.includes(entry.type));
     }
-    if (searchTerm.trim()) {
-      const lowerSearchTerm = searchTerm.toLowerCase();
-      tempHistory = tempHistory.filter(entry => entry.summary.toLowerCase().includes(lowerSearchTerm));
-    }
-    return tempHistory;
-  }, [history, filterMode, searchTerm]);
-
-  const keyEventsCount = useMemo(() => history.filter(entry => KEY_EVENT_TYPES.includes(entry.type)).length, [history]);
+    return history;
+  }, [history, filterMode]);
 
   return (
     React.createElement("div", { style: { display: 'flex', flexDirection: 'column', gap: '8px', height: '100%' }},
