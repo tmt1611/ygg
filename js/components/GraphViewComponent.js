@@ -325,30 +325,48 @@ const GraphViewComponent = ({
 
     // Position the foreignObject for regular node labels
     nodeGroups.select(".node-label-foreign-object")
-      .attr("width", d => getNodeRadius(d) * 6)
+      .attr("width", d => {
+        if (layout === 'vertical' && (!d.children || d.children.length === 0)) {
+            return getNodeRadius(d) * 8; // Wider for leaf nodes in vertical layout
+        }
+        return getNodeRadius(d) * 6;
+      })
       .attr("height", 50) // Fixed height, CSS will handle overflow
       .attr("transform", d => {
-        if (d.isProxy) return null; // Should not happen due to conditional creation
+        if (d.isProxy) return null;
         const radius = getNodeRadius(d);
         const spacing = 8;
-        const labelWidth = getNodeRadius(d) * 6;
-
+        
         if (layout === 'radial') {
+            const labelWidth = getNodeRadius(d) * 6;
             const angle = d.x;
             const isLeftSide = angle > Math.PI / 2 && angle < 3 * Math.PI / 2;
             const xOffset = isLeftSide ? -(radius + spacing + labelWidth) : (radius + spacing);
             return `translate(${xOffset}, -25)`; // Center vertically
         }
         if (layout === 'vertical') {
-            return `translate(${radius + spacing}, -25)`;
+            const isLeaf = !d.children || d.children.length === 0;
+            if (isLeaf) {
+                const labelWidth = getNodeRadius(d) * 8;
+                return `translate(-${labelWidth / 2}, ${radius + spacing})`; // Centered below
+            }
+            const labelWidth = getNodeRadius(d) * 6;
+            return `translate(${radius + spacing}, -25)`; // To the right, centered vertically
         }
         // horizontal
+        const labelWidth = getNodeRadius(d) * 6;
         return `translate(${radius + spacing}, -25)`; // Position to the right, centered vertically
       });
 
     // Set the text content for the div inside the foreignObject
     nodeGroups.select(".node-label-wrapper")
-      .html(d => d.isProxy ? "" : (d.data.name || ""));
+      .html(d => d.isProxy ? "" : (d.data.name || ""))
+      .style("text-align", d => {
+        if (layout === 'vertical' && (!d.children || d.children.length === 0)) {
+          return "center";
+        }
+        return "left";
+      });
 
     nodeGroups.select(".node-rune-icon")
       .attr("transform", null) // No rotation needed for any layout
