@@ -351,7 +351,7 @@ export const compareAndAnnotateTree = (originalTree, modifiedTree) => {
     if (!originalTree) {
         const markAllNew = (node) => {
             if (!node) return null;
-            const newNode = { ...node, _changeStatus: 'new' };
+            const newNode = { ...node, _changeStatus: 'new', _modificationDetails: [{label: 'Status', type: 'critical', to: 'Newly created node'}] };
             if (newNode.children) {
                 newNode.children = newNode.children.map(markAllNew);
             }
@@ -408,9 +408,11 @@ export const compareAndAnnotateTree = (originalTree, modifiedTree) => {
         let structureModified = false;
 
         if (originalNode.isLocked) {
-            if (originalNode.name !== modNode.name || originalNode.description !== modNode.description || originalNode.importance !== modNode.importance) {
+            if (originalNode.name !== modNode.name) { modDetails.push({label: 'Name', from: originalNode.name, to: modNode.name, type: 'critical'}); }
+            if (originalNode.description !== modNode.description) { modDetails.push({label: 'Description', from: originalNode.description, to: modNode.description, type: 'critical'}); }
+            if (originalNode.importance !== modNode.importance) { modDetails.push({label: 'Importance', from: originalNode.importance, to: modNode.importance, type: 'critical'}); }
+            if (modDetails.length > 0) {
                 status = 'locked_content_changed';
-                modDetails.push({label: 'Critical Change', type: 'critical', to: 'Locked node content was illegally modified.'});
                 lockedContentChangedNodes.push(modNode);
             }
         } else {
@@ -432,15 +434,15 @@ export const compareAndAnnotateTree = (originalTree, modifiedTree) => {
             }
         }
 
-        if (contentModified) {
+        if (contentModified && status !== 'locked_content_changed') {
             status = 'content_modified';
             modifiedContentNodes.push(modNode);
         }
 
-        const originalChildrenIds = (originalNode.children || []).map(c => c.id).sort().join(',');
-        const modifiedChildrenIds = (modNode.children || []).map(c => c.id).sort().join(',');
+        const originalChildrenIds = (originalNode.children || []).map(c => c.id).sort();
+        const modifiedChildrenIds = (modNode.children || []).map(c => c.id).sort();
 
-        if (originalChildrenIds !== modifiedChildrenIds) {
+        if (originalChildrenIds.join(',') !== modifiedChildrenIds.join(',')) {
             if (status === 'unchanged') status = 'structure_modified'; 
             structureModified = true;
             structureModifiedNodes.push(modNode);
