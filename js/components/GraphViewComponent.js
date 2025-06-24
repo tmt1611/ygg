@@ -221,10 +221,45 @@ const GraphViewComponent = ({
         return `url(#arrowhead)`;
       })
       .attr("d", d => {
-        if (layout === 'radial') return linkRadial().angle(n => n.x).radius(n => n.y)(d);
-        if (layout === 'vertical') return linkVertical().x(n => n.x).y(n => n.y)(d);
-        // For horizontal, we swap x and y for d3.linkHorizontal
-        return linkHorizontal().x(n => n.y).y(n => n.x)(d);
+        if (d.target.isProxy) {
+            if (layout === 'radial') return linkRadial().angle(n => n.x).radius(n => n.y)(d);
+            if (layout === 'vertical') return linkVertical().x(n => n.x).y(n => n.y)(d);
+            return linkHorizontal().x(n => n.y).y(n => n.x)(d);
+        }
+
+        const radius = getNodeRadius(d.target);
+
+        if (layout === 'radial') {
+            const newTarget = { ...d.target };
+            const newTargetRadius = newTarget.y - radius;
+            newTarget.y = newTargetRadius < 0 ? 0 : newTargetRadius;
+            return linkRadial().angle(n => n.x).radius(n => n.y)({ source: d.source, target: newTarget });
+        }
+
+        let sx, sy, tx, ty;
+        if (layout === 'vertical') {
+            sx = d.source.x; sy = d.source.y;
+            tx = d.target.x; ty = d.target.y;
+        } else { // horizontal
+            sx = d.source.y; sy = d.source.x;
+            tx = d.target.y; ty = d.target.x;
+        }
+
+        const dx = tx - sx;
+        const dy = ty - sy;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < radius) return null;
+
+        const ratio = (dist - radius) / dist;
+        const new_tx = sx + dx * ratio;
+        const new_ty = sy + dy * ratio;
+
+        if (layout === 'vertical') {
+            return `M${sx},${sy}C${sx},${(sy + new_ty) / 2} ${new_tx},${(sy + new_ty) / 2} ${new_tx},${new_ty}`;
+        }
+        
+        // horizontal
+        return `M${sx},${sy}C${(sx + new_tx) / 2},${sy} ${(sx + new_tx) / 2},${new_ty} ${new_tx},${new_ty}`;
       });
 
     // Draw node groups
@@ -263,7 +298,7 @@ const GraphViewComponent = ({
           });
           
           group.append("text").attr("class", "node-rune-icon").attr("dy", "0.35em")
-            .attr("font-size", d => `${getNodeRadius(d) * 0.9}px`).style("pointer-events", "none").style("user-select", "none");
+            .attr("font-size", d => `${getNodeRadius(d) * 1.1}px`).style("pointer-events", "none").style("user-select", "none");
 
           group.append("text").attr("class", "node-icon node-lock-icon").attr("dy", d => `${getNodeRadius(d) * 0.4}px`)
             .attr("dx", d => `${-getNodeRadius(d) * 0.9}px`).attr("font-size", d => `${getNodeRadius(d) * 0.8}px`)

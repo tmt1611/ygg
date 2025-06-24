@@ -1030,8 +1030,8 @@ html[data-theme='synthwave'] .graph-view-node.highlighted .node-label-wrapper {
   fill: var(--primary-accent);
 }
 
-.graph-view-node .node-rune-icon { font-size: 0.7em; dominant-baseline: middle; text-anchor: middle; fill: var(--text-primary); pointer-events: none; }
-.graph-view-node .node-icon { font-size: 0.6em; pointer-events: none; }
+.graph-view-node .node-rune-icon { font-size: 0.9em; dominant-baseline: middle; text-anchor: middle; fill: var(--text-primary); pointer-events: none; }
+.graph-view-node .node-icon { font-size: 0.8em; pointer-events: none; }
 
 .graph-view-node.proxy rect {
   stroke-width: 2px;
@@ -1379,6 +1379,11 @@ html[data-theme='synthwave'] .segmented-control button.active {
   background-color: rgba(0,0,0,0.2);
   border-color: rgba(var(--focus-panel-text), 0.3);
   padding: 3px;
+}
+html[data-theme='dark'] .focus-view-importance-control,
+html[data-theme='synthwave'] .focus-view-importance-control {
+  background-color: var(--panel-alt-bg);
+  border-color: var(--border-color-strong);
 }
 .focus-view-importance-control button {
   color: var(--focus-panel-text);
