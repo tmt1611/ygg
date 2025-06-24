@@ -1041,6 +1041,17 @@ html[data-theme='synthwave'] .graph-view-node.highlighted .node-label-wrapper {
     opacity: 1;
 }
 
+.graph-view-node.dimmed, .graph-view-link.dimmed {
+    opacity: 0.2;
+    transition: opacity 0.3s ease-out;
+}
+.graph-view-node.highlighted, .graph-view-node.selected {
+    opacity: 1;
+}
+.graph-view-node.dimmed:hover {
+    opacity: 1;
+}
+
 .graph-view-link { stroke: var(--graph-link-stroke-ecosystem); stroke-linecap: round; }
 .graph-view-project-link { stroke: var(--primary-accent); stroke-linecap: round; }
 
