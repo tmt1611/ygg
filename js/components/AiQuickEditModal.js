@@ -98,7 +98,7 @@ const AiQuickEditModal = ({ isOpen, node, onConfirm, onCancel, onGenerate, isApp
 
     return (
         React.createElement("div", { className: "modal-overlay-basic", role: "dialog", "aria-modal": "true", "aria-labelledby": "ai-quick-edit-title", onClick: (e) => { if (e.target === e.currentTarget) onCancel(); } },
-            React.createElement("div", { className: "modal-content-basic", style: { width: 'clamp(500px, 70vw, 700px)' } },
+            React.createElement("div", { className: "modal-content-basic", style: { width: 'clamp(450px, 60vw, 600px)' } },
                 React.createElement("h2", { id: "ai-quick-edit-title", className: "modal-title" },
                     React.createElement("span", { className: "modal-icon" }, "🤖"),
                     "Quick Edit: ", node.name
