@@ -50,10 +50,9 @@ const CollapsiblePanel = ({
           // The onClick is inherited from the header, no need to stop propagation or define it here.
           // This makes the button a part of the larger clickable header area.
           tabIndex: -1, // Prevent tabbing to this button since the header is already focusable.
+          "aria-hidden": "true" // The whole header is the button, so this is decorative.
         },
-          React.createElement("svg", { viewBox: "0 0 24 24", fill: "currentColor", width: "1em", height: "1em", style: { display: 'block', pointerEvents: 'none' } },
-            React.createElement("path", { d: "M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6z" })
-          )
+          "›"
         )
       ),
       React.createElement("div", {

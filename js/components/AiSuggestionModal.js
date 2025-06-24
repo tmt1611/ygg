@@ -156,9 +156,7 @@ const AiSuggestionModal = ({
                 "aria-controls": "ai-suggestion-summary-panel",
                 "aria-expanded": isSummaryVisible
               },
-                React.createElement("svg", { viewBox: "0 0 24 24", fill: "currentColor", width: "1.2em", height: "1.2em", style: { display: 'block' } },
-                  React.createElement("path", { d: "M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6z" })
-                )
+                "›"
               )
             ),
             React.createElement("div", { className: "ai-suggestion-modal-content-area", "aria-live": "polite", "aria-atomic": "true" },

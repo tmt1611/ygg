@@ -40,11 +40,11 @@ export const useD3Tree = (
     } else if (layout === 'vertical') {
       // For a top-down tree, nodeSize defines spacing between nodes.
       // Increased width to prevent label overlap.
-      return tree().nodeSize([120, 200]); // [width between nodes, height between levels]
+      return tree().nodeSize([140, 200]); // [width between nodes, height between levels]
     } else { // 'horizontal' layout
       // For a left-to-right tree, nodeSize is [height between nodes, width between levels]
       // Increased height between nodes and width between levels.
-      return tree().nodeSize([100, 250]);
+      return tree().nodeSize([110, 250]);
     }
   }, [rootHierarchy, radialRadiusFactor, layout]);
 

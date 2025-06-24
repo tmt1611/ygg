@@ -74,7 +74,6 @@ const MainContentRouter = ({
           onSwitchToFocusView: viewStates.handleSwitchToFocusView,
           onOpenContextMenu: modalManager.openContextMenu,
           onCloseContextMenu: modalManager.closeContextMenu,
-          onCloseContextMenu: modalManager.closeContextMenu,
           onOpenViewContextMenu: onOpenViewContextMenu,
           onAddNodeToRoot: onAddNodeToRoot,
           isAppBusy: isAppBusy,
