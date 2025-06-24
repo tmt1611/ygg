@@ -6,9 +6,6 @@ import PathToRootDisplay from './PathToRootDisplay.js';
 import GraphMiniMap from './GraphMiniMap.js';
 import { useGraphTooltip } from '../hooks/useGraphTooltip.js';
 import GraphNodeTooltip from './GraphNodeTooltip.js';
-import GraphMiniMap from './GraphMiniMap.js';
-import { useGraphTooltip } from '../hooks/useGraphTooltip.js';
-import GraphNodeTooltip from './GraphNodeTooltip.js';
 
 
 const getNodeRadius = (node) => {
@@ -235,7 +232,7 @@ const GraphViewComponent = ({
 
   const handleNodeMouseEnter = useCallback((event, d) => {
     if (d.isProxy) return;
-    showTooltip(d.data, event);
+    showTooltip(d.data, event, d.parent?.data);
   }, [showTooltip]);
 
   const handleNodeMouseLeave = useCallback(() => {
