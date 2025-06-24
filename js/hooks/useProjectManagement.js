@@ -138,18 +138,21 @@ export const useProjectManagement = ({
             return true;
         }
         
-        const elfExample = allProjects.find(p => p.isExample && p.treeData.id === 'elf-warfare-root-example-v1');
-        if (elfExample) {
-            loadProjectState(elfExample, 'fallback-example');
-            return true;
-        }
-
+        // If we reach here, there are no user projects.
+        // We will let the WelcomeScreen show by not loading any project.
         return false;
     }
 
-    findAndLoadProject();
+    if (!findAndLoadProject()) {
+        // If no user project was loaded, we ensure the app is in a clean state
+        // for the welcome screen.
+        resetTreeForNewProjectContext();
+        if (!startupLogged) {
+            addHistoryEntry('PROJECT_LOADED', 'Welcome screen shown; no user projects found.', { source: 'initial-load', logId });
+        }
+    }
 
-  }, [setTechTreeData, setInitialPrompt, viewStates, addHistoryEntry, setActiveProjectId]);
+  }, [setTechTreeData, setInitialPrompt, viewStates, addHistoryEntry, setActiveProjectId, resetTreeForNewProjectContext]);
 
 
   const initializeDefaultProjects = useCallback(() => {
@@ -395,11 +398,11 @@ export const useProjectManagement = ({
         
         if (activeProjectId === projectId) {
             const nextUserProject = projectsWithLinksCleaned.find(p => !p.isExample);
-            if(nextUserProject) handleSetActiveProject(nextUserProject.id);
-            else {
-                const nextExampleProject = projectsWithLinksCleaned.find(p => p.isExample);
-                if (nextExampleProject) handleSetActiveProject(nextExampleProject.id, true);
-                else resetTreeForNewProjectContext();
+            if(nextUserProject) {
+                handleSetActiveProject(nextUserProject.id);
+            } else {
+                // No more user projects, go to welcome screen state.
+                resetTreeForNewProjectContext();
             }
         }
         closeConfirmModal();

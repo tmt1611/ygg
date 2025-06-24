@@ -4,6 +4,7 @@ import GraphViewComponent from './components/GraphViewComponent.js';
 import ListViewTabContent from './tabs/ListViewTab.js';
 import FocusViewComponent from './components/FocusViewComponent.js';
 import LoadingSpinner from './components/LoadingSpinner.js';
+import WelcomeScreen from './WelcomeScreen.js';
 
 const MainContentRouter = ({
   appState,
@@ -37,6 +38,19 @@ const MainContentRouter = ({
   const renderContent = () => {
     switch(yggdrasilViewMode) {
       case 'workspace':
+        if (!techTreeData && !isLoading && !isModifying) {
+          return React.createElement(WelcomeScreen, {
+            initialPrompt: initialPrompt,
+            setInitialPrompt: setInitialPrompt,
+            handleGenerateTree: treeOperationsAI.handleGenerateNewTree,
+            isLoadingInitial: isLoading,
+            apiKeyIsSet: apiKeyHook.status.isSet,
+            onAddNewProjectFromFile: projectManager.handleAddNewProjectFromFile,
+            onLoadAndGoToGraph: projectManager.handleLoadAndGoToGraph,
+            exampleProjects: projectManager.projects.filter(p => p.isExample),
+            isAppBusy: isAppBusy,
+          });
+        }
         if (isLoading) return React.createElement(LoadingSpinner, { message: "Generating Structure..." });
         if (isModifying && !modalManager.isAiSuggestionModalOpen) return React.createElement(LoadingSpinner, { message: "AI Applying Modifications..." });
         return React.createElement(WorkspaceTabContent, {
