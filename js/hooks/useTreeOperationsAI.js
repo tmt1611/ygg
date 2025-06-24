@@ -22,7 +22,7 @@ export const useTreeOperationsAI = ({
   setModificationPrompt,
   selectedGraphNodeId,
 }) => {
-  const { openAiSuggestionModal, closeAiSuggestionModal, openConfirmModal, setPendingAiSuggestion, pendingAiSuggestion, openAiQuickEditModal, closeAiQuickEditModal, aiQuickEditModalConfig } = modalManager;
+  const { openAiSuggestionModal, closeAiSuggestionModal, openConfirmModal, setPendingAiSuggestion, pendingAiSuggestion } = modalManager;
   const { addHistoryEntry } = historyManager;
 
   const handleGenerateNewTree = useCallback(async () => {
@@ -206,64 +206,11 @@ export const useTreeOperationsAI = ({
     setError, setTechTreeData, setPreviousTreeStateForUndo, setBaseForModalDiff, setPendingAiSuggestion, addHistoryEntry
   ]);
 
-  const handleGenerateAiQuickEdit = useCallback(async (nodeId, prompt) => {
-    if (!apiKeyIsSet || !techTreeData || !prompt) {
-      setError("Cannot perform quick edit: API key, tree data, and prompt are required.");
-      return null;
-    }
-    const nodeToEdit = findNodeById(techTreeData, nodeId);
-    if (!nodeToEdit) {
-      setError(`Cannot perform quick edit: Node with ID ${nodeId} not found.`);
-      return null;
-    }
-    if (nodeToEdit.isLocked) {
-      setError(`Cannot perform quick edit: Node "${nodeToEdit.name}" is locked.`);
-      return null;
-    }
-
-    try {
-      const modifiedNode = await geminiService.quickEditNode(nodeToEdit, prompt);
-      return modifiedNode;
-    } catch (e) {
-      setError(e);
-      console.error("Gemini API Error (Quick Edit):", e);
-      return null;
-    }
-  }, [apiKeyIsSet, techTreeData, setError]);
-
-  const handleConfirmAiQuickEdit = useCallback((originalNodeId, modifiedNodeData) => {
-    if (!techTreeData || !originalNodeId || !modifiedNodeData) {
-      setError("Could not apply quick edit due to missing data.");
-      return;
-    }
-    
-    // The AI might return children with "NEW_NODE" as ID. We need to initialize them.
-    const initializedModifiedNode = {
-      ...modifiedNodeData,
-      children: modifiedNodeData.children.map(child => {
-        if (child.id === "NEW_NODE") {
-          return initializeNodes(child, modifiedNodeData.id);
-        }
-        // Also re-initialize existing children to update their parentId if they were moved
-        return initializeNodes(child, modifiedNodeData.id);
-      })
-    };
-
-    const updatedTree = updateNodeInTree(techTreeData, originalNodeId, initializedModifiedNode);
-    setTechTreeData(updatedTree);
-    projectManager.handleSaveActiveProject(false);
-    addHistoryEntry('NODE_UPDATED', `Node "${modifiedNodeData.name}" updated via AI Quick Edit.`);
-    closeAiQuickEditModal();
-  }, [techTreeData, setTechTreeData, projectManager, addHistoryEntry, closeAiQuickEditModal, setError]);
-
-
   return {
     handleGenerateNewTree,
     handleApplyAiModification,
     handleConfirmAiSuggestion,
     handleRejectAiSuggestion,
     handleUndoAiModification,
-    handleGenerateAiQuickEdit,
-    handleConfirmAiQuickEdit,
   };
 };
