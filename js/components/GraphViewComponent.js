@@ -339,8 +339,7 @@ const GraphViewComponent = ({
 
     // Set the text content for the div inside the foreignObject
     nodeGroups.select(".node-label-wrapper")
-      .html(d => d.isProxy ? "" : (d.data.name || ""))
-      .style("text-align", "center"); // Always center the text
+      .html(d => d.isProxy ? "" : (d.data.name || ""));
 
     nodeGroups.select(".node-rune-icon")
       .attr("transform", null) // No rotation needed for any layout

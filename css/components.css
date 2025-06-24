@@ -954,7 +954,7 @@ html[data-theme='sol'] .graph-view-svg-container {
   background-color: rgba(var(--app-bg-rgb), 0.85);
   padding: 3px 5px;
   border-radius: var(--border-radius);
-  text-align: left;
+  text-align: center;
   hyphens: auto;
   word-break: break-word;
   display: -webkit-box;
