@@ -95,6 +95,7 @@ const MainContentRouter = ({
             onToggleNodeLock: nodeOperations.handleToggleNodeLock,
             onAddQuickChild: nodeOperations.handleQuickAddChild,
             onNodeImportanceChange: nodeOperations.handleNodeImportanceChange,
+            onNodeNameChange: nodeOperations.handleNodeNameChange,
             onOpenNodeEditModal: modalManager.openNodeEditModal,
             isAppBusy: isAppBusy,
             collapsedNodeIds: viewStates.collapsedNodeIds,

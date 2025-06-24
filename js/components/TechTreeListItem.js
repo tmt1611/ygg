@@ -1,5 +1,4 @@
-
-import React, { useMemo, useCallback, useState, useEffect } from 'react';
+import React, { useMemo, useCallback, useState, useEffect, useRef } from 'react';
 import { NODE_IMPORTANCE_OPTIONS } from '../constants.js';
 
 const importanceCycle = ['common', 'major', 'minor'];
@@ -8,6 +7,7 @@ const TechTreeListItemComponent = ({
     node, showDescriptionsGlobal,
     onToggleLock, onAddQuickChild,
     onNodeImportanceChange,
+    onNodeNameChange,
     onOpenNodeEditModal, level, searchTerm, isAppBusy, collapsedNodeIds, onToggleCollapseNode,
     onSwitchToFocusView,
     onNavigateToLinkedProject,
@@ -21,10 +21,26 @@ const TechTreeListItemComponent = ({
     handleNavigateToSourceNode,
 }) => {
   const [isDescriptionLocallyVisible, setIsDescriptionLocallyVisible] = useState(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editText, setEditText] = useState(node.name);
+  const inputRef = useRef(null);
 
   useEffect(() => {
     setIsDescriptionLocallyVisible(null);
   }, [showDescriptionsGlobal, node.id]);
+
+  useEffect(() => {
+    if (isEditing) {
+      setEditText(node.name); // Reset edit text to current node name when editing starts
+    }
+  }, [isEditing, node.name]);
+
+  useEffect(() => {
+    if (isEditing && inputRef.current) {
+      inputRef.current.focus();
+      inputRef.current.select();
+    }
+  }, [isEditing]);
 
   const isEffectivelyDescriptionVisible = useMemo(() => {
     return isDescriptionLocallyVisible !== null ? isDescriptionLocallyVisible : showDescriptionsGlobal;
@@ -37,6 +53,27 @@ const TechTreeListItemComponent = ({
   const isCollapsed = collapsedNodeIds.has(node.id);
   const hasChildren = !!(node.children && node.children.length > 0);
   const isSelected = node.id === selectedNodeId;
+
+  const handleCommitEdit = useCallback(() => {
+    if (isEditing) {
+      if (editText.trim() && editText.trim() !== node.name) {
+        onNodeNameChange(node.id, editText.trim());
+      }
+      setIsEditing(false);
+    }
+  }, [isEditing, node.id, node.name, editText, onNodeNameChange]);
+
+  const handleCancelEdit = useCallback(() => {
+    setIsEditing(false);
+  }, []);
+
+  const handleInputKeyDown = useCallback((e) => {
+    if (e.key === 'Enter') {
+      handleCommitEdit();
+    } else if (e.key === 'Escape') {
+      handleCancelEdit();
+    }
+  }, [handleCommitEdit, handleCancelEdit]);
 
   const handleCycleImportance = useCallback(() => {
     if (node.isLocked) return;
@@ -118,11 +155,13 @@ const TechTreeListItemComponent = ({
 
   const handleNodeNameClick = useCallback((e) => {
     if (e.detail === 2) { // Double click
-      onSwitchToFocusView(node.id);
+      if (!node.isLocked) {
+        setIsEditing(true);
+      }
     } else if (onSelectListItem) {
       onSelectListItem(node.id);
     }
-  }, [node.id, onSelectListItem, onSwitchToFocusView]);
+  }, [node.id, node.isLocked, onSelectListItem]);
 
   const handleContextMenu = useCallback((event) => {
     event.preventDefault();
@@ -143,7 +182,7 @@ const TechTreeListItemComponent = ({
 
 
   return (
-    React.createElement("li", { className: "list-view-item", "aria-labelledby": `node-name-${node.id}`, onContextMenu: handleContextMenu },
+    React.createElement("li", { className: `list-view-item ${isSelected ? 'selected' : ''}`, "aria-labelledby": `node-name-${node.id}`, onContextMenu: handleContextMenu },
       React.createElement("div", { className: `list-view-item-header ${itemContentVisible && !isCollapsed ? 'expanded' : ''}`},
         React.createElement("div", { className: "list-view-name-section" },
           hasChildren && (
@@ -163,16 +202,37 @@ const TechTreeListItemComponent = ({
             React.createElement("span", { style: { fontSize: '1em', marginRight: '4px', color: 'var(--secondary-accent-dark)' }, title: `Linked from: ${incomingLinkSource.sourceProjectName} / ${incomingLinkSource.sourceNodeName}`}, "↩️")
           ),
 
-          React.createElement("span", { id: `node-name-${node.id}`,
-             className: `list-view-node-name ${onSelectListItem ? 'clickable' : ''} ${node.isLocked ? 'locked' : ''}`,
-             title: nodeNameTitle,
-             onClick: handleNodeNameClick 
-          },
-            getHighlightedText(node.name, searchTerm)
+          isEditing ? (
+            React.createElement("input", {
+              ref: inputRef,
+              type: "text",
+              value: editText,
+              onChange: (e) => setEditText(e.target.value),
+              onBlur: handleCommitEdit,
+              onKeyDown: handleInputKeyDown,
+              className: "list-view-node-name-input",
+              onClick: (e) => e.stopPropagation(),
+              "aria-label": `Editing name for ${node.name}`
+            })
+          ) : (
+            React.createElement("span", { id: `node-name-${node.id}`,
+               className: `list-view-node-name ${onSelectListItem ? 'clickable' : ''} ${node.isLocked ? 'locked' : ''}`,
+               title: nodeNameTitle,
+               onClick: handleNodeNameClick 
+            },
+              getHighlightedText(node.name, searchTerm)
+            )
           )
         ),
 
         React.createElement("div", { className: "list-view-actions" },
+          React.createElement("button", { 
+            onClick: handleFocusNodeClick, 
+            disabled: isAppBusy, 
+            className: "list-item-action-icon base-icon-button",
+            "aria-label": `Focus on node ${node.name}`, 
+            title: `Focus on Node`
+          }, '🎯'),
           node.description && React.createElement("button", { 
             onClick: handleToggleLocalDescription, disabled: isAppBusy, className: "list-item-action-icon base-icon-button",
             style: { opacity: isEffectivelyDescriptionVisible ? 1 : 0.5 },
@@ -226,6 +286,7 @@ const TechTreeListItemComponent = ({
               onToggleLock: onToggleLock,
               onAddQuickChild: onAddQuickChild,
               onNodeImportanceChange: onNodeImportanceChange,
+              onNodeNameChange: onNodeNameChange,
               onOpenNodeEditModal: onOpenNodeEditModal, level: level + 1,
               searchTerm: searchTerm, isAppBusy: isAppBusy,
               collapsedNodeIds: collapsedNodeIds, onToggleCollapseNode: onToggleCollapseNode,

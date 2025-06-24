@@ -986,7 +986,7 @@ html[data-theme='synthwave'] .graph-view-svg-container {
   font-size: 11px;
   line-height: 1.3;
   color: var(--graph-node-text);
-  background-color: rgba(var(--app-bg-rgb), 0.85);
+  background-color: rgba(var(--app-bg-rgb), 0.7);
   padding: 3px 5px;
   border-radius: var(--border-radius);
   text-align: center;
@@ -1262,8 +1262,10 @@ html[data-theme='light'] .ai-insights-list-item-name, html[data-theme='sol'] .ai
 .list-view-item:hover {
   background-color: rgba(var(--primary-accent-rgb), 0.05); /* Subtle hover for the whole item */
 }
-.list-view-item.selected > .list-view-item-header {
+.list-view-item.selected {
   background-color: var(--primary-accent-hover-bg);
+}
+.list-view-item.selected > .list-view-item-header {
   border-left: 3px solid var(--primary-accent);
   padding-left: 5px; /* Adjust padding to account for border */
 }
@@ -1284,6 +1286,21 @@ html[data-theme='light'] .ai-insights-list-item-name, html[data-theme='sol'] .ai
 .list-view-node-name.locked { font-style: italic; opacity: 0.8; }
 .list-view-node-name.clickable { cursor: pointer; }
 .list-view-node-name.clickable:hover { color: var(--primary-accent); text-decoration: underline; }
+
+.list-view-node-name-input {
+  font-family: var(--font-family-sans);
+  font-weight: 500;
+  font-size: 0.95em;
+  padding: 1px 4px;
+  border: 1px solid var(--primary-accent);
+  border-radius: var(--border-radius);
+  background-color: var(--panel-bg);
+  color: var(--text-primary);
+  outline: none;
+  box-shadow: var(--input-focus-shadow);
+  width: 100%;
+  margin-left: -4px;
+}
 
 .list-view-actions { display: flex; align-items: center; gap: 2px; flex-shrink: 0; } /* Reduced gap */
 .list-item-chevron-icon { 
