@@ -124,7 +124,7 @@ export const useD3Tree = (
             .attr('id', id)
             .attr('class', className)
             .attr('viewBox', '-10 -5 10 10')
-            .attr('refX', 0) // Position the base of the arrow at the end of the line
+            .attr('refX', -5) // Position the center of the arrow at the vertex
             .attr('refY', 0)
             .attr('orient', 'auto')
             .attr('markerWidth', 6)

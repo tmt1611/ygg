@@ -216,50 +216,61 @@ const GraphViewComponent = ({
         (exit) => exit.remove()
       )
       .attr("marker-end", d => {
-        if (d.isProjectLink) return 'url(#arrowhead-project)';
-        if (d.target.isProxy) return null;
+        // Only outgoing project links to a proxy node get an end marker.
+        if (d.isProjectLink && d.target.isProxy) return 'url(#arrowhead-project)';
+        return null;
+      })
+      .attr("marker-mid", d => {
+        // Regular links (including incoming project links) get a mid marker.
+        if (d.isProjectLink) return null;
         return `url(#arrowhead)`;
       })
       .attr("d", d => {
-        if (d.target.isProxy) {
+        // Outgoing project links are simple curves to the proxy node.
+        if (d.isProjectLink && d.target.isProxy) {
             if (layout === 'radial') return linkRadial().angle(n => n.x).radius(n => n.y)(d);
             if (layout === 'vertical') return linkVertical().x(n => n.x).y(n => n.y)(d);
             return linkHorizontal().x(n => n.y).y(n => n.x)(d);
         }
 
-        const radius = getNodeRadius(d.target);
+        // All other links (regular and incoming project links) are straight lines
+        // with a midpoint for the arrow, shortened to not overlap nodes.
+        const sourceRadius = getNodeRadius(d.source);
+        const targetRadius = getNodeRadius(d.target);
+
+        let sx_c, sy_c, tx_c, ty_c;
 
         if (layout === 'radial') {
-            const newTarget = { ...d.target };
-            const newTargetRadius = newTarget.y - radius;
-            newTarget.y = newTargetRadius < 0 ? 0 : newTargetRadius;
-            return linkRadial().angle(n => n.x).radius(n => n.y)({ source: d.source, target: newTarget });
-        }
+            const angle_s = d.source.x - Math.PI / 2;
+            sx_c = d.source.y * Math.cos(angle_s);
+            sy_c = d.source.y * Math.sin(angle_s);
 
-        let sx, sy, tx, ty;
-        if (layout === 'vertical') {
-            sx = d.source.x; sy = d.source.y;
-            tx = d.target.x; ty = d.target.y;
+            const angle_t = d.target.x - Math.PI / 2;
+            tx_c = d.target.y * Math.cos(angle_t);
+            ty_c = d.target.y * Math.sin(angle_t);
+        } else if (layout === 'vertical') {
+            sx_c = d.source.x; sy_c = d.source.y;
+            tx_c = d.target.x; ty_c = d.target.y;
         } else { // horizontal
-            sx = d.source.y; sy = d.source.x;
-            tx = d.target.y; ty = d.target.x;
-        }
-
-        const dx = tx - sx;
-        const dy = ty - sy;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-        if (dist < radius) return null;
-
-        const ratio = (dist - radius) / dist;
-        const new_tx = sx + dx * ratio;
-        const new_ty = sy + dy * ratio;
-
-        if (layout === 'vertical') {
-            return `M${sx},${sy}C${sx},${(sy + new_ty) / 2} ${new_tx},${(sy + new_ty) / 2} ${new_tx},${new_ty}`;
+            sx_c = d.source.y; sy_c = d.source.x;
+            tx_c = d.target.y; ty_c = d.target.x;
         }
         
-        // horizontal
-        return `M${sx},${sy}C${(sx + new_tx) / 2},${sy} ${(sx + new_tx) / 2},${new_ty} ${new_tx},${new_ty}`;
+        const dx = tx_c - sx_c;
+        const dy = ty_c - sy_c;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+
+        if (dist <= sourceRadius + targetRadius) return null;
+
+        const sx = sx_c + (dx / dist) * sourceRadius;
+        const sy = sy_c + (dy / dist) * sourceRadius;
+        const tx = tx_c - (dx / dist) * targetRadius;
+        const ty = ty_c - (dy / dist) * targetRadius;
+
+        const mx = (sx + tx) / 2;
+        const my = (sy + ty) / 2;
+
+        return `M${sx},${sy}L${mx},${my}L${tx},${ty}`;
       });
 
     // Draw node groups
