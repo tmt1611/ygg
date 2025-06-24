@@ -2370,6 +2370,7 @@ html[data-theme='synthwave'] .welcome-screen-title {
   background-color: var(--error-bg);
   padding: 8px;
   border-radius: var(--border-radius);
+  text-align: center;
 }
 .welcome-screen-secondary-actions {
   display: flex;
