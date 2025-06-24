@@ -147,6 +147,10 @@ export const useD3Tree = (
           if (gSelectionRef.current) {
             gSelectionRef.current.attr("transform", event.transform);
           }
+          // Close context menu on pan/zoom
+          if (onBackgroundClick) {
+            onBackgroundClick();
+          }
         });
       svg.call(zoomBehaviorRef.current);
 

@@ -8,6 +8,7 @@ const TechTreeListViewComponent = ({
     onSwitchToFocusView,
     onNavigateToLinkedProject,
     onOpenContextMenu,
+    onCloseContextMenu,
     onSelectListItem,
     selectedNodeId,
     projects,
@@ -28,7 +29,10 @@ const TechTreeListViewComponent = ({
   }
 
   return (
-    React.createElement("div", { style: { height: '100%', overflowY: 'auto', border: '1px solid var(--border-color)', borderRadius: 'var(--border-radius)', background: 'var(--app-bg)', padding: '8px' }},
+    React.createElement("div", { 
+        style: { height: '100%', overflowY: 'auto', border: '1px solid var(--border-color)', borderRadius: 'var(--border-radius)', background: 'var(--app-bg)', padding: '8px' },
+        onScroll: onCloseContextMenu
+    },
       React.createElement("ul", { style: { listStyleType: 'none', padding: '0', margin: '0' }},
         React.createElement(TechTreeListItem, {
             key: treeData.id, node: treeData,

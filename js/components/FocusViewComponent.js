@@ -8,7 +8,7 @@ import PathToRootDisplay from './PathToRootDisplay.js';
 const FocusViewComponent = ({
   treeData, focusNodeId, selectedNodeInPanelId, onSelectNodeInPanel, onChangeFocusNode,
   onExitFocusView, onOpenNodeEditModal, onToggleLock, onNodeImportanceChange, isAppBusy,
-  onNavigateToLinkedProject, onUnlinkProjectFromNode, onOpenContextMenu,
+  onNavigateToLinkedProject, onUnlinkProjectFromNode, onOpenContextMenu, onCloseContextMenu,
   onOpenLinkProjectModal, onDeleteNode, projects, activeProjectId, findLinkSource, handleNavigateToSourceNode
 }) => {
   const nodeMap = useMemo(() => getAllNodesAsMap(treeData), [treeData]);
@@ -134,7 +134,7 @@ const FocusViewComponent = ({
       ),
       React.createElement("div", { className: "focus-view-container" },
         React.createElement("div", { className: "focus-view-main-area" },
-          React.createElement("div", { ref: layoutRef, className: "focus-view-layout", style: { minHeight: `${layoutHeight}px` } },
+          React.createElement("div", { ref: layoutRef, className: "focus-view-layout", style: { minHeight: `${layoutHeight}px` }, onScroll: onCloseContextMenu },
             React.createElement("svg", { className: "focus-view-svg-overlay", style: { height: `${layoutHeight}px` } },
               connectorLines.map(line => 
                 React.createElement("line", { 
