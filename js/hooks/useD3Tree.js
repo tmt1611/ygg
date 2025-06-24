@@ -23,7 +23,6 @@ export const useD3Tree = (
   const gSelectionRef = useRef(null);
   const zoomBehaviorRef = useRef(null);
   const [g, setG] = useState(null);
-  const initialDataLoadedForSession = useRef(false);
 
   const rootHierarchy = useMemo(() => {
     if (!treeData) return null;
@@ -46,6 +45,47 @@ export const useD3Tree = (
       return tree().nodeSize([80, 220]);
     }
   }, [rootHierarchy, radialRadiusFactor, layout]);
+
+  const nodesAndLinks = useMemo(() => {
+    if (!rootHierarchy) return { nodes: [], links: [] };
+    const treeRoot = treeLayout(rootHierarchy);
+    const nodes = treeRoot.descendants();
+    const links = treeRoot.links();
+    // For radial, x is angle, y is radius.
+    // For tree, x and y are cartesian coordinates.
+    return { nodes, links };
+  }, [rootHierarchy, treeLayout]);
+
+  const centerOnNode = useCallback((nodeId) => {
+    if (!svgSelectionRef.current || !zoomBehaviorRef.current || !svgRef.current.parentElement || !nodesAndLinks.nodes || nodesAndLinks.nodes.length === 0) return;
+
+    const nodeToCenter = nodesAndLinks.nodes.find(n => n.data.id === nodeId);
+    if (!nodeToCenter) return;
+
+    const { clientWidth, clientHeight } = svgRef.current.parentElement;
+    const currentTransform = select(svgRef.current).property('__zoom');
+    const scale = currentTransform ? currentTransform.k : 1;
+
+    let x, y;
+    if (layout === 'radial') {
+        const angle = nodeToCenter.x - Math.PI / 2;
+        x = nodeToCenter.y * Math.cos(angle);
+        y = nodeToCenter.y * Math.sin(angle);
+    } else if (layout === 'vertical') {
+        x = nodeToCenter.x;
+        y = nodeToCenter.y;
+    } else { // horizontal
+        x = nodeToCenter.y;
+        y = nodeToCenter.x;
+    }
+
+    const transform = zoomIdentity
+      .translate(clientWidth / 2, clientHeight / 2)
+      .scale(scale)
+      .translate(-x, -y);
+
+    svgSelectionRef.current.transition().duration(750).call(zoomBehaviorRef.current.transform, transform);
+  }, [nodesAndLinks, layout]);
 
   const resetZoom = useCallback(() => {
     if (svgSelectionRef.current && zoomBehaviorRef.current && svgRef.current && svgRef.current.parentElement) {
@@ -118,16 +158,6 @@ export const useD3Tree = (
     }
   }, [treeData, g, resetZoom]); // resetZoom is stable but depends on layout, so this effect runs on treeData or layout change.
 
-  const nodesAndLinks = useMemo(() => {
-    if (!rootHierarchy) return { nodes: [], links: [] };
-    const treeRoot = treeLayout(rootHierarchy);
-    const nodes = treeRoot.descendants();
-    const links = treeRoot.links();
-    // For radial, x is angle, y is radius.
-    // For tree, x and y are cartesian coordinates.
-    return { nodes, links };
-  }, [rootHierarchy, treeLayout]);
-
   const zoomIn = useCallback(() => {
     if (svgSelectionRef.current && zoomBehaviorRef.current) {
       svgSelectionRef.current.transition().duration(250).call(zoomBehaviorRef.current.scaleBy, 1.2);
@@ -149,5 +179,6 @@ export const useD3Tree = (
     resetZoom,
     zoomIn,
     zoomOut,
+    centerOnNode,
   };
 };

@@ -128,7 +128,7 @@ const GraphViewComponent = ({
     });
   }, [onOpenViewContextMenu, resetZoom, toggleLayout, layout]);
 
-  const { g, nodes, links, config, resetZoom, zoomIn, zoomOut } = useD3Tree(svgRef, treeData, {}, onCloseContextMenu, handleBackgroundContextMenu, layout);
+  const { g, nodes, links, config, resetZoom, zoomIn, zoomOut, centerOnNode } = useD3Tree(svgRef, treeData, {}, onCloseContextMenu, handleBackgroundContextMenu, layout);
 
   const toggleLayout = useCallback(() => {
     setLayout(prev => {
@@ -479,8 +479,13 @@ const GraphViewComponent = ({
       .attr("stroke", d => {
           return d.isProxy ? null : (d.data.id === activeNodeId ? 'var(--graph-node-selected-stroke)' : 'var(--graph-node-stroke)');
       });
+    
+    // Center view on the active node when it changes
+    if (activeNodeId) {
+        centerOnNode(activeNodeId);
+    }
 
-  }, [g, activeNodeId, nodes, layout]); // Using 'nodes' and 'layout' to re-run on data change.
+  }, [g, activeNodeId, nodes, layout, centerOnNode]); // Using 'nodes' and 'layout' to re-run on data change.
 
 
   if (!treeData) {
