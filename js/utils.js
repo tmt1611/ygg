@@ -231,6 +231,21 @@ export const getAncestorIds = (nodeId, tree) => {
   return ancestors; 
 };
 
+export const getNodePathString = (nodeId, tree) => {
+    if (!tree || !nodeId) return "";
+    const nodeMap = getAllNodesAsMap(tree);
+    const ancestorIds = getAncestorIds(nodeId, tree);
+
+    const pathNames = ancestorIds.map(id => nodeMap.get(id)?.name).filter(Boolean);
+    
+    const currentNode = nodeMap.get(nodeId);
+    if (currentNode) {
+        pathNames.push(currentNode.name);
+    }
+
+    return pathNames.join(' / ');
+};
+
 export const getAllExpandableNodeIds = (node) => {
     let ids = new Set();
     const traverse = (n) => {

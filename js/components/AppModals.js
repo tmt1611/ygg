@@ -116,6 +116,7 @@ const AppModals = ({
           isOpen: isContextMenuOpen,
           position: contextMenuPosition,
           node: findNodeById(techTreeData, contextMenuNodeId),
+          techTreeData: techTreeData,
           linkSourceInfoFromView: contextMenuLinkSourceInfo,
           onClose: closeContextMenu,
           onToggleLock: (nodeId) => nodeOperations.handleToggleNodeLock(nodeId),

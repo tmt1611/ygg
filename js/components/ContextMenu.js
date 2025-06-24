@@ -1,8 +1,9 @@
 import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import { NODE_IMPORTANCE_OPTIONS } from '../constants.js';
+import { getNodePathString } from '../utils.js';
 
 const ContextMenu = ({
-  isOpen, position, node, onClose, onToggleLock, onChangeImportance, onEditName, onAddChild,
+  isOpen, position, node, techTreeData, onClose, onToggleLock, onChangeImportance, onEditName, onAddChild,
   onSetFocus, onDeleteNode, onLinkToProject, onGoToLinkedProject, onUnlinkProject, onGenerateInsights, onSwitchToAiOps,
   projects, activeProjectId, currentProjectRootId, findLinkSource, handleNavigateToSourceNode,
   linkSourceInfoFromView,
@@ -22,6 +23,7 @@ const ContextMenu = ({
     switch (type) {
         case 'id': textToCopy = node.id; break;
         case 'name': textToCopy = node.name; break;
+        case 'path': textToCopy = getNodePathString(node.id, techTreeData); break;
         case 'json':
             const cleanNodeForExport = (nodeToClean) => {
                 const { _parentId, _changeStatus, _modificationDetails, _oldParentId, ...rest } = nodeToClean;
@@ -43,7 +45,7 @@ const ContextMenu = ({
         setCopyFeedback('');
         setTimeout(() => setCopyError(''), 1500);
     });
-  }, [node]);
+  }, [node, techTreeData]);
 
   const isCurrentNodeRoot = node?.id === currentProjectRootId;
   const incomingLink = useMemo(() => {
@@ -71,6 +73,7 @@ const ContextMenu = ({
     const copySubmenu = [
         { id: 'copy-name', label: "Name", icon: '📋', action: () => handleCopy('name') },
         { id: 'copy-id', label: "ID", icon: '🆔', action: () => handleCopy('id') },
+        { id: 'copy-path', label: "Path", icon: '🛤️', action: () => handleCopy('path') },
         { id: 'copy-json', label: "as JSON", icon: '📦', action: () => handleCopy('json') },
     ];
     
