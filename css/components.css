@@ -309,6 +309,11 @@ html[data-theme='ocean'] .yggdrasil-app-body.sidebar-collapsed .knowledge-branch
   display: block; width: 100%; height: 100%;
   pointer-events: auto;
 }
+.graph-view-svg-container svg:focus {
+  outline: 2px solid var(--primary-accent);
+  outline-offset: -2px;
+  border-radius: var(--border-radius);
+}
 
 /* Styles for OverlayPanelView have been removed as it is no longer used for main content views. */
 /* Focus view now uses its own header and container setup. */
