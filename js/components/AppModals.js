@@ -127,6 +127,7 @@ const AppModals = ({
           onUnlockAllChildren: nodeOperations.handleUnlockAllChildren,
           onChangeImportanceOfAllChildren: nodeOperations.handleChangeImportanceOfAllChildren,
           onDeleteAllChildren: nodeOperations.handleDeleteAllChildren,
+          onPasteNode: nodeOperations.handlePasteNode,
           onGenerateInsights: onGenerateInsights,
           onSwitchToAiOps: onSwitchToAiOps,
           onLinkToProject: (nodeId) => projectLinkingHook.handleOpenLinkProjectModal(nodeId),

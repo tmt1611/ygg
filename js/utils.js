@@ -297,6 +297,41 @@ export const isValidTechTreeNodeShape = (node) => {
     return hasName && hasChildren && hasImportance && hasIsLocked && hasDescription && childrenAreValid;
 };
 
+export const reinitializeNodeIds = (node, newParentId = null) => {
+  if (!node) return null;
+  // Create a new ID for the current node
+  const newId = generateUUID();
+  // Create a new node object with the new ID and parent ID
+  const newNode = { ...node, id: newId, _parentId: newParentId };
+  
+  // If there are children, recursively call this function for each child,
+  // passing the new ID of the current node as their new parent ID.
+  if (newNode.children && newNode.children.length > 0) {
+    newNode.children = newNode.children.map(child => reinitializeNodeIds(child, newId));
+  }
+  
+  return newNode;
+};
+
+export const addPastedNodeToParent = (tree, parentId, nodeToPaste) => {
+    // First, create a deep copy of the node to paste with all new IDs
+    const reinitializedNode = reinitializeNodeIds(nodeToPaste, parentId);
+
+    const addRecursively = (node) => {
+        if (node.id === parentId) {
+            return {
+                ...node,
+                children: [...(node.children || []), reinitializedNode]
+            };
+        }
+        if (node.children) {
+            return { ...node, children: node.children.map(child => addRecursively(child)) };
+        }
+        return node;
+    };
+    return addRecursively(tree);
+};
+
 export const downloadObjectAsJson = (exportObj, exportName) => {
   const jsonStr = JSON.stringify(exportObj, null, 2);
   const blob = new Blob([jsonStr], { type: "application/json" });

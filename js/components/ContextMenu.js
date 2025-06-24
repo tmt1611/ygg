@@ -6,6 +6,7 @@ const ContextMenu = ({
   isOpen, position, node, techTreeData, onClose, onToggleLock, onChangeImportance, onEditName, onAddChild,
   onSetFocus, onDeleteNode, onLinkToProject, onGoToLinkedProject, onUnlinkProject, onGenerateInsights, onSwitchToAiOps,
   onLockAllChildren, onUnlockAllChildren, onChangeImportanceOfAllChildren, onDeleteAllChildren,
+  onPasteNode,
   projects, activeProjectId, currentProjectRootId, findLinkSource, handleNavigateToSourceNode,
   linkSourceInfoFromView,
 }) => {
@@ -17,6 +18,17 @@ const ContextMenu = ({
   const [submenuStyle, setSubmenuStyle] = useState({});
   const [copyFeedback, setCopyFeedback] = useState('');
   const [copyError, setCopyError] = useState('');
+  const [canPaste, setCanPaste] = useState(false);
+
+  useEffect(() => {
+    if (isOpen) {
+      if (navigator.clipboard && navigator.clipboard.readText) {
+        setCanPaste(true);
+      } else {
+        setCanPaste(false);
+      }
+    }
+  }, [isOpen]);
 
   const handleCopy = useCallback((type) => {
     if (!node) return;
@@ -76,6 +88,7 @@ const ContextMenu = ({
     return [
       { id: 'edit', label: "Edit Details...", icon: '✏️', action: () => onEditName(node) },
       { id: 'add-child', label: "Add Child Node...", icon: '➕', action: () => onAddChild(node) },
+      onPasteNode && { id: 'paste-node', label: "Paste as Child", icon: '📎', action: () => onPasteNode(node.id), isDisabled: !canPaste, title: canPaste ? "Paste a copied node as a child of this node" : "Clipboard API not available or permission denied" },
       !!onSetFocus && { id: 'set-focus', label: "Set as Focus Node", icon: '🎯', action: () => onSetFocus(node.id) },
       { type: 'separator' },
       { id: 'toggle-lock', label: node.isLocked ? 'Unlock Node' : 'Lock Node', icon: node.isLocked ? '🔓' : '🔒', action: () => onToggleLock(node.id) },
@@ -144,7 +157,7 @@ const ContextMenu = ({
         { id: 'delete-node', label: "Delete Node...", icon: '🗑️', isDestructive: true, action: () => onDeleteNode(node.id) }
       ] : [])
     ].filter(Boolean);
-  }, [node, onEditName, onAddChild, onToggleLock, onSetFocus, onLinkToProject, onGoToLinkedProject, onUnlinkProject, onDeleteNode, onGenerateInsights, onSwitchToAiOps, handleCopy, incomingLink, handleNavigateToSourceNode, onChangeImportance, onLockAllChildren, onUnlockAllChildren, onChangeImportanceOfAllChildren, onDeleteAllChildren, copyFeedback, copyError]);
+  }, [node, onEditName, onAddChild, onToggleLock, onSetFocus, onLinkToProject, onGoToLinkedProject, onUnlinkProject, onDeleteNode, onGenerateInsights, onSwitchToAiOps, handleCopy, incomingLink, handleNavigateToSourceNode, onChangeImportance, onLockAllChildren, onUnlockAllChildren, onChangeImportanceOfAllChildren, onDeleteAllChildren, copyFeedback, copyError, onPasteNode, canPaste]);
 
   const focusableItems = useMemo(() => menuItems.filter(item => item.type !== 'separator' && !item.isDisabled), [menuItems]);
   const openSubmenuItems = useMemo(() => {

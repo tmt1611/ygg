@@ -1,5 +1,5 @@
 import { useCallback } from 'react';
-import { findNodeById, updateNodeInTree, addNodeToParent, lockAllNodesInTree, unlockAllNodesInTree, areAllNodesLocked, removeNodeAndChildrenFromTree, updateAllChildren, deleteAllChildren } from '../utils.js';
+import { findNodeById, updateNodeInTree, addNodeToParent, lockAllNodesInTree, unlockAllNodesInTree, areAllNodesLocked, removeNodeAndChildrenFromTree, updateAllChildren, deleteAllChildren, addPastedNodeToParent, isValidTechTreeNodeShape } from '../utils.js';
 
 export const useNodeOperations = ({
   techTreeData, 
@@ -221,6 +221,42 @@ export const useNodeOperations = ({
     });
   }, [techTreeData, setTechTreeData, handleSaveActiveProject, addHistoryEntry, openConfirmModal, closeConfirmModal]);
 
+  const handlePasteNode = useCallback(async (targetNodeId) => {
+    if (!techTreeData) {
+      setError("Cannot paste: No active tree.");
+      return;
+    }
+    
+    try {
+      const clipboardText = await navigator.clipboard.readText();
+      const parsedNode = JSON.parse(clipboardText);
+
+      if (!isValidTechTreeNodeShape(parsedNode)) {
+        throw new Error("Clipboard content is not a valid node structure.");
+      }
+      
+      const parentNode = findNodeById(techTreeData, targetNodeId);
+      if (!parentNode) {
+        throw new Error("Target node for paste operation not found.");
+      }
+
+      const updatedTree = addPastedNodeToParent(techTreeData, targetNodeId, parsedNode);
+      setTechTreeData(updatedTree);
+      handleSaveActiveProject(false);
+      addHistoryEntry('NODE_CREATED', `Pasted node "${parsedNode.name}" as child of "${parentNode.name}".`);
+
+    } catch (e) {
+      let errorMessage = "Failed to paste node from clipboard.";
+      if (e instanceof SyntaxError) {
+        errorMessage = "Clipboard does not contain valid JSON.";
+      } else if (e.message) {
+        errorMessage = e.message;
+      }
+      console.error("Paste Error:", e);
+      setError(errorMessage);
+    }
+  }, [techTreeData, setTechTreeData, handleSaveActiveProject, addHistoryEntry, setError]);
+
 
   return {
     handleToggleNodeLock,
@@ -234,5 +270,6 @@ export const useNodeOperations = ({
     handleUnlockAllChildren,
     handleChangeImportanceOfAllChildren,
     handleDeleteAllChildren,
+    handlePasteNode,
   };
 };
