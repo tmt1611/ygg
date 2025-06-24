@@ -326,70 +326,21 @@ const GraphViewComponent = ({
 
     // Position the foreignObject for regular node labels
     nodeGroups.select(".node-label-foreign-object")
-      .attr("width", d => {
-        if (layout === 'vertical' && (!d.children || d.children.length === 0)) {
-            return getNodeRadius(d) * 8; // Wider for leaf nodes in vertical layout
-        }
-        return getNodeRadius(d) * 6;
-      })
+      .attr("width", 120) // A fixed, reasonable width for all nodes
       .attr("height", 50) // Fixed height, CSS will handle overflow
       .attr("transform", d => {
         if (d.isProxy) return null;
         const radius = getNodeRadius(d);
-        const spacing = 8;
-        
-        if (layout === 'radial') {
-            const labelWidth = getNodeRadius(d) * 6;
-            const labelHeight = 50; // The height of the foreignObject
-            const angle = d.x; // Radians from d3.tree
-
-            // Define zones for label placement to reduce overlaps
-            const isTopZone = angle > Math.PI / 4 && angle < 3 * Math.PI / 4;
-            const isBottomZone = angle > 5 * Math.PI / 4 && angle < 7 * Math.PI / 4;
-            const isLeftSide = angle > Math.PI / 2 && angle < 3 * Math.PI / 2;
-
-            if (isTopZone) {
-                // Place label above the node
-                return `translate(-${labelWidth / 2}, -${radius + spacing + labelHeight})`;
-            }
-            if (isBottomZone) {
-                // Place label below the node
-                return `translate(-${labelWidth / 2}, ${radius + spacing})`;
-            }
-            
-            // Default to left/right placement for side nodes
-            const xOffset = isLeftSide ? -(radius + spacing + labelWidth) : (radius + spacing);
-            return `translate(${xOffset}, -${labelHeight / 2})`; // Center vertically
-        }
-        if (layout === 'vertical') {
-            const isLeaf = !d.children || d.children.length === 0;
-            if (isLeaf) {
-                const labelWidth = getNodeRadius(d) * 8;
-                return `translate(-${labelWidth / 2}, ${radius + spacing})`; // Centered below
-            }
-            const labelWidth = getNodeRadius(d) * 6;
-            return `translate(${radius + spacing}, -25)`; // To the right, centered vertically
-        }
-        // horizontal
-        const labelWidth = getNodeRadius(d) * 6;
-        return `translate(${radius + spacing}, -25)`; // Position to the right, centered vertically
+        const spacing = 6; // A little less spacing is needed
+        const labelWidth = 120;
+        // Always position below the node, centered horizontally
+        return `translate(-${labelWidth / 2}, ${radius + spacing})`;
       });
 
     // Set the text content for the div inside the foreignObject
     nodeGroups.select(".node-label-wrapper")
       .html(d => d.isProxy ? "" : (d.data.name || ""))
-      .style("text-align", d => {
-        if (layout === 'radial') {
-            const angle = d.x;
-            const isTopZone = angle > Math.PI / 4 && angle < 3 * Math.PI / 4;
-            const isBottomZone = angle > 5 * Math.PI / 4 && angle < 7 * Math.PI / 4;
-            if (isTopZone || isBottomZone) return "center";
-        }
-        if (layout === 'vertical' && (!d.children || d.children.length === 0)) {
-          return "center";
-        }
-        return "left";
-      });
+      .style("text-align", "center"); // Always center the text
 
     nodeGroups.select(".node-rune-icon")
       .attr("transform", null) // No rotation needed for any layout

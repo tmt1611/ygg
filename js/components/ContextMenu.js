@@ -61,82 +61,90 @@ const ContextMenu = ({
 
     const hasChildren = node.children && node.children.length > 0;
 
-    const importanceSubmenu = NODE_IMPORTANCE_OPTIONS.map(opt => ({
-        id: `importance-${opt.value}`,
-        label: opt.label,
-        action: () => onChangeImportance(node.id, opt.value),
-        isChecked: (node.importance || 'common') === opt.value,
-    }));
+    const getCopyLabel = (type) => {
+        if (copyError === type) return "Error!";
+        if (copyFeedback === type) return "Copied!";
+        switch (type) {
+            case 'name': return "Name";
+            case 'id': return "ID";
+            case 'path': return "Path";
+            case 'json': return "as JSON";
+            default: return "Copy";
+        }
+    };
 
-    const aiSubmenu = [
-        { id: 'ai-insights', label: "Node Insights", icon: '💡', action: () => { onGenerateInsights(node); } },
-        { id: 'ai-modify', label: "Modify with AI...", icon: '🤖', action: () => { onSwitchToAiOps(node); } },
-    ];
-
-    const copySubmenu = [
-        { id: 'copy-name', label: "Name", icon: '📋', action: () => handleCopy('name') },
-        { id: 'copy-id', label: "ID", icon: '🆔', action: () => handleCopy('id') },
-        { id: 'copy-path', label: "Path", icon: '🛤️', action: () => handleCopy('path') },
-        { id: 'copy-json', label: "as JSON", icon: '📦', action: () => handleCopy('json') },
-    ];
-    
-    const items = [
-        { id: 'edit', label: "Edit Details...", icon: '✏️', action: () => onEditName(node) },
-        { id: 'add-child', label: "Add Child Node...", icon: '➕', action: () => onAddChild(node) },
-        { id: 'set-focus', label: "Set as Focus Node", icon: '🎯', action: () => onSetFocus(node.id), condition: !!onSetFocus },
+    return [
+      { id: 'edit', label: "Edit Details...", icon: '✏️', action: () => onEditName(node) },
+      { id: 'add-child', label: "Add Child Node...", icon: '➕', action: () => onAddChild(node) },
+      !!onSetFocus && { id: 'set-focus', label: "Set as Focus Node", icon: '🎯', action: () => onSetFocus(node.id) },
+      { type: 'separator' },
+      { id: 'toggle-lock', label: node.isLocked ? 'Unlock Node' : 'Lock Node', icon: node.isLocked ? '🔓' : '🔒', action: () => onToggleLock(node.id) },
+      {
+        id: 'change-importance', label: "Change Importance", icon: '⚖️', hasSubmenu: true,
+        submenu: NODE_IMPORTANCE_OPTIONS.map(opt => ({
+          id: `importance-${opt.value}`, label: opt.label,
+          action: () => onChangeImportance(node.id, opt.value),
+          isChecked: (node.importance || 'common') === opt.value,
+        }))
+      },
+      { type: 'separator' },
+      {
+        id: 'ai-actions', label: "AI Actions...", icon: '🤖', hasSubmenu: true,
+        submenu: [
+          { id: 'ai-insights', label: "Node Insights", icon: '💡', action: () => onGenerateInsights(node) },
+          { id: 'ai-modify', label: "Modify with AI...", icon: '🤖', action: () => onSwitchToAiOps(node) },
+        ]
+      },
+      {
+        id: 'link-actions', label: "Project Linking...", icon: '🔗', hasSubmenu: true,
+        submenu: [
+          ...(node.linkedProjectId ? [
+            onGoToLinkedProject && { id: 'go-to-link', label: `Go to: ${node.linkedProjectName || '...'}`, icon: '↪️', title: `Go to project: ${node.linkedProjectName || 'Linked Project'}`, action: () => onGoToLinkedProject(node.linkedProjectId) },
+            onUnlinkProject && { id: 'unlink-outgoing', label: "Unlink Outgoing Project", icon: '🚫', isDestructive: true, action: () => onUnlinkProject(node.id) },
+          ] : !incomingLink ? [
+            onLinkToProject && { id: 'link-project', label: "Link to Project...", icon: '🔗', action: () => onLinkToProject(node.id) },
+          ] : []),
+          ...(incomingLink ? [
+            { id: 'go-to-source', label: `From: ${incomingLink.sourceProjectName.substring(0, 12)}...`, icon: '↩️', title: `From: ${incomingLink.sourceProjectName} / ${incomingLink.sourceNodeName}`, action: () => handleNavigateToSourceNode(incomingLink.sourceProjectId, incomingLink.sourceNodeId) },
+            { id: 'unlink-incoming-disabled', label: "Unlink (Incoming)", icon: '🚫', isDisabled: true, title: "Remove link from source project to unlink." },
+          ] : [])
+        ].filter(Boolean)
+      },
+      { type: 'separator' },
+      {
+        id: 'copy-actions', label: "Copy...", icon: '📋', hasSubmenu: true,
+        submenu: [
+          { id: 'copy-name', label: getCopyLabel('name'), icon: '📋', action: () => handleCopy('name') },
+          { id: 'copy-id', label: getCopyLabel('id'), icon: '🆔', action: () => handleCopy('id') },
+          { id: 'copy-path', label: getCopyLabel('path'), icon: '🛤️', action: () => handleCopy('path') },
+          { id: 'copy-json', label: getCopyLabel('json'), icon: '📦', action: () => handleCopy('json') },
+        ]
+      },
+      ...(hasChildren ? [
         { type: 'separator' },
-        { id: 'toggle-lock', label: node.isLocked ? 'Unlock Node' : 'Lock Node', icon: node.isLocked ? '🔓' : '🔒', action: () => onToggleLock(node.id) },
-        { id: 'change-importance', label: "Change Importance", icon: '⚖️', hasSubmenu: true, submenu: importanceSubmenu },
-        { type: 'separator' },
-        { id: 'ai-actions', label: "AI Actions...", icon: '🤖', hasSubmenu: true, submenu: aiSubmenu },
-    ];
-
-    const linkSubmenu = [];
-    if (node.linkedProjectId) {
-        if (onGoToLinkedProject) linkSubmenu.push({ id: 'go-to-link', label: `Go to: ${node.linkedProjectName || '...'}`, icon: '↪️', title: `Go to project: ${node.linkedProjectName || 'Linked Project'}`, action: () => onGoToLinkedProject(node.linkedProjectId) });
-        if (onUnlinkProject) linkSubmenu.push({ id: 'unlink-outgoing', label: "Unlink Outgoing Project", icon: '🚫', isDestructive: true, action: () => onUnlinkProject(node.id) });
-    } else if (!incomingLink) {
-        if (onLinkToProject) linkSubmenu.push({ id: 'link-project', label: "Link to Project...", icon: '🔗', action: () => onLinkToProject(node.id) });
-    }
-    if (incomingLink) {
-        linkSubmenu.push({ id: 'go-to-source', label: `From: ${incomingLink.sourceProjectName.substring(0, 12)}...`, icon: '↩️', title: `From: ${incomingLink.sourceProjectName} / ${incomingLink.sourceNodeName}`, action: () => handleNavigateToSourceNode(incomingLink.sourceProjectId, incomingLink.sourceNodeId) });
-        linkSubmenu.push({ id: 'unlink-incoming-disabled', label: "Unlink (Incoming)", icon: '🚫', isDisabled: true, title: "Remove link from source project to unlink." });
-    }
-    if (linkSubmenu.length > 0) {
-        items.push({ id: 'link-actions', label: "Project Linking...", icon: '🔗', hasSubmenu: true, submenu: linkSubmenu });
-    }
-
-    items.push({ type: 'separator' });
-    items.push({ id: 'copy-actions', label: "Copy...", icon: '📋', hasSubmenu: true, submenu: copySubmenu });
-
-    items.push({ type: 'separator' });
-    items.push({ id: 'copy-actions', label: "Copy...", icon: '📋', hasSubmenu: true, submenu: copySubmenu });
-
-    if (hasChildren) {
-        const bulkImportanceSubmenu = NODE_IMPORTANCE_OPTIONS.map(opt => ({
-            id: `bulk-importance-${opt.value}`,
-            label: opt.label,
-            action: () => onChangeImportanceOfAllChildren(node.id, opt.value),
-        }));
-
-        const bulkActionsSubmenu = [
+        {
+          id: 'bulk-actions', label: "Actions on Children...", icon: '⚡️', hasSubmenu: true,
+          submenu: [
             { id: 'bulk-lock', label: "Lock All Children", icon: '🔒', action: () => onLockAllChildren(node.id) },
             { id: 'bulk-unlock', label: "Unlock All Children", icon: '🔓', action: () => onUnlockAllChildren(node.id) },
-            { id: 'bulk-set-importance', label: "Set Importance for All...", icon: '⚖️', hasSubmenu: true, submenu: bulkImportanceSubmenu },
+            {
+              id: 'bulk-set-importance', label: "Set Importance for All...", icon: '⚖️', hasSubmenu: true,
+              submenu: NODE_IMPORTANCE_OPTIONS.map(opt => ({
+                id: `bulk-importance-${opt.value}`, label: opt.label,
+                action: () => onChangeImportanceOfAllChildren(node.id, opt.value),
+              }))
+            },
             { type: 'separator' },
             { id: 'bulk-delete', label: "Delete All Children...", icon: '🗑️', isDestructive: true, action: () => onDeleteAllChildren(node.id) },
-        ];
-        items.push({ type: 'separator' });
-        items.push({ id: 'bulk-actions', label: "Actions on Children...", icon: '⚡️', hasSubmenu: true, submenu: bulkActionsSubmenu });
-    }
-
-    if (onDeleteNode) {
-        items.push({ type: 'separator' });
-        items.push({ id: 'delete-node', label: "Delete Node...", icon: '🗑️', isDestructive: true, action: () => onDeleteNode(node.id) });
-    }
-
-    return items.filter(item => item.condition !== false);
-  }, [node, onEditName, onAddChild, onToggleLock, onSetFocus, onLinkToProject, onGoToLinkedProject, onUnlinkProject, onDeleteNode, onGenerateInsights, onSwitchToAiOps, handleCopy, incomingLink, handleNavigateToSourceNode, onChangeImportance, onLockAllChildren, onUnlockAllChildren, onChangeImportanceOfAllChildren, onDeleteAllChildren]);
+          ]
+        }
+      ] : []),
+      ...(onDeleteNode ? [
+        { type: 'separator' },
+        { id: 'delete-node', label: "Delete Node...", icon: '🗑️', isDestructive: true, action: () => onDeleteNode(node.id) }
+      ] : [])
+    ].filter(Boolean);
+  }, [node, onEditName, onAddChild, onToggleLock, onSetFocus, onLinkToProject, onGoToLinkedProject, onUnlinkProject, onDeleteNode, onGenerateInsights, onSwitchToAiOps, handleCopy, incomingLink, handleNavigateToSourceNode, onChangeImportance, onLockAllChildren, onUnlockAllChildren, onChangeImportanceOfAllChildren, onDeleteAllChildren, copyFeedback, copyError]);
 
   const focusableItems = useMemo(() => menuItems.filter(item => item.type !== 'separator' && !item.isDisabled), [menuItems]);
   const openSubmenuItems = useMemo(() => {
