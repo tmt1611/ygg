@@ -1,7 +1,5 @@
 import React, { useState } from 'react';
 
-import React, { useState } from 'react';
-
 const ErrorMessage = ({ error, onClose, mode = 'toast' }) => {
   const [copyFeedback, setCopyFeedback] = useState('');
 
