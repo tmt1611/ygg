@@ -31,6 +31,9 @@ const GraphNodeTooltip = ({ tooltip }) => {
       ),
       React.createElement("p", { className: "graph-node-tooltip-description" },
         description || React.createElement("i", null, "No description provided.")
+      ),
+      React.createElement("div", { className: "graph-node-tooltip-footer" },
+        "Double-click for Focus View"
       )
     )
   );
