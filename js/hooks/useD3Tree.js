@@ -30,10 +30,36 @@ export const useD3Tree = (
   const rootHierarchy = useMemo(() => {
     if (!treeData) return null;
     if (isFocusMode && activeNodeId) {
-        const focusNode = findNodeById(treeData, activeNodeId);
+        const allNodesMap = getAllNodesAsMap(treeData);
+        const focusNode = allNodesMap.get(activeNodeId);
+
         if (focusNode) {
-            // When focusing, we treat the selected node as the root of a new hierarchy.
-            return hierarchy(focusNode);
+            const parentNode = focusNode._parentId ? allNodesMap.get(focusNode._parentId) : null;
+            
+            let temporaryTree;
+            
+            if (parentNode) {
+                // Reconstruct parent with focus node and its siblings
+                const siblingNodes = parentNode.children.map(c => allNodesMap.get(c.id));
+                temporaryTree = { 
+                    ...parentNode, 
+                    children: siblingNodes.map(sibling => {
+                        if (sibling.id === focusNode.id) {
+                            // For the focus node, include its children
+                            return {
+                                ...focusNode,
+                                children: focusNode.children ? [...focusNode.children] : []
+                            };
+                        }
+                        // For siblings, show them but not their children
+                        return { ...sibling, children: [] };
+                    })
+                };
+            } else {
+                // focusNode is the root, so it's the root of our temporary tree
+                temporaryTree = { ...focusNode };
+            }
+            return hierarchy(temporaryTree);
         }
     }
     return hierarchy(treeData);
