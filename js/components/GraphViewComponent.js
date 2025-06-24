@@ -4,6 +4,8 @@ import { useD3Tree } from '../hooks/useD3Tree.js';
 import { NODE_IMPORTANCE_RUNES } from '../constants.js';
 import PathToRootDisplay from './PathToRootDisplay.js';
 import GraphMiniMap from './GraphMiniMap.js';
+import { useGraphTooltip } from '../hooks/useGraphTooltip.js';
+import GraphNodeTooltip from './GraphNodeTooltip.js';
 
 
 const getNodeRadius = (node) => {
@@ -36,6 +38,7 @@ const GraphViewComponent = ({
 }) => {
   const [layout, setLayout] = useState('radial'); // 'radial', 'vertical', or 'horizontal'
   const [isFocusMode, setIsFocusMode] = useState(false);
+  const { tooltip, showTooltip, hideTooltip } = useGraphTooltip();
 
   const svgContainerDivRef = useRef(null);
   const svgRef = useRef(null);
@@ -217,6 +220,15 @@ const GraphViewComponent = ({
     }
   }, [isAppBusy, onSwitchToFocusView]);
 
+  const handleNodeMouseEnter = useCallback((event, d) => {
+    if (d.isProxy) return;
+    showTooltip(d.data, event);
+  }, [showTooltip]);
+
+  const handleNodeMouseLeave = useCallback(() => {
+    hideTooltip();
+  }, [hideTooltip]);
+
   const handleNodeContextMenu = useCallback((event, d) => {
     event.preventDefault();
     event.stopPropagation();
@@ -387,7 +399,9 @@ const GraphViewComponent = ({
       })
       .on("click", handleNodeClick)
       .on("dblclick", handleNodeDoubleClick)
-      .on("contextmenu", handleNodeContextMenu);
+      .on("contextmenu", handleNodeContextMenu)
+      .on("mouseenter", handleNodeMouseEnter)
+      .on("mouseleave", handleNodeMouseLeave);
 
     nodeGroups.select("title").text(d => d.isProxy ? `Project: ${d.data.fullName}\n(Click to navigate)` : `${d.data.name}\n(Double-click for Focus View)`);
 
@@ -439,7 +453,7 @@ const GraphViewComponent = ({
       .attr("transform", null) // No rotation needed for any layout
       .text(d => (d.data.isLocked && !d.isProxy ? "🔒" : ""));
 
-  }, [g, nodes, links, handleNodeClick, handleNodeDoubleClick, handleNodeContextMenu, projectLinksAndProxyNodes, layout]);
+  }, [g, nodes, links, handleNodeClick, handleNodeDoubleClick, handleNodeContextMenu, handleNodeMouseEnter, handleNodeMouseLeave, projectLinksAndProxyNodes, layout]);
 
   // Effect for dynamic styling (selection, search highlight, focus mode)
   useEffect(() => {
@@ -535,6 +549,7 @@ const GraphViewComponent = ({
 
   return (
     React.createElement("div", { className: "graph-view-wrapper" },
+      React.createElement(GraphNodeTooltip, { tooltip: tooltip }),
       React.createElement("div", { ref: svgContainerDivRef, className: "graph-view-svg-container" },
         isFocusMode && activeNodeId && (
             React.createElement("div", { style: { position: 'absolute', top: '8px', left: '8px', zIndex: 10, maxWidth: 'calc(100% - 150px)' }},
