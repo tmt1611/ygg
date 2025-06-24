@@ -8,6 +8,7 @@ export const useNodeOperations = ({
   historyManager,
   projectManager,
   viewStates,
+  setError,
 }) => {
   const { nodeEditModalConfig, closeNodeEditModal, openConfirmModal, closeConfirmModal } = modalManager;
   const { addHistoryEntry } = historyManager;

@@ -102,7 +102,7 @@ const App = () => {
 
 
   const nodeOperations = useNodeOperations({
-    techTreeData, setTechTreeData, modalManager, historyManager, projectManager, viewStates
+    techTreeData, setTechTreeData, modalManager, historyManager, projectManager, viewStates, setError
   });
 
   const apiKeyHook = useApiKey(addHistoryEntry); 

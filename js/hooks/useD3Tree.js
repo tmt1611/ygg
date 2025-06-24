@@ -36,7 +36,7 @@ export const useD3Tree = (
       // Make radius dependent on depth to avoid clutter
       return tree()
         .size([2 * Math.PI, depth * radialRadiusFactor])
-        .separation((a, b) => (a.parent === b.parent ? 2 : 2.5));
+        .separation((a, b) => (a.parent === b.parent ? 3 : 4));
     } else if (layout === 'vertical') {
       // For a top-down tree, nodeSize defines spacing between nodes.
       // Increased width to prevent label overlap.
