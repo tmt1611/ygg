@@ -1265,6 +1265,44 @@ html[data-theme='nebula'] .segmented-control button.active {
     border-color: var(--border-color-strong);
 }
 
+/* Focus View Importance Control */
+.focus-view-importance-control {
+  background-color: rgba(0,0,0,0.2);
+  border-color: rgba(var(--focus-panel-text), 0.3);
+  padding: 3px;
+}
+.focus-view-importance-control button {
+  color: var(--focus-panel-text);
+  opacity: 0.7;
+  flex-grow: 1;
+  padding: 5px 8px;
+  font-size: 0.85em;
+  /* Override base button styles */
+  background-color: transparent;
+  border: 1px solid transparent;
+  box-shadow: none;
+}
+.focus-view-importance-control button:hover:not(.active):not(:disabled) {
+  background-color: rgba(255,255,255,0.1);
+  opacity: 1;
+  transform: none; /* Override base button hover transform */
+}
+.focus-view-importance-control button.active {
+  background-color: var(--focus-connector-stroke);
+  color: var(--focus-stellar-bg);
+  border-color: var(--focus-connector-stroke);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+  opacity: 1;
+  font-weight: 600;
+}
+.focus-view-importance-control button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+.focus-view-importance-control button.active:disabled {
+  opacity: 0.6;
+}
+
 
 .workspace-tab-container { padding: 12px; background-color: var(--app-bg); height: 100%; overflow-y: auto; } 
 .workspace-content-area { flex-grow: 1; overflow-y: auto; }

@@ -72,14 +72,15 @@ const FocusViewDetailPanel = ({
 
       React.createElement("div", { className: "form-group" },
         React.createElement("label", { htmlFor: "focus-node-importance" }, "System Importance:"),
-        React.createElement("select", {
-          id: "focus-node-importance",
-          value: node.importance || 'common',
-          onChange: (e) => handleDetailPanelNodeAction(() => onNodeImportanceChange(node.id, e.target.value)),
-          disabled: isAppBusy || node.isLocked,
-          className: `importance-select importance-${node.importance || 'common'}`
-        },
-          NODE_IMPORTANCE_OPTIONS.map(opt => React.createElement("option", { key: opt.value, value: opt.value }, opt.rune, " ", opt.label))
+        React.createElement("div", { id: "focus-node-importance", className: "segmented-control focus-view-importance-control" },
+          NODE_IMPORTANCE_OPTIONS.map(opt => React.createElement("button", {
+            key: opt.value,
+            type: "button",
+            className: (node.importance || 'common') === opt.value ? 'active' : '',
+            onClick: () => handleDetailPanelNodeAction(() => onNodeImportanceChange(node.id, opt.value)),
+            disabled: isAppBusy || node.isLocked,
+            title: `Set importance to ${opt.label}`
+          }, opt.rune, " ", opt.label))
         )
       ),
 
