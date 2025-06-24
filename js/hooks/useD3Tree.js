@@ -141,7 +141,7 @@ export const useD3Tree = (
             .attr('d', 'M0,-5L-10,0L0,5');
       };
 
-      createMarker('arrowhead', 'graph-arrowhead');
+      // The 'arrowhead' is now drawn manually in GraphViewComponent, so we only need the project one.
       createMarker('arrowhead-project', 'graph-arrowhead-project');
       
       // The 'g' element will be centered, and nodes will be positioned relative to it.

@@ -272,8 +272,7 @@ const GraphViewComponent = ({
       .attr("marker-end", d => {
         // Only outgoing project links to a proxy node get an end marker.
         if (d.isProjectLink && d.target.isProxy) return 'url(#arrowhead-project)';
-        // Regular links also get an end marker now.
-        if (!d.isProjectLink) return 'url(#arrowhead)';
+        // Regular links have their arrowheads drawn manually at the midpoint.
         return null;
       })
       .attr("d", d => {
@@ -321,6 +320,64 @@ const GraphViewComponent = ({
         return `M${sx},${sy}L${tx},${ty}`;
       });
 
+    // Draw arrowheads for regular links at the midpoint
+    const regularLinks = allLinks.filter(link => !link.isProjectLink);
+    g.selectAll(".graph-arrowhead-group")
+      .data(regularLinks, d => `${d.source.id}-${d.target.id}`)
+      .join(
+        enter => {
+          const group = enter.append("g").attr("class", "graph-arrowhead-group");
+          group.append("path")
+            .attr("d", "M0,-4L-8,0L0,4") // Arrow shape
+            .attr("fill", "none")
+            .attr("stroke-width", 1.5)
+            .attr("stroke-linecap", "round");
+          return group;
+        },
+        update => update,
+        exit => exit.remove()
+      )
+      .attr("transform", d => {
+        const sourceRadius = getNodeRadius(d.source);
+        const targetRadius = getNodeRadius(d.target);
+
+        let sx_c, sy_c, tx_c, ty_c;
+
+        if (effectiveLayout === 'radial') {
+            const angle_s = d.source.x - Math.PI / 2;
+            sx_c = d.source.y * Math.cos(angle_s);
+            sy_c = d.source.y * Math.sin(angle_s);
+            const angle_t = d.target.x - Math.PI / 2;
+            tx_c = d.target.y * Math.cos(angle_t);
+            ty_c = d.target.y * Math.sin(angle_t);
+        } else if (effectiveLayout === 'vertical') {
+            sx_c = d.source.x; sy_c = d.source.y;
+            tx_c = d.target.x; ty_c = d.target.y;
+        } else { // horizontal
+            sx_c = d.source.y; sy_c = d.source.x;
+            tx_c = d.target.y; ty_c = d.target.x;
+        }
+        
+        const dx = tx_c - sx_c;
+        const dy = ty_c - sy_c;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+
+        if (dist <= sourceRadius + targetRadius) return "translate(-10000, -10000)"; // Hide if nodes overlap
+
+        const sx = sx_c + (dx / dist) * sourceRadius;
+        const sy = sy_c + (dy / dist) * sourceRadius;
+        const tx = tx_c - (dx / dist) * targetRadius;
+        const ty = ty_c - (dy / dist) * targetRadius;
+
+        const midX = (sx + tx) / 2;
+        const midY = (sy + ty) / 2;
+        const angle = Math.atan2(ty - sy, tx - sx) * 180 / Math.PI;
+        
+        return `translate(${midX}, ${midY}) rotate(${angle})`;
+      })
+      .select("path")
+      .attr("stroke", "var(--graph-link-stroke-ecosystem)");
+
     // Draw node groups
     const nodeGroups = g
       .selectAll(".graph-view-node")
@@ -330,7 +387,7 @@ const GraphViewComponent = ({
           const group = enter.append("g")
             .attr("class", d => d.isProxy ? "graph-view-node proxy" : "graph-view-node");
           
-          group.append("title");
+          // The native <title> element is removed to prevent it from interfering with the custom tooltip.
 
           group.each(function(d) {
             const el = select(this);
@@ -397,7 +454,7 @@ const GraphViewComponent = ({
       .on("mouseenter", handleNodeMouseEnter)
       .on("mouseleave", handleNodeMouseLeave);
 
-    nodeGroups.select("title").text(d => d.isProxy ? `Project: ${d.data.fullName}\n(Click to navigate)` : `${d.data.name}\n(Double-click for Focus View)`);
+    // The native <title> element is removed to prevent it from interfering with the custom tooltip.
 
     nodeGroups.select("circle").attr("fill", d => {
         if (d.data.importance === 'minor') return 'var(--importance-minor-bg)';

@@ -1055,8 +1055,8 @@ html[data-theme='synthwave'] .graph-view-node.highlighted .node-label-wrapper {
 .graph-view-link { stroke: var(--graph-link-stroke-ecosystem); stroke-linecap: round; }
 .graph-view-project-link { stroke: var(--primary-accent); stroke-linecap: round; }
 
-.graph-arrowhead path {
-  fill: var(--graph-link-stroke-ecosystem);
+.graph-arrowhead-group path {
+  stroke: var(--graph-link-stroke-ecosystem);
 }
 .graph-arrowhead-project path {
   fill: var(--primary-accent);

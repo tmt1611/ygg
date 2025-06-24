@@ -9,6 +9,9 @@ PORT = 8080
 # Make sure to run this script from the project's root directory.
 Handler = http.server.SimpleHTTPRequestHandler
 
+# Allow reusing the address to avoid "Address already in use" error on quick restarts
+socketserver.TCPServer.allow_reuse_address = True
+
 with socketserver.TCPServer(("", PORT), Handler) as httpd:
     print("=====================================================")
     print("  Yggdrasil Project Server Started")
