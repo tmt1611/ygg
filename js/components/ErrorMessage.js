@@ -30,7 +30,7 @@ const ErrorMessage = ({ error, onClose, mode = 'toast' }) => {
         React.createElement("strong", null, "Error:"), " ",
         formattedMessage
       ),
-      error.details && mode === 'toast' && React.createElement("button", {
+      error.details && React.createElement("button", {
         onClick: handleCopy,
         className: "base-icon-button error-message-copy-btn",
         "aria-label": "Copy error details",

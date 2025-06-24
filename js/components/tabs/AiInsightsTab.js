@@ -56,7 +56,7 @@ const AiInsightsTab = ({
       ),
 
       isLoading && !insightsData && React.createElement(LoadingSpinner, { message: "Fetching Insights..." }),
-      error && React.createElement(ErrorMessage, { message: error }),
+      error && React.createElement(ErrorMessage, { error: error, mode: "inline" }),
 
       insightsData ? (
         React.createElement("div", { className: "ai-insights-content-sections" },

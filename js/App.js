@@ -287,7 +287,7 @@ const App = () => {
 
   const handleGenerateStrategicSuggestions = useCallback(async () => {
     if (!apiKeyHook.status.isSet || !initialPrompt.trim()) {
-      setStrategicSuggestionsError("API Key must be set and project context (initial prompt) must be provided.");
+      setStrategicSuggestionsError({ message: "API Key must be set and project context (initial prompt) must be provided." });
       return;
     }
     setIsFetchingStrategicSuggestions(true);
@@ -303,7 +303,7 @@ const App = () => {
       addHistoryEntry('AI_STRATEGY_GEN', 'AI strategic suggestions generated for project.');
     } catch (e) {
       console.error("Error generating strategic suggestions:", e);
-      setStrategicSuggestionsError(e.message || "Failed to fetch strategic suggestions from AI.");
+      setStrategicSuggestionsError({ message: e.message || "Failed to fetch strategic suggestions from AI.", details: e.stack });
     } finally {
       setIsFetchingStrategicSuggestions(false);
     }

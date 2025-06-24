@@ -75,7 +75,7 @@ const AiToolsTab = ({
         ),
 
         isFetchingStrategicSuggestions && React.createElement(LoadingSpinner, { message: null }),
-        strategicSuggestionsError && React.createElement(ErrorMessage, { message: strategicSuggestionsError }),
+        strategicSuggestionsError && React.createElement(ErrorMessage, { error: strategicSuggestionsError, mode: "inline" }),
 
         strategicSuggestions && strategicSuggestions.length > 0 && (
           React.createElement("div", { style: { marginTop: '15px' } },

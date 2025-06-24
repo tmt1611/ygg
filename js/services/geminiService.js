@@ -438,19 +438,24 @@ export const generateStrategicSuggestions = async (
     throw new Error("Gemini API client not initialized. Set a valid API Key.");
   }
 
+  const systemInstruction = `You are an AI assistant that provides strategic suggestions for a project.
+You MUST respond with a single, valid JSON array of strings.
+Example: ["Suggestion 1", "Suggestion 2", "Suggestion 3"]
+Output ONLY the JSON array. NO extra text, explanations, or markdown fences.
+`;
+
   const prompt = `
 Project Context: "${projectContext}"
 Current Tree Summary: "${currentTreeSummary}"
 
 Based on the project context and the current state of the tree, suggest 3-5 high-level strategic next steps, new major branches, or key areas of focus that would logically extend, complement, or significantly enhance this project.
 Each suggestion should be a concise, actionable phrase or short sentence.
-Return the suggestions as a JSON array of strings. For example: ["Develop a dedicated AI research branch", "Explore sustainable energy integrations", "Create a beginner-friendly tutorial pathway"].
-Respond ONLY with the JSON array. No extra text or markdown.
 `;
 
   try {
     const model = apiClientState.client.getGenerativeModel({ 
       model: "gemini-1.5-flash-latest",
+      systemInstruction: { parts: [{ text: systemInstruction }], role: "model" },
       generationConfig: { 
         responseMimeType: "application/json", 
         temperature: 0.6, topK: 50, topP: 0.95 

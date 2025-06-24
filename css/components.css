@@ -2291,7 +2291,14 @@ html[data-theme='ocean'] .panel-variant-sidebar .panel-toggle-button {
   color: var(--error-color);
 }
 .error-message-inline .error-message-copy-btn {
-  display: none; /* No copy button for inline errors */
+  font-size: 1.2em;
+  padding: 0;
+  width: 22px;
+  height: 22px;
+  line-height: 1;
+  flex-shrink: 0;
+  margin-left: 4px;
+  color: var(--error-color);
 }
 .error-message-inline .error-message-close-btn:hover {
   background-color: rgba(var(--error-color-rgb, 220, 53, 69), 0.15);
