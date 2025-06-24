@@ -61,7 +61,39 @@ html[data-theme='sol'] .yggdrasil-top-bar-nav-button:hover {
 }
 html[data-theme='dark'] .yggdrasil-top-bar-nav-button.active { color: var(--yggdrasil-bark-bg); }
 
-/* Search bar styles removed as the component is not used */
+/* Search bar styles */
+.yggdrasil-top-bar-search-wrapper {
+  margin-left: 12px;
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.yggdrasil-top-bar-search-input {
+  padding: 6px 10px;
+  font-size: 0.85em;
+  border: 1px solid var(--yggdrasil-bark-border);
+  border-radius: var(--border-radius);
+  background-color: var(--panel-alt-bg);
+  color: var(--text-on-bark);
+  transition: background-color 0.2s, border-color 0.2s;
+  width: 200px;
+}
+.yggdrasil-top-bar-search-input:focus {
+  outline: none;
+  border-color: var(--primary-accent);
+  background-color: var(--panel-bg);
+}
+html[data-theme='dark'] .yggdrasil-top-bar-search-input,
+html[data-theme='nebula'] .yggdrasil-top-bar-search-input {
+  background-color: var(--panel-bg);
+  border-color: var(--border-color);
+  color: var(--text-primary);
+}
+html[data-theme='dark'] .yggdrasil-top-bar-search-input:focus,
+html[data-theme='nebula'] .yggdrasil-top-bar-search-input:focus {
+  border-color: var(--primary-accent);
+  background-color: var(--app-bg);
+}
 
 
 .yggdrasil-top-bar-active-project {
@@ -939,6 +971,17 @@ html[data-theme='sol'] .graph-view-svg-container {
 html[data-theme='dark'] .graph-view-node.highlighted .node-label-wrapper,
 html[data-theme='nebula'] .graph-view-node.highlighted .node-label-wrapper {
     text-shadow: 0 0 5px var(--graph-node-highlight-stroke);
+}
+
+.graph-view-node.dimmed, .graph-view-link.dimmed {
+    opacity: 0.2;
+    transition: opacity 0.3s ease-out;
+}
+.graph-view-node.highlighted, .graph-view-node.selected {
+    opacity: 1;
+}
+.graph-view-node.dimmed:hover {
+    opacity: 1;
 }
 
 .graph-view-link { stroke: var(--graph-link-stroke-ecosystem); stroke-linecap: round; }

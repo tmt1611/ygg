@@ -90,7 +90,7 @@ const App = () => {
     techTreeData, setError, modalManager, addHistoryEntry,
     setYggdrasilViewMode, yggdrasilViewMode
   });
-  const { focusNodeId, selectedGraphNodeId, setSelectedGraphNodeId, handleSwitchToFocusView } = viewStates;
+  const { focusNodeId, selectedGraphNodeId, setSelectedGraphNodeId, handleSwitchToFocusView, graphSearchTerm, setGraphSearchTerm } = viewStates;
 
   const projectManager = useProjectManagement({
     modalManager, historyManager, viewStates,
@@ -329,7 +329,9 @@ const App = () => {
         hasTechTreeData: !!techTreeData,
         yggdrasilViewMode: yggdrasilViewMode,
         setYggdrasilViewMode: setYggdrasilViewMode,
-        focusNodeId: focusNodeId
+        focusNodeId: focusNodeId,
+        graphSearchTerm: graphSearchTerm,
+        setGraphSearchTerm: setGraphSearchTerm
       }),
       React.createElement("div", { className: `yggdrasil-app-body theme-${themeMode} view-mode-${yggdrasilViewMode} ${isSidebarCollapsed ? 'sidebar-collapsed' : ''}` },
         React.createElement(KnowledgeBranchSidebar, {
@@ -377,7 +379,8 @@ const App = () => {
               techTreeData, isLoading, isModifying,
               isAppBusy: isLoading || isModifying || isFetchingStrategicSuggestions,
               initialPrompt, setInitialPrompt, currentTreeStats,
-              isSummarizing
+              isSummarizing,
+              graphSearchTerm
             },
             appHooks: {
               projectManager, nodeOperations, viewStates,

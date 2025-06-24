@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import TechTreeListView from '../TechTreeListView.js';
 import { filterTree, areAllNodesExpanded } from '../../utils.js'; 
 
@@ -23,8 +23,8 @@ const ListViewTabContent = ({
   findLinkSource,
   handleNavigateToSourceNode,
   handleToggleAllNodesList,
+  searchTerm,
 }) => {
-  const [searchTerm, setSearchTerm] = useState('');
 
   if (!techTreeData && !isAppBusy) {
     return (
@@ -44,24 +44,13 @@ const ListViewTabContent = ({
       techTreeData && (
         React.createElement("div", { style: { 
             display: 'flex', 
-            justifyContent: 'space-between', 
+            justifyContent: 'flex-end', 
             alignItems: 'center',
             paddingBottom: '8px', 
             borderBottom: '1px solid var(--border-color)', 
             marginBottom: '8px',
             gap: '12px'
         }},
-          React.createElement("div", { style: { flexGrow: 1, maxWidth: '400px' }},
-            React.createElement("input", {
-              type: "search",
-              placeholder: "Filter list by name/description...",
-              value: searchTerm,
-              onChange: (e) => setSearchTerm(e.target.value),
-              style: { width: '100%' },
-              "aria-label": "Filter list of nodes",
-              disabled: isAppBusy || !techTreeData
-            })
-          ),
           React.createElement("button", { 
             onClick: handleToggleAllNodesList, 
             disabled: isAppBusy || !techTreeData,

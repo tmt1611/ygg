@@ -27,6 +27,7 @@ export const useViewStates = ({
   const [focusNodeId, setFocusNodeId] = useState(null);
   const [selectedNodeInFocusPanelId, setSelectedNodeInFocusPanelId] = useState(null);
   const [selectedGraphNodeId, setSelectedGraphNodeId] = useState(null);
+  const [graphSearchTerm, setGraphSearchTerm] = useState('');
 
   useEffect(() => { localStorage.setItem(APP_STORAGE_KEYS.COLLAPSED_NODES, JSON.stringify(Array.from(collapsedNodeIds))); }, [collapsedNodeIds]);
 
@@ -97,6 +98,7 @@ export const useViewStates = ({
     collapsedNodeIds, setCollapsedNodeIds,
     focusNodeId, setFocusNodeId, selectedNodeInFocusPanelId, setSelectedNodeInFocusPanelId,
     selectedGraphNodeId, setSelectedGraphNodeId,
+    graphSearchTerm, setGraphSearchTerm,
     handleSwitchToFocusView,
     handleToggleCollapseNode, handleToggleAllNodesList,
     commonViewResetLogic,
@@ -106,6 +108,7 @@ export const useViewStates = ({
     collapsedNodeIds, setCollapsedNodeIds,
     focusNodeId, setFocusNodeId, selectedNodeInFocusPanelId, setSelectedNodeInFocusPanelId,
     selectedGraphNodeId, setSelectedGraphNodeId,
+    graphSearchTerm, setGraphSearchTerm,
     handleSwitchToFocusView,
     handleToggleCollapseNode, handleToggleAllNodesList,
     commonViewResetLogic,

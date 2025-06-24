@@ -30,7 +30,8 @@ const GraphViewComponent = ({
   activeProjectId,
   findLinkSource,
   onNavigateToLinkedProject,
-  handleNavigateToSourceNode
+  handleNavigateToSourceNode,
+  searchTerm
 }) => {
   const LAYOUT_CYCLE = ['radial', 'vertical', 'horizontal'];
   const [layout, setLayout] = useState('radial'); // 'radial', 'vertical', or 'horizontal'
@@ -386,10 +387,43 @@ const GraphViewComponent = ({
     if (!g) return;
 
     const nodeSelection = g.selectAll(".graph-view-node");
+    const linkSelection = g.selectAll(".graph-view-link, .graph-view-project-link");
+
+    if (searchTerm?.trim()) {
+        const lowerCaseSearchTerm = searchTerm.toLowerCase();
+        const matchingNodeIds = new Set();
+        
+        nodes.forEach(node => {
+            if (!node.isProxy && (node.data.name.toLowerCase().includes(lowerCaseSearchTerm) || 
+                (node.data.description && node.data.description.toLowerCase().includes(lowerCaseSearchTerm)))) {
+                matchingNodeIds.add(node.data.id);
+                // Also add ancestors to keep the path visible
+                let current = node.parent;
+                while (current) {
+                    matchingNodeIds.add(current.data.id);
+                    current = current.parent;
+                }
+            }
+        });
+
+        nodeSelection
+            .classed("highlighted", d => !d.isProxy && matchingNodeIds.has(d.data.id))
+            .classed("dimmed", d => !d.isProxy && !matchingNodeIds.has(d.data.id) && d.data.id !== activeNodeId);
+
+        linkSelection
+            .classed("dimmed", d => {
+                const sourceIsMatch = d.source.isProxy || matchingNodeIds.has(d.source.data.id);
+                const targetIsMatch = d.target.isProxy || matchingNodeIds.has(d.target.data.id);
+                return !(sourceIsMatch && targetIsMatch);
+            });
+
+    } else {
+        nodeSelection.classed("highlighted", false).classed("dimmed", false);
+        linkSelection.classed("dimmed", false);
+    }
     
     nodeSelection
-      .classed("selected", d => !d.isProxy && d.data.id === activeNodeId)
-      .classed("highlighted", false); // No search term, so nothing is highlighted
+      .classed("selected", d => !d.isProxy && d.data.id === activeNodeId);
 
     nodeSelection.select("circle")
       .attr("stroke", d => {
@@ -401,7 +435,7 @@ const GraphViewComponent = ({
         centerOnNode(activeNodeId);
     }
 
-  }, [g, activeNodeId, nodes, layout, centerOnNode]); // Using 'nodes' and 'layout' to re-run on data change.
+  }, [g, activeNodeId, nodes, layout, centerOnNode, searchTerm]); // Using 'nodes' and 'layout' to re-run on data change.
 
 
   if (!treeData) {

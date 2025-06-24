@@ -14,7 +14,8 @@ const MainContentRouter = ({
   const {
     techTreeData, isLoading, isModifying, isAppBusy,
     initialPrompt, setInitialPrompt, currentTreeStats,
-    isSummarizing
+    isSummarizing,
+    graphSearchTerm
   } = appState;
 
   const {
@@ -69,6 +70,7 @@ const MainContentRouter = ({
         return React.createElement(GraphViewComponent, {
           treeData: techTreeData,
           activeNodeId: viewStates.selectedGraphNodeId,
+          searchTerm: graphSearchTerm,
           onSelectNode: handleNodeSelectedForInsightsOrActions,
           onSwitchToFocusView: viewStates.handleSwitchToFocusView,
           onOpenContextMenu: modalManager.openContextMenu,
@@ -88,6 +90,7 @@ const MainContentRouter = ({
         return React.createElement("div", { className: "workspace-tab-container" },
           React.createElement(ListViewTabContent, {
             techTreeData: techTreeData,
+            searchTerm: graphSearchTerm,
             showListDescriptionsGlobal: viewStates.showListDescriptionsGlobal,
             onToggleNodeLock: nodeOperations.handleToggleNodeLock,
             onAddQuickChild: nodeOperations.handleQuickAddChild,

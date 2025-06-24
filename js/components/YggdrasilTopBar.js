@@ -16,7 +16,9 @@ const YggdrasilTopBar = ({
   onDownloadActiveProject, saveFeedback, setSaveFeedback, downloadFeedback, setDownloadFeedback,
   isAppBusy, hasTechTreeData,
   yggdrasilViewMode, setYggdrasilViewMode,
-  focusNodeId
+  focusNodeId,
+  graphSearchTerm,
+  setGraphSearchTerm
 }) => {
 
   useEffect(() => {
@@ -39,6 +41,8 @@ const YggdrasilTopBar = ({
   const handleNavClick = (viewMode) => {
     setYggdrasilViewMode(viewMode);
   };
+
+  const showSearchBar = ['graph', 'list'].includes(yggdrasilViewMode);
 
     return (
     React.createElement("header", { className: "yggdrasil-top-bar" },
@@ -71,6 +75,16 @@ const YggdrasilTopBar = ({
           disabled: (isAppBusy && yggdrasilViewMode !== 'focus') || !focusNodeId,
           title: focusNodeId ? "Detailed view of the currently focused node" : "Select a node to enable Focus View"
         }, "Focus"),
+        showSearchBar && React.createElement("div", { className: "yggdrasil-top-bar-search-wrapper" },
+            React.createElement("input", {
+                type: "search",
+                placeholder: "Filter nodes...",
+                className: "yggdrasil-top-bar-search-input",
+                value: graphSearchTerm,
+                onChange: (e) => setGraphSearchTerm(e.target.value),
+                "aria-label": "Filter nodes in graph or list"
+            })
+        ),
         activeProjectName ? (
           React.createElement("div", { className: "yggdrasil-top-bar-active-project", title: `Currently active project: ${activeProjectName}`},
             React.createElement("span", { className: "yggdrasil-top-bar-project-icon" }, "🌲"), activeProjectName
