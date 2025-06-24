@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useMemo, useCallback, useState } from 'react'
 import { linkRadial, select, linkVertical, linkHorizontal } from 'd3';
 import { useD3Tree } from '../hooks/useD3Tree.js';
 import { NODE_IMPORTANCE_RUNES } from '../constants.js';
-// wrapSvgText is no longer needed
+import PathToRootDisplay from './PathToRootDisplay.js';
 
 
 const getNodeRadius = (node) => {
@@ -85,6 +85,13 @@ const GraphViewComponent = ({
         return newMode;
     });
   }, [activeNodeId, resetZoom]);
+
+  const handlePathNodeSelect = useCallback((nodeId) => {
+    onSelectNode(nodeId);
+    // The activeNodeId change will cause useD3Tree to re-render with the new focus.
+    // We reset zoom to re-center on the new focus root.
+    setTimeout(resetZoom, 50);
+  }, [onSelectNode, resetZoom]);
 
   const projectLinksAndProxyNodes = useMemo(() => {
     if (isFocusMode || !nodes || nodes.length === 0 || !projects) {
@@ -497,6 +504,16 @@ const GraphViewComponent = ({
   return (
     React.createElement("div", { className: "graph-view-wrapper" },
       React.createElement("div", { ref: svgContainerDivRef, className: "graph-view-svg-container" },
+        isFocusMode && activeNodeId && (
+            React.createElement("div", { style: { position: 'absolute', top: '8px', left: '8px', zIndex: 10, maxWidth: 'calc(100% - 150px)' }},
+                React.createElement(PathToRootDisplay, {
+                    treeData: treeData,
+                    currentNodeId: activeNodeId,
+                    onSelectPathNode: handlePathNodeSelect,
+                    pathContext: "graph-focus"
+                })
+            )
+        ),
         React.createElement("svg", { ref: svgRef, style: { display: 'block', width: '100%', height: '100%' }})
       ),
       React.createElement("div", { className: "graph-view-controls" },

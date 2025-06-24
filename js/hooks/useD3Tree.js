@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useCallback, useState, useLayoutEffect } from 'react';
 import { select, zoom, hierarchy, tree, zoomIdentity } from 'd3';
-import { getAllNodesAsMap } from '../utils.js';
+import { getAllNodesAsMap, findNodeById } from '../utils.js';
 
 const defaultTreeConfig = {
   nodeRadius: 16, // Base for 'common', but will be overridden in GraphViewComponent
@@ -15,7 +15,9 @@ export const useD3Tree = (
   config = {},
   onBackgroundClick,
   onBackgroundContextMenu,
-  layout = 'radial' // 'radial', 'vertical', 'horizontal'
+  layout = 'radial', // 'radial', 'vertical', 'horizontal'
+  isFocusMode,
+  activeNodeId
 ) => {
   const finalConfig = { ...defaultTreeConfig, ...config };
   const { margin, radialRadiusFactor } = finalConfig;
@@ -27,8 +29,15 @@ export const useD3Tree = (
 
   const rootHierarchy = useMemo(() => {
     if (!treeData) return null;
+    if (isFocusMode && activeNodeId) {
+        const focusNode = findNodeById(treeData, activeNodeId);
+        if (focusNode) {
+            // When focusing, we treat the selected node as the root of a new hierarchy.
+            return hierarchy(focusNode);
+        }
+    }
     return hierarchy(treeData);
-  }, [treeData]);
+  }, [treeData, isFocusMode, activeNodeId]);
 
   const treeLayout = useMemo(() => {
     const depth = rootHierarchy ? rootHierarchy.height : 1;
