@@ -24,6 +24,7 @@ const GraphViewComponent = ({
   onOpenContextMenu,
   onCloseContextMenu,
   onOpenViewContextMenu,
+  onAddNodeToRoot,
   isAppBusy,
   projects,
   activeProjectId,
@@ -54,10 +55,11 @@ const GraphViewComponent = ({
         actions: {
             onResetZoom: resetZoom,
             onToggleLayout: toggleLayout,
-            nextLayoutInfo: getNextLayoutInfo(layout)
+            nextLayoutInfo: getNextLayoutInfo(layout),
+            onAddChildToRoot: onAddNodeToRoot,
         }
     });
-  }, [onOpenViewContextMenu, resetZoom, toggleLayout, layout]);
+  }, [onOpenViewContextMenu, resetZoom, toggleLayout, layout, onAddNodeToRoot]);
 
   const { g, nodes, links, config, resetZoom, zoomIn, zoomOut, centerOnNode } = useD3Tree(svgRef, treeData, {}, onCloseContextMenu, handleBackgroundContextMenu, layout);
 

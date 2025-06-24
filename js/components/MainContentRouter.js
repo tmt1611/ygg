@@ -27,6 +27,7 @@ const MainContentRouter = ({
     handleExtractData, handleNodeSelectedForInsightsOrActions,
     handleDeleteNodeWithConfirmation,
     onOpenViewContextMenu,
+    onAddNodeToRoot,
   } = appCallbacks;
 
   const {
@@ -73,6 +74,7 @@ const MainContentRouter = ({
           onOpenContextMenu: modalManager.openContextMenu,
           onCloseContextMenu: modalManager.closeContextMenu,
           onOpenViewContextMenu: onOpenViewContextMenu,
+          onAddNodeToRoot: onAddNodeToRoot,
           isAppBusy: isAppBusy,
           projects: projectManager.projects,
           activeProjectId: projectManager.activeProjectId,

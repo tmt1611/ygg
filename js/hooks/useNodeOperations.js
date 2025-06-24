@@ -158,6 +158,18 @@ export const useNodeOperations = ({
     );
   }, [techTreeData, setTechTreeData, handleSaveActiveProject, addHistoryEntry, projectManager.projects, projectManager.activeProjectId]);
 
+  const handleAddNodeToRoot = useCallback(() => {
+    if (!techTreeData) return;
+    modalManager.openNodeEditModal({
+      mode: 'addChild',
+      targetNodeId: techTreeData.id, // Target the root node
+      parentNodeName: techTreeData.name,
+      title: `Add Node to Root: ${techTreeData.name}`,
+      label: "New Node Name",
+      placeholder: "Enter name for new top-level node",
+    });
+  }, [techTreeData, modalManager]);
+
 
   return {
     handleToggleNodeLock,
@@ -166,5 +178,6 @@ export const useNodeOperations = ({
     handleDeleteNodeWithConfirmation,
     handleQuickAddChild,
     handleToggleAllLock,
+    handleAddNodeToRoot,
   };
 };

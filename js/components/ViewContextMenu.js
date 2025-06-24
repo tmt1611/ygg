@@ -9,13 +9,13 @@ const ViewContextMenu = ({ isOpen, config, onClose }) => {
         if (!config || !config.actions) return [];
         const { actions } = config;
         const items = [
-            { id: 'reset-zoom', label: 'Reset View', icon: '🎯', action: actions.onResetZoom },
-            { id: 'toggle-layout', label: `Layout: ${actions.nextLayoutInfo.next}`, icon: actions.nextLayoutInfo.icon, action: actions.onToggleLayout },
+            { id: 'reset-zoom', label: 'Reset View', icon: '🎯', action: actions.onResetZoom, title: "Reset zoom and pan to default" },
+            { id: 'toggle-layout', label: `Layout: ${actions.nextLayoutInfo.title.replace('Switch to ', '').replace(' Layout', '')}`, icon: actions.nextLayoutInfo.icon, action: actions.onToggleLayout, title: actions.nextLayoutInfo.title },
         ];
 
         if (actions.onAddChildToRoot) {
             items.push({ type: 'separator' });
-            items.push({ id: 'add-child-to-root', label: 'Add Node to Root', icon: '➕', action: actions.onAddChildToRoot });
+            items.push({ id: 'add-child-to-root', label: 'Add Node to Root', icon: '➕', action: actions.onAddChildToRoot, title: "Add a new top-level node to the project" });
         }
 
         return items;
@@ -99,6 +99,7 @@ const ViewContextMenu = ({ isOpen, config, onClose }) => {
                                 className: `context-menu-item ${isFocused ? 'focused' : ''}`,
                                 onClick: () => { if (item.action) { item.action(); onClose(); } },
                                 onMouseEnter: () => setFocusedIndex(focusableItems.findIndex(fi => fi.id === item.id)),
+                                title: item.title || item.label,
                             },
                                 React.createElement("span", { className: "context-menu-icon" }, item.icon),
                                 React.createElement("span", { className: "context-menu-label" }, item.label)

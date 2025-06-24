@@ -388,6 +388,7 @@ const App = () => {
               handleExtractData, handleNodeSelectedForInsightsOrActions,
               handleDeleteNodeWithConfirmation: nodeOperations.handleDeleteNodeWithConfirmation,
               onOpenViewContextMenu: modalManager.openViewContextMenu,
+              onAddNodeToRoot: nodeOperations.handleAddNodeToRoot,
             },
             viewControls: {
               yggdrasilViewMode, setYggdrasilViewMode
