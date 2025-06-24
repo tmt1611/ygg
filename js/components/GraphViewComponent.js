@@ -272,12 +272,9 @@ const GraphViewComponent = ({
       .attr("marker-end", d => {
         // Only outgoing project links to a proxy node get an end marker.
         if (d.isProjectLink && d.target.isProxy) return 'url(#arrowhead-project)';
+        // Regular links also get an end marker now.
+        if (!d.isProjectLink) return 'url(#arrowhead)';
         return null;
-      })
-      .attr("marker-mid", d => {
-        // Regular links (including incoming project links) get a mid marker.
-        if (d.isProjectLink) return null;
-        return `url(#arrowhead)`;
       })
       .attr("d", d => {
         // Outgoing project links are simple curves to the proxy node.
@@ -288,7 +285,7 @@ const GraphViewComponent = ({
         }
 
         // All other links (regular and incoming project links) are straight lines
-        // with a midpoint for the arrow, shortened to not overlap nodes.
+        // shortened to not overlap nodes.
         const sourceRadius = getNodeRadius(d.source);
         const targetRadius = getNodeRadius(d.target);
 
@@ -321,10 +318,7 @@ const GraphViewComponent = ({
         const tx = tx_c - (dx / dist) * targetRadius;
         const ty = ty_c - (dy / dist) * targetRadius;
 
-        const mx = (sx + tx) / 2;
-        const my = (sy + ty) / 2;
-
-        return `M${sx},${sy}L${mx},${my}L${tx},${ty}`;
+        return `M${sx},${sy}L${tx},${ty}`;
       });
 
     // Draw node groups
