@@ -41,6 +41,22 @@ export const useApiKey = (addHistoryEntry) => {
     initializeApiKey();
   }, [_updateStatus]);
 
+  const clearActiveUserKey = useCallback(async () => {
+    setIsProcessing(true);
+    geminiService.clearActiveApiKey();
+    if (addHistoryEntry) addHistoryEntry('API_KEY_STATUS_CHANGED', 'API Key cleared by user.');
+    const envResult = await geminiService.attemptLoadEnvKey();
+    if (envResult.success) {
+      _updateStatus(envResult, 'clear_and_reinit_env');
+      setSelectedMode('environment');
+    } else {
+      _updateStatus({ success: false, message: "API Key cleared. Provide a new key or set environment variable.", source: null }, 'clear_and_reinit_pasted');
+      setSelectedMode('pasted');
+    }
+    setInputKey('');
+    setIsProcessing(false);
+  }, [_updateStatus, addHistoryEntry]);
+
   const changeMode = useCallback((newMode) => {
     if (selectedMode === newMode || isProcessing) return;
 
@@ -72,22 +88,6 @@ export const useApiKey = (addHistoryEntry) => {
     }
     setIsProcessing(false);
   }, [_updateStatus, inputKey]);
-
-  const clearActiveUserKey = useCallback(async () => {
-    setIsProcessing(true);
-    geminiService.clearActiveApiKey();
-    if (addHistoryEntry) addHistoryEntry('API_KEY_STATUS_CHANGED', 'API Key cleared by user.');
-    const envResult = await geminiService.attemptLoadEnvKey();
-    if (envResult.success) {
-      _updateStatus(envResult, 'clear_and_reinit_env');
-      setSelectedMode('environment');
-    } else {
-      _updateStatus({ success: false, message: "API Key cleared. Provide a new key or set environment variable.", source: null }, 'clear_and_reinit_pasted');
-      setSelectedMode('pasted');
-    }
-    setInputKey('');
-    setIsProcessing(false);
-  }, [_updateStatus, addHistoryEntry]);
 
   const hookReturn = {
     selectedMode,
