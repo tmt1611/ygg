@@ -343,7 +343,7 @@ const GraphViewComponent = ({
             return `translate(${radius + spacing}, -25)`;
         }
         // horizontal
-        return `translate(-${labelWidth / 2}, ${radius + spacing})`;
+        return `translate(${radius + spacing}, -25)`; // Position to the right, centered vertically
       });
 
     // Set the text content for the div inside the foreignObject

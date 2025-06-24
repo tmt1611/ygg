@@ -50,7 +50,8 @@ const LinkProjectModal = ({
       className: "modal-overlay-basic",
       role: "dialog",
       "aria-modal": "true",
-      "aria-labelledby": "link-project-modal-title"
+      "aria-labelledby": "link-project-modal-title",
+      onClick: (e) => { if (e.target === e.currentTarget) onCancel(); }
     },
       React.createElement("div", { className: "modal-content-basic", style: { width: 'clamp(400px, 70vw, 600px)' }},
         React.createElement("form", { onSubmit: handleConfirm },

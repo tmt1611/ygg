@@ -131,7 +131,7 @@ const AiSuggestionModal = ({
   };
 
   return (
-    React.createElement("div", { className: "modal-overlay-basic", role: "dialog", "aria-modal": "true", "aria-labelledby": "ai-suggestion-modal-title", "aria-describedby": "ai-suggestion-summary" },
+    React.createElement("div", { className: "modal-overlay-basic", role: "dialog", "aria-modal": "true", "aria-labelledby": "ai-suggestion-modal-title", "aria-describedby": "ai-suggestion-summary", onClick: (e) => { if (e.target === e.currentTarget) onCancel(); } },
       React.createElement("div", { className: "modal-content-basic large"},
         React.createElement("h2", { id: "ai-suggestion-modal-title", className: "modal-title"},
           "AI Modification Preview"
