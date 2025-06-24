@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 
 const LinkProjectModal = ({
   isOpen,
@@ -11,12 +11,15 @@ const LinkProjectModal = ({
   onCancel,
 }) => {
   const [selectedTargetProjectId, setSelectedTargetProjectId] = useState(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const searchInputRef = useRef(null);
   const firstRadioRef = useRef(null);
 
   useEffect(() => {
     if (isOpen) {
-      setSelectedTargetProjectId(null); 
-      setTimeout(() => firstRadioRef.current?.focus(), 50);
+      setSelectedTargetProjectId(null);
+      setSearchTerm('');
+      setTimeout(() => searchInputRef.current?.focus(), 50);
     }
   }, [isOpen]);
 
@@ -29,16 +32,23 @@ const LinkProjectModal = ({
     return () => document.removeEventListener('keydown', handleEscape);
   }, [isOpen, onCancel]);
 
-  if (!isOpen) return null;
+  const filteredProjects = useMemo(() => {
+    const available = currentProjects.filter(
+      (p) => p.id !== activeProjectId && !p.isExample
+    );
+    if (!searchTerm.trim()) {
+      return available;
+    }
+    const lowerCaseSearchTerm = searchTerm.toLowerCase();
+    return available.filter(p => p.name.toLowerCase().includes(lowerCaseSearchTerm));
+  }, [currentProjects, activeProjectId, searchTerm]);
 
-  const availableProjectsToLink = currentProjects.filter(
-    (p) => p.id !== activeProjectId && !p.isExample 
-  );
+  if (!isOpen) return null;
 
   const handleConfirm = (e) => {
     e.preventDefault();
     if (selectedTargetProjectId) {
-      const targetProject = availableProjectsToLink.find(p => p.id === selectedTargetProjectId);
+      const targetProject = currentProjects.find(p => p.id === selectedTargetProjectId);
       if (targetProject) {
         onConfirm(sourceNodeId, targetProject.id, targetProject.name);
       }
@@ -62,9 +72,21 @@ const LinkProjectModal = ({
             "Select a target project. This node will then link to the root of the chosen project."
           ),
 
-          availableProjectsToLink.length > 0 ? (
+          React.createElement("div", { style: { marginBottom: '15px' }},
+            React.createElement("input", {
+              ref: searchInputRef,
+              type: "search",
+              placeholder: "Search for a project to link...",
+              value: searchTerm,
+              onChange: (e) => setSearchTerm(e.target.value),
+              style: { width: '100%' },
+              "aria-label": "Search for project to link"
+            })
+          ),
+
+          filteredProjects.length > 0 ? (
             React.createElement("div", { style: { maxHeight: '300px', overflowY: 'auto', border: '1px solid var(--border-color)', borderRadius: 'var(--border-radius)', padding: '10px', background: 'var(--panel-alt-bg)' }},
-              availableProjectsToLink.map((project, index) => (
+              filteredProjects.map((project, index) => (
                 React.createElement("label", {
                   key: project.id,
                   htmlFor: `project-link-target-${project.id}`,
@@ -94,7 +116,7 @@ const LinkProjectModal = ({
             )
           ) : (
             React.createElement("p", { style: { color: 'var(--text-secondary)', fontStyle: 'italic', textAlign: 'center', padding: '20px' }},
-              "No other user-created projects available to link to."
+              searchTerm ? `No projects match "${searchTerm}".` : "No other user-created projects available to link to."
             )
           ),
 
@@ -103,7 +125,7 @@ const LinkProjectModal = ({
             React.createElement("button", {
               type: "submit",
               className: "primary",
-              disabled: !selectedTargetProjectId || availableProjectsToLink.length === 0
+              disabled: !selectedTargetProjectId || filteredProjects.length === 0
             },
               "Link to Selected Project"
             )
