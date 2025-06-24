@@ -52,11 +52,16 @@ const GraphViewComponent = ({
     });
   }, [onOpenViewContextMenu]);
 
+  const handleBackgroundClick = useCallback(() => {
+      onCloseContextMenu();
+      hideTooltip();
+  }, [onCloseContextMenu, hideTooltip]);
+
   const { g, nodes, links, config, resetZoom, zoomIn, zoomOut, centerOnNode, currentTransform, translateTo } = useD3Tree(
     svgRef, 
     treeData, 
     {}, 
-    onCloseContextMenu, 
+    handleBackgroundClick, 
     handleBackgroundContextMenu, 
     layout
   );
@@ -193,6 +198,7 @@ const GraphViewComponent = ({
   const handleNodeClick = useCallback((event, d) => {
     event.stopPropagation();
     if (isAppBusy) return;
+    hideTooltip();
     if (d.isProxy) {
         if (d.data.isOutgoingLink && onNavigateToLinkedProject) {
             onNavigateToLinkedProject(d.data.realProjectId);
@@ -207,10 +213,11 @@ const GraphViewComponent = ({
     } else {
         console.warn("Node ID not found on D3GraphNode data in click handler", d);
     }
-  }, [isAppBusy, onSelectNode, activeNodeId, onNavigateToLinkedProject, handleNavigateToSourceNode]);
+  }, [isAppBusy, onSelectNode, activeNodeId, onNavigateToLinkedProject, handleNavigateToSourceNode, hideTooltip]);
 
   const handleNodeDoubleClick = useCallback((event, d) => {
     event.stopPropagation();
+    hideTooltip();
     if (isAppBusy || d.isProxy) return;
     const nodeId = d.data.id;
     if (nodeId) {
@@ -218,7 +225,7 @@ const GraphViewComponent = ({
     } else {
         console.warn("Node ID not found on D3GraphNode data in double-click handler", d);
     }
-  }, [isAppBusy, onSwitchToFocusView]);
+  }, [isAppBusy, onSwitchToFocusView, hideTooltip]);
 
   const handleNodeMouseEnter = useCallback((event, d) => {
     if (d.isProxy) return;
@@ -232,6 +239,7 @@ const GraphViewComponent = ({
   const handleNodeContextMenu = useCallback((event, d) => {
     event.preventDefault();
     event.stopPropagation();
+    hideTooltip();
     if (isAppBusy || d.isProxy) return;
     const nodeId = d.data.id;
     if (nodeId) {
@@ -244,7 +252,7 @@ const GraphViewComponent = ({
     } else {
         console.warn("Node ID not found on D3GraphNode data in context menu handler", d);
     }
-  }, [isAppBusy, onOpenContextMenu, treeData, activeProjectId, projects, findLinkSource, onSelectNode]);
+  }, [isAppBusy, onOpenContextMenu, treeData, activeProjectId, projects, findLinkSource, onSelectNode, hideTooltip]);
 
   // Effect for drawing the main graph structure
   useEffect(() => {
