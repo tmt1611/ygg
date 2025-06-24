@@ -1,10 +1,10 @@
-
 import React from 'react';
 import { findNodeById } from '../utils.js';
 
 // Modal Components
 import ProjectNameModal from './ProjectNameModal.js';
 import AiSuggestionModal from './AiSuggestionModal.js';
+import AiQuickEditModal from './AiQuickEditModal.js';
 import ConfirmModal from './ConfirmModal.js';
 import NodeEditModal from './NodeEditModal.js';
 import TechExtractionModal from './TechExtractionModal.js';
@@ -40,6 +40,7 @@ const AppModals = ({
     isLinkProjectModalOpen, linkProjectModalConfig, closeLinkProjectModal,
     isContextMenuOpen, contextMenuPosition, contextMenuNodeId, contextMenuLinkSourceInfo, closeContextMenu,
     isViewContextMenuOpen, viewContextMenuConfig, closeViewContextMenu,
+    isAiQuickEditModalOpen, aiQuickEditModalConfig, closeAiQuickEditModal,
   } = modalManager;
 
   return (
@@ -117,6 +118,7 @@ const AppModals = ({
           techTreeData: techTreeData,
           linkSourceInfoFromView: contextMenuLinkSourceInfo,
           onClose: closeContextMenu,
+          modalManager: modalManager,
           onToggleLock: nodeOperations.handleToggleNodeLock,
           onChangeImportance: nodeOperations.handleNodeImportanceChange,
           onEditName: (n) => modalManager.openNodeEditModal({mode:'editName', targetNodeId: n.id, currentNodeName: n.name, currentNodeDescription: n.description, title: `Edit: ${n.name}`, label: 'Node Name', placeholder: 'Enter new name', initialValue: n.name, initialDescription: n.description}),
@@ -145,6 +147,16 @@ const AppModals = ({
           isOpen: isViewContextMenuOpen,
           config: viewContextMenuConfig,
           onClose: closeViewContextMenu,
+        })
+      ),
+      isAiQuickEditModalOpen && aiQuickEditModalConfig && (
+        React.createElement(AiQuickEditModal, {
+          isOpen: isAiQuickEditModalOpen,
+          node: findNodeById(techTreeData, aiQuickEditModalConfig.nodeId),
+          onConfirm: treeOperationsAI.handleConfirmAiQuickEdit,
+          onCancel: closeAiQuickEditModal,
+          onGenerate: treeOperationsAI.handleGenerateAiQuickEdit,
+          isAppBusy: isModifying,
         })
       )
     )

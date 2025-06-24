@@ -7,6 +7,7 @@ const ContextMenu = ({
   onSetFocus, onDeleteNode, onLinkToProject, onGoToLinkedProject, onUnlinkProject, onGenerateInsights, onSwitchToAiOps,
   onLockAllChildren, onUnlockAllChildren, onChangeImportanceOfAllChildren, onDeleteAllChildren,
   onPasteNode,
+  modalManager,
   projects, activeProjectId, currentProjectRootId, findLinkSource, handleNavigateToSourceNode,
   linkSourceInfoFromView,
 }) => {
@@ -132,8 +133,9 @@ const ContextMenu = ({
       {
         id: 'ai-actions', label: "AI Actions...", icon: '🤖', hasSubmenu: true,
         submenu: [
+          { id: 'ai-quick-edit', label: "Quick Edit with AI...", icon: '✏️', action: () => modalManager.openAiQuickEditModal({ nodeId: node.id }), isDisabled: node.isLocked, title: node.isLocked ? "Unlock node to use AI Quick Edit" : "Make focused changes to this node with AI" },
           { id: 'ai-insights', label: "Node Insights", icon: '💡', action: () => onGenerateInsights(node) },
-          { id: 'ai-modify', label: "Modify with AI...", icon: '🤖', action: () => onSwitchToAiOps(node) },
+          { id: 'ai-modify', label: "Modify with AI...", icon: '🌳', action: () => onSwitchToAiOps(node), title: "Perform larger, structural modifications to the tree" },
         ]
       },
       {
@@ -184,7 +186,7 @@ const ContextMenu = ({
         { id: 'delete-node', label: "Delete Node...", icon: '🗑️', isDestructive: true, action: () => onDeleteNode(node.id) }
       ] : [])
     ].filter(Boolean);
-  }, [node, onEditName, onAddChild, onToggleLock, onSetFocus, onLinkToProject, onGoToLinkedProject, onUnlinkProject, onDeleteNode, onGenerateInsights, onSwitchToAiOps, handleCopy, incomingLink, handleNavigateToSourceNode, onChangeImportance, onLockAllChildren, onUnlockAllChildren, onChangeImportanceOfAllChildren, onDeleteAllChildren, copyFeedback, copyError, onPasteNode, canPaste, handleCopyNodeForPasting]);
+  }, [node, onEditName, onAddChild, onToggleLock, onSetFocus, onLinkToProject, onGoToLinkedProject, onUnlinkProject, onDeleteNode, onGenerateInsights, onSwitchToAiOps, handleCopy, incomingLink, handleNavigateToSourceNode, onChangeImportance, onLockAllChildren, onUnlockAllChildren, onChangeImportanceOfAllChildren, onDeleteAllChildren, copyFeedback, copyError, onPasteNode, canPaste, handleCopyNodeForPasting, modalManager]);
 
   const focusableItems = useMemo(() => menuItems.filter(item => item.type !== 'separator' && !item.isDisabled), [menuItems]);
   const openSubmenuItems = useMemo(() => {

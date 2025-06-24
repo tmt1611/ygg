@@ -1,4 +1,3 @@
-
 import React from 'react';
 import ContextualHelpTooltip from './ContextualHelpTooltip.js';
 import { NODE_IMPORTANCE_OPTIONS } from '../constants.js';

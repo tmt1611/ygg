@@ -52,7 +52,7 @@ const CollapsiblePanel = ({
           tabIndex: -1, // Prevent tabbing to this button since the header is already focusable.
           "aria-hidden": "true" // The whole header is the button, so this is decorative.
         },
-          "›"
+          "❯"
         )
       ),
       React.createElement("div", {

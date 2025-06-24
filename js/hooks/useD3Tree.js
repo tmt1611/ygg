@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useCallback, useState, useLayoutEffect } from 'react';
 import { select, zoom, hierarchy, tree, zoomIdentity } from 'd3';
+import { getAllNodesAsMap, findNodeById } from '../utils.js';
 
 const defaultTreeConfig = {
   nodeRadius: 16, // Base for 'common', but will be overridden in GraphViewComponent
@@ -23,9 +24,12 @@ export const useD3Tree = (
   const gSelectionRef = useRef(null);
   const zoomBehaviorRef = useRef(null);
   const [g, setG] = useState(null);
+  const [currentTransform, setCurrentTransform] = useState(zoomIdentity);
 
   const rootHierarchy = useMemo(() => {
     if (!treeData) return null;
+    // The hierarchy is now always based on the full treeData.
+    // Focus mode will be handled by dimming, not by changing the data.
     return hierarchy(treeData);
   }, [treeData]);
 
@@ -67,13 +71,14 @@ export const useD3Tree = (
     const { clientWidth, clientHeight } = svgRef.current.parentElement;
     const currentTransform = select(svgRef.current).property('__zoom');
     const scale = currentTransform ? currentTransform.k : 1;
+    const effectiveLayout = layout;
 
     let x, y;
-    if (layout === 'radial') {
+    if (effectiveLayout === 'radial') {
         const angle = nodeToCenter.x - Math.PI / 2;
         x = nodeToCenter.y * Math.cos(angle);
         y = nodeToCenter.y * Math.sin(angle);
-    } else if (layout === 'vertical') {
+    } else if (effectiveLayout === 'vertical') {
         x = nodeToCenter.x;
         y = nodeToCenter.y;
     } else { // horizontal
@@ -94,11 +99,14 @@ export const useD3Tree = (
       const { clientWidth, clientHeight } = svgRef.current.parentElement;
       if (clientWidth > 0 && clientHeight > 0) {
         let initialTransform;
-        if (layout === 'radial') {
+        const effectiveLayout = layout;
+
+        if (effectiveLayout === 'radial') {
             initialTransform = zoomIdentity.translate(clientWidth / 2, clientHeight / 2).scale(0.65);
-        } else if (layout === 'vertical') {
+        } else if (effectiveLayout === 'vertical') {
             // Center the tree horizontally, and position it near the top.
-            initialTransform = zoomIdentity.translate(clientWidth / 2, margin.top * 4).scale(0.65);
+            const yOffset = margin.top * 4;
+            initialTransform = zoomIdentity.translate(clientWidth / 2, yOffset).scale(0.65);
         } else { // horizontal
             // Center the tree vertically, and position it near the left.
             initialTransform = zoomIdentity.translate(margin.left * 6, clientHeight / 2).scale(0.6);
@@ -124,7 +132,7 @@ export const useD3Tree = (
             .attr('id', id)
             .attr('class', className)
             .attr('viewBox', '-10 -5 10 10')
-            .attr('refX', 0) // Position the base of the arrow at the end of the line
+            .attr('refX', 0)
             .attr('refY', 0)
             .attr('orient', 'auto')
             .attr('markerWidth', 6)
@@ -133,7 +141,7 @@ export const useD3Tree = (
             .attr('d', 'M0,-5L-10,0L0,5');
       };
 
-      createMarker('arrowhead', 'graph-arrowhead');
+      // The 'arrowhead' is now drawn manually in GraphViewComponent, so we only need the project one.
       createMarker('arrowhead-project', 'graph-arrowhead-project');
       
       // The 'g' element will be centered, and nodes will be positioned relative to it.
@@ -147,6 +155,7 @@ export const useD3Tree = (
           if (gSelectionRef.current) {
             gSelectionRef.current.attr("transform", event.transform);
           }
+          setCurrentTransform(event.transform);
           // Close context menu on pan/zoom
           if (onBackgroundClick) {
             onBackgroundClick();
@@ -182,7 +191,7 @@ export const useD3Tree = (
       }, 50);
       return () => clearTimeout(timer);
     }
-  }, [treeData, g, resetZoom]); // resetZoom is stable but depends on layout, so this effect runs on treeData or layout change.
+  }, [treeData, g, resetZoom]);
 
   const zoomIn = useCallback(() => {
     if (svgSelectionRef.current && zoomBehaviorRef.current) {
@@ -194,7 +203,13 @@ export const useD3Tree = (
     if (svgSelectionRef.current && zoomBehaviorRef.current) {
       svgSelectionRef.current.transition().duration(250).call(zoomBehaviorRef.current.scaleBy, 1 / 1.2);
     }
-  }, []); 
+  }, []);
+
+  const translateTo = useCallback((x, y) => {
+    if (svgSelectionRef.current && zoomBehaviorRef.current) {
+        svgSelectionRef.current.transition().duration(750).call(zoomBehaviorRef.current.translateTo, x, y);
+    }
+  }, []);
 
 
   return { 
@@ -206,5 +221,7 @@ export const useD3Tree = (
     zoomIn,
     zoomOut,
     centerOnNode,
+    currentTransform,
+    translateTo,
   };
 };

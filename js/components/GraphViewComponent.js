@@ -2,7 +2,10 @@ import React, { useEffect, useRef, useMemo, useCallback, useState } from 'react'
 import { linkRadial, select, linkVertical, linkHorizontal } from 'd3';
 import { useD3Tree } from '../hooks/useD3Tree.js';
 import { NODE_IMPORTANCE_RUNES } from '../constants.js';
-// wrapSvgText is no longer needed
+import PathToRootDisplay from './PathToRootDisplay.js';
+import GraphMiniMap from './GraphMiniMap.js';
+import { useGraphTooltip } from '../hooks/useGraphTooltip.js';
+import GraphNodeTooltip from './GraphNodeTooltip.js';
 
 
 const getNodeRadius = (node) => {
@@ -34,10 +37,13 @@ const GraphViewComponent = ({
   searchTerm
 }) => {
   const [layout, setLayout] = useState('radial'); // 'radial', 'vertical', or 'horizontal'
+  const [isFocusMode, setIsFocusMode] = useState(false);
+  const { tooltip, showTooltip, hideTooltip } = useGraphTooltip();
 
-  const svgContainerDivRef = useRef(null); 
-  const svgRef = useRef(null); 
+  const svgContainerDivRef = useRef(null);
+  const svgRef = useRef(null);
   const contextMenuActionsRef = useRef({});
+  const [mainViewportSize, setMainViewportSize] = useState({ width: 0, height: 0 });
   
   const handleBackgroundContextMenu = useCallback((position) => {
     onOpenViewContextMenu({
@@ -46,7 +52,14 @@ const GraphViewComponent = ({
     });
   }, [onOpenViewContextMenu]);
 
-  const { g, nodes, links, config, resetZoom, zoomIn, zoomOut, centerOnNode } = useD3Tree(svgRef, treeData, {}, onCloseContextMenu, handleBackgroundContextMenu, layout);
+  const { g, nodes, links, config, resetZoom, zoomIn, zoomOut, centerOnNode, currentTransform, translateTo } = useD3Tree(
+    svgRef, 
+    treeData, 
+    {}, 
+    onCloseContextMenu, 
+    handleBackgroundContextMenu, 
+    layout
+  );
 
   useEffect(() => {
     contextMenuActionsRef.current = {
@@ -55,6 +68,21 @@ const GraphViewComponent = ({
     };
   }, [resetZoom, onAddNodeToRoot]);
 
+  useEffect(() => {
+    const container = svgContainerDivRef.current;
+    if (!container) return;
+
+    const resizeObserver = new ResizeObserver(entries => {
+      if (entries[0]) {
+        const { width, height } = entries[0].contentRect;
+        setMainViewportSize({ width, height });
+      }
+    });
+
+    resizeObserver.observe(container);
+    return () => resizeObserver.unobserve(container);
+  }, []);
+
   const handleSetLayout = useCallback((newLayout) => {
     if (newLayout !== layout) {
       setLayout(newLayout);
@@ -62,6 +90,21 @@ const GraphViewComponent = ({
       setTimeout(resetZoom, 50);
     }
   }, [layout, resetZoom]);
+
+  const handleToggleFocusMode = useCallback(() => {
+    setIsFocusMode(prev => {
+        const newMode = !prev;
+        if (newMode && !activeNodeId) {
+            // If turning on focus mode without a selected node, do nothing.
+            return false;
+        }
+        // Center on the active node when entering focus mode
+        if (newMode && activeNodeId) {
+            centerOnNode(activeNodeId);
+        }
+        return newMode;
+    });
+  }, [activeNodeId, centerOnNode]);
 
   const projectLinksAndProxyNodes = useMemo(() => {
     if (!nodes || nodes.length === 0 || !projects) {
@@ -177,6 +220,15 @@ const GraphViewComponent = ({
     }
   }, [isAppBusy, onSwitchToFocusView]);
 
+  const handleNodeMouseEnter = useCallback((event, d) => {
+    if (d.isProxy) return;
+    showTooltip(d.data, event);
+  }, [showTooltip]);
+
+  const handleNodeMouseLeave = useCallback(() => {
+    hideTooltip();
+  }, [hideTooltip]);
+
   const handleNodeContextMenu = useCallback((event, d) => {
     event.preventDefault();
     event.stopPropagation();
@@ -198,6 +250,8 @@ const GraphViewComponent = ({
   useEffect(() => {
     if (!g || !nodes || !links) return;
 
+    const effectiveLayout = layout;
+
     const allNodes = [...nodes, ...projectLinksAndProxyNodes.proxyNodes];
     const allLinks = [...links, ...projectLinksAndProxyNodes.projectLinks];
 
@@ -216,51 +270,114 @@ const GraphViewComponent = ({
         (exit) => exit.remove()
       )
       .attr("marker-end", d => {
-        if (d.isProjectLink) return 'url(#arrowhead-project)';
-        if (d.target.isProxy) return null;
-        return `url(#arrowhead)`;
+        // Only outgoing project links to a proxy node get an end marker.
+        if (d.isProjectLink && d.target.isProxy) return 'url(#arrowhead-project)';
+        // Regular links have their arrowheads drawn manually at the midpoint.
+        return null;
       })
       .attr("d", d => {
-        if (d.target.isProxy) {
-            if (layout === 'radial') return linkRadial().angle(n => n.x).radius(n => n.y)(d);
-            if (layout === 'vertical') return linkVertical().x(n => n.x).y(n => n.y)(d);
+        // Outgoing project links are simple curves to the proxy node.
+        if (d.isProjectLink && d.target.isProxy) {
+            if (effectiveLayout === 'radial') return linkRadial().angle(n => n.x).radius(n => n.y)(d);
+            if (effectiveLayout === 'vertical') return linkVertical().x(n => n.x).y(n => n.y)(d);
             return linkHorizontal().x(n => n.y).y(n => n.x)(d);
         }
 
-        const radius = getNodeRadius(d.target);
+        // All other links (regular and incoming project links) are straight lines
+        // shortened to not overlap nodes.
+        const sourceRadius = getNodeRadius(d.source);
+        const targetRadius = getNodeRadius(d.target);
 
-        if (layout === 'radial') {
-            const newTarget = { ...d.target };
-            const newTargetRadius = newTarget.y - radius;
-            newTarget.y = newTargetRadius < 0 ? 0 : newTargetRadius;
-            return linkRadial().angle(n => n.x).radius(n => n.y)({ source: d.source, target: newTarget });
-        }
+        let sx_c, sy_c, tx_c, ty_c;
 
-        let sx, sy, tx, ty;
-        if (layout === 'vertical') {
-            sx = d.source.x; sy = d.source.y;
-            tx = d.target.x; ty = d.target.y;
+        if (effectiveLayout === 'radial') {
+            const angle_s = d.source.x - Math.PI / 2;
+            sx_c = d.source.y * Math.cos(angle_s);
+            sy_c = d.source.y * Math.sin(angle_s);
+
+            const angle_t = d.target.x - Math.PI / 2;
+            tx_c = d.target.y * Math.cos(angle_t);
+            ty_c = d.target.y * Math.sin(angle_t);
+        } else if (effectiveLayout === 'vertical') {
+            sx_c = d.source.x; sy_c = d.source.y;
+            tx_c = d.target.x; ty_c = d.target.y;
         } else { // horizontal
-            sx = d.source.y; sy = d.source.x;
-            tx = d.target.y; ty = d.target.x;
-        }
-
-        const dx = tx - sx;
-        const dy = ty - sy;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-        if (dist < radius) return null;
-
-        const ratio = (dist - radius) / dist;
-        const new_tx = sx + dx * ratio;
-        const new_ty = sy + dy * ratio;
-
-        if (layout === 'vertical') {
-            return `M${sx},${sy}C${sx},${(sy + new_ty) / 2} ${new_tx},${(sy + new_ty) / 2} ${new_tx},${new_ty}`;
+            sx_c = d.source.y; sy_c = d.source.x;
+            tx_c = d.target.y; ty_c = d.target.x;
         }
         
-        // horizontal
-        return `M${sx},${sy}C${(sx + new_tx) / 2},${sy} ${(sx + new_tx) / 2},${new_ty} ${new_tx},${new_ty}`;
+        const dx = tx_c - sx_c;
+        const dy = ty_c - sy_c;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+
+        if (dist <= sourceRadius + targetRadius) return null;
+
+        const sx = sx_c + (dx / dist) * sourceRadius;
+        const sy = sy_c + (dy / dist) * sourceRadius;
+        const tx = tx_c - (dx / dist) * targetRadius;
+        const ty = ty_c - (dy / dist) * targetRadius;
+
+        return `M${sx},${sy}L${tx},${ty}`;
       });
+
+    // Draw arrowheads for regular links at the midpoint
+    const regularLinks = allLinks.filter(link => !link.isProjectLink);
+    g.selectAll(".graph-arrowhead-group")
+      .data(regularLinks, d => `${d.source.id}-${d.target.id}`)
+      .join(
+        enter => {
+          const group = enter.append("g").attr("class", "graph-arrowhead-group");
+          group.append("path")
+            .attr("d", "M0,-4L-8,0L0,4") // Arrow shape
+            .attr("fill", "none")
+            .attr("stroke-width", 1.5)
+            .attr("stroke-linecap", "round");
+          return group;
+        },
+        update => update,
+        exit => exit.remove()
+      )
+      .attr("transform", d => {
+        const sourceRadius = getNodeRadius(d.source);
+        const targetRadius = getNodeRadius(d.target);
+
+        let sx_c, sy_c, tx_c, ty_c;
+
+        if (effectiveLayout === 'radial') {
+            const angle_s = d.source.x - Math.PI / 2;
+            sx_c = d.source.y * Math.cos(angle_s);
+            sy_c = d.source.y * Math.sin(angle_s);
+            const angle_t = d.target.x - Math.PI / 2;
+            tx_c = d.target.y * Math.cos(angle_t);
+            ty_c = d.target.y * Math.sin(angle_t);
+        } else if (effectiveLayout === 'vertical') {
+            sx_c = d.source.x; sy_c = d.source.y;
+            tx_c = d.target.x; ty_c = d.target.y;
+        } else { // horizontal
+            sx_c = d.source.y; sy_c = d.source.x;
+            tx_c = d.target.y; ty_c = d.target.x;
+        }
+        
+        const dx = tx_c - sx_c;
+        const dy = ty_c - sy_c;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+
+        if (dist <= sourceRadius + targetRadius) return "translate(-10000, -10000)"; // Hide if nodes overlap
+
+        const sx = sx_c + (dx / dist) * sourceRadius;
+        const sy = sy_c + (dy / dist) * sourceRadius;
+        const tx = tx_c - (dx / dist) * targetRadius;
+        const ty = ty_c - (dy / dist) * targetRadius;
+
+        const midX = (sx + tx) / 2;
+        const midY = (sy + ty) / 2;
+        // Point from child (t) to parent (s) to reverse the arrow direction.
+        const angle = Math.atan2(sy - ty, sx - tx) * 180 / Math.PI;
+        
+        return `translate(${midX}, ${midY}) rotate(${angle})`;
+      })
+      .select("path")
+      .attr("stroke", "var(--graph-link-stroke-ecosystem)");
 
     // Draw node groups
     const nodeGroups = g
@@ -271,7 +388,7 @@ const GraphViewComponent = ({
           const group = enter.append("g")
             .attr("class", d => d.isProxy ? "graph-view-node proxy" : "graph-view-node");
           
-          group.append("title");
+          // The native <title> element is removed to prevent it from interfering with the custom tooltip.
 
           group.each(function(d) {
             const el = select(this);
@@ -320,13 +437,13 @@ const GraphViewComponent = ({
         return classes.join(' ');
       })
       .attr("transform", d => {
-        if (layout === 'radial') {
+        if (effectiveLayout === 'radial') {
             // Use cartesian coordinates for radial layout to keep text horizontal
             const angle = d.x - Math.PI / 2; // Adjust angle to start from top
             const x = d.y * Math.cos(angle);
             const y = d.y * Math.sin(angle);
             return `translate(${x}, ${y})`;
-        } else if (layout === 'vertical') {
+        } else if (effectiveLayout === 'vertical') {
             return `translate(${d.x}, ${d.y})`;
         } else { // horizontal
             return `translate(${d.y}, ${d.x})`;
@@ -334,9 +451,11 @@ const GraphViewComponent = ({
       })
       .on("click", handleNodeClick)
       .on("dblclick", handleNodeDoubleClick)
-      .on("contextmenu", handleNodeContextMenu);
+      .on("contextmenu", handleNodeContextMenu)
+      .on("mouseenter", handleNodeMouseEnter)
+      .on("mouseleave", handleNodeMouseLeave);
 
-    nodeGroups.select("title").text(d => d.isProxy ? `Project: ${d.data.fullName}\n(Click to navigate)` : `${d.data.name}\n(Double-click for Focus View)`);
+    // The native <title> element is removed to prevent it from interfering with the custom tooltip.
 
     nodeGroups.select("circle").attr("fill", d => {
         if (d.data.importance === 'minor') return 'var(--importance-minor-bg)';
@@ -355,10 +474,20 @@ const GraphViewComponent = ({
       .attr("transform", d => {
         if (d.isProxy) return null;
         const radius = getNodeRadius(d);
-        const spacing = 6; // A little less spacing is needed
+        const spacing = 5; // A little less spacing is needed
         const labelWidth = 120;
-        // Always position below the node, centered horizontally
-        return `translate(-${labelWidth / 2}, ${radius + spacing})`;
+        
+        // For non-root nodes, offset diagonally to avoid covering the link to children.
+        // For the root node, position it directly below.
+        if (d.depth === 0) {
+            return `translate(-${labelWidth / 2}, ${radius + spacing})`;
+        }
+        
+        // Diagonal offset to bottom-right
+        const xOffset = radius * 0.707; // approx radius / sqrt(2)
+        const yOffset = radius * 0.707;
+        
+        return `translate(${xOffset}, ${yOffset})`;
       });
 
     // Set the text content for the div inside the foreignObject
@@ -376,16 +505,40 @@ const GraphViewComponent = ({
       .attr("transform", null) // No rotation needed for any layout
       .text(d => (d.data.isLocked && !d.isProxy ? "🔒" : ""));
 
-  }, [g, nodes, links, handleNodeClick, handleNodeDoubleClick, handleNodeContextMenu, projectLinksAndProxyNodes, layout]);
+  }, [g, nodes, links, handleNodeClick, handleNodeDoubleClick, handleNodeContextMenu, handleNodeMouseEnter, handleNodeMouseLeave, projectLinksAndProxyNodes, layout]);
 
-  // Effect for dynamic styling (selection, search highlight)
+  // Effect for dynamic styling (selection, search highlight, focus mode)
   useEffect(() => {
     if (!g) return;
 
     const nodeSelection = g.selectAll(".graph-view-node");
     const linkSelection = g.selectAll(".graph-view-link, .graph-view-project-link");
 
-    if (searchTerm?.trim()) {
+    // Reset classes
+    nodeSelection.classed("highlighted", false).classed("dimmed", false);
+    linkSelection.classed("dimmed", false);
+
+    if (isFocusMode && activeNodeId) {
+        const focusNode = nodes.find(n => n.data.id === activeNodeId);
+        if (focusNode) {
+            const inFocusIds = new Set([activeNodeId]);
+            if (focusNode.parent) {
+                inFocusIds.add(focusNode.parent.data.id);
+                // Add siblings
+                focusNode.parent.children.forEach(sibling => inFocusIds.add(sibling.data.id));
+            }
+            if (focusNode.children) {
+                focusNode.children.forEach(child => inFocusIds.add(child.data.id));
+            }
+
+            nodeSelection.classed("dimmed", d => !d.isProxy && !inFocusIds.has(d.data.id));
+            linkSelection.classed("dimmed", d => {
+                const sourceInFocus = d.source.isProxy || inFocusIds.has(d.source.data.id);
+                const targetInFocus = d.target.isProxy || inFocusIds.has(d.target.data.id);
+                return !(sourceInFocus && targetInFocus);
+            });
+        }
+    } else if (searchTerm?.trim()) {
         const lowerCaseSearchTerm = searchTerm.toLowerCase();
         const matchingNodeIds = new Set();
         
@@ -412,10 +565,6 @@ const GraphViewComponent = ({
                 const targetIsMatch = d.target.isProxy || matchingNodeIds.has(d.target.data.id);
                 return !(sourceIsMatch && targetIsMatch);
             });
-
-    } else {
-        nodeSelection.classed("highlighted", false).classed("dimmed", false);
-        linkSelection.classed("dimmed", false);
     }
     
     nodeSelection
@@ -431,7 +580,7 @@ const GraphViewComponent = ({
         centerOnNode(activeNodeId);
     }
 
-  }, [g, activeNodeId, nodes, layout, centerOnNode, searchTerm]); // Using 'nodes' and 'layout' to re-run on data change.
+  }, [g, activeNodeId, nodes, layout, centerOnNode, searchTerm, isFocusMode]); // Using 'nodes' and 'layout' to re-run on data change.
 
 
   if (!treeData) {
@@ -452,7 +601,18 @@ const GraphViewComponent = ({
 
   return (
     React.createElement("div", { className: "graph-view-wrapper" },
+      React.createElement(GraphNodeTooltip, { tooltip: tooltip }),
       React.createElement("div", { ref: svgContainerDivRef, className: "graph-view-svg-container" },
+        isFocusMode && activeNodeId && (
+            React.createElement("div", { style: { position: 'absolute', top: '8px', left: '8px', zIndex: 10, maxWidth: 'calc(100% - 150px)' }},
+                React.createElement(PathToRootDisplay, {
+                    treeData: treeData,
+                    currentNodeId: activeNodeId,
+                    onSelectPathNode: onSelectNode, // Clicking path now just selects, doesn't force re-layout
+                    pathContext: "graph-focus"
+                })
+            )
+        ),
         React.createElement("svg", { ref: svgRef, style: { display: 'block', width: '100%', height: '100%' }})
       ),
       React.createElement("div", { className: "graph-view-controls" },
@@ -465,16 +625,30 @@ const GraphViewComponent = ({
                     className: layout === opt.id ? 'active' : '',
                     onClick: () => handleSetLayout(opt.id),
                     title: opt.title,
-                    disabled: isAppBusy
+                    disabled: isAppBusy || isFocusMode
                 }, opt.label)
             ))
         ),
         React.createElement("div", { className: "graph-zoom-controls" },
+            React.createElement("button", { 
+                onClick: handleToggleFocusMode, 
+                title: isFocusMode ? "Exit Graph Focus Mode" : "Enter Graph Focus Mode (select a node first)", 
+                disabled: isAppBusy || (!isFocusMode && !activeNodeId),
+                className: isFocusMode ? 'active' : ''
+            }, '🔬'),
             React.createElement("button", { onClick: zoomIn, title: "Zoom In", disabled: isAppBusy }, "➕"),
             React.createElement("button", { onClick: zoomOut, title: "Zoom Out", disabled: isAppBusy }, "➖"),
             React.createElement("button", { onClick: resetZoom, title: "Reset Zoom & Pan", disabled: isAppBusy }, "🎯")
         )
-      )
+      ),
+      React.createElement(GraphMiniMap, {
+        nodes: nodes,
+        links: links,
+        layout: layout,
+        viewTransform: currentTransform,
+        translateTo: translateTo,
+        mainViewportSize: mainViewportSize
+      })
     )
   );
 };

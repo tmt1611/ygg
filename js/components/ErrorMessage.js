@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-const ErrorMessage = ({ error, onClose }) => {
+const ErrorMessage = ({ error, onClose, mode = 'toast' }) => {
   const [copyFeedback, setCopyFeedback] = useState('');
 
   if (!error || !error.message) return null;
@@ -18,9 +18,11 @@ const ErrorMessage = ({ error, onClose }) => {
   
   const formattedMessage = error.message.startsWith("Error:") ? error.message.substring(6).trim() : error.message;
 
+  const className = mode === 'inline' ? 'error-message-inline' : 'error-toast';
+
   return (
     React.createElement("div", { 
-      className: "error-message-inline",
+      className: className,
       role: "alert",
     },
       React.createElement("span", { className: "error-icon", "aria-hidden": "true" }, "⚠️"),
@@ -28,7 +30,7 @@ const ErrorMessage = ({ error, onClose }) => {
         React.createElement("strong", null, "Error:"), " ",
         formattedMessage
       ),
-      error.details && React.createElement("button", {
+      error.details && mode === 'toast' && React.createElement("button", {
         onClick: handleCopy,
         className: "base-icon-button error-message-copy-btn",
         "aria-label": "Copy error details",

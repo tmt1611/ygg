@@ -1,4 +1,3 @@
-
 import React, { useMemo, useEffect, useRef, useState } from 'react';
 import { compareAndAnnotateTree, countNodesInTree, isValidTechTreeNodeShape, getAllNodesAsMap } from '../utils.js';
 import AiSuggestionPreviewListItem from './AiSuggestionPreviewListItem.js';
@@ -169,7 +168,7 @@ const AiSuggestionModal = ({
                 "aria-controls": "ai-suggestion-summary-panel",
                 "aria-expanded": isSummaryVisible
               },
-                "›"
+                "❯"
               )
             ),
             React.createElement("div", { className: "ai-suggestion-modal-content-area", "aria-live": "polite", "aria-atomic": "true" },
@@ -178,11 +177,11 @@ const AiSuggestionModal = ({
                     React.createElement(AiSuggestionPreviewListItem, { node: annotatedTree, level: 0, isVisualDiff: true })
                 )
               ) : (
-                React.createElement("div", { className: "error-message-inline", style: { margin: '1em', padding: '15px' } },
-                  React.createElement("div", { className: "error-icon", style: { fontSize: '1.5em' } }, "⚠️"),
+                React.createElement("div", { className: "error-message-inline", style: { margin: '1em', padding: '15px', alignItems: 'flex-start' } },
+                  React.createElement("span", { className: "error-icon", style: { fontSize: '1.5em', marginTop: '3px' } }, "⚠️"),
                   React.createElement("div", null,
                     React.createElement("strong", { style: { display: 'block', marginBottom: '5px' } }, "AI Suggestion Error"),
-                    annotatedTree?.description || "Could not display preview due to a malformed AI suggestion. The AI may have returned data that is not a valid tree structure (e.g. missing required fields). You can try refining your prompt or reject this suggestion."
+                    React.createElement("p", { style: { margin: 0, lineHeight: 1.4, fontSize: '0.95em' } }, annotatedTree?.description || "Could not display preview due to a malformed AI suggestion. The AI may have returned data that is not a valid tree structure (e.g. missing required fields). You can try refining your prompt or reject this suggestion.")
                   )
                 )
               ),
