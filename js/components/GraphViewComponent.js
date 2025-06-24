@@ -6,6 +6,9 @@ import PathToRootDisplay from './PathToRootDisplay.js';
 import GraphMiniMap from './GraphMiniMap.js';
 import { useGraphTooltip } from '../hooks/useGraphTooltip.js';
 import GraphNodeTooltip from './GraphNodeTooltip.js';
+import GraphMiniMap from './GraphMiniMap.js';
+import { useGraphTooltip } from '../hooks/useGraphTooltip.js';
+import GraphNodeTooltip from './GraphNodeTooltip.js';
 
 
 const getNodeRadius = (node) => {
@@ -72,6 +75,21 @@ const GraphViewComponent = ({
       onAddChildToRoot: onAddNodeToRoot,
     };
   }, [resetZoom, onAddNodeToRoot]);
+
+  useEffect(() => {
+    const container = svgContainerDivRef.current;
+    if (!container) return;
+
+    const resizeObserver = new ResizeObserver(entries => {
+      if (entries[0]) {
+        const { width, height } = entries[0].contentRect;
+        setMainViewportSize({ width, height });
+      }
+    });
+
+    resizeObserver.observe(container);
+    return () => resizeObserver.unobserve(container);
+  }, []);
 
   useEffect(() => {
     const container = svgContainerDivRef.current;
@@ -198,6 +216,7 @@ const GraphViewComponent = ({
   const handleNodeClick = useCallback((event, d) => {
     event.stopPropagation();
     if (isAppBusy) return;
+    hideTooltip();
     hideTooltip();
     if (d.isProxy) {
         if (d.data.isOutgoingLink && onNavigateToLinkedProject) {

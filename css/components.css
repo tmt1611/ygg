@@ -977,7 +977,34 @@ html[data-theme='synthwave'] .graph-view-svg-container {
   stroke-width: 3px;
   filter: drop-shadow(0 0 8px var(--graph-node-highlight-stroke));
 }
-/* This is now handled by .node-label-wrapper styles */
+/* .node-label-bg is no longer used, background is handled by foreignObject's div */
+.graph-view-node:not(.proxy) .node-label-wrapper {
+  font-weight: 500;
+  font-size: 11px;
+  line-height: 1.3;
+  color: var(--graph-node-text);
+  background-color: rgba(var(--app-bg-rgb), 0.4);
+  padding: 3px 5px;
+  border-radius: var(--border-radius);
+  text-align: center;
+  hyphens: auto;
+  word-break: break-word;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3; /* Limit to 3 lines */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-height: 4.0em; /* approx 3 lines * 1.3 line-height */
+}
+.graph-view-node.highlighted .node-label-wrapper {
+    font-weight: bold;
+    color: var(--graph-node-highlight-stroke);
+}
+html[data-theme='dark'] .graph-view-node.highlighted .node-label-wrapper,
+html[data-theme='nebula'] .graph-view-node.highlighted .node-label-wrapper,
+html[data-theme='synthwave'] .graph-view-node.highlighted .node-label-wrapper {
+    text-shadow: 0 0 5px var(--graph-node-highlight-stroke);
+}
 
 /* Change status highlights */
 .graph-view-node.status-new circle {
@@ -1136,6 +1163,130 @@ html[data-theme='dark'] .graph-view-node.proxy rect {
 .graph-zoom-controls button.active:hover:not(:disabled) {
   background-color: var(--primary-accent-dark);
   color: var(--text-on-accent);
+}
+
+/* Graph Node Tooltip */
+.graph-node-tooltip {
+  position: fixed;
+  background-color: rgba(var(--panel-bg-rgb), 0.9);
+  backdrop-filter: blur(4px);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color-strong);
+  border-radius: var(--border-radius-lg);
+  padding: 10px 12px;
+  max-width: 280px;
+  box-shadow: var(--box-shadow-lg);
+  z-index: 1020;
+  pointer-events: none; /* Important: tooltip should not intercept mouse events */
+  opacity: 0;
+  transform: scale(0.95) translateY(10px);
+  transition: opacity 0.2s ease-out, transform 0.2s ease-out;
+  font-size: 0.9em;
+  line-height: 1.4;
+}
+.graph-node-tooltip.visible {
+  opacity: 1;
+  transform: scale(1) translateY(0);
+}
+.graph-node-tooltip-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-bottom: 8px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--border-color);
+}
+.graph-node-tooltip-icon {
+  font-size: 1.3em;
+  margin-top: 1px;
+}
+.graph-node-tooltip-name {
+  font-weight: 600;
+  font-size: 1.1em;
+  color: var(--text-primary);
+  word-break: break-word;
+}
+.graph-node-tooltip-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+  font-size: 0.85em;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+}
+.graph-node-tooltip-meta-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background-color: var(--panel-alt-bg);
+  padding: 2px 6px;
+  border-radius: var(--border-radius);
+  border: 1px solid var(--border-color);
+}
+.graph-node-tooltip-description {
+  font-size: 0.9em;
+  color: var(--text-secondary);
+  max-height: 100px; /* approx 5 lines */
+  overflow-y: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 5;
+  line-height: 1.4;
+}
+.graph-node-tooltip-description i {
+  opacity: 0.7;
+}
+
+.graph-node-tooltip-footer {
+  margin-top: 8px;
+  padding-top: 6px;
+  border-top: 1px solid var(--border-color);
+  font-size: 0.8em;
+  color: var(--text-tertiary);
+  font-style: italic;
+  text-align: center;
+}
+
+
+/* Graph Mini-map */
+.graph-minimap-container {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  background-color: rgba(var(--panel-bg-rgb), 0.85);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  box-shadow: var(--box-shadow-md);
+  z-index: 10;
+  pointer-events: auto;
+  backdrop-filter: blur(3px);
+  overflow: hidden;
+  transition: opacity 0.3s;
+}
+
+.graph-minimap-container svg {
+  display: block;
+}
+
+.minimap-links line {
+  stroke: var(--border-color-strong);
+  stroke-width: 1px; /* Scaled by viewBox, so needs to be thicker */
+  stroke-opacity: 0.6;
+}
+
+.minimap-nodes circle {
+  fill: var(--text-tertiary);
+  fill-opacity: 0.7;
+  stroke: var(--panel-bg);
+  stroke-width: 0.5px;
+}
+
+.minimap-view-rect {
+  fill: rgba(var(--primary-accent-rgb), 0.2);
+  stroke: var(--primary-accent);
+  stroke-width: 2px; /* Scaled by viewBox */
+  cursor: move;
 }
 
 /* Graph Node Tooltip */
@@ -1972,6 +2123,136 @@ html[data-theme='ocean'] .panel-variant-sidebar .panel-toggle-button {
   border-right-color: transparent;
   border-radius: 50%;
   vertical-align: middle;
+}
+
+
+
+
+
+/* Path to Root Display */
+.path-to-root-display {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background-color: var(--button-default-bg);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  padding: 3px 8px;
+  font-size: 0.8em;
+  overflow-x: auto;
+  max-width: 50vw; /* Prevent it from taking too much space */
+  position: relative;
+}
+.path-to-root-display.context-focus-view {
+  max-width: 100%;
+  width: 100%;
+  background-color: transparent;
+  border: none;
+  padding: 2px 0;
+}
+.path-to-root-display.context-focus-view .path-segment {
+  background-color: var(--button-default-bg);
+  border: 1px solid var(--border-color);
+}
+.path-to-root-display.context-focus-view .path-segment:hover {
+  background-color: var(--primary-accent-hover-bg);
+  color: var(--primary-accent-dark);
+  border-color: var(--primary-accent);
+}
+.path-to-root-display.context-focus-view .path-segment.current-focus-path-node {
+  background-color: var(--primary-accent);
+  color: var(--text-on-accent);
+  border-color: var(--primary-accent-dark);
+  font-weight: 600;
+}
+.path-to-root-display::-webkit-scrollbar { height: 0; width: 0; }
+.path-to-root-display { scrollbar-width: none; }
+.path-to-root-display::before, .path-to-root-display::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 20px;
+  pointer-events: none;
+  transition: opacity 0.2s;
+}
+.path-to-root-display::before {
+  left: 0;
+  background: linear-gradient(to right, var(--button-default-bg), transparent);
+}
+.path-to-root-display.context-focus-view::before {
+  background: linear-gradient(to right, var(--app-bg), transparent);
+}
+.path-to-root-display::after {
+  right: 0;
+  background: linear-gradient(to left, var(--button-default-bg), transparent);
+}
+.path-to-root-display.context-focus-view::after {
+  background: linear-gradient(to left, var(--app-bg), transparent);
+}
+.path-to-root-display.context-graph-focus {
+  background-color: rgba(var(--panel-bg-rgb), 0.8);
+  backdrop-filter: blur(2px);
+}
+.path-to-root-display.context-graph-focus .path-segment:hover {
+  background-color: var(--primary-accent-hover-bg);
+  color: var(--primary-accent-dark);
+}
+.path-to-root-display.context-graph-focus .path-segment.current-focus-path-node {
+  background-color: var(--primary-accent);
+  color: var(--text-on-accent);
+  font-weight: 600;
+}
+.path-to-root-display.context-graph-focus::before {
+  background: linear-gradient(to right, rgba(var(--panel-bg-rgb), 0.8), transparent);
+}
+.path-to-root-display.context-graph-focus::after {
+  background: linear-gradient(to left, rgba(var(--panel-bg-rgb), 0.8), transparent);
+}
+.path-to-root-display.no-scroll-start::before,
+.path-to-root-display.no-scroll-end::after {
+  opacity: 0;
+}
+.path-segment {
+  white-space: nowrap;
+  padding: 2px 5px;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  transition: background-color 0.2s, color 0.2s;
+}
+.path-segment:hover {
+  background-color: var(--primary-accent-hover-bg);
+  color: var(--primary-accent-dark);
+}
+.path-segment.current-focus-path-node {
+  background-color: var(--primary-accent);
+  color: var(--text-on-accent);
+  font-weight: 600;
+}
+.path-separator {
+  color: var(--text-tertiary);
+  font-size: 0.9em;
+  user-select: none;
+}
+
+.path-to-root-display.context-graph-focus {
+  background-color: rgba(var(--panel-bg-rgb), 0.8);
+  backdrop-filter: blur(2px);
+}
+.path-to-root-display.context-graph-focus .path-segment:hover {
+  background-color: var(--primary-accent-hover-bg);
+  color: var(--primary-accent-dark);
+}
+.path-to-root-display.context-graph-focus .path-segment.current-focus-path-node {
+  background-color: var(--primary-accent);
+  color: var(--text-on-accent);
+  font-weight: 600;
+}
+.path-to-root-display.context-graph-focus::before {
+  background: linear-gradient(to right, rgba(var(--panel-bg-rgb), 0.8), transparent);
+}
+.path-to-root-display.context-graph-focus::after {
+  background: linear-gradient(to left, rgba(var(--panel-bg-rgb), 0.8), transparent);
 }
 
 

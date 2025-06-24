@@ -42,7 +42,6 @@ const App = () => {
   
   const [previousTreeStateForUndo, setPreviousTreeStateForUndo] = useState(null);
   const [baseForModalDiff, setBaseForModalDiff] = useState(null); 
-  const [baseForModalDiff, setBaseForModalDiff] = useState(null); 
 
   const [selectedNodeForInsights, setSelectedNodeForInsights] = useState(null);
 
