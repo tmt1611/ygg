@@ -262,6 +262,7 @@ export const modifyTechTreeByGemini = async (
 5.  **Output Format:** Respond ONLY with a single, valid JSON object for the modified tree's root node. NO EXTRA TEXT, explanations, or markdown fences.
 6.  **JSON Syntax:** Strictly follow JSON rules. Example node: ${COMMON_NODE_FORMAT_INSTRUCTION}
 7.  **Maintain Structure:** Avoid unnecessarily drastic changes to the overall tree shape (e.g., adding many new levels of depth) unless the user's instruction explicitly asks for it.
+8.  **Final Check:** Before outputting, double-check that your entire response is a single JSON object starting with { and ending with }, and that the root object and all its children have all the mandatory fields.
 `;
 
   const fullPrompt = `
