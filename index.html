@@ -22,34 +22,34 @@
     <style>
       /* Light Theme (Default) & Core Structure Variables */
       :root {
-        --app-bg: #F0F2F5; /* Canvas Background */
-        --app-bg-rgb: 240,242,245;
+        --app-bg: #F5F5F5;
+        --app-bg-rgb: 245,245,245;
         --panel-bg: #FFFFFF;
         --panel-bg-rgb: 255,255,255;
-        --panel-alt-bg: #F8F9FA;
-        --panel-alt-bg-rgb: 248,249,250;
+        --panel-alt-bg: #FAFAFA;
+        --panel-alt-bg-rgb: 250,250,250;
         
-        --text-primary: #1E1E3F;
-        --text-secondary: #4A4A6A;
-        --text-tertiary: #7E7E9A;
+        --text-primary: #37474F;
+        --text-secondary: #546E7A;
+        --text-tertiary: #78909C;
         --text-on-dark-bg: #EAEAEA; 
         --text-on-accent: #FFFFFF;
         --text-on-bark: var(--text-primary);
         
-        --primary-accent: #0E6655; /* Yggdrasil: Deep Forest Green */
-        --primary-accent-rgb: 14,102,85; 
-        --primary-accent-dark: #0A4D3B; 
-        --primary-accent-light: #58D68D; 
+        --primary-accent: #2E7D32; /* Vibrant Leaf Green */
+        --primary-accent-rgb: 46,125,50; 
+        --primary-accent-dark: #1B5E20; 
+        --primary-accent-light: #66BB6A; 
         --primary-accent-hover-bg: #E8F5E9; 
 
-        --secondary-accent: #A0522D; /* Yggdrasil: Earthy Brown */
-        --secondary-accent-rgb: 160, 82, 45;
-        --secondary-accent-dark: #795548; 
-        --secondary-accent-dark-rgb: 121, 85, 72;
+        --secondary-accent: #795548; /* Earthy Brown */
+        --secondary-accent-rgb: 121,85,72;
+        --secondary-accent-dark: #4E342E; 
+        --secondary-accent-dark-rgb: 78,52,46;
         
         --border-color: #D1D5DB;
-        --border-color-strong: #A0A0C0;
-        --input-border-color: #B0B0D0;
+        --border-color-strong: #B0BEC5;
+        --input-border-color: #CFD8DC;
         --input-focus-border-color: var(--primary-accent);
         --input-focus-shadow: 0 0 0 2px rgba(var(--primary-accent-rgb), 0.2);
 
@@ -91,7 +91,6 @@
         --graph-link-stroke-ecosystem: #8B7E66; 
         --graph-link-stroke: var(--graph-link-stroke-ecosystem);
         --graph-node-selected-stroke: var(--primary-accent);
-        --graph-node-highlight-stroke: #eac54f;
         --graph-node-highlight-stroke: var(--secondary-accent-dark);
 
         --focus-stellar-bg: #E8F0F8;
@@ -106,9 +105,7 @@
         --focus-node-beacon-color: #F1C40F;
         --focus-panel-text: var(--text-primary);
         --focus-panel-bg: rgba(var(--panel-bg-rgb), 0.9);
-        --focus-placeholder-bg: rgba(var(--panel-alt-bg-rgb, 248,249,250), 0.8);
-        --focus-placeholder-text: var(--text-tertiary);
-        --focus-placeholder-bg: rgba(var(--panel-alt-bg-rgb, 248,249,250), 0.8);
+        --focus-placeholder-bg: rgba(var(--panel-alt-bg-rgb), 0.8);
         --focus-placeholder-text: var(--text-tertiary);
 
         --font-family-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
@@ -134,8 +131,8 @@
         --importance-major-text: #0D47A1; 
         --importance-major-border: #90CAF9; 
 
-        --yggdrasil-bark-bg: #F5F0E1; /* Bark color for top-bar/sidebar */
-        --yggdrasil-bark-border: #D2B48C;
+        --yggdrasil-bark-bg: #EFEBE9; /* Birch Bark */
+        --yggdrasil-bark-border: #D7CCC8;
         --yggdrasil-leaf-green: #2E7D32; 
         --yggdrasil-rune-glow: var(--primary-accent-light);
 
@@ -144,50 +141,50 @@
         --top-bar-height: 50px; 
       }
 
-      /* Dark Theme */
+      /* Dark Theme (Yggdrasil by Night) */
       html[data-theme='dark'] {
-        --app-bg: #121212; /* Darker app background */
-        --app-bg-rgb: 18,18,18;
-        --panel-bg: #1E1E1E; /* Darker panel background */
-        --panel-bg-rgb: 30,30,30;
-        --panel-alt-bg: #282828; /* Darker alt panel background */
-        --panel-alt-bg-rgb: 40,40,40;
+        --app-bg: #101418;
+        --app-bg-rgb: 16,20,24;
+        --panel-bg: #1A2027;
+        --panel-bg-rgb: 26,32,39;
+        --panel-alt-bg: #232B34;
+        --panel-alt-bg-rgb: 35,43,52;
 
-        --text-primary: #E0E0E0;
-        --text-secondary: #B0B0B0;
-        --text-tertiary: #888888; /* Slightly lighter tertiary for better contrast */
+        --text-primary: #E0E6E9;
+        --text-secondary: #A0AEC0;
+        --text-tertiary: #718096;
         --text-on-dark-bg: #EAEAEA;
         --text-on-bark: var(--text-on-dark-bg);
         
-        --primary-accent: #58D68D; 
-        --primary-accent-rgb: 88,214,141;
-        --primary-accent-dark: #2ECC71; 
-        --primary-accent-light: #ABEBC6; 
-        --primary-accent-hover-bg: #2A2A2A; /* Darker hover background */
+        --primary-accent: #38A169; /* Glowing Green */
+        --primary-accent-rgb: 56,161,105;
+        --primary-accent-dark: #2F855A; 
+        --primary-accent-light: #68D391; 
+        --primary-accent-hover-bg: rgba(56, 161, 105, 0.12);
         
-        --secondary-accent: #BCAAA4; 
-        --secondary-accent-rgb: 188, 170, 164;
-        --secondary-accent-dark: #8D6E63;
-        --secondary-accent-dark-rgb: 141, 110, 99;
+        --secondary-accent: #A0AEC0; /* Moonlight Silver */
+        --secondary-accent-rgb: 160, 174, 192;
+        --secondary-accent-dark: #718096;
+        --secondary-accent-dark-rgb: 113, 128, 150;
 
-        --border-color: #383838; /* Darker border color */
-        --border-color-strong: #555555;
-        --input-border-color: #4A4A4A;
+        --border-color: #2D3748;
+        --border-color-strong: #4A5568;
+        --input-border-color: #4A5568;
         
         --success-color: #66BB6A; 
-        --success-bg: #2E7D32;   
+        --success-bg: rgba(102, 187, 106, 0.15);   
         --error-color: #EF5350;
         --error-color-rgb: 239,83,80;
-        --error-bg: #C62828;     
+        --error-bg: rgba(239, 83, 80, 0.15);     
         --warning-color: #FFEE58; 
-        --warning-bg: #F9A825;    
+        --warning-bg: rgba(255, 238, 88, 0.15);    
 
         --disabled-bg: #333333;
         --disabled-bg-rgb: 51, 51, 51;
         --disabled-text: #6A6A6A;
         --disabled-border: #454545;
 
-        --button-primary-text: var(--text-on-accent); 
+        --button-primary-text: #101418; 
         --button-secondary-text: var(--primary-accent-light);
         --button-secondary-border: var(--primary-accent);
         --button-secondary-hover-bg: #333333;
@@ -204,74 +201,74 @@
         --graph-link-stroke-ecosystem: #A1887F;
         --graph-node-highlight-stroke: #FFCA28;
 
-        --importance-minor-bg: #2E7D32; 
+        --importance-minor-bg: rgba(102, 187, 106, 0.1); 
         --importance-minor-text: #C8E6C9; 
-        --importance-minor-border: #4CAF50; 
-        --importance-common-bg: #D84315; 
-        --importance-common-text: #FFCCBC; 
-        --importance-common-border: #FF7043;
-        --importance-major-bg: #1565C0; 
-        --importance-major-text: #BBDEFB;
-        --importance-major-border: #42A5F5;
+        --importance-minor-border: #66BB6A; 
+        --importance-common-bg: rgba(160, 174, 192, 0.1); 
+        --importance-common-text: #E2E8F0; 
+        --importance-common-border: #A0AEC0;
+        --importance-major-bg: rgba(104, 211, 145, 0.2); 
+        --importance-major-text: #9AE6B4;
+        --importance-major-border: #68D391;
 
-        --yggdrasil-bark-bg: #2A1B16;
-        --yggdrasil-bark-border: var(--secondary-accent-dark);
-        --yggdrasil-leaf-green: #388E3C;
+        --yggdrasil-bark-bg: #2D3748; /* Dark Slate */
+        --yggdrasil-bark-border: #4A5568;
+        --yggdrasil-leaf-green: #38A169;
 
         /* Focus View override for Dark Theme */
-        --focus-stellar-bg: #0a0f1a; 
-        --focus-connector-stroke: #4dd0e1; 
-        --focus-node-asteroid-bg: #5d4037; 
-        --focus-node-asteroid-glow: #795548;
-        --focus-node-planet-bg: #1565c0; 
-        --focus-node-planet-glow: #42a5f5;
-        --focus-node-star-bg: #ffb300; 
-        --focus-node-star-glow: #ffca28;
+        --focus-stellar-bg: #080B10; 
+        --focus-connector-stroke: var(--primary-accent-light); 
+        --focus-node-asteroid-bg: #718096; 
+        --focus-node-asteroid-glow: #A0AEC0;
+        --focus-node-planet-bg: #2D3748; 
+        --focus-node-planet-glow: #4A5568;
+        --focus-node-star-bg: #38A169; 
+        --focus-node-star-glow: #68D391;
         --focus-node-shield-color: #03a9f4; 
         --focus-node-beacon-color: #fdd835; 
         --focus-panel-text: #E0E0E0;
-        --focus-panel-bg: rgba(30, 30, 60, 0.9); 
-        --focus-placeholder-bg: rgba(20, 25, 40, 0.8);
+        --focus-panel-bg: rgba(var(--panel-bg-rgb), 0.9); 
+        --focus-placeholder-bg: rgba(var(--panel-alt-bg-rgb), 0.8);
         --focus-placeholder-text: #a0a8c0;
       }
 
-      /* Sol Theme (Warm Paper) */
+      /* Sol Theme (Ancient Scroll) */
       html[data-theme='sol'] {
-        --app-bg: #FAF8F3; /* Slightly less yellow */
-        --app-bg-rgb: 250,248,243;
+        --app-bg: #FDFBF6;
+        --app-bg-rgb: 253,251,246;
         --panel-bg: #FFFFFF;
         --panel-bg-rgb: 255,255,255;
-        --panel-alt-bg: #FBF9F6;
-        --panel-alt-bg-rgb: 251,249,246;
+        --panel-alt-bg: #FDFDFD;
+        --panel-alt-bg-rgb: 253,253,253;
 
-        --text-primary: #4A413A; /* Darker brown for text */
-        --text-secondary: #797068;
-        --text-tertiary: #9F978F;
+        --text-primary: #5D4037; /* Dark Brown */
+        --text-secondary: #795548;
+        --text-tertiary: #A1887F;
         --text-on-dark-bg: var(--text-primary);
         --text-on-accent: #FFFFFF;
         --text-on-bark: var(--text-primary);
         
-        --primary-accent: #E57373; /* Softer, warm red */
-        --primary-accent-rgb: 229,115,115;
-        --primary-accent-dark: #D32F2F; /* Stronger red for hover/active */
-        --primary-accent-light: #FFCDD2; /* Very light red for backgrounds */
-        --primary-accent-hover-bg: rgba(229,115,115, 0.08);
+        --primary-accent: #BF360C; /* Burnt Orange/Red Ink */
+        --primary-accent-rgb: 191,54,12;
+        --primary-accent-dark: #A9310A; 
+        --primary-accent-light: #FF7043; 
+        --primary-accent-hover-bg: rgba(191, 54, 12, 0.08);
 
-        --secondary-accent: #81C784; /* Sage Green */
-        --secondary-accent-rgb: 129, 199, 132;
-        --secondary-accent-dark: #4CAF50;
-        --secondary-accent-dark-rgb: 76, 175, 80;
+        --secondary-accent: #FFB74D; /* Gold/Amber */
+        --secondary-accent-rgb: 255,183,77;
+        --secondary-accent-dark: #FFA726;
+        --secondary-accent-dark-rgb: 255,167,38;
         
         --border-color: #EAE3DC;
         --border-color-strong: #CFC5BB;
         --input-border-color: #D6CFC7;
         
-        --success-color: #4CAF50; /* Green */
+        --success-color: #4CAF50;
         --success-bg: #E8F5E9;
-        --error-color: #F44336; /* Red */
-        --error-color-rgb: 244,67,54;
+        --error-color: #D32F2F;
+        --error-color-rgb: 211,47,47;
         --error-bg: #FFEBEE;
-        --warning-color: #FF9800; /* Amber */
+        --warning-color: #FFA000;
         --warning-bg: #FFF3E0;
 
         --disabled-bg: #F5F5F5;
@@ -292,65 +289,158 @@
         --graph-link-stroke-ecosystem: #A1887F; /* Sepia */
         --graph-node-highlight-stroke: var(--warning-color);
         
-        --importance-minor-bg: rgba(var(--secondary-accent-dark), 0.1); 
-        --importance-minor-text: #2E7D32;
-        --importance-minor-border: #A5D6A7; 
-        --importance-common-bg: rgba(255, 152, 0, 0.1); /* Amber bg */
+        --importance-minor-bg: rgba(121, 85, 72, 0.1); 
+        --importance-minor-text: #4E342E;
+        --importance-minor-border: #BCAAA4; 
+        --importance-common-bg: rgba(255, 152, 0, 0.1);
         --importance-common-text: #E65100;
         --importance-common-border: #FFB74D;
-        --importance-major-bg: rgba(var(--primary-accent-dark), 0.1); 
-        --importance-major-text: #B71C1C;
-        --importance-major-border: #EF9A9A;
+        --importance-major-bg: rgba(191, 54, 12, 0.1); 
+        --importance-major-text: #BF360C;
+        --importance-major-border: #FF8A65;
 
-        --yggdrasil-bark-bg: #F6F2EC; /* Lighter Parchment */
+        --yggdrasil-bark-bg: #F5EFE6; /* Parchment */
         --yggdrasil-bark-border: #E0D8CE;
 
         /* Focus View override for Sol Theme */
-        --focus-stellar-bg: #F0EBE4; 
-        --focus-connector-stroke: var(--primary-accent-dark); 
+        --focus-stellar-bg: #F5EFE6; 
+        --focus-connector-stroke: var(--primary-accent); 
         --focus-node-asteroid-bg: #BCAAA4; 
         --focus-node-asteroid-glow: #D7CCC8;
-        --focus-node-planet-bg: #81C784; 
-        --focus-node-planet-glow: #A5D6A7;
-        --focus-node-star-bg: #E57373; 
-        --focus-node-star-glow: #EF9A9A;
+        --focus-node-planet-bg: #FFB74D; 
+        --focus-node-planet-glow: #FFD54F;
+        --focus-node-star-bg: #FF7043; 
+        --focus-node-star-glow: #FF8A65;
         --focus-node-shield-color: #64B5F6; 
-        --focus-node-beacon-color: #FFB74D;
+        --focus-node-beacon-color: var(--secondary-accent-dark);
         --focus-panel-text: var(--text-primary);
         --focus-panel-bg: rgba(255, 255, 255, 0.85);
-        --focus-placeholder-bg: rgba(251,249,246, 0.8);
+        --focus-placeholder-bg: rgba(253,251,246, 0.8);
         --focus-placeholder-text: var(--text-tertiary);
+      }
+
+      /* Ocean Theme */
+      html[data-theme='ocean'] {
+        --app-bg: #F0F7FA;
+        --app-bg-rgb: 240,247,250;
+        --panel-bg: #FFFFFF;
+        --panel-bg-rgb: 255,255,255;
+        --panel-alt-bg: #F8FCFD;
+        --panel-alt-bg-rgb: 248,252,253;
+
+        --text-primary: #0D47A1; /* Deep Blue */
+        --text-secondary: #1565C0;
+        --text-tertiary: #42A5F5;
+        --text-on-dark-bg: #EAEAEA;
+        --text-on-accent: #FFFFFF;
+        --text-on-bark: var(--text-primary);
+        
+        --primary-accent: #00838F; /* Teal */
+        --primary-accent-rgb: 0,131,143;
+        --primary-accent-dark: #006064; 
+        --primary-accent-light: #4DD0E1; 
+        --primary-accent-hover-bg: rgba(0, 131, 143, 0.08);
+
+        --secondary-accent: #FFB74D; /* Sand/Sun */
+        --secondary-accent-rgb: 255,183,77;
+        --secondary-accent-dark: #FFA726;
+        --secondary-accent-dark-rgb: 255,167,38;
+        
+        --border-color: #B3E5FC;
+        --border-color-strong: #81D4FA;
+        --input-border-color: #90CAF9;
+        
+        --success-color: #4CAF50;
+        --success-bg: #E8F5E9;
+        --error-color: #F44336;
+        --error-color-rgb: 244,67,54;
+        --error-bg: #FFEBEE;
+        --warning-color: #FF9800; 
+        --warning-bg: #FFF3E0;   
+        
+        --disabled-bg: #E0E0E0;
+        --disabled-bg-rgb: 224,224,224;
+        --disabled-text: #9E9E9E;
+        --disabled-border: #BDBDBD;
+
+        --button-primary-bg: var(--primary-accent);
+        --button-primary-text: var(--text-on-accent);
+        --button-primary-hover-bg: var(--primary-accent-dark);
+        --button-primary-active-bg: #004D40; 
+
+        --button-secondary-bg: var(--panel-alt-bg);
+        --button-secondary-text: var(--primary-accent);
+        --button-secondary-border: var(--primary-accent-light);
+        --button-secondary-hover-bg: var(--primary-accent-hover-bg);
+        --button-secondary-hover-border: var(--primary-accent);
+        --button-secondary-hover-text: var(--primary-accent-dark);
+
+        --graph-node-stroke: var(--border-color-strong);
+        --graph-node-text: var(--text-primary);
+        --graph-link-stroke-ecosystem: #1976D2; 
+        --graph-node-selected-stroke: var(--primary-accent);
+        --graph-node-highlight-stroke: var(--secondary-accent-dark);
+
+        --importance-minor-bg: rgba(var(--secondary-accent-rgb), 0.15); 
+        --importance-minor-text: #E65100; 
+        --importance-minor-border: #FFCC80; 
+        --importance-common-bg: rgba(var(--primary-accent-rgb), 0.1); 
+        --importance-common-text: #006064; 
+        --importance-common-border: #80DEEA; 
+        --importance-major-bg: rgba(13, 71, 161, 0.1); 
+        --importance-major-text: #0D47A1; 
+        --importance-major-border: #90CAF9; 
+
+        --yggdrasil-bark-bg: #E3F2FD; /* Light Blue Foam */
+        --yggdrasil-bark-border: #B3E5FC;
+        --yggdrasil-leaf-green: #00838F;
+
+        /* Focus View override for Ocean Theme */
+        --focus-stellar-bg: #01579B; /* Deep Ocean */
+        --focus-connector-stroke: #FFD54F; /* Sunlight through water */
+        --focus-node-asteroid-bg: #455A64; /* Rock */
+        --focus-node-asteroid-glow: #607D8B;
+        --focus-node-planet-bg: #0288D1; /* Water Planet */
+        --focus-node-planet-glow: #29B6F6;
+        --focus-node-star-bg: #FBC02D; /* Sun */
+        --focus-node-star-glow: #FFF176;
+        --focus-node-shield-color: #4DD0E1; 
+        --focus-node-beacon-color: #FFD54F;
+        --focus-panel-text: #E1F5FE;
+        --focus-panel-bg: rgba(1, 87, 155, 0.85);
+        --focus-placeholder-bg: rgba(2, 119, 189, 0.8);
+        --focus-placeholder-text: #B3E5FC;
       }
 
       /* Nebula Theme */
       html[data-theme='nebula'] {
-        --app-bg: #0d1117;
-        --app-bg-rgb: 13,17,23;
-        --panel-bg: #161b22;
-        --panel-bg-rgb: 22,27,34;
-        --panel-alt-bg: #21262d;
-        --panel-alt-bg-rgb: 33,38,45;
+        --app-bg: #0d0c1d;
+        --app-bg-rgb: 13,12,29;
+        --panel-bg: #19162c;
+        --panel-bg-rgb: 25,22,44;
+        --panel-alt-bg: #252042;
+        --panel-alt-bg-rgb: 37,32,66;
 
-        --text-primary: #c9d1d9;
-        --text-secondary: #8b949e;
-        --text-tertiary: #6e7681;
+        --text-primary: #e0e0e0;
+        --text-secondary: #a0a0c0;
+        --text-tertiary: #7f7f9f;
         --text-on-dark-bg: #EAEAEA;
-        --text-on-accent: #0d1117;
+        --text-on-accent: #0d0c1d;
         --text-on-bark: #e0cffc;
         
-        --primary-accent: #58a6ff; 
-        --primary-accent-rgb: 88,166,255;
-        --primary-accent-dark: #80baff; 
-        --primary-accent-light: #addbff; 
-        --primary-accent-hover-bg: rgba(88, 166, 255, 0.12);
+        --primary-accent: #a777ff; /* Vibrant Purple */
+        --primary-accent-rgb: 167,119,255;
+        --primary-accent-dark: #c39fff; 
+        --primary-accent-light: #d8bfff; 
+        --primary-accent-hover-bg: rgba(167, 119, 255, 0.12);
 
-        --secondary-accent: #f78166; 
-        --secondary-accent-rgb: 247, 129, 102;
-        --secondary-accent-dark: #d36c54;
-        --secondary-accent-dark-rgb: 211, 108, 84;
+        --secondary-accent: #00e5ff; /* Cyan */
+        --secondary-accent-rgb: 0,229,255;
+        --secondary-accent-dark: #00cfff;
+        --secondary-accent-dark-rgb: 0,207,255;
 
-        --border-color: #30363d;
-        --border-color-strong: #454c56;
+        --border-color: #3a3152;
+        --border-color-strong: #4f417a;
         --input-border-color: #4a4a60;
         
         --success-color: #56d364; 
@@ -379,6 +469,7 @@
         --graph-node-stroke: var(--border-color-strong);
         --graph-link-stroke-ecosystem: #8b949e; 
         --graph-node-selected-stroke: var(--primary-accent);
+        --graph-node-highlight-stroke: #eac54f;
 
         --importance-minor-bg: rgba(86, 211, 100, 0.1); 
         --importance-minor-text: #56d364; 
@@ -390,7 +481,7 @@
         --importance-major-text: #58a6ff;
         --importance-major-border: #58a6ff;
 
-        --yggdrasil-bark-bg: #1c162a; /* Deep purple */
+        --yggdrasil-bark-bg: #19162c; /* Deep purple */
         --yggdrasil-bark-border: #3a3152;
         --yggdrasil-leaf-green: var(--success-color);
 
@@ -399,16 +490,107 @@
         --focus-connector-stroke: #ff00ff; /* Magenta */
         --focus-node-asteroid-bg: #6e407e; 
         --focus-node-asteroid-glow: #8e5a9e;
-        --focus-node-planet-bg: #3b3eac; 
-        --focus-node-planet-glow: #5d63d8;
-        --focus-node-star-bg: #f78166; 
-        --focus-node-star-glow: #ff9f86;
+        --focus-node-planet-bg: #a777ff; 
+        --focus-node-planet-glow: #c39fff;
+        --focus-node-star-bg: #00e5ff; 
+        --focus-node-star-glow: #66f5ff;
         --focus-node-shield-color: var(--primary-accent); 
         --focus-node-beacon-color: #eac54f;
         --focus-panel-text: #e0cffc;
         --focus-panel-bg: rgba(30, 10, 50, 0.9);
         --focus-placeholder-bg: rgba(20, 15, 40, 0.8);
         --focus-placeholder-text: #a098c0;
+      }
+
+      /* Synthwave Theme */
+      html[data-theme='synthwave'] {
+        --app-bg: #0d0221;
+        --app-bg-rgb: 13,2,33;
+        --panel-bg: #1a0938;
+        --panel-bg-rgb: 26,9,56;
+        --panel-alt-bg: #240d52;
+        --panel-alt-bg-rgb: 36,13,82;
+
+        --text-primary: #f0e8ff;
+        --text-secondary: #c0b8d8;
+        --text-tertiary: #9088b0;
+        --text-on-dark-bg: #f0e8ff;
+        --text-on-accent: #0d0221;
+        --text-on-bark: #f0e8ff;
+        
+        --primary-accent: #ff00ff; /* Magenta */
+        --primary-accent-rgb: 255,0,255;
+        --primary-accent-dark: #e600e6; 
+        --primary-accent-light: #ff66ff; 
+        --primary-accent-hover-bg: rgba(255, 0, 255, 0.15);
+
+        --secondary-accent: #00f0ff; /* Cyan */
+        --secondary-accent-rgb: 0,240,255;
+        --secondary-accent-dark: #00d0e0;
+        --secondary-accent-dark-rgb: 0,208,224;
+        
+        --border-color: #4f21a5;
+        --border-color-strong: #6c35d4;
+        --input-border-color: #4f21a5;
+        
+        --success-color: #00ff89; 
+        --success-bg: rgba(0, 255, 137, 0.15);   
+        --error-color: #ff3366;
+        --error-color-rgb: 255,51,102;
+        --error-bg: rgba(255, 51, 102, 0.15);     
+        --warning-color: #ffff00; 
+        --warning-bg: rgba(255, 255, 0, 0.15);    
+
+        --disabled-bg: #240d52;
+        --disabled-bg-rgb: 36,13,82;
+        --disabled-text: #9088b0;
+        --disabled-border: #4f21a5;
+
+        --button-primary-bg: var(--primary-accent);
+        --button-primary-text: var(--text-on-accent);
+        --button-primary-hover-bg: var(--primary-accent-dark);
+        --button-primary-active-bg: var(--primary-accent-light);
+
+        --button-secondary-text: var(--secondary-accent);
+        --button-secondary-border: var(--secondary-accent);
+        --button-secondary-hover-bg: rgba(var(--secondary-accent-rgb), 0.15);
+        --button-secondary-hover-border: var(--secondary-accent-light);
+        
+        --graph-node-stroke: var(--border-color-strong);
+        --graph-node-text: var(--text-primary);
+        --graph-link-stroke-ecosystem: #c0b8d8; 
+        --graph-node-selected-stroke: var(--primary-accent);
+        --graph-node-highlight-stroke: #ffff00;
+
+        --importance-minor-bg: rgba(var(--secondary-accent-rgb), 0.1); 
+        --importance-minor-text: var(--secondary-accent); 
+        --importance-minor-border: var(--secondary-accent);
+        --importance-common-bg: rgba(var(--primary-accent-rgb), 0.1); 
+        --importance-common-text: var(--primary-accent); 
+        --importance-common-border: var(--primary-accent);
+        --importance-major-bg: rgba(255, 255, 0, 0.1); 
+        --importance-major-text: #ffff00;
+        --importance-major-border: #ffff00;
+
+        --yggdrasil-bark-bg: #1a0938;
+        --yggdrasil-bark-border: #4f21a5;
+        --yggdrasil-leaf-green: var(--secondary-accent);
+
+        /* Focus View override for Synthwave Theme */
+        --focus-stellar-bg: #000000; 
+        --focus-connector-stroke: var(--secondary-accent); 
+        --focus-node-asteroid-bg: #4f21a5; 
+        --focus-node-asteroid-glow: #6c35d4;
+        --focus-node-planet-bg: var(--primary-accent); 
+        --focus-node-planet-glow: var(--primary-accent-light);
+        --focus-node-star-bg: #ffff00; /* Neon Yellow */
+        --focus-node-star-glow: #ffff66;
+        --focus-node-shield-color: var(--secondary-accent); 
+        --focus-node-beacon-color: #ffff00;
+        --focus-panel-text: var(--text-primary);
+        --focus-panel-bg: rgba(26, 9, 56, 0.85);
+        --focus-placeholder-bg: rgba(36, 13, 82, 0.8);
+        --focus-placeholder-text: var(--text-secondary);
       }
 
       /* Global Styles */
@@ -443,10 +625,12 @@
         background-color: var(--panel-bg); color: var(--text-primary); font-size: 0.9em; transition: border-color 0.2s ease, box-shadow 0.2s ease; /* Reduced font-size */
       }
       input:focus, textarea:focus, select:focus { outline: none; border-color: var(--input-focus-border-color); box-shadow: var(--input-focus-shadow); }
-      select { appearance: none; background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%232E7D32%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E'); background-repeat: no-repeat; background-position: right 8px center; background-size: 9px; padding-right: 25px; } /* Adjusted select arrow */
-      html[data-theme='dark'] select { background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23B0B0B0%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E'); }
-      html[data-theme='nebula'] select { background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%238b949e%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E'); }
-      html[data-theme='sol'] select { background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23716A63%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E'); }
+      select { appearance: none; background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23546E7A%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E'); background-repeat: no-repeat; background-position: right 8px center; background-size: 9px; padding-right: 25px; } /* Adjusted select arrow */
+      html[data-theme='dark'] select { background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23A0AEC0%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E'); }
+      html[data-theme='nebula'] select { background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23a0a0c0%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E'); }
+      html[data-theme='sol'] select { background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23795548%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E'); }
+      html[data-theme='ocean'] select { background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%230D47A1%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E'); }
+      html[data-theme='synthwave'] select { background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23c0b8d8%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E'); }
 
       button, input[type="submit"], input[type="button"] {
         padding: 8px 12px; border: 1px solid var(--button-default-border); border-radius: var(--border-radius); /* Reduced padding */
@@ -462,7 +646,9 @@
         background-color: var(--button-primary-bg); color: var(--button-primary-text); border-color: var(--button-primary-bg); 
         background-image: linear-gradient(to bottom, rgba(255,255,255,0.08), rgba(0,0,0,0.08));
       }
-      html[data-theme='dark'] button.primary { background-image: linear-gradient(to bottom, rgba(255,255,255,0.1), rgba(0,0,0,0.1)); }
+      html[data-theme='dark'] button.primary,
+      html[data-theme='nebula'] button.primary,
+      html[data-theme='synthwave'] button.primary { background-image: linear-gradient(to bottom, rgba(255,255,255,0.1), rgba(0,0,0,0.1)); }
       button.primary:hover { background-color: var(--button-primary-hover-bg); border-color: var(--button-primary-hover-bg); }
       button.primary:active { background-color: var(--button-primary-active-bg); }
       

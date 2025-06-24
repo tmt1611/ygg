@@ -5,8 +5,10 @@ const getNextThemeInfo = (currentTheme) => {
     switch (currentTheme) {
         case 'dark': return { next: 'Light', icon: '☀️' };
         case 'light': return { next: 'Sol', icon: '📜' };
-        case 'sol': return { next: 'Nebula', icon: '🌌' };
-        case 'nebula': return { next: 'Dark', icon: '🌙' };
+        case 'sol': return { next: 'Ocean', icon: '🌊' };
+        case 'ocean': return { next: 'Nebula', icon: '🌌' };
+        case 'nebula': return { next: 'Synthwave', icon: '🎹' };
+        case 'synthwave': return { next: 'Dark', icon: '🌙' };
         default: return { next: 'Light', icon: '☀️' };
     }
 };
