@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import HistoryItem from '../HistoryItem.js';
+import HistoryControls from '../HistoryControls.js';
 import { EVENT_TYPE_INFO } from '../../constants.js';
 
 const KEY_EVENT_TYPES = [
@@ -24,26 +25,34 @@ const HistoryViewTabContent = ({ history, onClearHistory }) => {
   }, [history, filterMode]);
 
   return (
-    React.createElement("div", { style: { display: 'flex', flexDirection: 'column', gap: '10px' }},
-      React.createElement("div", { style: { display: 'flex', justifyContent: 'center', gap: '10px', paddingBottom: '10px', borderBottom: '1px solid var(--border-color)' }},
-        React.createElement("button", {
-          onClick: () => setFilterMode('all'),
-          className: filterMode === 'all' ? 'primary' : 'secondary',
-          disabled: filterMode === 'all',
-          style: {fontSize: '0.9em', padding: '6px 10px'}
-        },
-          "Show All (", history.length, ")"
-        ),
-        React.createElement("button", {
-          onClick: () => setFilterMode('key'),
-          className: filterMode === 'key' ? 'primary' : 'secondary',
-          disabled: filterMode === 'key',
-          style: {fontSize: '0.9em', padding: '6px 10px'}
-        },
-          "Key Events Only (", history.filter(entry => KEY_EVENT_TYPES.includes(entry.type)).length, ")"
+    React.createElement("div", { style: { display: 'flex', flexDirection: 'column', gap: '8px', height: '100%' }},
+      React.createElement(HistoryControls, {
+        searchTerm: searchTerm,
+        onSearchTermChange: setSearchTerm,
+        filterMode: filterMode,
+        onFilterModeChange: setFilterMode,
+        filteredCount: filteredHistory.length,
+        keyEventsCount: keyEventsCount,
+        totalCount: history.length,
+        onClearHistory: onClearHistory,
+        isClearDisabled: history.length === 0,
+      }),
+      React.createElement("div", { style: { flexGrow: 1, overflowY: 'auto' }},
+        filteredHistory.length > 0 ? (
+          React.createElement("ul", { style: { listStyle: 'none', padding: 0, margin: 0 }, "aria-label": "History of actions" },
+            filteredHistory.map((entry) => (
+              React.createElement(HistoryItem, { key: entry.id, entry: entry })
+            ))
+          )
+        ) : (
+          React.createElement("div", { className: "placeholder-center-content", style: { minHeight: '100px', padding: '10px' }},
+            React.createElement("span", { className: "placeholder-icon", style: {fontSize: '2em', marginBottom: '8px'}}, "📜"),
+            history.length > 0 ?
+                React.createElement("p", { style: { color: 'var(--text-tertiary)', fontSize: '0.9em' }}, "No actions match your search.") :
+                React.createElement("p", { style: { color: 'var(--text-tertiary)', fontSize: '0.9em' }}, "No actions recorded yet.")
+          )
         )
-      ),
-      React.createElement(HistoryPanel, { history: filteredHistory })
+      )
     )
   );
 };

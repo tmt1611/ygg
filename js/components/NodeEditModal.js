@@ -59,7 +59,8 @@ const NodeEditModal = ({
       className: "modal-overlay-basic",
       role: "dialog",
       "aria-modal": "true",
-      "aria-labelledby": "node-edit-modal-title"
+      "aria-labelledby": "node-edit-modal-title",
+      onClick: (e) => { if (e.target === e.currentTarget) onCancel(); }
     },
       React.createElement("div", { className: "modal-content-basic", style: {width: 'clamp(350px, 60vw, 550px)'}},
         React.createElement("form", { onSubmit: handleConfirm },

@@ -1,5 +1,5 @@
 import { useCallback } from 'react';
-import { findNodeById, updateNodeInTree, addNodeToParent, lockAllNodesInTree, unlockAllNodesInTree, areAllNodesLocked, removeNodeAndChildrenFromTree } from '../utils.js';
+import { findNodeById, updateNodeInTree, addNodeToParent, lockAllNodesInTree, unlockAllNodesInTree, areAllNodesLocked, removeNodeAndChildrenFromTree, updateAllChildren, deleteAllChildren, addPastedNodeToParent, isValidTechTreeNodeShape } from '../utils.js';
 
 export const useNodeOperations = ({
   techTreeData, 
@@ -8,6 +8,7 @@ export const useNodeOperations = ({
   historyManager,
   projectManager,
   viewStates,
+  setError,
 }) => {
   const { nodeEditModalConfig, closeNodeEditModal, openConfirmModal, closeConfirmModal } = modalManager;
   const { addHistoryEntry } = historyManager;
@@ -40,7 +41,12 @@ export const useNodeOperations = ({
     if (!techTreeData) return;
     const nodeToDelete = findNodeById(techTreeData, nodeId);
     if (!nodeToDelete) {
-        console.error(`handleDeleteNodeWithConfirmation: Node with ID ${nodeId} not found.`);
+        openConfirmModal({
+            title: "Deletion Error",
+            message: `Node could not be found for deletion. It may have already been removed.`,
+            confirmText: "OK",
+            cancelText: null,
+        });
         return;
     }
 
@@ -153,6 +159,105 @@ export const useNodeOperations = ({
     );
   }, [techTreeData, setTechTreeData, handleSaveActiveProject, addHistoryEntry, projectManager.projects, projectManager.activeProjectId]);
 
+  const handleAddNodeToRoot = useCallback(() => {
+    if (!techTreeData) return;
+    modalManager.openNodeEditModal({
+      mode: 'addChild',
+      targetNodeId: techTreeData.id, // Target the root node
+      parentNodeName: techTreeData.name,
+      title: `Add Node to Root: ${techTreeData.name}`,
+      label: "New Node Name",
+      placeholder: "Enter name for new top-level node",
+    });
+  }, [techTreeData, modalManager]);
+
+  const handleLockAllChildren = useCallback((parentId) => {
+    if (!techTreeData) return;
+    const parentNode = findNodeById(techTreeData, parentId);
+    if (!parentNode || !parentNode.children || parentNode.children.length === 0) return;
+    const updatedTree = updateAllChildren(techTreeData, parentId, { isLocked: true });
+    setTechTreeData(updatedTree);
+    handleSaveActiveProject(false);
+    addHistoryEntry('NODE_UPDATED', `All children of "${parentNode.name}" have been locked.`);
+  }, [techTreeData, setTechTreeData, handleSaveActiveProject, addHistoryEntry]);
+
+  const handleUnlockAllChildren = useCallback((parentId) => {
+    if (!techTreeData) return;
+    const parentNode = findNodeById(techTreeData, parentId);
+    if (!parentNode || !parentNode.children || parentNode.children.length === 0) return;
+    const updatedTree = updateAllChildren(techTreeData, parentId, { isLocked: false });
+    setTechTreeData(updatedTree);
+    handleSaveActiveProject(false);
+    addHistoryEntry('NODE_UPDATED', `All children of "${parentNode.name}" have been unlocked.`);
+  }, [techTreeData, setTechTreeData, handleSaveActiveProject, addHistoryEntry]);
+
+  const handleChangeImportanceOfAllChildren = useCallback((parentId, importance) => {
+    if (!techTreeData) return;
+    const parentNode = findNodeById(techTreeData, parentId);
+    if (!parentNode || !parentNode.children || parentNode.children.length === 0) return;
+    const updatedTree = updateAllChildren(techTreeData, parentId, { importance });
+    setTechTreeData(updatedTree);
+    handleSaveActiveProject(false);
+    addHistoryEntry('NODE_UPDATED', `Importance of all children of "${parentNode.name}" set to ${importance}.`);
+  }, [techTreeData, setTechTreeData, handleSaveActiveProject, addHistoryEntry]);
+
+  const handleDeleteAllChildren = useCallback((parentId) => {
+    if (!techTreeData) return;
+    const parentNode = findNodeById(techTreeData, parentId);
+    if (!parentNode || !parentNode.children || parentNode.children.length === 0) return;
+    
+    openConfirmModal({
+        title: "Delete All Children?",
+        message: `Delete all direct children of "${parentNode.name}"? This action cannot be undone.`,
+        confirmText: "Delete All",
+        confirmButtonStyle: 'danger',
+        onConfirm: () => {
+            const updatedTree = deleteAllChildren(techTreeData, parentId);
+            setTechTreeData(updatedTree);
+            handleSaveActiveProject(false);
+            addHistoryEntry('NODE_DELETED', `All children of "${parentNode.name}" deleted.`);
+            closeConfirmModal();
+        },
+        onCancel: closeConfirmModal,
+    });
+  }, [techTreeData, setTechTreeData, handleSaveActiveProject, addHistoryEntry, openConfirmModal, closeConfirmModal]);
+
+  const handlePasteNode = useCallback(async (targetNodeId) => {
+    if (!techTreeData) {
+      setError("Cannot paste: No active tree.");
+      return;
+    }
+    
+    try {
+      const clipboardText = await navigator.clipboard.readText();
+      const parsedNode = JSON.parse(clipboardText);
+
+      if (!isValidTechTreeNodeShape(parsedNode)) {
+        throw new Error("Clipboard content is not a valid node structure.");
+      }
+      
+      const parentNode = findNodeById(techTreeData, targetNodeId);
+      if (!parentNode) {
+        throw new Error("Target node for paste operation not found.");
+      }
+
+      const updatedTree = addPastedNodeToParent(techTreeData, targetNodeId, parsedNode);
+      setTechTreeData(updatedTree);
+      handleSaveActiveProject(false);
+      addHistoryEntry('NODE_CREATED', `Pasted node "${parsedNode.name}" as child of "${parentNode.name}".`);
+
+    } catch (e) {
+      let errorMessage = "Failed to paste node from clipboard.";
+      if (e instanceof SyntaxError) {
+        errorMessage = "Clipboard does not contain valid JSON.";
+      } else if (e.message) {
+        errorMessage = e.message;
+      }
+      console.error("Paste Error:", e);
+      setError(errorMessage);
+    }
+  }, [techTreeData, setTechTreeData, handleSaveActiveProject, addHistoryEntry, setError]);
+
 
   return {
     handleToggleNodeLock,
@@ -161,5 +266,11 @@ export const useNodeOperations = ({
     handleDeleteNodeWithConfirmation,
     handleQuickAddChild,
     handleToggleAllLock,
+    handleAddNodeToRoot,
+    handleLockAllChildren,
+    handleUnlockAllChildren,
+    handleChangeImportanceOfAllChildren,
+    handleDeleteAllChildren,
+    handlePasteNode,
   };
 };

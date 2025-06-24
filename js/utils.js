@@ -1,4 +1,5 @@
 import { v4 as uuidv4 } from 'uuid';
+import { select } from 'd3';
 
 export const generateUUID = () => uuidv4();
 
@@ -92,6 +93,25 @@ export const removeNodeAndChildrenFromTree = (tree, nodeIdToRemove) => {
         return { ...node, children: newChildren };
     };
     return removeRecursively(tree);
+};
+
+export const updateAllChildren = (tree, parentId, updates) => {
+    const updateRecursively = (node) => {
+        if (node.id === parentId) {
+            if (!node.children || node.children.length === 0) return node;
+            const updatedChildren = node.children.map(child => ({ ...child, ...updates }));
+            return { ...node, children: updatedChildren };
+        }
+        if (node.children) {
+            return { ...node, children: node.children.map(child => updateRecursively(child)) };
+        }
+        return node;
+    };
+    return updateRecursively(tree);
+};
+
+export const deleteAllChildren = (tree, parentId) => {
+    return updateNodeInTree(tree, parentId, { children: [] });
 };
 
 export const lockAllNodesInTree = (tree) => {
@@ -204,7 +224,6 @@ export const filterTree = (node, searchTerm) => {
     return null;
 };
 
-
 export const getAncestorIds = (nodeId, tree) => {
   if (!tree || !nodeId) return [];
   const nodeMap = getAllNodesAsMap(tree);
@@ -229,6 +248,21 @@ export const getAncestorIds = (nodeId, tree) => {
   }
   
   return ancestors; 
+};
+
+export const getNodePathString = (nodeId, tree) => {
+    if (!tree || !nodeId) return "";
+    const nodeMap = getAllNodesAsMap(tree);
+    const ancestorIds = getAncestorIds(nodeId, tree);
+
+    const pathNames = ancestorIds.map(id => nodeMap.get(id)?.name).filter(Boolean);
+    
+    const currentNode = nodeMap.get(nodeId);
+    if (currentNode) {
+        pathNames.push(currentNode.name);
+    }
+
+    return pathNames.join(' / ');
 };
 
 export const getAllExpandableNodeIds = (node) => {
@@ -262,6 +296,56 @@ export const isValidTechTreeNodeShape = (node) => {
 
     return hasName && hasChildren && hasImportance && hasIsLocked && hasDescription && childrenAreValid;
 };
+
+export const reinitializeNodeIds = (node, newParentId = null) => {
+  if (!node) return null;
+  // Create a new ID for the current node
+  const newId = generateUUID();
+  // Create a new node object with the new ID and parent ID
+  const newNode = { ...node, id: newId, _parentId: newParentId };
+  
+  // If there are children, recursively call this function for each child,
+  // passing the new ID of the current node as their new parent ID.
+  if (newNode.children && newNode.children.length > 0) {
+    newNode.children = newNode.children.map(child => reinitializeNodeIds(child, newId));
+  }
+  
+  return newNode;
+};
+
+export const addPastedNodeToParent = (tree, parentId, nodeToPaste) => {
+    // First, create a deep copy of the node to paste with all new IDs
+    const reinitializedNode = reinitializeNodeIds(nodeToPaste, parentId);
+
+    const addRecursively = (node) => {
+        if (node.id === parentId) {
+            return {
+                ...node,
+                children: [...(node.children || []), reinitializedNode]
+            };
+        }
+        if (node.children) {
+            return { ...node, children: node.children.map(child => addRecursively(child)) };
+        }
+        return node;
+    };
+    return addRecursively(tree);
+};
+
+export const downloadObjectAsJson = (exportObj, exportName) => {
+  const jsonStr = JSON.stringify(exportObj, null, 2);
+  const blob = new Blob([jsonStr], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = exportName;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+};
+
+// wrapSvgText has been removed in favor of using <foreignObject> for more robust text wrapping.
 
 export const compareAndAnnotateTree = (originalTree, modifiedTree) => {
     if (!originalTree) {

@@ -1,4 +1,3 @@
-
 import React from 'react';
 
 const CollapsiblePanel = ({
@@ -9,6 +8,7 @@ const CollapsiblePanel = ({
   onToggle,
   children,
   headerActions,
+  variant = 'workspace' // 'workspace' or 'sidebar'
 }) => {
 
   const handleHeaderKeyDown = (event) => {
@@ -22,7 +22,7 @@ const CollapsiblePanel = ({
     }
   };
 
-  const panelClasses = `panel ${isCollapsed ? 'collapsed' : ''}`;
+  const panelClasses = `panel panel-variant-${variant} ${isCollapsed ? 'collapsed' : ''}`;
 
   return (
     React.createElement("div", { className: panelClasses },
@@ -38,7 +38,7 @@ const CollapsiblePanel = ({
       },
         icon && React.createElement("span", { className: "panel-header-icon", "aria-hidden": "true" }, icon),
         React.createElement("h3", null, title),
-        React.createElement("div", { 
+        React.createElement("div", {
           className: "panel-header-actions",
           onClick: (e) => e.stopPropagation() // Prevent actions from toggling the panel
         },
@@ -47,14 +47,12 @@ const CollapsiblePanel = ({
         React.createElement("button", {
           className: `panel-toggle-button ${isCollapsed ? 'collapsed' : ''}`,
           "aria-label": `${isCollapsed ? 'Expand' : 'Collapse'} ${title}`,
-          onClick: (e) => {
-            e.stopPropagation(); // Stop this event from bubbling to the header...
-            onToggle(panelId);   // ...and toggle the panel directly.
-          },
+          // The onClick is inherited from the header, no need to stop propagation or define it here.
+          // This makes the button a part of the larger clickable header area.
+          tabIndex: -1, // Prevent tabbing to this button since the header is already focusable.
+          "aria-hidden": "true" // The whole header is the button, so this is decorative.
         },
-          React.createElement("svg", { viewBox: "0 0 24 24", fill: "currentColor", width: "1em", height: "1em", style: { display: 'block', pointerEvents: 'none' } },
-            React.createElement("path", { d: "M7.41 8.59 12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z" })
-          )
+          "›"
         )
       ),
       React.createElement("div", {

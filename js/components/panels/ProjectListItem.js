@@ -26,10 +26,9 @@ const ProjectListItem = ({ project, activeProjectId, onLoadProject, onLoadAndGoT
           React.createElement("button", {
             onClick: () => onLoadAndGoToGraph(project.id),
             disabled: isAppBusy,
-            title: `Start a new project using "${project.name}" as a template and view graph.`,
-            className: "secondary panel-button",
-            style: { padding: '5px 10px', fontSize: '0.9em', width: 'auto' }
-          }, "🚀 Use Example")
+            title: `Start new project from template: "${project.name}"`,
+            className: "base-icon-button"
+          }, "🚀")
         ) : (
           React.createElement(React.Fragment, null,
             React.createElement("button", { className: "base-icon-button", onClick: () => onLoadAndGoToGraph(project.id), disabled: isAppBusy || isActive, title: `Load "${project.name}" and view graph` }, "🚀"),

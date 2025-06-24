@@ -1,7 +1,16 @@
 
 import { useState, useCallback, useEffect } from 'react';
-import { generateUUID, initializeNodes, findNodeById, updateNodeInTree } from '../utils.js';
+import { generateUUID, initializeNodes, findNodeById, updateNodeInTree, getAllNodesAsMap, downloadObjectAsJson } from '../utils.js';
 import { APP_STORAGE_KEYS, ELF_WARFARE_STRUCTURE_JSON_STRING, ADVANCED_NATURE_MAGIC_JSON_STRING } from '../constants.js';
+
+const downloadProjectFile = (project, addHistoryEntry) => {
+    if (!project) return;
+    const filename = `${project.name.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.project.json`;
+    downloadObjectAsJson(project, filename);
+    if (addHistoryEntry) {
+        addHistoryEntry('TREE_DOWNLOADED', `Project "${project.name}" downloaded.`);
+    }
+};
 
 export const useProjectManagement = ({
   modalManager,
@@ -98,38 +107,7 @@ export const useProjectManagement = ({
       return newProjects;
   }, []);
 
-  const _linkExampleProjects = useCallback((projectsList) => {
-      let linkedProjects = [...projectsList];
-      const ewProject = linkedProjects.find(p => p.isExample && p.treeData.id === 'elf-warfare-root-example-v1');
-      const anmProject = linkedProjects.find(p => p.isExample && p.treeData.id === 'nature-magic-root-example-v1');
 
-      if (!ewProject || !anmProject) return linkedProjects;
-      
-      let ewTree = ewProject.treeData;
-      let anmTree = anmProject.treeData;
-      let modified = false;
-
-      const nodeToLinkInEW = findNodeById(ewTree, "natures-embrace");
-      if (nodeToLinkInEW && nodeToLinkInEW.linkedProjectId !== anmProject.id) {
-          ewTree = updateNodeInTree(ewTree, "natures-embrace", { linkedProjectId: anmProject.id, linkedProjectName: anmProject.name });
-          modified = true;
-      }
-      
-      if (anmTree.linkedProjectId !== ewProject.id) {
-          anmTree = { ...anmTree, linkedProjectId: ewProject.id, linkedProjectName: ewProject.name };
-          modified = true;
-      }
-
-      if (modified) {
-          return linkedProjects.map(p => {
-              if (p.id === ewProject.id) return { ...p, treeData: ewTree, lastModified: new Date().toISOString() };
-              if (p.id === anmProject.id) return { ...p, treeData: anmTree, lastModified: new Date().toISOString() };
-              return p;
-          });
-      }
-      
-      return linkedProjects;
-  }, []);
 
   const _setActiveInitialProject = useCallback((allProjects) => {
     const startupLogged = localStorage.getItem(APP_STORAGE_KEYS.STARTUP_LOAD_LOGGED);
@@ -179,8 +157,7 @@ export const useProjectManagement = ({
     const startupLogged = localStorage.getItem(APP_STORAGE_KEYS.STARTUP_LOAD_LOGGED);
     try {
       let projectsFromStorage = _loadProjectsFromStorage();
-      let projectsWithExamples = _addMissingExampleProjects(projectsFromStorage);
-      let allProjects = _linkExampleProjects(projectsWithExamples);
+      let allProjects = _addMissingExampleProjects(projectsFromStorage);
       
       setProjects(allProjects);
       _setActiveInitialProject(allProjects);
@@ -191,7 +168,7 @@ export const useProjectManagement = ({
     } finally {
         if (!startupLogged) localStorage.setItem(APP_STORAGE_KEYS.STARTUP_LOAD_LOGGED, 'true');
     }
-  }, [_loadProjectsFromStorage, _addMissingExampleProjects, _linkExampleProjects, _setActiveInitialProject, setError, addHistoryEntry]);
+  }, [_loadProjectsFromStorage, _addMissingExampleProjects, _setActiveInitialProject, setError, addHistoryEntry]);
 
 
   const handleSetActiveProject = useCallback((projectId, fromExample = false) => {
@@ -208,6 +185,10 @@ export const useProjectManagement = ({
       } else {
         setActiveProjectId(projectToLoad.id);
         addHistoryEntry('PROJECT_LOADED', `Project "${projectToLoad.name}" activated.`);
+      }
+      // Switch to graph view after loading a project from the workspace
+      if (viewStates) {
+        viewStates.setYggdrasilViewMode('graph');
       }
     } else {
       setError(`Project with ID ${projectId} not found.`);
@@ -230,6 +211,11 @@ export const useProjectManagement = ({
   }, [addHistoryEntry, setError, setInitialPrompt, setActiveProjectId]);
 
   const internalCreateNewProject = useCallback((name) => {
+    if (projects.some(p => !p.isExample && p.name.toLowerCase() === name.toLowerCase())) {
+        setError(`A project named "${name}" already exists. Please choose a unique name.`);
+        closeProjectNameModal();
+        return;
+    }
     resetTreeForNewProjectContext();
     const newEmptyTree = initializeNodes({
       id: 'root-empty-' + generateUUID().substring(0,8), name: 'New Project Root', description: 'Start building your tech tree.', importance: 'common'
@@ -240,11 +226,10 @@ export const useProjectManagement = ({
     const savedProject = saveNewProject(newEmptyTree, name, false);
     closeProjectNameModal();
     if (viewStates && savedProject && savedProject.treeData.id) {
-        viewStates.setYggdrasilViewMode('treeView');
-        viewStates.setActiveOverlayPanel(null); // Ensure graph view is active
+        viewStates.setYggdrasilViewMode('graph');
         viewStates.setSelectedGraphNodeId(savedProject.treeData.id); // Select the root node
     }
-  }, [resetTreeForNewProjectContext, setTechTreeData, setInitialPrompt, saveNewProject, closeProjectNameModal, viewStates]);
+  }, [projects, setError, resetTreeForNewProjectContext, setTechTreeData, setInitialPrompt, saveNewProject, closeProjectNameModal, viewStates]);
 
   const handleCreateNewProject = useCallback(() => {
     openProjectNameModal({ mode: 'create', onConfirm: internalCreateNewProject });
@@ -278,7 +263,7 @@ export const useProjectManagement = ({
           }
           handleSetActiveProject(newProject.id, newProject.isExample);
           setError(null);
-        } catch (err) { setError(`Error loading project from file: ${err.message}`); console.error("Project File Load Error:", err); }
+        } catch (err) { setError(err); console.error("Project File Load Error:", err); }
         finally { event.target.value = ''; }
       };
       reader.readAsText(file);
@@ -300,15 +285,8 @@ export const useProjectManagement = ({
         onConfirm: (nameFromModal) => {
           setInitialPrompt(nameFromModal);
           const newSavedProject = saveNewProject(currentTechTreeData, nameFromModal, false);
-          if (newSavedProject && andDownload) { 
-            const filename = `${newSavedProject.name.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.project.json`;
-            const jsonStr = JSON.stringify(newSavedProject, null, 2);
-            const blob = new Blob([jsonStr], { type: "application/json" });
-            const url = URL.createObjectURL(blob);
-            const link = document.createElement("a");
-            link.href = url; link.download = filename; document.body.appendChild(link);
-            link.click(); document.body.removeChild(link); URL.revokeObjectURL(url);
-            addHistoryEntry('TREE_DOWNLOADED', `Project "${newSavedProject.name}" downloaded.`);
+          if (newSavedProject && andDownload) {
+            downloadProjectFile(newSavedProject, addHistoryEntry);
           }
           closeProjectNameModal();
         }
@@ -327,23 +305,53 @@ export const useProjectManagement = ({
     };
     setProjects(prev => { const newProjects = [...prev]; newProjects[projectIndex] = updatedProject; return newProjects; });
     addHistoryEntry('PROJECT_SAVED', `Project "${updatedProject.name}" saved.`);
-    if (andDownload) { 
-        const filename = `${updatedProject.name.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.project.json`;
-        const jsonStr = JSON.stringify(updatedProject, null, 2);
-        const blob = new Blob([jsonStr], { type: "application/json" });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement("a");
-        link.href = url; link.download = filename; document.body.appendChild(link);
-        link.click(); document.body.removeChild(link); URL.revokeObjectURL(url);
-        addHistoryEntry('TREE_DOWNLOADED', `Project "${updatedProject.name}" downloaded.`);
+    if (andDownload) {
+      downloadProjectFile(updatedProject, addHistoryEntry);
     }
   }, [activeProjectId, currentTechTreeData, projects, currentContextText, addHistoryEntry, openProjectNameModal, saveNewProject, closeProjectNameModal, setInitialPrompt, setError]);
 
   const internalRenameProject = useCallback((projectId, newName) => {
     const oldProject = projects.find(p => p.id === projectId);
-    setProjects(prevProjects => prevProjects.map(p => p.id === projectId ? { ...p, name: newName, lastModified: new Date().toISOString() } : p));
+    if (!oldProject) return;
+
+    if (projects.some(p => p.id !== projectId && !p.isExample && p.name.toLowerCase() === newName.toLowerCase())) {
+        setError(`A project named "${newName}" already exists. Please choose a unique name.`);
+        closeProjectNameModal();
+        return;
+    }
+
+    // Find all projects that link to the project being renamed and update them.
+    const projectsWithLinksUpdated = projects.map(proj => {
+      if (proj.id === projectId) {
+        // This is the project being renamed.
+        return { ...proj, name: newName, lastModified: new Date().toISOString() };
+      }
+
+      // Check if this project has links to the renamed project.
+      if (!proj.treeData) return proj;
+      
+      let treeData = proj.treeData;
+      let wasModified = false;
+      const nodesMap = getAllNodesAsMap(treeData);
+
+      nodesMap.forEach(node => {
+        if (node.linkedProjectId === projectId) {
+          treeData = updateNodeInTree(treeData, node.id, { linkedProjectName: newName });
+          wasModified = true;
+        }
+      });
+
+      if (wasModified) {
+        return { ...proj, treeData, lastModified: new Date().toISOString() };
+      }
+      
+      return proj;
+    });
+
+    setProjects(projectsWithLinksUpdated);
+
     if (activeProjectId === projectId) { setInitialPrompt(newName); }
-    addHistoryEntry('PROJECT_RENAMED', `Project "${oldProject?.name}" renamed to "${newName}".`);
+    addHistoryEntry('PROJECT_RENAMED', `Project "${oldProject.name}" renamed to "${newName}". Incoming links updated.`);
     closeProjectNameModal();
   }, [projects, activeProjectId, addHistoryEntry, closeProjectNameModal, setInitialPrompt]);
 
@@ -361,18 +369,36 @@ export const useProjectManagement = ({
     const projectToDelete = projects.find(p => p.id === projectId);
     if (!projectToDelete) { setError("Project not found for deletion."); return; }
     openConfirmModal({
-      title: `Delete ${projectToDelete.isExample ? 'Example' : ''} Project?`, message: `Delete "${projectToDelete.name}"? This cannot be undone.`,
+      title: `Delete ${projectToDelete.isExample ? 'Example' : ''} Project?`, message: `Delete "${projectToDelete.name}"? This will also remove any links pointing to it from other projects. This cannot be undone.`,
       confirmText: `Delete ${projectToDelete.isExample ? 'Example' : ''} Project`, cancelText: "Cancel", confirmButtonStyle: 'danger',
       onConfirm: () => {
-        const remainingProjects = projects.filter(p => p.id !== projectId);
-        setProjects(remainingProjects);
-        addHistoryEntry('PROJECT_DELETED', `${projectToDelete.isExample ? 'Example p' : 'P'}roject "${projectToDelete.name}" deleted.`);
+        
+        const projectsWithLinksCleaned = projects
+          .filter(p => p.id !== projectId) // Remove the deleted project
+          .map(p => { // Check every other project for links TO the deleted one
+            if (!p.treeData) return p;
+            let treeData = p.treeData;
+            let wasModified = false;
+            const nodesMap = getAllNodesAsMap(treeData);
+            
+            nodesMap.forEach(node => {
+              if (node.linkedProjectId === projectId) {
+                treeData = updateNodeInTree(treeData, node.id, { linkedProjectId: null, linkedProjectName: null });
+                wasModified = true;
+              }
+            });
+            
+            return wasModified ? { ...p, treeData, lastModified: new Date().toISOString() } : p;
+          });
+
+        setProjects(projectsWithLinksCleaned);
+        addHistoryEntry('PROJECT_DELETED', `${projectToDelete.isExample ? 'Example p' : 'P'}roject "${projectToDelete.name}" deleted. Dangling links cleaned.`);
         
         if (activeProjectId === projectId) {
-            const nextUserProject = remainingProjects.find(p => !p.isExample);
+            const nextUserProject = projectsWithLinksCleaned.find(p => !p.isExample);
             if(nextUserProject) handleSetActiveProject(nextUserProject.id);
             else {
-                const nextExampleProject = remainingProjects.find(p => p.isExample);
+                const nextExampleProject = projectsWithLinksCleaned.find(p => p.isExample);
                 if (nextExampleProject) handleSetActiveProject(nextExampleProject.id, true);
                 else resetTreeForNewProjectContext();
             }
@@ -400,7 +426,7 @@ export const useProjectManagement = ({
     const projectToLoad = projects.find(p => p.id === projectId);
     if (projectToLoad && viewStates) {
         handleSetActiveProject(projectId, projectToLoad.isExample);
-         viewStates.setYggdrasilViewMode('treeView'); 
+         viewStates.setYggdrasilViewMode('graph'); 
         if (projectToLoad.treeData && projectToLoad.treeData.id) {
            viewStates.setSelectedGraphNodeId(projectToLoad.treeData.id); 
         }

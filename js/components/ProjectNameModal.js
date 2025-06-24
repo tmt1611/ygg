@@ -78,7 +78,8 @@ const ProjectNameModal = ({
       className: "modal-overlay-basic", 
       role: "dialog",
       "aria-modal": "true",
-      "aria-labelledby": "project-name-modal-title"
+      "aria-labelledby": "project-name-modal-title",
+      onClick: (e) => { if (e.target === e.currentTarget) onCancel(); }
     },
       React.createElement("div", { className: "modal-content-basic" },
         React.createElement("form", { onSubmit: handleConfirm },

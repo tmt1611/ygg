@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import AiToolsTab from './tabs/AiToolsTab.js';
 import AiInsightsTab from './tabs/AiInsightsTab.js';
 import HistoryViewTabContent from './tabs/HistoryViewTab.js';
@@ -11,30 +11,40 @@ const sidebarTabs = [
     { id: 'history', label: 'History', icon: '📜' },
 ];
 
-const KnowledgeBranchSidebar = ({
-  isCollapsed,
-  onToggleSidebar,
-  activeSidebarTab,
-  setActiveSidebarTab,
-  themeMode,
-  modificationPrompt, setModificationPrompt, onModifyAiTree, isAiModifying, canUndoAiMod, onUndoAiModification,
-  initialPromptForStrategy, techTreeDataForStrategy, strategicSuggestions, isFetchingStrategicSuggestions, strategicSuggestionsError, onGenerateStrategicSuggestions,
-  apiKeyIsSet, hasTechTreeData, isAppBusy,
-  selectedNodeForInsights, aiInsightsData, aiInsightsIsLoading, aiInsightsError, onGenerateAiNodeInsights,
-  onUseSuggestedDescription, onUseAlternativeName, onAddSuggestedChildFromInsight,
-  history,
-}) => {
-
-  const canGenerateStrategicSuggestions = apiKeyIsSet && !!initialPromptForStrategy?.trim() && !isAppBusy && !isFetchingStrategicSuggestions;
-
-  const handlePasteStrategicSuggestionsToModPrompt = () => {
-    if (strategicSuggestions && strategicSuggestions.length > 0) {
-      const formattedSuggestions = strategicSuggestions.map(s => `- ${s}`).join('\n');
-      const fullPrompt = `Based on the following strategic ideas:\n${formattedSuggestions}\n\nPlease apply relevant modifications to the current tree structure. For example, consider creating new main branches, adding key technologies under existing nodes, or expanding on underdeveloped areas related to these ideas.`;
-      setModificationPrompt(fullPrompt);
-      setActiveSidebarTab('ai-tools'); 
+const KnowledgeBranchSidebar = (props) => {
+  const {
+    isCollapsed, onToggleSidebar, activeSidebarTab, setActiveSidebarTab,
+    isAppBusy, apiKeyIsSet, hasTechTreeData,
+  } = props;
+  const [collapsedPanels, setCollapsedPanels] = useState(() => {
+    const savedState = localStorage.getItem(APP_STORAGE_KEYS.SIDEBAR_PANEL_STATES);
+    try {
+        if (savedState) {
+            const parsed = JSON.parse(savedState);
+            return new Set(Array.isArray(parsed) ? parsed : []);
+        }
+    } catch (e) {
+        console.error("Failed to parse sidebar panel states from localStorage", e);
     }
-  };
+    return new Set([]); // Keep panels open by default for better discoverability
+  });
+
+  const handleTogglePanel = useCallback((panelId) => {
+    setCollapsedPanels(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(panelId)) {
+        newSet.delete(panelId);
+      } else {
+        newSet.add(panelId);
+      }
+      return newSet;
+    });
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem(APP_STORAGE_KEYS.SIDEBAR_PANEL_STATES, JSON.stringify(Array.from(collapsedPanels)));
+  }, [collapsedPanels]);
+
 
   return (
     React.createElement("aside", { className: `knowledge-branch-sidebar ${isCollapsed ? 'collapsed' : ''}` },

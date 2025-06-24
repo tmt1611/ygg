@@ -7,7 +7,7 @@ import YggdrasilTopBar from './components/YggdrasilTopBar.js';
 import ErrorMessage from './components/ErrorMessage.js';
 import MainContentRouter from './components/MainContentRouter.js'; 
 import AppModals from './components/AppModals.js'; 
-import WhisperingRunesPanel from './components/WhisperingRunesPanel.js';
+
 
 
 // Hooks
@@ -32,23 +32,40 @@ import { findNodeById, countNodesInTree, getTreeDepth, getLockedNodeIds, countNo
 const App = () => {
   // --- STATE ---
   const [techTreeData, setTechTreeData] = useState(null);
-  const [error, setError] = useState(null);
+  const [error, _setError] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isModifying, setIsModifying] = useState(false);
   const [initialPrompt, setInitialPrompt] = useState('');
   const [modificationPrompt, setModificationPrompt] = useState('');
   const [isSummarizing, setIsSummarizing] = useState(false);
+  const [saveFeedback, setSaveFeedback] = useState(false);
+  const [downloadFeedback, setDownloadFeedback] = useState(false);
   
   const [previousTreeStateForUndo, setPreviousTreeStateForUndo] = useState(null);
   const [baseForModalDiff, setBaseForModalDiff] = useState(null); 
 
   const [selectedNodeForInsights, setSelectedNodeForInsights] = useState(null);
-  const [isNodeActionsPanelVisible, setIsNodeActionsPanelVisible] = useState(true); 
 
   const [strategicSuggestions, setStrategicSuggestions] = useState(null);
   const [isFetchingStrategicSuggestions, setIsFetchingStrategicSuggestions] = useState(false);
   const [strategicSuggestionsError, setStrategicSuggestionsError] = useState(null);
 
+
+  const setError = useCallback((err) => {
+    if (err === null) {
+        _setError(null);
+        return;
+    }
+    if (typeof err === 'string') {
+        _setError({ message: err });
+    } else if (err instanceof Error) {
+        _setError({ message: err.message, details: err.stack });
+    } else if (typeof err === 'object' && err !== null && err.message) {
+        _setError({ message: err.message, details: err.details || JSON.stringify(err, null, 2) });
+    } else {
+        _setError({ message: 'An unknown error occurred.', details: JSON.stringify(err, null, 2) });
+    }
+  }, []);
 
   // --- HOOKS ---
   const historyManager = useHistoryManager();
@@ -56,8 +73,8 @@ const App = () => {
 
   const appThemeAndLayout = useAppThemeAndLayout(addHistoryEntry);
   const {
-    themeMode, isSidebarCollapsed, yggdrasilViewMode, activeOverlayPanel,
-    toggleTheme, toggleSidebar, setYggdrasilViewMode, setActiveOverlayPanel
+    themeMode, isSidebarCollapsed, yggdrasilViewMode,
+    toggleTheme, toggleSidebar, setYggdrasilViewMode
   } = appThemeAndLayout;
   
   const [activeSidebarTab, setActiveSidebarTab] = useState('ai-tools');
@@ -71,9 +88,9 @@ const App = () => {
 
   const viewStates = useViewStates({
     techTreeData, setError, modalManager, addHistoryEntry,
-    setYggdrasilViewMode, setActiveOverlayPanel, activeOverlayPanel
+    setYggdrasilViewMode, yggdrasilViewMode
   });
-  const { focusNodeId, selectedGraphNodeId, setSelectedGraphNodeId, handleSwitchToFocusView } = viewStates;
+  const { focusNodeId, selectedGraphNodeId, setSelectedGraphNodeId, handleSwitchToFocusView, graphSearchTerm, setGraphSearchTerm } = viewStates;
 
   const projectManager = useProjectManagement({
     modalManager, historyManager, viewStates,
@@ -85,7 +102,7 @@ const App = () => {
 
 
   const nodeOperations = useNodeOperations({
-    techTreeData, setTechTreeData, modalManager, historyManager, projectManager, viewStates
+    techTreeData, setTechTreeData, modalManager, historyManager, projectManager, viewStates, setError
   });
 
   const apiKeyHook = useApiKey(addHistoryEntry); 
@@ -109,7 +126,7 @@ const App = () => {
 
   const projectLinkingHook = useProjectLinking({
     techTreeData, setTechTreeData, projectManager, modalManager, historyManager, viewStates,
-    yggdrasilViewMode, activeOverlayPanel 
+    yggdrasilViewMode
   });
 
   // --- EFFECTS ---
@@ -123,16 +140,35 @@ const App = () => {
         setPendingAiSuggestion(null);
         setPreviousTreeStateForUndo(null);
         setBaseForModalDiff(null);
-        setModificationPrompt(''); 
+        setModificationPrompt('');
         if (isAiSuggestionModalOpen) closeAiSuggestionModal();
     }
   }, [techTreeData, pendingAiSuggestion, previousTreeStateForUndo, baseForModalDiff, isAiSuggestionModalOpen, closeAiSuggestionModal, setPendingAiSuggestion, setModificationPrompt]);
 
 
   // --- Event Handlers & Callbacks ---
-  const handleDownloadTreeData = useCallback(() => {
+  const handleSaveActiveProjectWithFeedback = useCallback(() => {
+    if (!techTreeData) return;
+    projectManager.handleSaveActiveProject(false);
+    setSaveFeedback(true);
+  }, [projectManager, techTreeData]);
+
+  const handleDownloadTreeDataWithFeedback = useCallback(() => {
+    if (!techTreeData) return;
     projectManager.handleSaveActiveProject(true);
-  }, [projectManager]);
+    setDownloadFeedback(true);
+  }, [projectManager, techTreeData]);
+
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      if ((event.ctrlKey || event.metaKey) && event.key === 's') {
+        event.preventDefault();
+        handleSaveActiveProjectWithFeedback();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [handleSaveActiveProjectWithFeedback]);
 
   const handleExtractData = useCallback(async () => {
     if (!techTreeData) { setError("No data to extract."); return; }
@@ -146,7 +182,7 @@ const App = () => {
         contentToDisplay = await geminiService.summarizeText(projectSummaryContext);
         title = "AI Generated Summary";
         addHistoryEntry('AI_SUMMARY_GEN', 'AI summary generated for the current tree.');
-      } catch (e) { setError(e.message || "Failed to generate summary."); setIsSummarizing(false); return; }
+      } catch (e) { setError(e); setIsSummarizing(false); return; }
       finally { setIsSummarizing(false); }
     } else { // raw
       title = "Raw Project Data (Text)";
@@ -170,11 +206,7 @@ const App = () => {
       setSelectedGraphNodeId(null);
       aiInsightsHook.clearAiInsights(); 
     }
-  }, [techTreeData, setSelectedGraphNodeId, aiInsightsHook]); 
-
-  const toggleNodeActionsPanelVisibility = useCallback(() => {
-    setIsNodeActionsPanelVisible(prev => !prev);
-  }, []);
+  }, [techTreeData, setSelectedGraphNodeId, aiInsightsHook]);
 
 
   const currentTreeStats = useMemo(() => {
@@ -210,6 +242,37 @@ const App = () => {
         onCancel: modalManager.closeConfirmModal,
     });
   }, [modalManager, clearHistory, addHistoryEntry]);
+
+  const handleGenerateInsightsAndSwitchTab = useCallback((node) => {
+    if (isSidebarCollapsed) {
+      toggleSidebar();
+    }
+    setActiveSidebarTab('ai-insights');
+    handleGenerateAiInsights(node);
+  }, [isSidebarCollapsed, toggleSidebar, setActiveSidebarTab, handleGenerateAiInsights]);
+
+  const handleSwitchToAiOpsTab = useCallback((node) => {
+    const focusInput = () => {
+        const inputElement = document.getElementById('techTreeModificationPrompt');
+        if (inputElement) {
+            inputElement.focus();
+            // Move cursor to the end of the pre-filled text
+            inputElement.setSelectionRange(inputElement.value.length, inputElement.value.length);
+        }
+    };
+
+    if (isSidebarCollapsed) {
+        toggleSidebar();
+        // Wait for sidebar to finish expanding before focusing
+        setTimeout(focusInput, 350); 
+    } else {
+        focusInput();
+    }
+    
+    setActiveSidebarTab('ai-tools');
+    // Pre-fill the prompt for a better workflow
+    setModificationPrompt(`Regarding the node "${node.name}" and its children, `);
+  }, [isSidebarCollapsed, toggleSidebar, setActiveSidebarTab, setModificationPrompt]);
 
   const handleGenerateStrategicSuggestions = useCallback(async () => {
     if (!apiKeyHook.status.isSet || !initialPrompt.trim()) {
@@ -256,17 +319,21 @@ const App = () => {
         onToggleTheme: toggleTheme,
         apiKeyIsSet: apiKeyHook.status.isSet,
         activeProjectName: activeProjectNameForDisplay,
-        onSaveActiveProject: () => projectManager.handleSaveActiveProject(false),
-        onDownloadActiveProject: handleDownloadTreeData,
+        onSaveActiveProject: handleSaveActiveProjectWithFeedback,
+        onDownloadActiveProject: handleDownloadTreeDataWithFeedback,
+        saveFeedback: saveFeedback,
+        setSaveFeedback: setSaveFeedback,
+        downloadFeedback: downloadFeedback,
+        setDownloadFeedback: setDownloadFeedback,
         isAppBusy: isLoading || isModifying || isFetchingStrategicSuggestions,
         hasTechTreeData: !!techTreeData,
         yggdrasilViewMode: yggdrasilViewMode,
-        activeOverlayPanel: activeOverlayPanel,
         setYggdrasilViewMode: setYggdrasilViewMode,
-        setActiveOverlayPanel: setActiveOverlayPanel,
-        focusNodeId: focusNodeId
+        focusNodeId: focusNodeId,
+        graphSearchTerm: graphSearchTerm,
+        setGraphSearchTerm: setGraphSearchTerm
       }),
-      React.createElement("div", { className: `yggdrasil-app-body theme-${themeMode} view-mode-${yggdrasilViewMode} ${isSidebarCollapsed ? 'sidebar-collapsed' : ''} ${activeOverlayPanel ? 'overlay-panel-active' : ''}` },
+      React.createElement("div", { className: `yggdrasil-app-body theme-${themeMode} view-mode-${yggdrasilViewMode} ${isSidebarCollapsed ? 'sidebar-collapsed' : ''}` },
         React.createElement(KnowledgeBranchSidebar, {
           isCollapsed: isSidebarCollapsed,
           onToggleSidebar: toggleSidebar,
@@ -299,14 +366,15 @@ const App = () => {
         }),
         
         React.createElement("main", { className: "yggdrasil-core-canvas" },
-          error && React.createElement(ErrorMessage, { message: error }),
+          error && React.createElement(ErrorMessage, { error: error, onClose: () => setError(null) }),
 
           React.createElement(MainContentRouter, {
             appState: {
               techTreeData, isLoading, isModifying,
               isAppBusy: isLoading || isModifying || isFetchingStrategicSuggestions,
               initialPrompt, setInitialPrompt, currentTreeStats,
-              isSummarizing
+              isSummarizing,
+              graphSearchTerm
             },
             appHooks: {
               projectManager, nodeOperations, viewStates,
@@ -315,38 +383,14 @@ const App = () => {
             },
             appCallbacks: {
               handleExtractData, handleNodeSelectedForInsightsOrActions,
-              toggleNodeActionsPanelVisibility,
-              handleDeleteNodeWithConfirmation: nodeOperations.handleDeleteNodeWithConfirmation
+              onOpenViewContextMenu: modalManager.openViewContextMenu,
+              onAddNodeToRoot: nodeOperations.handleAddNodeToRoot,
             },
             viewControls: {
-              yggdrasilViewMode, activeOverlayPanel, setActiveOverlayPanel
+              yggdrasilViewMode, setYggdrasilViewMode
             }
           })
         )
-      ), 
-
-      isNodeActionsPanelVisible && yggdrasilViewMode === 'treeView' && activeOverlayPanel === null && (
-        React.createElement(WhisperingRunesPanel, {
-          targetNodeId: selectedNodeForInsights?.id || null,
-          treeData: techTreeData,
-          onOpenNodeEditModal: modalManager.openNodeEditModal,
-          onToggleLock: nodeOperations.handleToggleNodeLock,
-          onNodeImportanceChange: nodeOperations.handleNodeImportanceChange,
-          onLinkToProject: projectLinkingHook.handleOpenLinkProjectModal,
-          onGoToLinkedProject: projectLinkingHook.handleNavigateToLinkedProject,
-          onUnlinkProject: projectLinkingHook.handleUnlinkProjectFromNode,
-          onDeleteNode: nodeOperations.handleDeleteNodeWithConfirmation,
-          onSetFocusNode: viewStates.handleSwitchToFocusView,
-          onGenerateInsights: handleGenerateAiInsights,
-          isAppBusy: isLoading || isModifying || isFetchingStrategicSuggestions,
-          activeOverlayPanel: activeOverlayPanel,
-          yggdrasilViewMode: yggdrasilViewMode,
-          projects: projectManager.projects,
-          activeProjectId: projectManager.activeProjectId,
-          currentProjectRootId: techTreeData?.id,
-          findLinkSource: projectLinkingHook.findLinkSource,
-          handleNavigateToSourceNode: projectLinkingHook.handleNavigateToSourceNode
-        })
       ),
 
       React.createElement(AppModals, {
@@ -356,16 +400,15 @@ const App = () => {
         treeOperationsAI: treeOperationsAI,
         isModifying: isModifying,
         apiKeyIsSet: apiKeyHook.status.isSet,
-        handleConfirmNodeEdit: nodeOperations.handleConfirmNodeEdit,
+        nodeOperations: nodeOperations,
         projectLinkingHook: projectLinkingHook,
         techTreeData: techTreeData,
-        nodeOperations: nodeOperations,
-        onDeleteNodeWithConfirmation: nodeOperations.handleDeleteNodeWithConfirmation,
         handleSwitchToFocusView: viewStates.handleSwitchToFocusView,
         projects: projectManager.projects,
         activeProjectId: projectManager.activeProjectId,
         yggdrasilViewMode: yggdrasilViewMode,
-        activeOverlayPanel: activeOverlayPanel,
+        onGenerateInsights: handleGenerateInsightsAndSwitchTab,
+        onSwitchToAiOps: handleSwitchToAiOpsTab,
       })
     )
   );

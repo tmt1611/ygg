@@ -52,8 +52,8 @@ const ApiKeySetupPanel = ({ apiKeyHook, controlsDisabled }) => {
       ),
 
       apiKeyStatus.isSet && (selectedMode === 'pasted' || (apiKeyStatus.source === 'environment')) && ( 
-        React.createElement("button", { onClick: clearActiveUserKey, disabled: isApiKeyProcessing || controlsDisabled, className: "secondary", style: {width: '100%', marginTop: '10px'}, title: "Clear the currently active API key and attempt to use environment key if available."},
-          isApiKeyProcessing ? 'Clearing...' : 'Clear Current Key & Reset'
+        React.createElement("button", { onClick: clearActiveUserKey, disabled: isApiKeyProcessing || controlsDisabled, className: "secondary", style: {width: '100%', marginTop: '10px'}, title: "Clear the currently active API key and reset to default (tries environment variable first)."},
+          isApiKeyProcessing ? 'Clearing...' : 'Clear & Reset'
         )
       ),
       apiKeyStatus.message && ( React.createElement("p", { className: `api-key-status-message ${apiKeyStatus.type || 'info'}`}, apiKeyStatus.message) ),

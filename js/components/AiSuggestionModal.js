@@ -1,5 +1,5 @@
 
-import React, { useMemo, useEffect, useRef, useState, useCallback } from 'react';
+import React, { useMemo, useEffect, useRef, useState } from 'react';
 import { compareAndAnnotateTree, countNodesInTree, isValidTechTreeNodeShape, getAllNodesAsMap } from '../utils.js';
 import AiSuggestionPreviewListItem from './AiSuggestionPreviewListItem.js';
 import ModificationPromptInput from './ModificationPromptInput.js';
@@ -17,6 +17,7 @@ const AiSuggestionModal = ({
   const applyButtonRef = useRef(null);
   const [followUpPrompt, setFollowUpPrompt] = useState('');
   const [isRemovedNodesCollapsed, setIsRemovedNodesCollapsed] = useState(true);
+  const [isSummaryVisible, setIsSummaryVisible] = useState(true);
 
   const comparisonResult = useMemo(() => {
     if (!isOpen || !suggestion) return null;
@@ -46,13 +47,74 @@ const AiSuggestionModal = ({
 
   useEffect(() => {
     if (isOpen) {
+      const hasCriticalIssues = comparisonResult?.lockedContentChangedNodes?.length > 0 || comparisonResult?.lockedNodesRemoved?.length > 0;
+      if (hasCriticalIssues) {
+        setIsSummaryVisible(true); // Force open on critical issues
+      } else {
+        // For non-critical cases, respect the stored preference
+        const saved = sessionStorage.getItem('aiSuggestionModalSummaryVisible');
+        setIsSummaryVisible(saved !== null ? JSON.parse(saved) : true);
+      }
+    }
+  }, [isOpen, comparisonResult]);
+
+  useEffect(() => {
+    // Persist user's choice to storage
+    if (isOpen) {
+      sessionStorage.setItem('aiSuggestionModalSummaryVisible', JSON.stringify(isSummaryVisible));
+    }
+  }, [isSummaryVisible, isOpen]);
+
+  const removedNodesTree = useMemo(() => {
+    if (!comparisonResult || !comparisonResult.removedNodes.length) return [];
+    
+    // Add the status to every node first and prepare for tree building
+    const removedNodesWithStatus = comparisonResult.removedNodes.map(n => ({
+        ...n,
+        _changeStatus: 'removed',
+        children: []
+    }));
+
+    const removedNodesById = new Map(removedNodesWithStatus.map(n => [n.id, n]));
+    const rootRemovedNodes = [];
+
+    removedNodesById.forEach(node => {
+        // A node is a root of a removed subtree if its parent is NOT in the removed list.
+        if (!node._parentId || !removedNodesById.has(node._parentId)) {
+            rootRemovedNodes.push(node);
+        } else {
+            // It's a child of another removed node.
+            const parent = removedNodesById.get(node._parentId);
+            if (parent) {
+                // Ensure children are not duplicated if map iteration order is weird
+                if (!parent.children.some(c => c.id === node.id)) {
+                    parent.children.push(node);
+                }
+            }
+        }
+    });
+
+    return rootRemovedNodes;
+  }, [comparisonResult]);
+
+
+  useEffect(() => {
+    if (isOpen) {
       applyButtonRef.current?.focus();
       setFollowUpPrompt('');
+      
+      // Expand the removed nodes list if there are critical removals.
+      if (comparisonResult?.lockedNodesRemoved?.length > 0) {
+        setIsRemovedNodesCollapsed(false);
+      } else {
+        setIsRemovedNodesCollapsed(true);
+      }
+
       const handleEscape = (event) => { if (event.key === 'Escape') onCancel(); };
       document.addEventListener('keydown', handleEscape);
       return () => document.removeEventListener('keydown', handleEscape);
     }
-  }, [isOpen, onCancel]);
+  }, [isOpen, onCancel, comparisonResult]);
 
   if (!isOpen || !comparisonResult) return null;
 
@@ -63,6 +125,11 @@ const AiSuggestionModal = ({
   const netChange = suggestedTotalNodes - currentTotalNodes;
 
   const netChangeStyle = { color: netChange > 0 ? 'var(--success-color)' : netChange < 0 ? 'var(--error-color)' : 'var(--text-secondary)'};
+
+  const hasCriticalIssues = comparisonResult?.lockedContentChangedNodes.length > 0 || comparisonResult?.lockedNodesRemoved.length > 0;
+  const applyButtonClass = hasCriticalIssues ? 'danger' : 'success';
+  const applyButtonText = isRefining ? "Refining..." : (hasCriticalIssues ? "Apply (with Cautions)" : "Apply Changes to Project");
+  const applyButtonTitle = hasCriticalIssues ? "Warning: This suggestion modifies or removes locked nodes. Proceed with caution." : "Apply these changes to your project.";
 
   const renderSummaryItem = (label, count, color, icon) => {
     if (count <= 0) return null;
@@ -84,16 +151,26 @@ const AiSuggestionModal = ({
   };
 
   return (
-    React.createElement("div", { className: "modal-overlay-basic", role: "dialog", "aria-modal": "true", "aria-labelledby": "ai-suggestion-modal-title", "aria-describedby": "ai-suggestion-summary" },
+    React.createElement("div", { className: "modal-overlay-basic", role: "dialog", "aria-modal": "true", "aria-labelledby": "ai-suggestion-modal-title", "aria-describedby": "ai-suggestion-summary", onClick: (e) => { if (e.target === e.currentTarget) onCancel(); } },
       React.createElement("div", { className: "modal-content-basic large"},
         React.createElement("h2", { id: "ai-suggestion-modal-title", className: "modal-title"},
           "AI Modification Preview"
         ),
 
-        React.createElement("div", { className: "ai-suggestion-modal-layout" },
+        React.createElement("div", { className: `ai-suggestion-modal-layout ${!isSummaryVisible ? 'summary-hidden' : ''}` },
           React.createElement("div", { className: "ai-suggestion-modal-preview-panel" },
             React.createElement("h3", { className: "ai-suggestion-modal-header" },
-              "Preview of Changes"
+              React.createElement("span", null, "Preview of Changes"),
+              React.createElement("button", {
+                className: `base-icon-button toggle-summary-btn ${!isSummaryVisible ? 'collapsed' : ''}`,
+                onClick: () => setIsSummaryVisible(!isSummaryVisible),
+                title: isSummaryVisible ? "Hide Summary Panel" : "Show Summary Panel",
+                "aria-label": isSummaryVisible ? "Hide Summary Panel" : "Show Summary Panel",
+                "aria-controls": "ai-suggestion-summary-panel",
+                "aria-expanded": isSummaryVisible
+              },
+                "›"
+              )
             ),
             React.createElement("div", { className: "ai-suggestion-modal-content-area", "aria-live": "polite", "aria-atomic": "true" },
               annotatedTree && !annotatedTree._isErrorNode ? (
@@ -101,31 +178,35 @@ const AiSuggestionModal = ({
                     React.createElement(AiSuggestionPreviewListItem, { node: annotatedTree, level: 0, isVisualDiff: true })
                 )
               ) : (
-                React.createElement("div", { className: "error-message-inline", style: { margin: '1em' } },
-                  React.createElement("div", { className: "error-icon" }, "⚠️"),
+                React.createElement("div", { className: "error-message-inline", style: { margin: '1em', padding: '15px' } },
+                  React.createElement("div", { className: "error-icon", style: { fontSize: '1.5em' } }, "⚠️"),
                   React.createElement("div", null,
-                    React.createElement("strong", null, "AI Suggestion Error:"), " ",
-                    annotatedTree?.description || "Could not display preview due to a malformed AI suggestion. The AI may have returned data that is not a valid tree structure (e.g. missing required fields). You can try refining your prompt."
+                    React.createElement("strong", { style: { display: 'block', marginBottom: '5px' } }, "AI Suggestion Error"),
+                    annotatedTree?.description || "Could not display preview due to a malformed AI suggestion. The AI may have returned data that is not a valid tree structure (e.g. missing required fields). You can try refining your prompt or reject this suggestion."
                   )
                 )
               ),
-              removedNodes.length > 0 && (
+              removedNodes.length > 0 && !annotatedTree?._isErrorNode && (
                 React.createElement("div", { className: "ai-suggestion-modal-removed-nodes-section" },
-                    React.createElement("h4", { 
+                    React.createElement("h4", {
                       className: `ai-suggestion-modal-removed-nodes-title ${isRemovedNodesCollapsed ? 'collapsed' : ''}`,
                       onClick: () => setIsRemovedNodesCollapsed(!isRemovedNodesCollapsed),
                       "aria-expanded": !isRemovedNodesCollapsed,
                       role: "button",
                       tabIndex: 0,
                       onKeyDown: (e) => { if (e.key === 'Enter' || e.key === ' ') setIsRemovedNodesCollapsed(!isRemovedNodesCollapsed); }
-                    }, "Nodes To Be Removed (", removedNodes.length, "):"),
+                    },
+                     "Nodes To Be Removed",
+                     " (", removedNodes.length, "):"
+                    ),
                     React.createElement("ul", { className: `ai-suggestion-modal-removed-nodes-list ${isRemovedNodesCollapsed ? 'collapsed' : ''}` },
-                        !isRemovedNodesCollapsed && removedNodes.map(node => (
-                            React.createElement("li", { key: `removed-${node.id}`},
-                              node.isLocked && React.createElement("span", { title: "Locked Node", style: { marginRight: '4px', color: 'var(--error-color)', fontWeight: 'bold' } }, "🔒"),
-                              React.createElement("strong", null, node.name), " ", node.description && `- "${node.description.substring(0, 40)}${node.description.length > 40 ? '...' : ''}"`,
-                              React.createElement("span", { className: "node-id" }, " (ID: ", node.id.substring(0,8), "...)")
-                            )
+                        !isRemovedNodesCollapsed && removedNodesTree.map(node => (
+                            React.createElement(AiSuggestionPreviewListItem, {
+                                key: `removed-root-${node.id}`,
+                                node: node,
+                                level: 0,
+                                isVisualDiff: true
+                            })
                         ))
                     )
                 )
@@ -133,7 +214,7 @@ const AiSuggestionModal = ({
             )
           ),
 
-          React.createElement("div", { className: "ai-suggestion-modal-summary-panel" },
+          isSummaryVisible && React.createElement("div", { id: "ai-suggestion-summary-panel", className: "ai-suggestion-modal-summary-panel" },
             React.createElement("div", { id: "ai-suggestion-summary", className: "ai-suggestion-modal-summary-section" },
               React.createElement("h4", { className: "ai-suggestion-modal-summary-title" }, "Summary of Changes"),
               !annotatedTree?._isErrorNode ? (
@@ -183,10 +264,15 @@ const AiSuggestionModal = ({
 
         React.createElement("div", { className: "ai-suggestion-modal-footer-actions" },
           React.createElement("button", { type: "button", onClick: onCancel, className: "secondary" }, "Reject Suggestion"),
-          React.createElement("button", { ref: applyButtonRef, type: "button", onClick: onConfirm, className: "success",
-            disabled: !!annotatedTree?._isErrorNode || isRefining
-            },
-            isRefining ? "Refining..." : "Apply Changes to Project"
+          React.createElement("button", {
+            ref: applyButtonRef,
+            type: "button",
+            onClick: onConfirm,
+            className: applyButtonClass,
+            disabled: !!annotatedTree?._isErrorNode || isRefining,
+            title: applyButtonTitle
+          },
+            applyButtonText
           )
         )
       )

@@ -41,24 +41,36 @@ export const useApiKey = (addHistoryEntry) => {
     initializeApiKey();
   }, [_updateStatus]);
 
-  const changeMode = useCallback((newMode) => {
-    if (selectedMode === newMode) return;
-    setSelectedMode(newMode);
-    // If user selects 'environment', re-check it, but don't clear a valid pasted key.
-    if (newMode === 'environment' && status.source !== 'environment') {
-        const checkEnv = async () => {
-            setIsProcessing(true);
-            const result = await geminiService.attemptLoadEnvKey();
-            if (result.success) {
-                _updateStatus(result, 'mode_change_env_success');
-            }
-            // If it fails, we just keep the current status (which might be a valid pasted key)
-            // and let the user see the 'environment' radio selected.
-            setIsProcessing(false);
-        };
-        checkEnv();
+  const clearActiveUserKey = useCallback(async () => {
+    setIsProcessing(true);
+    geminiService.clearActiveApiKey();
+    if (addHistoryEntry) addHistoryEntry('API_KEY_STATUS_CHANGED', 'API Key cleared by user.');
+    const envResult = await geminiService.attemptLoadEnvKey();
+    if (envResult.success) {
+      _updateStatus(envResult, 'clear_and_reinit_env');
+      setSelectedMode('environment');
+    } else {
+      _updateStatus({ success: false, message: "API Key cleared. Provide a new key or set environment variable.", source: null }, 'clear_and_reinit_pasted');
+      setSelectedMode('pasted');
     }
-  }, [selectedMode, status.source, _updateStatus]);
+    setInputKey('');
+    setIsProcessing(false);
+  }, [_updateStatus, addHistoryEntry]);
+
+  const changeMode = useCallback((newMode) => {
+    if (selectedMode === newMode || isProcessing) return;
+
+    // When switching to 'environment', we always want to attempt to load from there,
+    // clearing any pasted key. `clearActiveUserKey` handles this logic.
+    if (newMode === 'environment') {
+        clearActiveUserKey();
+    } else {
+        // When switching to 'pasted', we just change the UI to show the input.
+        // The currently active key (if any, from env) remains active until the user
+        // submits a new pasted key.
+        setSelectedMode('pasted');
+    }
+  }, [selectedMode, isProcessing, clearActiveUserKey]);
 
   const submitPastedKey = useCallback(async (keyToSubmit) => {
     setIsProcessing(true);
@@ -76,22 +88,6 @@ export const useApiKey = (addHistoryEntry) => {
     }
     setIsProcessing(false);
   }, [_updateStatus, inputKey]);
-
-  const clearActiveUserKey = useCallback(async () => {
-    setIsProcessing(true);
-    geminiService.clearActiveApiKey();
-    if (addHistoryEntry) addHistoryEntry('API_KEY_STATUS_CHANGED', 'API Key cleared by user.');
-    const envResult = await geminiService.attemptLoadEnvKey();
-    if (envResult.success) {
-      _updateStatus(envResult, 'clear_and_reinit_env');
-      setSelectedMode('environment');
-    } else {
-      _updateStatus({ success: false, message: "API Key cleared. Provide a new key or set environment variable.", source: null }, 'clear_and_reinit_pasted');
-      setSelectedMode('pasted');
-    }
-    setInputKey('');
-    setIsProcessing(false);
-  }, [_updateStatus, addHistoryEntry]);
 
   const hookReturn = {
     selectedMode,

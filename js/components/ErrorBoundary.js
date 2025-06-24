@@ -1,5 +1,5 @@
-
 import React, { Component } from 'react';
+import { APP_STORAGE_KEYS } from '../constants.js';
 
 class ErrorBoundary extends Component {
   constructor(props) {
@@ -28,9 +28,12 @@ class ErrorBoundary extends Component {
     const errorText = `
 --- YGGDRASIL ERROR REPORT ---
 Date: ${new Date().toISOString()}
+User Agent: ${navigator.userAgent}
 Error: ${error.toString()}
+
 Stack Trace:
 ${error.stack}
+
 Component Stack:
 ${errorInfo?.componentStack || 'Not available'}
 ------------------------------
@@ -44,6 +47,23 @@ ${errorInfo?.componentStack || 'Not available'}
         this.setState({ copyFeedback: 'Failed to copy.' });
         console.error('Failed to copy error report:', err);
       });
+  };
+
+  handleHardReset = () => {
+    if (window.confirm("☢️ DANGER: HARD RESET ☢️\n\nAre you absolutely sure you want to proceed?\n\nThis will DELETE ALL your saved projects and settings from this browser's local storage.\n\nThis action is irreversible and should only be used if the application is completely broken and will not load.\n\nPress 'OK' to permanently delete all data and reload. Press 'Cancel' to go back.")) {
+      try {
+        console.warn("Yggdrasil: Performing hard reset. Clearing all application data from localStorage.");
+        Object.values(APP_STORAGE_KEYS).forEach(key => {
+          localStorage.removeItem(key);
+        });
+        sessionStorage.clear();
+        console.log("Yggdrasil: localStorage and sessionStorage cleared.");
+      } catch (e) {
+        console.error("Yggdrasil: Failed to clear application storage.", e);
+      } finally {
+        window.location.reload();
+      }
+    }
   };
 
   render() {
@@ -60,14 +80,20 @@ ${errorInfo?.componentStack || 'Not available'}
               "Yggdrasil encountered an unexpected error and cannot continue."
             ),
             React.createElement("p", { className: "error-boundary-subtext" },
-              "Reloading the application may fix the issue. Your work should be auto-saved up to the last successful action."
+              "An unexpected error has occurred. Reloading may fix it. If the error persists, it might be due to corrupted local data. You can try a hard reset, but this will clear all your saved projects and settings."
             ),
             React.createElement("div", { className: "error-boundary-actions" },
               React.createElement("button", {
                 onClick: () => window.location.reload(),
-                className: "danger"
+                className: "primary"
               },
                 "Reload Application"
+              ),
+              React.createElement("button", {
+                onClick: this.handleHardReset,
+                className: "danger"
+              },
+                "Clear Data & Reload"
               ),
               this.state.error && React.createElement("button", {
                 onClick: this.handleCopyError,

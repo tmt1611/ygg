@@ -9,8 +9,7 @@ export const useProjectLinking = ({
   modalManager,
   historyManager,
   viewStates,
-  yggdrasilViewMode, 
-  activeOverlayPanel, 
+  yggdrasilViewMode,
 }) => {
   const { projects, activeProjectId: currentActiveProjectIdFromPM, handleSaveActiveProject, updateProjectData } = projectManager;
   const { openLinkProjectModal, closeLinkProjectModal } = modalManager;
@@ -106,44 +105,36 @@ export const useProjectLinking = ({
     const targetProject = projectManager.projects.find(p => p.id === targetProjectId);
     if (targetProject) {
       projectManager.handleSetActiveProject(targetProjectId, targetProject.isExample);
-      const currentGlobalViewMode = yggdrasilViewMode;
-      const currentTreeOverlayPanel = activeOverlayPanel;
       
       const nodeToFocusId = targetNodeIdForFocus || targetProject.treeData?.id;
 
       if (nodeToFocusId) {
-        if (currentGlobalViewMode === 'treeView') {
-          viewStates.setYggdrasilViewMode('treeView');
-          if (currentTreeOverlayPanel === null) { 
-            viewStates.setActiveOverlayPanel(null);
-            viewStates.setSelectedGraphNodeId(nodeToFocusId);
-          } else if (currentTreeOverlayPanel === 'list') { 
-            viewStates.setActiveOverlayPanel('list');
-          } else if (currentTreeOverlayPanel === 'focus') { 
-            viewStates.setActiveOverlayPanel('focus');
-            viewStates.setFocusNodeId(nodeToFocusId);
-            viewStates.setSelectedNodeInFocusPanelId(nodeToFocusId);
-          } else { 
-            viewStates.setActiveOverlayPanel(null);
-            viewStates.setSelectedGraphNodeId(nodeToFocusId);
-          }
-        } else { 
-          viewStates.setYggdrasilViewMode('treeView');
-          viewStates.setActiveOverlayPanel(null);
+        // If current view is a tree-related view, stay in it. Otherwise, default to graph.
+        const targetView = ['graph', 'list', 'focus'].includes(yggdrasilViewMode) ? yggdrasilViewMode : 'graph';
+        
+        viewStates.setYggdrasilViewMode(targetView);
+
+        if (targetView === 'graph') {
           viewStates.setSelectedGraphNodeId(nodeToFocusId);
+        } else if (targetView === 'focus') {
+          viewStates.setFocusNodeId(nodeToFocusId);
+          viewStates.setSelectedNodeInFocusPanelId(nodeToFocusId);
         }
+        // For 'list', no specific node focusing action is needed here to change view.
+        // The list will show the new project's data.
+
       } else {
         const errorMsg = `Target project "${targetProject.name}" has no valid root node or specified node for focus.`;
         console.error(errorMsg);
         if (typeof projectManager.setError === 'function') { projectManager.setError(errorMsg); }
-        viewStates.setYggdrasilViewMode('workspace'); viewStates.setActiveOverlayPanel(null);
+        viewStates.setYggdrasilViewMode('workspace');
       }
     } else {
       const errorMsg = `Failed to navigate: Project with ID ${targetProjectId} not found.`;
       console.error(errorMsg);
       if (typeof projectManager.setError === 'function') { projectManager.setError(errorMsg); }
     }
-  }, [projectManager, viewStates, yggdrasilViewMode, activeOverlayPanel]);
+  }, [projectManager, viewStates, yggdrasilViewMode]);
 
 
   const handleNavigateToLinkedProject = useCallback((targetProjectId) => {

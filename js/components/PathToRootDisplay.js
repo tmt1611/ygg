@@ -1,4 +1,3 @@
-
 import React, { useRef, useEffect, useState, useLayoutEffect } from 'react';
 import { getAncestorIds, findNodeById } from '../utils.js'; 
 
@@ -60,17 +59,18 @@ const PathToRootDisplay = ({
     return React.createElement("div", { className: "path-to-root-display" }, React.createElement("span", null, title));
   }
 
-  const pathTitle = pathContext === 'stellar' ? "Route:" : "Path:";
+  const pathTitle = pathContext === 'focus-view' ? "Route:" : "Path:";
   
   const containerClasses = [
     "path-to-root-display",
+    `context-${pathContext}`,
     scrollState.atStart ? "no-scroll-start" : "",
     scrollState.atEnd ? "no-scroll-end" : "",
   ].filter(Boolean).join(" ");
 
   return (
     React.createElement("div", { ref: containerRef, className: containerClasses, "aria-label": "Navigation path to current object" },
-      React.createElement("strong", { style: { marginRight: '5px', color: 'var(--text-secondary)', flexShrink: 0 }}, pathTitle),
+      React.createElement("strong", { style: { marginRight: '8px', color: 'var(--text-secondary)', flexShrink: 0, textTransform: 'uppercase', fontSize: '0.9em' }}, pathTitle),
       pathNodes.map((node, index) => (
         React.createElement(React.Fragment, { key: node.id },
           React.createElement("span", {

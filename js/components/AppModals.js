@@ -10,6 +10,7 @@ import NodeEditModal from './NodeEditModal.js';
 import TechExtractionModal from './TechExtractionModal.js';
 import LinkProjectModal from './LinkProjectModal.js';
 import ContextMenu from './ContextMenu.js';
+import ViewContextMenu from './ViewContextMenu.js';
 
 // Hooks and Types (Hook return types removed)
 
@@ -20,16 +21,15 @@ const AppModals = ({
   treeOperationsAI,
   isModifying,
   apiKeyIsSet,
-  handleConfirmNodeEdit,
+  nodeOperations,
   projectLinkingHook,
   techTreeData,
-  nodeOperations,
-  onDeleteNodeWithConfirmation,
   handleSwitchToFocusView,
   projects,
   activeProjectId,
   yggdrasilViewMode,
-  activeOverlayPanel,
+  onGenerateInsights,
+  onSwitchToAiOps,
 }) => {
   const {
     isProjectNameModalOpen, projectModalConfig, closeProjectNameModal,
@@ -39,6 +39,7 @@ const AppModals = ({
     isTechExtractionModalOpen, extractedTechsContent, extractionModalTitle, closeTechExtractionModal,
     isLinkProjectModalOpen, linkProjectModalConfig, closeLinkProjectModal,
     isContextMenuOpen, contextMenuPosition, contextMenuNodeId, contextMenuLinkSourceInfo, closeContextMenu,
+    isViewContextMenuOpen, viewContextMenuConfig, closeViewContextMenu,
   } = modalManager;
 
   return (
@@ -85,7 +86,7 @@ const AppModals = ({
           placeholder: nodeEditModalConfig.placeholder,
           initialValue: nodeEditModalConfig.initialValue,
           initialDescription: nodeEditModalConfig.initialDescription,
-          onConfirm: handleConfirmNodeEdit,
+          onConfirm: nodeOperations.handleConfirmNodeEdit,
           onCancel: closeNodeEditModal
         })
       ),
@@ -113,14 +114,22 @@ const AppModals = ({
           isOpen: isContextMenuOpen,
           position: contextMenuPosition,
           node: findNodeById(techTreeData, contextMenuNodeId),
+          techTreeData: techTreeData,
           linkSourceInfoFromView: contextMenuLinkSourceInfo,
           onClose: closeContextMenu,
-          onToggleLock: (nodeId) => nodeOperations.handleToggleNodeLock(nodeId),
-          onChangeImportance: (nodeId, importance) => nodeOperations.handleNodeImportanceChange(nodeId, importance),
+          onToggleLock: nodeOperations.handleToggleNodeLock,
+          onChangeImportance: nodeOperations.handleNodeImportanceChange,
           onEditName: (n) => modalManager.openNodeEditModal({mode:'editName', targetNodeId: n.id, currentNodeName: n.name, currentNodeDescription: n.description, title: `Edit: ${n.name}`, label: 'Node Name', placeholder: 'Enter new name', initialValue: n.name, initialDescription: n.description}),
           onAddChild: (n) => modalManager.openNodeEditModal({mode:'addChild', targetNodeId: n.id, parentNodeName: n.name, title: `Add Child to: ${n.name}`, label: 'New Child Name', placeholder: 'Enter name'}),
           onSetFocus: (nodeId) => handleSwitchToFocusView(nodeId),
-          onDeleteNode: (nodeId) => onDeleteNodeWithConfirmation(nodeId),
+          onDeleteNode: nodeOperations.handleDeleteNodeWithConfirmation,
+          onLockAllChildren: nodeOperations.handleLockAllChildren,
+          onUnlockAllChildren: nodeOperations.handleUnlockAllChildren,
+          onChangeImportanceOfAllChildren: nodeOperations.handleChangeImportanceOfAllChildren,
+          onDeleteAllChildren: nodeOperations.handleDeleteAllChildren,
+          onPasteNode: nodeOperations.handlePasteNode,
+          onGenerateInsights: onGenerateInsights,
+          onSwitchToAiOps: onSwitchToAiOps,
           onLinkToProject: (nodeId) => projectLinkingHook.handleOpenLinkProjectModal(nodeId),
           onGoToLinkedProject: (projectId) => projectLinkingHook.handleNavigateToLinkedProject(projectId),
           onUnlinkProject: (nodeId) => projectLinkingHook.handleUnlinkProjectFromNode(nodeId),
@@ -129,6 +138,13 @@ const AppModals = ({
           currentProjectRootId: techTreeData?.id,
           findLinkSource: projectLinkingHook.findLinkSource,
           handleNavigateToSourceNode: projectLinkingHook.handleNavigateToSourceNode
+        })
+      ),
+      isViewContextMenuOpen && viewContextMenuConfig && (
+        React.createElement(ViewContextMenu, {
+          isOpen: isViewContextMenuOpen,
+          config: viewContextMenuConfig,
+          onClose: closeViewContextMenu,
         })
       )
     )
