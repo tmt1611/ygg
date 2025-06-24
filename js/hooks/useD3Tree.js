@@ -4,7 +4,7 @@ import { select, zoom, hierarchy, tree, zoomIdentity } from 'd3';
 const defaultTreeConfig = {
   nodeRadius: 16, // Base for 'common', but will be overridden in GraphViewComponent
   // New config for radial layout
-  radialRadiusFactor: 120, 
+  radialRadiusFactor: 150, // Increased to provide more space between levels
   margin: { top: 20, right: 20, bottom: 20, left: 20 },
 };
 
@@ -39,10 +39,12 @@ export const useD3Tree = (
         .separation((a, b) => (a.parent === b.parent ? 2 : 2.5));
     } else if (layout === 'vertical') {
       // For a top-down tree, nodeSize defines spacing between nodes.
-      return tree().nodeSize([80, 180]); // [width between nodes, height between levels]
+      // Increased width to prevent label overlap.
+      return tree().nodeSize([120, 200]); // [width between nodes, height between levels]
     } else { // 'horizontal' layout
       // For a left-to-right tree, nodeSize is [height between nodes, width between levels]
-      return tree().nodeSize([80, 220]);
+      // Increased height between nodes and width between levels.
+      return tree().nodeSize([100, 250]);
     }
   }, [rootHierarchy, radialRadiusFactor, layout]);
 
@@ -93,13 +95,13 @@ export const useD3Tree = (
       if (clientWidth > 0 && clientHeight > 0) {
         let initialTransform;
         if (layout === 'radial') {
-            initialTransform = zoomIdentity.translate(clientWidth / 2, clientHeight / 2).scale(0.8);
+            initialTransform = zoomIdentity.translate(clientWidth / 2, clientHeight / 2).scale(0.65);
         } else if (layout === 'vertical') {
             // Center the tree horizontally, and position it near the top.
-            initialTransform = zoomIdentity.translate(clientWidth / 2, margin.top * 4).scale(0.7);
+            initialTransform = zoomIdentity.translate(clientWidth / 2, margin.top * 4).scale(0.65);
         } else { // horizontal
             // Center the tree vertically, and position it near the left.
-            initialTransform = zoomIdentity.translate(margin.left * 6, clientHeight / 2).scale(0.7);
+            initialTransform = zoomIdentity.translate(margin.left * 6, clientHeight / 2).scale(0.6);
         }
         svgSelectionRef.current.transition().duration(750).call(zoomBehaviorRef.current.transform, initialTransform);
       }
