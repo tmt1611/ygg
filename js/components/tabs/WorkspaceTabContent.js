@@ -63,6 +63,33 @@ const WorkspaceTabContent = ({
     React.createElement("div", { className: "workspace-tab-container" },
       React.createElement("div", { className: "workspace-content-area", style: { display: 'flex', flexDirection: 'column', gap: '15px' }}, 
           React.createElement(CollapsiblePanel, {
+            panelId: "project-management",
+            title: "Project Management",
+            icon: "🗂️",
+            isCollapsed: collapsedPanels.has('project-management'),
+            onToggle: handleTogglePanel,
+            headerActions: React.createElement(ContextualHelpTooltip, { helpText: "Manage your saved projects and examples. Create new projects, import from files, or load existing work." })
+          },
+            React.createElement(ProjectManagementPanel, {
+              projects, activeProjectId, onLoadProject, onRenameProject, onDeleteProject, 
+              onAddNewProjectFromFile, onCreateEmptyProject, onSaveAsExample, onLoadAndGoToGraph,
+              isAppBusy, currentTreeExists
+            })
+          ),
+          React.createElement(CollapsiblePanel, {
+            panelId: "ai-generation",
+            title: "AI Structure Generation",
+            icon: "🧠",
+            isCollapsed: collapsedPanels.has('ai-generation'),
+            onToggle: handleTogglePanel,
+            headerActions: React.createElement(ContextualHelpTooltip, { helpText: "Use AI to generate a new tree structure from a topic or regenerate the structure for the current project's context." })
+          },
+            React.createElement(AiGenerationPanel, {
+              initialPrompt, setInitialPrompt, handleGenerateTree, isLoadingInitial,
+              generateUIDisabled, activeUserProjectExists, apiKeyIsSet: apiKeyHook.status.isSet
+            })
+          ),
+          React.createElement(CollapsiblePanel, {
             panelId: "project-overview",
             title: "Project Overview",
             icon: "📊",
@@ -99,33 +126,6 @@ const WorkspaceTabContent = ({
                 "Load or create a project to view its statistics."
               )
             )
-          ),
-          React.createElement(CollapsiblePanel, {
-            panelId: "project-management",
-            title: "Project Management",
-            icon: "🗂️",
-            isCollapsed: collapsedPanels.has('project-management'),
-            onToggle: handleTogglePanel,
-            headerActions: React.createElement(ContextualHelpTooltip, { helpText: "Manage your saved projects and examples. Create new projects, import from files, or load existing work." })
-          },
-            React.createElement(ProjectManagementPanel, {
-              projects, activeProjectId, onLoadProject, onRenameProject, onDeleteProject, 
-              onAddNewProjectFromFile, onCreateEmptyProject, onSaveAsExample, onLoadAndGoToGraph,
-              isAppBusy, currentTreeExists
-            })
-          ),
-          React.createElement(CollapsiblePanel, {
-            panelId: "ai-generation",
-            title: "AI Structure Generation",
-            icon: "🧠",
-            isCollapsed: collapsedPanels.has('ai-generation'),
-            onToggle: handleTogglePanel,
-            headerActions: React.createElement(ContextualHelpTooltip, { helpText: "Use AI to generate a new tree structure from a topic or regenerate the structure for the current project's context." })
-          },
-            React.createElement(AiGenerationPanel, {
-              initialPrompt, setInitialPrompt, handleGenerateTree, isLoadingInitial,
-              generateUIDisabled, activeUserProjectExists, apiKeyIsSet: apiKeyHook.status.isSet
-            })
           ),
           React.createElement(CollapsiblePanel, {
             panelId: "data-operations",
