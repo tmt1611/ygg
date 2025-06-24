@@ -987,7 +987,8 @@ html[data-theme='synthwave'] .graph-view-svg-container {
 
 .graph-view-wrapper { display: flex; height: 100%; width:100%; overflow: hidden; background: var(--app-bg); }
 .graph-view-node circle {
-  transition: transform 0.2s ease-out, filter 0.2s ease-out;
+  stroke: var(--graph-node-stroke);
+  transition: transform 0.2s ease-out, filter 0.2s ease-out, stroke 0.2s ease-out;
   filter: drop-shadow(0px 2px 3px rgba(0,0,0,0.15));
 }
 .graph-view-node:not(.proxy):hover circle {

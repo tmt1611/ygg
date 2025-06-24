@@ -649,10 +649,8 @@ const GraphViewComponent = ({
     nodeSelection
       .classed("selected", d => !d.isProxy && d.data.id === activeNodeId);
 
-    nodeSelection.select("circle")
-      .attr("stroke", d => {
-          return d.isProxy ? null : (d.data.id === activeNodeId ? 'var(--graph-node-selected-stroke)' : 'var(--graph-node-stroke)');
-      });
+    // The 'stroke' is now handled by CSS classes (.selected, .status-new, etc.), so we don't set it here.
+    // This prevents JS from overriding the desired CSS-based stroke color.
     
     // Center view on the active node when it changes
     if (activeNodeId) {

@@ -229,6 +229,7 @@ export const getAncestorIds = (nodeId, tree) => {
   if (!tree || !nodeId) return [];
   const nodeMap = getAllNodesAsMap(tree);
   const ancestors = [];
+  const visitedIds = new Set(); // To detect cycles
   
   const startNode = nodeMap.get(nodeId);
   if (!startNode) {
@@ -239,6 +240,12 @@ export const getAncestorIds = (nodeId, tree) => {
   let currentId = startNode._parentId;
 
   while (currentId) {
+    if (visitedIds.has(currentId)) {
+      console.error("Cycle detected in parent hierarchy starting from node ID:", nodeId, "at cycle ID:", currentId);
+      break; // Break the loop to prevent infinite recursion
+    }
+    visitedIds.add(currentId);
+
     const node = nodeMap.get(currentId);
     if (node) {
       ancestors.unshift(node.id); // Add parent ID to the start of the array
