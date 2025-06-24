@@ -2,6 +2,8 @@
 import React, { useMemo, useCallback, useState, useEffect } from 'react';
 import { NODE_IMPORTANCE_OPTIONS } from '../constants.js';
 
+const importanceCycle = ['common', 'major', 'minor'];
+
 const TechTreeListItemComponent = ({
     node, showDescriptionsGlobal,
     onToggleLock, onAddQuickChild,
@@ -36,9 +38,14 @@ const TechTreeListItemComponent = ({
   const hasChildren = !!(node.children && node.children.length > 0);
   const isSelected = node.id === selectedNodeId;
 
-  const handleImportanceChange = useCallback((e) => {
-    onNodeImportanceChange(node.id, e.target.value);
-  }, [node.id, onNodeImportanceChange]);
+  const handleCycleImportance = useCallback(() => {
+    if (node.isLocked) return;
+    const currentImportance = node.importance || 'common';
+    const currentIndex = importanceCycle.indexOf(currentImportance);
+    const nextIndex = (currentIndex + 1) % importanceCycle.length;
+    const newImportance = importanceCycle[nextIndex];
+    onNodeImportanceChange(node.id, newImportance);
+  }, [node.id, node.importance, node.isLocked, onNodeImportanceChange]);
 
   const handleEditNameAndDescriptionClick = useCallback(() => {
     onOpenNodeEditModal({
@@ -187,16 +194,13 @@ const TechTreeListItemComponent = ({
             "aria-label": `Add child to ${node.name}. Hold Shift to add without a prompt.`, 
             title: `Add Child Node (Shift+Click for quick add)`
           }, '➕'),
-          React.createElement("span", {
-            className: `list-view-importance-rune importance-${node.importance || 'common'}`,
-            title: `Importance: ${currentImportanceObject.label}. Right-click node for actions.`,
-            style: {
-              fontSize: '1.2em',
-              cursor: 'default',
-              padding: '0 6px',
-              userSelect: 'none',
-              lineHeight: 1,
-            }
+          React.createElement("button", {
+            onClick: handleCycleImportance,
+            disabled: isAppBusy || node.isLocked,
+            className: `list-item-action-icon base-icon-button list-view-importance-rune importance-${currentImportanceObject.value}`,
+            style: { fontSize: '1.2em' },
+            "aria-label": `Change importance for ${node.name}. Current: ${currentImportanceObject.label}`,
+            title: `Change Importance (Current: ${currentImportanceObject.label})`
           }, currentImportanceObject.rune)
         )
       ),

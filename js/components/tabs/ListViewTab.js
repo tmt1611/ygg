@@ -6,6 +6,7 @@ import { filterTree, areAllNodesExpanded } from '../../utils.js';
 const ListViewTabContent = ({
   techTreeData,
   showListDescriptionsGlobal,
+  onToggleShowListDescriptions,
   onToggleNodeLock,
   onAddQuickChild,
   onNodeImportanceChange,
@@ -52,6 +53,15 @@ const ListViewTabContent = ({
             marginBottom: '8px',
             gap: '12px'
         }},
+          React.createElement("button", { 
+            onClick: () => onToggleShowListDescriptions(prev => !prev),
+            disabled: isAppBusy || !techTreeData,
+            className: "secondary",
+            style: {padding: '6px 10px', fontSize: '0.9em'},
+            title: showListDescriptionsGlobal ? "Hide all node descriptions" : "Show all node descriptions"
+          },
+            showListDescriptionsGlobal ? 'Hide Descriptions' : 'Show Descriptions'
+          ),
           React.createElement("button", { 
             onClick: handleToggleAllNodesList, 
             disabled: isAppBusy || !techTreeData,

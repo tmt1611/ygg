@@ -366,10 +366,20 @@ const GraphViewComponent = ({
       .attr("transform", d => {
         if (d.isProxy) return null;
         const radius = getNodeRadius(d);
-        const spacing = 6; // A little less spacing is needed
+        const spacing = 5; // A little less spacing is needed
         const labelWidth = 120;
-        // Always position below the node, centered horizontally
-        return `translate(-${labelWidth / 2}, ${radius + spacing})`;
+        
+        // For non-root nodes, offset diagonally to avoid covering the link to children.
+        // For the root node, position it directly below.
+        if (d.depth === 0) {
+            return `translate(-${labelWidth / 2}, ${radius + spacing})`;
+        }
+        
+        // Diagonal offset to bottom-right
+        const xOffset = radius * 0.707; // approx radius / sqrt(2)
+        const yOffset = radius * 0.707;
+        
+        return `translate(${xOffset}, ${yOffset})`;
       });
 
     // Set the text content for the div inside the foreignObject

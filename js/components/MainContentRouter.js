@@ -91,6 +91,7 @@ const MainContentRouter = ({
             techTreeData: techTreeData,
             searchTerm: graphSearchTerm,
             showListDescriptionsGlobal: viewStates.showListDescriptionsGlobal,
+            onToggleShowListDescriptions: viewStates.setShowListDescriptionsGlobal,
             onToggleNodeLock: nodeOperations.handleToggleNodeLock,
             onAddQuickChild: nodeOperations.handleQuickAddChild,
             onNodeImportanceChange: nodeOperations.handleNodeImportanceChange,
