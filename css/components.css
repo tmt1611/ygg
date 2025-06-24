@@ -342,6 +342,7 @@ html[data-theme='sol'] .panel-header-icon { color: var(--primary-accent-dark); f
   border-radius: 50%;
   background-color: var(--button-default-bg);
   color: var(--text-tertiary);
+  font-family: var(--font-family-sans);
   font-size: 0.8em;
   font-weight: bold;
   cursor: help;
@@ -350,6 +351,7 @@ html[data-theme='sol'] .panel-header-icon { color: var(--primary-accent-dark); f
   transition: color 0.2s, transform 0.2s, background-color 0.2s, box-shadow 0.2s;
   border: 1px solid var(--border-color);
   outline: none;
+  padding: 0; /* Reset button padding */
 }
 .contextual-help-icon:hover, .contextual-help-icon:focus-visible {
   color: var(--primary-accent-dark);
@@ -1704,9 +1706,15 @@ html[data-theme='sol'] .panel-variant-sidebar .panel-toggle-button {
   left: 0;
   background: linear-gradient(to right, var(--button-default-bg), transparent);
 }
+.path-to-root-display.context-focus-view::before {
+  background: linear-gradient(to right, var(--app-bg), transparent);
+}
 .path-to-root-display::after {
   right: 0;
   background: linear-gradient(to left, var(--button-default-bg), transparent);
+}
+.path-to-root-display.context-focus-view::after {
+  background: linear-gradient(to left, var(--app-bg), transparent);
 }
 .path-to-root-display.no-scroll-start::before,
 .path-to-root-display.no-scroll-end::after {
