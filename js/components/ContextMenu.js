@@ -30,6 +30,27 @@ const ContextMenu = ({
     }
   }, [isOpen]);
 
+  const handleCopyNodeForPasting = useCallback(() => {
+    if (!node) return;
+    const cleanNodeForExport = (nodeToClean) => {
+        const { _parentId, _changeStatus, _modificationDetails, _oldParentId, ...rest } = nodeToClean;
+        const cleanedNode = { ...rest };
+        if (cleanedNode.children) cleanedNode.children = cleanedNode.children.map(cleanNodeForExport);
+        return cleanedNode;
+    };
+    const textToCopy = JSON.stringify(cleanNodeForExport(node), null, 2);
+    navigator.clipboard.writeText(textToCopy).then(() => {
+        setCopyFeedback('node');
+        setCopyError('');
+        setTimeout(() => setCopyFeedback(''), 1500);
+    }).catch(err => {
+        console.error(`Failed to copy node:`, err);
+        setCopyError('node');
+        setCopyFeedback('');
+        setTimeout(() => setCopyError(''), 1500);
+    });
+  }, [node]);
+
   const handleCopy = useCallback((type) => {
     if (!node) return;
     let textToCopy = '';
@@ -77,6 +98,7 @@ const ContextMenu = ({
         if (copyError === type) return "Error!";
         if (copyFeedback === type) return "Copied!";
         switch (type) {
+            case 'node': return "Copy Node";
             case 'name': return "Name";
             case 'id': return "ID";
             case 'path': return "Path";
@@ -86,11 +108,12 @@ const ContextMenu = ({
     };
 
     return [
+      // Primary Actions
       { id: 'edit', label: "Edit Details...", icon: '✏️', action: () => onEditName(node) },
       { id: 'add-child', label: "Add Child Node...", icon: '➕', action: () => onAddChild(node) },
-      onPasteNode && { id: 'paste-node', label: "Paste as Child", icon: '📎', action: () => onPasteNode(node.id), isDisabled: !canPaste, title: canPaste ? "Paste a copied node as a child of this node" : "Clipboard API not available or permission denied" },
       !!onSetFocus && { id: 'set-focus', label: "Set as Focus Node", icon: '🎯', action: () => onSetFocus(node.id) },
       { type: 'separator' },
+      // State Management
       { id: 'toggle-lock', label: node.isLocked ? 'Unlock Node' : 'Lock Node', icon: node.isLocked ? '🔓' : '🔒', action: () => onToggleLock(node.id) },
       {
         id: 'change-importance', label: "Change Importance", icon: '⚖️', hasSubmenu: true,
@@ -101,6 +124,11 @@ const ContextMenu = ({
         }))
       },
       { type: 'separator' },
+      // Structural Actions
+      { id: 'copy-node', label: getCopyLabel('node'), icon: '📋', action: handleCopyNodeForPasting, title: "Copy this node and its children to the clipboard for pasting elsewhere in the tree." },
+      onPasteNode && { id: 'paste-node', label: "Paste Node as Child", icon: '📎', action: () => onPasteNode(node.id), isDisabled: !canPaste, title: canPaste ? "Paste a node (copied as JSON) as a child of this node" : "Clipboard API not available or permission denied" },
+      { type: 'separator' },
+      // Submenus
       {
         id: 'ai-actions', label: "AI Actions...", icon: '🤖', hasSubmenu: true,
         submenu: [
@@ -123,18 +151,7 @@ const ContextMenu = ({
           ] : [])
         ].filter(Boolean)
       },
-      { type: 'separator' },
-      {
-        id: 'copy-actions', label: "Copy...", icon: '📋', hasSubmenu: true,
-        submenu: [
-          { id: 'copy-name', label: getCopyLabel('name'), icon: '📋', action: () => handleCopy('name') },
-          { id: 'copy-id', label: getCopyLabel('id'), icon: '🆔', action: () => handleCopy('id') },
-          { id: 'copy-path', label: getCopyLabel('path'), icon: '🛤️', action: () => handleCopy('path') },
-          { id: 'copy-json', label: getCopyLabel('json'), icon: '📦', action: () => handleCopy('json') },
-        ]
-      },
       ...(hasChildren ? [
-        { type: 'separator' },
         {
           id: 'bulk-actions', label: "Actions on Children...", icon: '⚡️', hasSubmenu: true,
           submenu: [
@@ -152,12 +169,22 @@ const ContextMenu = ({
           ]
         }
       ] : []),
+      {
+        id: 'copy-actions', label: "Copy Data...", icon: '📤', hasSubmenu: true,
+        submenu: [
+          { id: 'copy-name', label: getCopyLabel('name'), icon: '🔡', action: () => handleCopy('name') },
+          { id: 'copy-id', label: getCopyLabel('id'), icon: '🆔', action: () => handleCopy('id') },
+          { id: 'copy-path', label: getCopyLabel('path'), icon: '🛤️', action: () => handleCopy('path') },
+          { id: 'copy-json', label: getCopyLabel('json'), icon: '📦', action: () => handleCopy('json'), title: "Copy node and children as JSON for external use." },
+        ]
+      },
+      { type: 'separator' },
+      // Destructive Action
       ...(onDeleteNode ? [
-        { type: 'separator' },
         { id: 'delete-node', label: "Delete Node...", icon: '🗑️', isDestructive: true, action: () => onDeleteNode(node.id) }
       ] : [])
     ].filter(Boolean);
-  }, [node, onEditName, onAddChild, onToggleLock, onSetFocus, onLinkToProject, onGoToLinkedProject, onUnlinkProject, onDeleteNode, onGenerateInsights, onSwitchToAiOps, handleCopy, incomingLink, handleNavigateToSourceNode, onChangeImportance, onLockAllChildren, onUnlockAllChildren, onChangeImportanceOfAllChildren, onDeleteAllChildren, copyFeedback, copyError, onPasteNode, canPaste]);
+  }, [node, onEditName, onAddChild, onToggleLock, onSetFocus, onLinkToProject, onGoToLinkedProject, onUnlinkProject, onDeleteNode, onGenerateInsights, onSwitchToAiOps, handleCopy, incomingLink, handleNavigateToSourceNode, onChangeImportance, onLockAllChildren, onUnlockAllChildren, onChangeImportanceOfAllChildren, onDeleteAllChildren, copyFeedback, copyError, onPasteNode, canPaste, handleCopyNodeForPasting]);
 
   const focusableItems = useMemo(() => menuItems.filter(item => item.type !== 'separator' && !item.isDisabled), [menuItems]);
   const openSubmenuItems = useMemo(() => {
