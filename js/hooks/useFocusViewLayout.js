@@ -14,7 +14,8 @@ export const useFocusViewLayout = (
   layoutRef,
   focusNodeData,
   parentNodeData,
-  childrenNodeData
+  childrenNodeData,
+  siblingsNodeData
 ) => {
   const [layoutMetrics, setLayoutMetrics] = useState({ positions: new Map(), width: 0, height: 0 });
   const [viewportWidth, setViewportWidth] = useState(0);
@@ -25,6 +26,12 @@ export const useFocusViewLayout = (
       ...NODE_SIZES_PX[child.importance || 'common'],
       id: child.id,
     })), [childrenNodeData]);
+
+  const siblingsDims = useMemo(() =>
+    siblingsNodeData.map(sibling => ({
+      ...NODE_SIZES_PX[sibling.importance || 'common'],
+      id: sibling.id,
+    })), [siblingsNodeData]);
 
   useEffect(() => {
     const element = layoutRef.current;
@@ -66,16 +73,44 @@ export const useFocusViewLayout = (
       positions.set(parentNodeData.id, { x: centerX, y: parentY + parentSize.height / 2, ...parentSize });
     }
 
-    const focusY = parentNodeData 
+    const focusLevelY = parentNodeData 
       ? parentY + parentSize.height + VERTICAL_SPACING
       : VERTICAL_SPACING;
-    positions.set(focusNodeData.id, { x: centerX, y: focusY + focusSize.height / 2, ...focusSize });
     
-    let totalHeight = focusY + focusSize.height + VERTICAL_SPACING;
+    // Place focus node first
+    positions.set(focusNodeData.id, { x: centerX, y: focusLevelY + focusSize.height / 2, ...focusSize });
 
-    // New children layout logic
+    // Place siblings
+    const leftSiblings = siblingsDims.filter((_, i) => i % 2 === 0);
+    const rightSiblings = siblingsDims.filter((_, i) => i % 2 !== 0);
+
+    let currentX_left = centerX - focusSize.width / 2 - HORIZONTAL_CHILD_GAP;
+    leftSiblings.reverse().forEach(siblingDim => {
+      positions.set(siblingDim.id, {
+        x: currentX_left - siblingDim.width / 2,
+        y: focusLevelY + siblingDim.height / 2,
+        ...siblingDim
+      });
+      currentX_left -= (siblingDim.width + HORIZONTAL_CHILD_GAP);
+    });
+
+    let currentX_right = centerX + focusSize.width / 2 + HORIZONTAL_CHILD_GAP;
+    rightSiblings.forEach(siblingDim => {
+      positions.set(siblingDim.id, {
+        x: currentX_right + siblingDim.width / 2,
+        y: focusLevelY + siblingDim.height / 2,
+        ...siblingDim
+      });
+      currentX_right += (siblingDim.width + HORIZONTAL_CHILD_GAP);
+    });
+    
+    const maxFocusLevelHeight = Math.max(focusSize.height, ...siblingsDims.map(d => d.height), 0);
+
+    let totalHeight = focusLevelY + maxFocusLevelHeight + VERTICAL_SPACING;
+
+    // Children layout logic
     if (childrenDims.length > 0) {
-      let currentY = focusY + focusSize.height + VERTICAL_SPACING;
+      let currentY = focusLevelY + maxFocusLevelHeight + VERTICAL_SPACING;
       const availableWidth = Math.max(300, viewportWidth * 0.95);
       
       const rows = [];
@@ -123,7 +158,7 @@ export const useFocusViewLayout = (
       height: totalHeight,
     });
 
-  }, [focusNodeData, parentNodeData, childrenDims, viewportWidth]);
+  }, [focusNodeData, parentNodeData, childrenDims, siblingsDims, viewportWidth]);
   
   return layoutMetrics;
 };

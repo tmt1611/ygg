@@ -153,6 +153,9 @@ export const useTreeOperationsAI = ({
       addHistoryEntry('AI_MOD_CONFIRMED', 'AI modifications applied to project.', { nodeCount: countNodesInTree(suggestionToApply), projectId: activeProjectId });
       setModificationPrompt(''); 
       handleSaveActiveProject(false);
+      if (viewStates && viewStates.setSelectedGraphNodeId) {
+        viewStates.setSelectedGraphNodeId(null);
+      }
     }
     setPendingAiSuggestion(null); 
     setBaseForModalDiff(null);    
@@ -162,7 +165,8 @@ export const useTreeOperationsAI = ({
     pendingAiSuggestion, projectManager, techTreeData,
     closeAiSuggestionModal, addHistoryEntry, 
     setTechTreeData, setModificationPrompt, setError,
-    setPendingAiSuggestion, setBaseForModalDiff, setPreviousTreeStateForUndo
+    setPendingAiSuggestion, setBaseForModalDiff, setPreviousTreeStateForUndo,
+    viewStates
   ]);
 
   const handleRejectAiSuggestion = useCallback(() => {
