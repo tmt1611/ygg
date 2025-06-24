@@ -1222,6 +1222,80 @@ html[data-theme='light'] .ai-insights-list-item-name, html[data-theme='sol'] .ai
   border: 1px solid var(--primary-accent);
 }
 
+/* History Tab */
+.history-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px;
+  border-bottom: 1px solid rgba(var(--primary-accent-rgb), 0.2);
+  flex-shrink: 0;
+}
+.history-controls input[type="search"] {
+  flex-grow: 1;
+  min-width: 100px;
+  padding: 4px 8px;
+  font-size: 0.85em;
+}
+.history-controls .segmented-control {
+  flex-shrink: 0;
+}
+.history-controls .base-icon-button {
+  padding: 4px;
+  font-size: 1.2em;
+}
+
+.history-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 8px;
+  border-bottom: 1px solid rgba(var(--primary-accent-rgb), 0.1);
+  font-size: 0.85em;
+  transition: background-color 0.1s;
+}
+.history-item:hover {
+  background-color: rgba(var(--primary-accent-rgb), 0.05);
+}
+.history-item:last-child {
+  border-bottom: none;
+}
+.history-item-icon {
+  font-size: 1.2em;
+  width: 1.2em;
+  text-align: center;
+  flex-shrink: 0;
+}
+.history-item-summary {
+  flex-grow: 1;
+  color: var(--text-on-dark-bg);
+}
+html[data-theme='light'] .history-item-summary,
+html[data-theme='sol'] .history-item-summary,
+html[data-theme='ocean'] .history-item-summary {
+  color: var(--text-secondary);
+}
+.history-item-summary .history-entity {
+  font-weight: 600;
+  color: var(--primary-accent-light);
+}
+html[data-theme='light'] .history-item-summary .history-entity,
+html[data-theme='sol'] .history-item-summary .history-entity,
+html[data-theme='ocean'] .history-item-summary .history-entity {
+  color: var(--primary-accent-dark);
+}
+.history-item-summary .history-keyword {
+  font-weight: 500;
+  color: var(--text-tertiary);
+  text-transform: capitalize;
+}
+.history-item-time {
+  font-size: 0.9em;
+  color: var(--text-tertiary);
+  flex-shrink: 0;
+}
+
+
 .placeholder-center-content { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; text-align: center; color: var(--text-secondary); padding: 15px; } /* Reduced padding */
 .placeholder-center-content .placeholder-icon { font-size: 3.5em; margin-bottom: 15px; color: var(--primary-accent); opacity: 0.7; } /* Reduced size/margin */
 .placeholder-center-content h2 { font-family: var(--font-family-serif-display); font-size: 1.6em; color: var(--text-primary); margin-bottom: 8px;} /* Reduced size/margin */
