@@ -228,6 +228,8 @@ const GraphViewComponent = ({
   useEffect(() => {
     if (!g || !nodes || !links) return;
 
+    const effectiveLayout = isFocusMode ? 'vertical' : layout;
+
     const allNodes = [...nodes, ...projectLinksAndProxyNodes.proxyNodes];
     const allLinks = [...links, ...projectLinksAndProxyNodes.projectLinks];
 
@@ -258,8 +260,8 @@ const GraphViewComponent = ({
       .attr("d", d => {
         // Outgoing project links are simple curves to the proxy node.
         if (d.isProjectLink && d.target.isProxy) {
-            if (layout === 'radial') return linkRadial().angle(n => n.x).radius(n => n.y)(d);
-            if (layout === 'vertical') return linkVertical().x(n => n.x).y(n => n.y)(d);
+            if (effectiveLayout === 'radial') return linkRadial().angle(n => n.x).radius(n => n.y)(d);
+            if (effectiveLayout === 'vertical') return linkVertical().x(n => n.x).y(n => n.y)(d);
             return linkHorizontal().x(n => n.y).y(n => n.x)(d);
         }
 
@@ -270,7 +272,7 @@ const GraphViewComponent = ({
 
         let sx_c, sy_c, tx_c, ty_c;
 
-        if (layout === 'radial') {
+        if (effectiveLayout === 'radial') {
             const angle_s = d.source.x - Math.PI / 2;
             sx_c = d.source.y * Math.cos(angle_s);
             sy_c = d.source.y * Math.sin(angle_s);
@@ -278,7 +280,7 @@ const GraphViewComponent = ({
             const angle_t = d.target.x - Math.PI / 2;
             tx_c = d.target.y * Math.cos(angle_t);
             ty_c = d.target.y * Math.sin(angle_t);
-        } else if (layout === 'vertical') {
+        } else if (effectiveLayout === 'vertical') {
             sx_c = d.source.x; sy_c = d.source.y;
             tx_c = d.target.x; ty_c = d.target.y;
         } else { // horizontal
@@ -361,13 +363,13 @@ const GraphViewComponent = ({
         return classes.join(' ');
       })
       .attr("transform", d => {
-        if (layout === 'radial') {
+        if (effectiveLayout === 'radial') {
             // Use cartesian coordinates for radial layout to keep text horizontal
             const angle = d.x - Math.PI / 2; // Adjust angle to start from top
             const x = d.y * Math.cos(angle);
             const y = d.y * Math.sin(angle);
             return `translate(${x}, ${y})`;
-        } else if (layout === 'vertical') {
+        } else if (effectiveLayout === 'vertical') {
             return `translate(${d.x}, ${d.y})`;
         } else { // horizontal
             return `translate(${d.y}, ${d.x})`;
@@ -427,7 +429,7 @@ const GraphViewComponent = ({
       .attr("transform", null) // No rotation needed for any layout
       .text(d => (d.data.isLocked && !d.isProxy ? "🔒" : ""));
 
-  }, [g, nodes, links, handleNodeClick, handleNodeDoubleClick, handleNodeContextMenu, projectLinksAndProxyNodes, layout]);
+  }, [g, nodes, links, handleNodeClick, handleNodeDoubleClick, handleNodeContextMenu, projectLinksAndProxyNodes, layout, isFocusMode]);
 
   // Effect for dynamic styling (selection, search highlight)
   useEffect(() => {
@@ -482,7 +484,7 @@ const GraphViewComponent = ({
         centerOnNode(activeNodeId);
     }
 
-  }, [g, activeNodeId, nodes, layout, centerOnNode, searchTerm]); // Using 'nodes' and 'layout' to re-run on data change.
+  }, [g, activeNodeId, nodes, layout, centerOnNode, searchTerm, isFocusMode]); // Using 'nodes' and 'layout' to re-run on data change.
 
 
   if (!treeData) {

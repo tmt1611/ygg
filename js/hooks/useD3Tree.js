@@ -77,13 +77,14 @@ export const useD3Tree = (
     const { clientWidth, clientHeight } = svgRef.current.parentElement;
     const currentTransform = select(svgRef.current).property('__zoom');
     const scale = currentTransform ? currentTransform.k : 1;
+    const effectiveLayout = isFocusMode ? 'vertical' : layout;
 
     let x, y;
-    if (layout === 'radial') {
+    if (effectiveLayout === 'radial') {
         const angle = nodeToCenter.x - Math.PI / 2;
         x = nodeToCenter.y * Math.cos(angle);
         y = nodeToCenter.y * Math.sin(angle);
-    } else if (layout === 'vertical') {
+    } else if (effectiveLayout === 'vertical') {
         x = nodeToCenter.x;
         y = nodeToCenter.y;
     } else { // horizontal
@@ -97,7 +98,7 @@ export const useD3Tree = (
       .translate(-x, -y);
 
     svgSelectionRef.current.transition().duration(750).call(zoomBehaviorRef.current.transform, transform);
-  }, [nodesAndLinks, layout]);
+  }, [nodesAndLinks, layout, isFocusMode]);
 
   const resetZoom = useCallback(() => {
     if (svgSelectionRef.current && zoomBehaviorRef.current && svgRef.current && svgRef.current.parentElement) {
