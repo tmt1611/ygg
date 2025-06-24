@@ -127,7 +127,7 @@ const AiQuickEditModal = ({ isOpen, node, onConfirm, onCancel, onGenerate, isApp
                     React.createElement("div", { className: "ai-quick-edit-preview-section" },
                         React.createElement("h3", { className: "ai-quick-edit-preview-title" }, "Preview of Changes"),
                         isGenerating && React.createElement(LoadingSpinner, { message: "Generating..." }),
-                        error && React.createElement(ErrorMessage, { error: { message: error }, onClose: () => setError(null) }),
+                        error && React.createElement(ErrorMessage, { error: { message: error }, onClose: () => setError(null), mode: "inline" }),
                         suggestion && !isGenerating && (
                             React.createElement("div", { className: "ai-quick-edit-diff-container" },
                                 React.createElement(DiffDisplay, { label: "Name", original: node.name, modified: suggestion.name }),

@@ -2041,53 +2041,97 @@ html[data-theme='ocean'] .panel-variant-sidebar .panel-toggle-button {
   overflow-y: auto;
 }
 
+.error-toast {
+  background-color: var(--error-bg);
+  color: var(--error-color);
+  border: 1px solid var(--error-color);
+  border-radius: var(--border-radius-lg);
+  padding: 12px 18px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 0.95em;
+  font-weight: 500;
+  box-shadow: var(--box-shadow-lg);
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 2000;
+  animation: toastInRight 0.4s ease-out;
+  max-width: 450px;
+}
+
+@keyframes toastInRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.error-toast .error-icon {
+  font-size: 1.4em;
+  line-height: 1;
+  flex-shrink: 0;
+}
+.error-toast .error-message-close-btn {
+  font-size: 1.6em;
+  padding: 0;
+  width: 28px;
+  height: 28px;
+  line-height: 1;
+  flex-shrink: 0;
+  margin-left: auto;
+  color: var(--error-color);
+}
+.error-toast .error-message-copy-btn {
+  font-size: 1.3em;
+  padding: 0;
+  width: 28px;
+  height: 28px;
+  line-height: 1;
+  flex-shrink: 0;
+  margin-left: 8px;
+  color: var(--error-color);
+}
+.error-toast .error-message-copy-btn:hover,
+.error-toast .error-message-close-btn:hover {
+  background-color: rgba(var(--error-color-rgb, 220, 53, 69), 0.15);
+}
+
 .error-message-inline {
   background-color: var(--error-bg);
   color: var(--error-color);
   border: 1px solid var(--error-color);
   border-radius: var(--border-radius);
-  padding: 10px 15px;
-  margin: 10px;
+  padding: 8px 12px;
+  margin: 5px 0;
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   font-size: 0.9em;
-  font-weight: 500;
-  box-shadow: var(--box-shadow-md);
-  position: absolute;
-  top: 0;
-  left: 10px;
-  right: 10px;
-  z-index: 50;
-  animation: errorAppear 0.3s ease-out;
-  max-width: calc(100% - 20px);
 }
 .error-message-inline .error-icon {
-  font-size: 1.3em;
+  font-size: 1.2em;
   line-height: 1;
   flex-shrink: 0;
 }
 .error-message-inline .error-message-close-btn {
-  font-size: 1.5em;
+  font-size: 1.4em;
   padding: 0;
-  width: 24px;
-  height: 24px;
+  width: 22px;
+  height: 22px;
   line-height: 1;
   flex-shrink: 0;
   margin-left: auto;
   color: var(--error-color);
 }
 .error-message-inline .error-message-copy-btn {
-  font-size: 1.2em;
-  padding: 0;
-  width: 24px;
-  height: 24px;
-  line-height: 1;
-  flex-shrink: 0;
-  margin-left: 8px;
-  color: var(--error-color);
+  display: none; /* No copy button for inline errors */
 }
-.error-message-inline .error-message-copy-btn:hover,
 .error-message-inline .error-message-close-btn:hover {
   background-color: rgba(var(--error-color-rgb, 220, 53, 69), 0.15);
 }
