@@ -225,6 +225,11 @@ const GraphViewComponent = ({
         (update) => update,
         (exit) => exit.remove()
       )
+      .attr("marker-end", d => {
+        if (d.isProjectLink) return 'url(#arrowhead-project)';
+        if (d.target.isProxy) return null;
+        return `url(#arrowhead)`;
+      })
       .attr("d", d => {
         if (layout === 'radial') return linkRadial().angle(n => n.x).radius(n => n.y)(d);
         if (layout === 'vertical') return linkVertical().x(n => n.x).y(n => n.y)(d);

@@ -932,6 +932,13 @@ html[data-theme='nebula'] .graph-view-node.highlighted text.node-label {
 .graph-view-link { stroke: var(--graph-link-stroke-ecosystem); stroke-linecap: round; }
 .graph-view-project-link { stroke: var(--primary-accent); stroke-linecap: round; }
 
+.graph-arrowhead path {
+  fill: var(--graph-link-stroke-ecosystem);
+}
+.graph-arrowhead-project path {
+  fill: var(--primary-accent);
+}
+
 .graph-view-node .node-rune-icon { font-size: 0.7em; dominant-baseline: middle; text-anchor: middle; fill: var(--text-primary); pointer-events: none; }
 .graph-view-node .node-icon { font-size: 0.6em; pointer-events: none; }
 

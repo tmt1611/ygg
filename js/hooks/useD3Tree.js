@@ -115,6 +115,26 @@ export const useD3Tree = (
       const svg = select(svgRef.current);
       svgSelectionRef.current = svg;
       svg.select("g").remove(); 
+      svg.select("defs").remove();
+
+      const defs = svg.append('defs');
+
+      const createMarker = (id, className) => {
+        defs.append('marker')
+            .attr('id', id)
+            .attr('class', className)
+            .attr('viewBox', '-10 -5 10 10')
+            .attr('refX', 0)
+            .attr('refY', 0)
+            .attr('orient', 'auto')
+            .attr('markerWidth', 6)
+            .attr('markerHeight', 6)
+            .append('svg:path')
+            .attr('d', 'M0,-5L-10,0L0,5');
+      };
+
+      createMarker('arrowhead', 'graph-arrowhead');
+      createMarker('arrowhead-project', 'graph-arrowhead-project');
       
       // The 'g' element will be centered, and nodes will be positioned relative to it.
       const gElement = svg.append("g");
