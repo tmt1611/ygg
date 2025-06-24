@@ -59,17 +59,16 @@ const FocusViewComponent = ({
   }, [allNodePositions, focusNodeId, parentNodeData, childrenNodeData]);
 
   const handleNodeClick = useCallback((nodeId, isFocusTarget = false) => {
-    if (isAppBusy) return;
     onSelectNodeInPanel(nodeId);
     if (!isFocusTarget && nodeId !== focusNodeId) onChangeFocusNode(nodeId);
-  }, [isAppBusy, onSelectNodeInPanel, onChangeFocusNode, focusNodeId]);
+  }, [onSelectNodeInPanel, onChangeFocusNode, focusNodeId]);
 
   const handleNodeContextMenu = useCallback((event, nodeId) => {
-    event.preventDefault(); if (isAppBusy) return;
+    event.preventDefault();
     let linkSourceInfoForContext = null;
     if (treeData && nodeId === treeData.id && activeProjectId) linkSourceInfoForContext = findLinkSource(activeProjectId, projects);
     onOpenContextMenu(nodeId, { x: event.clientX, y: event.clientY }, linkSourceInfoForContext);
-  },[isAppBusy, onOpenContextMenu, treeData, activeProjectId, projects, findLinkSource]);
+  },[onOpenContextMenu, treeData, activeProjectId, projects, findLinkSource]);
 
   const pathDisplayProps = useMemo(() => ({
     treeData,

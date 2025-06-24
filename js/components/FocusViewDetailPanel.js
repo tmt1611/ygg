@@ -35,11 +35,6 @@ const FocusViewDetailPanel = ({
     );
   }
 
-  const handleDetailPanelNodeAction = (action) => {
-    if (isAppBusy) return;
-    action();
-  };
-  
   const handleEditDetails = () => {
     onOpenNodeEditModal({
         mode: 'editName',
@@ -77,7 +72,7 @@ const FocusViewDetailPanel = ({
             key: opt.value,
             type: "button",
             className: (node.importance || 'common') === opt.value ? 'active' : '',
-            onClick: () => handleDetailPanelNodeAction(() => onNodeImportanceChange(node.id, opt.value)),
+            onClick: () => onNodeImportanceChange(node.id, opt.value),
             disabled: isAppBusy || node.isLocked,
             title: `Set importance to ${opt.label}`
           }, opt.rune, " ", opt.label))
@@ -92,22 +87,22 @@ const FocusViewDetailPanel = ({
 
       React.createElement("div", { className: "panel-sub-header" }, "Core Actions"),
       React.createElement("div", { className: "panel-button-group" },
-        React.createElement("button", { onClick: () => handleDetailPanelNodeAction(handleEditDetails), disabled: isAppBusy || node.isLocked, title: "Edit name and description" }, React.createElement("span", { className: "button-icon" }, "✏️"), "Edit Details"),
-        React.createElement("button", { onClick: () => handleDetailPanelNodeAction(() => onToggleLock(node.id)), disabled: isAppBusy, title: node.isLocked ? "Unlock this celestial object" : "Lock this celestial object to prevent changes" }, React.createElement("span", { className: "button-icon" }, node.isLocked ? '🔓' : '🔒'), node.isLocked ? 'Unlock System' : 'Lock System'),
-        React.createElement("button", { onClick: () => handleDetailPanelNodeAction(() => onOpenNodeEditModal({ mode: 'addChild', targetNodeId: node.id, parentNodeName: node.name, title: `Add Subsystem to: ${node.name}`, label: 'New Subsystem Name', placeholder: 'Enter name', initialValue: '', initialDescription: '' })), disabled: isAppBusy, title: "Add a new child object" }, React.createElement("span", { className: "button-icon" }, "➕"), "Add Subsystem")
+        React.createElement("button", { onClick: handleEditDetails, disabled: isAppBusy || node.isLocked, title: "Edit name and description" }, React.createElement("span", { className: "button-icon" }, "✏️"), "Edit Details"),
+        React.createElement("button", { onClick: () => onToggleLock(node.id), disabled: isAppBusy, title: node.isLocked ? "Unlock this celestial object" : "Lock this celestial object to prevent changes" }, React.createElement("span", { className: "button-icon" }, node.isLocked ? '🔓' : '🔒'), node.isLocked ? 'Unlock System' : 'Lock System'),
+        React.createElement("button", { onClick: () => onOpenNodeEditModal({ mode: 'addChild', targetNodeId: node.id, parentNodeName: node.name, title: `Add Subsystem to: ${node.name}`, label: 'New Subsystem Name', placeholder: 'Enter name', initialValue: '', initialDescription: '' }), disabled: isAppBusy, title: "Add a new child object" }, React.createElement("span", { className: "button-icon" }, "➕"), "Add Subsystem")
       ),
       
       React.createElement("div", { className: "panel-sub-header" }, "Hyperspace Links"),
       React.createElement("div", { className: "panel-button-group" },
-        node.linkedProjectId && onNavigateToLinkedProject && (React.createElement("button", { onClick: () => handleDetailPanelNodeAction(() => onNavigateToLinkedProject(node.linkedProjectId)), disabled: isAppBusy, title: `Jump to linked project: ${node.linkedProjectName}` }, React.createElement("span", { className: "button-icon" }, "↪️"), "Jump to Linked System")),
-        node.linkedProjectId && onUnlinkProjectFromNode && (React.createElement("button", { onClick: () => handleDetailPanelNodeAction(() => onUnlinkProjectFromNode(node.id)), disabled: isAppBusy, className: "secondary", title: "Remove the outgoing link to another project" }, React.createElement("span", { className: "button-icon" }, "🚫"), "Sever Outgoing Link")),
-        isProjectRoot && incomingLinkInfo && (React.createElement("button", { onClick: () => handleDetailPanelNodeAction(() => handleNavigateToSourceNode(incomingLinkInfo.sourceProjectId, incomingLinkInfo.sourceNodeId)), disabled: isAppBusy, title: `Jump to source project: ${incomingLinkInfo.sourceProjectName}` }, React.createElement("span", { className: "button-icon" }, "↩️"), "Jump to Source System")),
-        !node.linkedProjectId && !(isProjectRoot && incomingLinkInfo) && (React.createElement("button", { onClick: () => handleDetailPanelNodeAction(() => onOpenLinkProjectModal(node.id)), disabled: isAppBusy, title: "Create a link from this object to another project" }, React.createElement("span", { className: "button-icon" }, "🔗"), "Establish Hyperspace Link"))
+        node.linkedProjectId && onNavigateToLinkedProject && (React.createElement("button", { onClick: () => onNavigateToLinkedProject(node.linkedProjectId), disabled: isAppBusy, title: `Jump to linked project: ${node.linkedProjectName}` }, React.createElement("span", { className: "button-icon" }, "↪️"), "Jump to Linked System")),
+        node.linkedProjectId && onUnlinkProjectFromNode && (React.createElement("button", { onClick: () => onUnlinkProjectFromNode(node.id), disabled: isAppBusy, className: "secondary", title: "Remove the outgoing link to another project" }, React.createElement("span", { className: "button-icon" }, "🚫"), "Sever Outgoing Link")),
+        isProjectRoot && incomingLinkInfo && (React.createElement("button", { onClick: () => handleNavigateToSourceNode(incomingLinkInfo.sourceProjectId, incomingLinkInfo.sourceNodeId), disabled: isAppBusy, title: `Jump to source project: ${incomingLinkInfo.sourceProjectName}` }, React.createElement("span", { className: "button-icon" }, "↩️"), "Jump to Source System")),
+        !node.linkedProjectId && !(isProjectRoot && incomingLinkInfo) && (React.createElement("button", { onClick: () => onOpenLinkProjectModal(node.id), disabled: isAppBusy, title: "Create a link from this object to another project" }, React.createElement("span", { className: "button-icon" }, "🔗"), "Establish Hyperspace Link"))
       ),
       
       React.createElement("div", { className: "panel-sub-header" }, "Danger Zone"),
       React.createElement("div", { className: "panel-button-group" },
-        React.createElement("button", { onClick: () => handleDetailPanelNodeAction(() => onDeleteNode(node.id)), disabled: isAppBusy, className: "danger", title: "Permanently delete this object and all its children" }, React.createElement("span", { className: "button-icon" }, "🗑️"), "Decommission System")
+        React.createElement("button", { onClick: () => onDeleteNode(node.id), disabled: isAppBusy, className: "danger", title: "Permanently delete this object and all its children" }, React.createElement("span", { className: "button-icon" }, "🗑️"), "Decommission System")
       ),
       React.createElement("button", { onClick: onExitFocusView, style: { marginTop: 'auto', width: '100%' }, className: "secondary" },
         "Exit Focus View"
