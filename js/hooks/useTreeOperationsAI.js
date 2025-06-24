@@ -20,6 +20,7 @@ export const useTreeOperationsAI = ({
   setIsLoading,
   setIsModifying,
   setModificationPrompt,
+  selectedGraphNodeId,
 }) => {
   const { openAiSuggestionModal, closeAiSuggestionModal, openConfirmModal, setPendingAiSuggestion, pendingAiSuggestion, openAiQuickEditModal, closeAiQuickEditModal, aiQuickEditModalConfig } = modalManager;
   const { addHistoryEntry } = historyManager;
@@ -93,6 +94,14 @@ export const useTreeOperationsAI = ({
 
     setIsModifying(true); setError(null);
 
+    let finalModificationPrompt = modificationPromptValue;
+    if (selectedGraphNodeId && techTreeData) {
+        const selectedNode = findNodeById(techTreeData, selectedGraphNodeId);
+        if (selectedNode) {
+            finalModificationPrompt = `The user has selected the node "${selectedNode.name}" (ID: ${selectedNode.id}). Apply the following instruction primarily to this node and its descendants, maintaining the integrity of the rest of the tree. Instruction: "${modificationPromptValue}"`;
+        }
+    }
+
     let currentModificationBase;
     if (pendingAiSuggestion) { 
         currentModificationBase = pendingAiSuggestion;
@@ -113,7 +122,7 @@ export const useTreeOperationsAI = ({
 
     try {
       const lockedIds = getLockedNodeIds(currentModificationBase);
-      const suggestedTree = await geminiService.modifyTechTreeByGemini(currentModificationBase, modificationPromptValue, lockedIds);
+      const suggestedTree = await geminiService.modifyTechTreeByGemini(currentModificationBase, finalModificationPrompt, lockedIds);
       
       setPendingAiSuggestion(suggestedTree); 
       openAiSuggestionModal(suggestedTree); 
@@ -126,7 +135,8 @@ export const useTreeOperationsAI = ({
   }, [
     techTreeData, apiKeyIsSet, projectManager, pendingAiSuggestion,
     openAiSuggestionModal, setPendingAiSuggestion, addHistoryEntry, 
-    setError, setPreviousTreeStateForUndo, setIsModifying, setBaseForModalDiff
+    setError, setPreviousTreeStateForUndo, setIsModifying, setBaseForModalDiff,
+    selectedGraphNodeId
   ]);
 
   const handleConfirmAiSuggestion = useCallback(() => {
