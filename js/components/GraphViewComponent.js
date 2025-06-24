@@ -33,19 +33,7 @@ const GraphViewComponent = ({
   handleNavigateToSourceNode,
   searchTerm
 }) => {
-  const LAYOUT_CYCLE = ['radial', 'vertical', 'horizontal'];
   const [layout, setLayout] = useState('radial'); // 'radial', 'vertical', or 'horizontal'
-
-  const getNextLayoutInfo = (currentLayout) => {
-    const currentIndex = LAYOUT_CYCLE.indexOf(currentLayout);
-    const nextLayout = LAYOUT_CYCLE[(currentIndex + 1) % LAYOUT_CYCLE.length];
-    switch (nextLayout) {
-        case 'radial': return { icon: '🌳', title: 'Switch to Radial Layout' };
-        case 'vertical': return { icon: '↕️', title: 'Switch to Vertical Layout' };
-        case 'horizontal': return { icon: '↔️', title: 'Switch to Horizontal Layout' };
-        default: return { icon: '🔄', title: 'Toggle Layout' };
-    }
-  };
 
   const svgContainerDivRef = useRef(null); 
   const svgRef = useRef(null); 
@@ -55,24 +43,20 @@ const GraphViewComponent = ({
         position,
         actions: {
             onResetZoom: resetZoom,
-            onToggleLayout: toggleLayout,
-            nextLayoutInfo: getNextLayoutInfo(layout),
             onAddChildToRoot: onAddNodeToRoot,
         }
     });
-  }, [onOpenViewContextMenu, resetZoom, toggleLayout, layout, onAddNodeToRoot]);
+  }, [onOpenViewContextMenu, resetZoom, onAddNodeToRoot]);
 
   const { g, nodes, links, config, resetZoom, zoomIn, zoomOut, centerOnNode } = useD3Tree(svgRef, treeData, {}, onCloseContextMenu, handleBackgroundContextMenu, layout);
 
-  const toggleLayout = useCallback(() => {
-    setLayout(prev => {
-      const currentIndex = LAYOUT_CYCLE.indexOf(prev);
-      const newLayout = LAYOUT_CYCLE[(currentIndex + 1) % LAYOUT_CYCLE.length];
+  const handleSetLayout = useCallback((newLayout) => {
+    if (newLayout !== layout) {
+      setLayout(newLayout);
       // A brief delay allows the state to update before we recenter the view on the new layout.
       setTimeout(resetZoom, 50);
-      return newLayout;
-    });
-  }, [resetZoom]);
+    }
+  }, [layout, resetZoom]);
 
   const projectLinksAndProxyNodes = useMemo(() => {
     if (!nodes || nodes.length === 0 || !projects) {
@@ -420,7 +404,11 @@ const GraphViewComponent = ({
     );
   }
   
-  const nextLayoutInfo = getNextLayoutInfo(layout);
+  const layoutOptions = [
+    { id: 'radial', label: '🌳', title: 'Radial Layout' },
+    { id: 'vertical', label: '↕️', title: 'Vertical Layout' },
+    { id: 'horizontal', label: '↔️', title: 'Horizontal Layout' },
+  ];
 
   return (
     React.createElement("div", { className: "graph-view-wrapper" },
@@ -428,10 +416,24 @@ const GraphViewComponent = ({
         React.createElement("svg", { ref: svgRef, style: { display: 'block', width: '100%', height: '100%' }})
       ),
       React.createElement("div", { className: "graph-view-controls" },
-        React.createElement("button", { onClick: toggleLayout, title: nextLayoutInfo.title, disabled: isAppBusy }, nextLayoutInfo.icon),
-        React.createElement("button", { onClick: zoomIn, title: "Zoom In", disabled: isAppBusy }, "➕"),
-        React.createElement("button", { onClick: zoomOut, title: "Zoom Out", disabled: isAppBusy }, "➖"),
-        React.createElement("button", { onClick: resetZoom, title: "Reset Zoom & Pan", disabled: isAppBusy }, "🎯")
+        React.createElement("div", { className: "segmented-control graph-layout-control", role: "radiogroup", "aria-label": "Graph Layout" },
+            layoutOptions.map(opt => (
+                React.createElement("button", {
+                    key: opt.id,
+                    role: "radio",
+                    "aria-checked": layout === opt.id,
+                    className: layout === opt.id ? 'active' : '',
+                    onClick: () => handleSetLayout(opt.id),
+                    title: opt.title,
+                    disabled: isAppBusy
+                }, opt.label)
+            ))
+        ),
+        React.createElement("div", { className: "graph-zoom-controls" },
+            React.createElement("button", { onClick: zoomIn, title: "Zoom In", disabled: isAppBusy }, "➕"),
+            React.createElement("button", { onClick: zoomOut, title: "Zoom Out", disabled: isAppBusy }, "➖"),
+            React.createElement("button", { onClick: resetZoom, title: "Reset Zoom & Pan", disabled: isAppBusy }, "🎯")
+        )
       )
     )
   );

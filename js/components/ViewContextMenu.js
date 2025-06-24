@@ -10,7 +10,6 @@ const ViewContextMenu = ({ isOpen, config, onClose }) => {
         const { actions } = config;
         const items = [
             { id: 'reset-zoom', label: 'Reset View', icon: '🎯', action: actions.onResetZoom, title: "Reset zoom and pan to default" },
-            { id: 'toggle-layout', label: `Layout: ${actions.nextLayoutInfo.title.replace('Switch to ', '').replace(' Layout', '')}`, icon: actions.nextLayoutInfo.icon, action: actions.onToggleLayout, title: actions.nextLayoutInfo.title },
         ];
 
         if (actions.onAddChildToRoot) {

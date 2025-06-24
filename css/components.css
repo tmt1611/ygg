@@ -1041,14 +1041,23 @@ html[data-theme='dark'] .graph-view-node.proxy rect {
 }
 
 
-.graph-view-controls { position: absolute; top: 8px; right: 8px; display: flex; flex-direction: column; gap: 6px; z-index: 10; pointer-events: auto; } /* Reduced spacing/gap */
-.graph-view-controls button {
+.graph-view-controls { position: absolute; top: 8px; right: 8px; display: flex; flex-direction: column; align-items: flex-end; gap: 8px; z-index: 10; pointer-events: auto; }
+.graph-view-controls .segmented-control.graph-layout-control {
+  background-color: rgba(var(--panel-bg-rgb), 0.8);
+  backdrop-filter: blur(2px);
+}
+.graph-view-controls .segmented-control.graph-layout-control button {
+  font-size: 1.1em;
+  min-width: 36px;
+}
+.graph-zoom-controls { display: flex; flex-direction: column; gap: 6px; }
+.graph-zoom-controls button {
   background-color: rgba(var(--panel-bg-rgb), 0.8); backdrop-filter: blur(2px); border: 1px solid var(--border-color);
-  padding: 6px; font-size: 1em; line-height: 1; /* Reduced padding/font-size */
-  width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; /* Reduced size */
+  padding: 6px; font-size: 1em; line-height: 1;
+  width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;
   transition: background-color 0.2s, border-color 0.2s, color 0.2s, transform 0.2s, box-shadow 0.2s;
 }
-.graph-view-controls button:hover:not(:disabled) {
+.graph-zoom-controls button:hover:not(:disabled) {
   background-color: var(--primary-accent-hover-bg);
   border-color: var(--primary-accent);
   color: var(--primary-accent);
