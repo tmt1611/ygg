@@ -37,18 +37,23 @@ const GraphViewComponent = ({
 
   const svgContainerDivRef = useRef(null); 
   const svgRef = useRef(null); 
+  const contextMenuActionsRef = useRef({});
   
   const handleBackgroundContextMenu = useCallback((position) => {
     onOpenViewContextMenu({
         position,
-        actions: {
-            onResetZoom: resetZoom,
-            onAddChildToRoot: onAddNodeToRoot,
-        }
+        actions: contextMenuActionsRef.current
     });
-  }, [onOpenViewContextMenu, resetZoom, onAddNodeToRoot]);
+  }, [onOpenViewContextMenu]);
 
   const { g, nodes, links, config, resetZoom, zoomIn, zoomOut, centerOnNode } = useD3Tree(svgRef, treeData, {}, onCloseContextMenu, handleBackgroundContextMenu, layout);
+
+  useEffect(() => {
+    contextMenuActionsRef.current = {
+      onResetZoom: resetZoom,
+      onAddChildToRoot: onAddNodeToRoot,
+    };
+  }, [resetZoom, onAddNodeToRoot]);
 
   const handleSetLayout = useCallback((newLayout) => {
     if (newLayout !== layout) {
