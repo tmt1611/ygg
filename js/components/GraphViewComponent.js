@@ -34,6 +34,7 @@ const GraphViewComponent = ({
   searchTerm
 }) => {
   const [layout, setLayout] = useState('radial'); // 'radial', 'vertical', or 'horizontal'
+  const [isFocusMode, setIsFocusMode] = useState(false);
 
   const svgContainerDivRef = useRef(null); 
   const svgRef = useRef(null); 
@@ -46,7 +47,16 @@ const GraphViewComponent = ({
     });
   }, [onOpenViewContextMenu]);
 
-  const { g, nodes, links, config, resetZoom, zoomIn, zoomOut, centerOnNode } = useD3Tree(svgRef, treeData, {}, onCloseContextMenu, handleBackgroundContextMenu, layout);
+  const { g, nodes, links, config, resetZoom, zoomIn, zoomOut, centerOnNode } = useD3Tree(
+    svgRef, 
+    treeData, 
+    {}, 
+    onCloseContextMenu, 
+    handleBackgroundContextMenu, 
+    layout,
+    isFocusMode,
+    activeNodeId
+  );
 
   useEffect(() => {
     contextMenuActionsRef.current = {
@@ -63,8 +73,21 @@ const GraphViewComponent = ({
     }
   }, [layout, resetZoom]);
 
+  const handleToggleFocusMode = useCallback(() => {
+    setIsFocusMode(prev => {
+        const newMode = !prev;
+        if (newMode && !activeNodeId) {
+            // If turning on focus mode without a selected node, do nothing.
+            return false;
+        }
+        // When toggling focus mode, reset the zoom to re-center the view.
+        setTimeout(resetZoom, 50);
+        return newMode;
+    });
+  }, [activeNodeId, resetZoom]);
+
   const projectLinksAndProxyNodes = useMemo(() => {
-    if (!nodes || nodes.length === 0 || !projects) {
+    if (isFocusMode || !nodes || nodes.length === 0 || !projects) {
         return { proxyNodes: [], projectLinks: [] };
     }
 
@@ -144,7 +167,7 @@ const GraphViewComponent = ({
     }
 
     return { proxyNodes, projectLinks };
-  }, [nodes, projects, activeProjectId, findLinkSource]);
+  }, [nodes, projects, activeProjectId, findLinkSource, isFocusMode]);
 
 
   const handleNodeClick = useCallback((event, d) => {
@@ -486,11 +509,17 @@ const GraphViewComponent = ({
                     className: layout === opt.id ? 'active' : '',
                     onClick: () => handleSetLayout(opt.id),
                     title: opt.title,
-                    disabled: isAppBusy
+                    disabled: isAppBusy || isFocusMode
                 }, opt.label)
             ))
         ),
         React.createElement("div", { className: "graph-zoom-controls" },
+            React.createElement("button", { 
+                onClick: handleToggleFocusMode, 
+                title: isFocusMode ? "Exit Graph Focus Mode" : "Enter Graph Focus Mode (select a node first)", 
+                disabled: isAppBusy || (!isFocusMode && !activeNodeId),
+                className: isFocusMode ? 'active' : ''
+            }, '🔬'),
             React.createElement("button", { onClick: zoomIn, title: "Zoom In", disabled: isAppBusy }, "➕"),
             React.createElement("button", { onClick: zoomOut, title: "Zoom Out", disabled: isAppBusy }, "➖"),
             React.createElement("button", { onClick: resetZoom, title: "Reset Zoom & Pan", disabled: isAppBusy }, "🎯")

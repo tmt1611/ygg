@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useCallback, useState, useLayoutEffect } from 'react';
 import { select, zoom, hierarchy, tree, zoomIdentity } from 'd3';
+import { getAllNodesAsMap } from '../utils.js';
 
 const defaultTreeConfig = {
   nodeRadius: 16, // Base for 'common', but will be overridden in GraphViewComponent
@@ -94,11 +95,14 @@ export const useD3Tree = (
       const { clientWidth, clientHeight } = svgRef.current.parentElement;
       if (clientWidth > 0 && clientHeight > 0) {
         let initialTransform;
-        if (layout === 'radial') {
+        const effectiveLayout = isFocusMode ? 'vertical' : layout; // Use the same logic as treeLayout
+
+        if (effectiveLayout === 'radial') {
             initialTransform = zoomIdentity.translate(clientWidth / 2, clientHeight / 2).scale(0.65);
-        } else if (layout === 'vertical') {
+        } else if (effectiveLayout === 'vertical') {
             // Center the tree horizontally, and position it near the top.
-            initialTransform = zoomIdentity.translate(clientWidth / 2, margin.top * 4).scale(0.65);
+            const yOffset = isFocusMode ? margin.top * 4 : margin.top * 4;
+            initialTransform = zoomIdentity.translate(clientWidth / 2, yOffset).scale(isFocusMode ? 0.9 : 0.65);
         } else { // horizontal
             // Center the tree vertically, and position it near the left.
             initialTransform = zoomIdentity.translate(margin.left * 6, clientHeight / 2).scale(0.6);
@@ -106,7 +110,7 @@ export const useD3Tree = (
         svgSelectionRef.current.transition().duration(750).call(zoomBehaviorRef.current.transform, initialTransform);
       }
     }
-  }, [layout, margin.top, margin.left]);
+  }, [layout, isFocusMode, margin.top, margin.left]);
 
   useLayoutEffect(() => {
     if (!svgRef.current) return;
@@ -182,7 +186,7 @@ export const useD3Tree = (
       }, 50);
       return () => clearTimeout(timer);
     }
-  }, [treeData, g, resetZoom]); // resetZoom is stable but depends on layout, so this effect runs on treeData or layout change.
+  }, [treeData, g, resetZoom]);
 
   const zoomIn = useCallback(() => {
     if (svgSelectionRef.current && zoomBehaviorRef.current) {

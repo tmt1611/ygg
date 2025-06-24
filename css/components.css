@@ -1405,6 +1405,16 @@ html[data-theme='dark'] .graph-view-node.proxy rect {
   transform: scale(1.05);
   box-shadow: var(--box-shadow-sm);
 }
+.graph-zoom-controls button.active {
+  background-color: var(--primary-accent);
+  border-color: var(--primary-accent-dark);
+  color: var(--text-on-accent);
+  font-weight: 600;
+}
+.graph-zoom-controls button.active:hover:not(:disabled) {
+  background-color: var(--primary-accent-dark);
+  color: var(--text-on-accent);
+}
 
 /* AI Insights Tab Styles */
 .ai-insights-panel {
