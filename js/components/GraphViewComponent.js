@@ -3,6 +3,7 @@ import { linkRadial, select, linkVertical, linkHorizontal } from 'd3';
 import { useD3Tree } from '../hooks/useD3Tree.js';
 import { NODE_IMPORTANCE_RUNES } from '../constants.js';
 import PathToRootDisplay from './PathToRootDisplay.js';
+import PathToRootDisplay from './PathToRootDisplay.js';
 
 
 const getNodeRadius = (node) => {
