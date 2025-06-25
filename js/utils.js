@@ -5,15 +5,22 @@ export const generateUUID = () => uuidv4();
 
 export const initializeNodes = (node, parentId = null) => {
   if (!node) return null;
-  const newNode = { ...node, _parentId: parentId };
   // Assign a new UUID if the node has no ID or has the placeholder ID from AI.
-  if (!newNode.id || newNode.id === 'NEW_NODE') {
-    newNode.id = generateUUID();
-  }
-  // Ensure children is an array
-  if (!Array.isArray(newNode.children)) {
-    newNode.children = [];
-  }
+  const newId = (!node.id || node.id === 'NEW_NODE') ? generateUUID() : node.id;
+  
+  const newNode = {
+    ...node, // Keep any other properties the AI might add
+    id: newId,
+    name: node.name || "Untitled Node",
+    description: node.description ?? "", // Use nullish coalescing for empty strings
+    isLocked: node.isLocked ?? false,
+    importance: ['minor', 'common', 'major'].includes(node.importance) ? node.importance : 'common',
+    children: Array.isArray(node.children) ? node.children : [],
+    linkedProjectId: node.linkedProjectId ?? null,
+    linkedProjectName: node.linkedProjectName ?? null,
+    _parentId: parentId,
+  };
+  
   if (newNode.children.length > 0) {
     newNode.children = newNode.children.map(child => initializeNodes(child, newNode.id));
   }
@@ -297,16 +304,17 @@ export const areAllNodesExpanded = (node, collapsedNodeIds) => {
 
 export const isValidTechTreeNodeShape = (node) => {
     if (typeof node !== 'object' || node === null) return false;
-    const hasName = typeof node.name === 'string';
-    const hasChildren = Array.isArray(node.children);
-    const hasImportance = typeof node.importance === 'string' && ['minor', 'common', 'major'].includes(node.importance);
-    const hasIsLocked = typeof node.isLocked === 'boolean';
-    // ID can be missing for new nodes suggested by AI
-    const hasDescription = node.hasOwnProperty('description');
+    // A node is structurally valid if it has a name.
+    // We are lenient on `children` because a leaf node might be missing it, and `initializeNodes` will add an empty array.
+    const hasName = typeof node.name === 'string' && node.name.trim() !== '';
 
-    const childrenAreValid = hasChildren ? node.children.every(isValidTechTreeNodeShape) : true;
+    // If children exist, they must be an array and their contents must be valid.
+    if (node.children) {
+        if (!Array.isArray(node.children)) return false;
+        return hasName && node.children.every(isValidTechTreeNodeShape);
+    }
 
-    return hasName && hasChildren && hasImportance && hasIsLocked && hasDescription && childrenAreValid;
+    return hasName; // It's a valid leaf node if it has a name.
 };
 
 export const reinitializeNodeIds = (node, newParentId = null) => {
