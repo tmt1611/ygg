@@ -16,7 +16,7 @@ const ErrorMessage = ({ error, onClose, mode = 'toast' }) => {
     });
   };
   
-  const formattedMessage = error.message.startsWith("Error:") ? error.message.substring(6).trim() : error.message;
+  const formattedMessage = error.message.replace(/^Error:\s*/i, '');
 
   const className = mode === 'inline' ? 'error-message-inline' : 'error-toast';
 

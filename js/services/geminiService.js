@@ -82,6 +82,18 @@ export const clearActiveApiKey = () => {
 
 export const isApiKeySet = () => apiClientState.isKeyAvailable && apiClientState.client !== null;
 
+const withApiClient = (fn) => {
+  return async (...args) => {
+    if (!apiClientState.client || !apiClientState.isKeyAvailable) {
+      throw constructApiError(
+        new Error("Gemini API client not initialized."),
+        "Failed to call API."
+      );
+    }
+    return fn(...args);
+  };
+};
+
 const constructApiError = (error, baseMessage, context = {}) => {
   // Use the original error object to preserve its stack trace, or create a new one.
   const errorToThrow = error instanceof Error ? error : new Error(baseMessage);
@@ -89,7 +101,7 @@ const constructApiError = (error, baseMessage, context = {}) => {
   if (context.prompt) errorToThrow.prompt = context.prompt;
   if (context.rawResponse) errorToThrow.rawResponse = context.rawResponse;
 
-  if (!isApiKeySet()) {
+  if (!isApiKeySet() && !error.message?.includes("Gemini API client not initialized")) {
      errorToThrow.message = "API Key not set or invalid. Please provide a valid API Key in 'Workspace' -> 'API Key Setup'.";
      return errorToThrow;
   }
@@ -218,10 +230,7 @@ const parseGeminiJsonResponseForInsights = (responseText) => {
     }
 };
 
-export const generateQuickEdit = async (nodeToEdit, modificationPrompt) => {
-  if (!apiClientState.client || !apiClientState.isKeyAvailable) {
-    throw new Error("Gemini API client not initialized.");
-  }
+export const generateQuickEdit = withApiClient(async (nodeToEdit, modificationPrompt) => {
 
   const systemInstruction = `You are an AI assistant that modifies a single JSON node object based on a user instruction.
 **RULES:**
@@ -284,10 +293,7 @@ Based on the instruction, provide the complete, modified JSON object for this si
 
 
 
-export const generateTechTree = async (userPrompt) => {
-  if (!apiClientState.client || !apiClientState.isKeyAvailable) {
-    throw new Error("Gemini API client not initialized. Set a valid API Key in 'Workspace' -> 'API Key Setup'.");
-  }
+export const generateTechTree = withApiClient(async (userPrompt) => {
 
   try {
     const model = apiClientState.client.getGenerativeModel({ 
@@ -322,14 +328,11 @@ Ensure: Logical hierarchy, 2-4 levels deep, 2-5 children per parent. Prioritize 
   }
 };
 
-export const modifyTechTreeByGemini = async (
+export const modifyTechTreeByGemini = withApiClient(async (
   currentTree,
   modificationPrompt,
   lockedNodeIds
 ) => {
-  if (!apiClientState.client || !apiClientState.isKeyAvailable) {
-    throw new Error("Gemini API client not initialized. Set a valid API Key in 'Workspace' -> 'Project Management'.");
-  }
 
   const systemInstruction = `You are an AI assistant that modifies a JSON tech tree based on user instructions.
 **MANDATORY RULES:**
@@ -448,10 +451,7 @@ Output the complete, modified JSON for the tech tree, adhering to ALL rules abov
   }
 };
 
-export const summarizeText = async (textToSummarize) => {
-  if (!apiClientState.client || !apiClientState.isKeyAvailable) {
-    throw new Error("Gemini API client not initialized. Set a valid API Key in 'Workspace' -> 'API Key Setup'.");
-  }
+export const summarizeText = withApiClient(async (textToSummarize) => {
 
   const prompt = `You are a helpful assistant. Summarize the following text, which describes a hierarchical tech tree or skill tree. 
 Provide a concise overview (100-150 words), highlighting its main purpose, key branches, and overall theme or focus.
@@ -481,16 +481,13 @@ Concise Summary (100-150 words, plain text only):`;
   }
 };
 
-export const generateNodeInsights = async (
+export const generateNodeInsights = withApiClient(async (
     node,
     parentNode,
     siblingNodes, 
     childNodes,
     projectContext
 ) => {
-    if (!apiClientState.client || !apiClientState.isKeyAvailable) {
-        throw new Error("Gemini API client not initialized. Set a valid API Key.");
-    }
 
     const parentInfo = parentNode ? `It is a child of "${parentNode.name}".` : "It is a root node.";
     const childrenInfo = childNodes.length > 0
@@ -550,13 +547,10 @@ Respond ONLY with the JSON object. No extra text or markdown.
     }
 };
 
-export const generateStrategicSuggestions = async (
+export const generateStrategicSuggestions = withApiClient(async (
   projectContext,
   currentTreeSummary
 ) => {
-  if (!apiClientState.client || !apiClientState.isKeyAvailable) {
-    throw constructApiError({ message: "Gemini API client not initialized. Set a valid API Key." }, "Could not generate suggestions.");
-  }
 
   const systemInstruction = `You are an AI assistant that provides strategic suggestions for a project.
 You MUST respond with a single, valid JSON array of strings.
