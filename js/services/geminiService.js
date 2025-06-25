@@ -1,4 +1,3 @@
-
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { initializeNodes, isValidTechTreeNodeShape } from "../utils.js";
 
@@ -491,7 +490,3 @@ Each suggestion should be a concise, actionable phrase or short sentence.
     throw constructApiError(error, "Failed to generate AI strategic suggestions.", { prompt });
   }
 };
-
-
-
-
