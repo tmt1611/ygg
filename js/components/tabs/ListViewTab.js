@@ -83,6 +83,7 @@ const ListViewTabContent = ({
               onToggleLock: onToggleNodeLock,
               onAddQuickChild: onAddQuickChild,
               onNodeImportanceChange: onNodeImportanceChange,
+              onNodeNameChange: onNodeNameChange,
               onOpenNodeEditModal: onOpenNodeEditModal,
               searchTerm: searchTerm,
               isAppBusy: isAppBusy,
