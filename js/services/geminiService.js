@@ -435,7 +435,7 @@ export const generateStrategicSuggestions = async (
   currentTreeSummary
 ) => {
   if (!apiClientState.client || !apiClientState.isKeyAvailable) {
-    throw new Error("Gemini API client not initialized. Set a valid API Key.");
+    throw constructApiError({ message: "Gemini API client not initialized. Set a valid API Key." }, "Could not generate suggestions.");
   }
 
   const systemInstruction = `You are an AI assistant that provides strategic suggestions for a project.
@@ -478,7 +478,7 @@ Each suggestion should be a concise, actionable phrase or short sentence.
     return parsed;
   } catch (error) {
     console.error("Error generating strategic suggestions from Gemini API:", error);
-    throw constructApiError(error, "Failed to generate AI strategic suggestions.");
+    throw constructApiError(error, "Failed to generate AI strategic suggestions.", { prompt });
   }
 };
 

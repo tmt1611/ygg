@@ -208,58 +208,16 @@ const App = () => {
   }, [techTreeData, modalManager, initialPrompt, apiKeyHook.status.isSet, setError, addHistoryEntry, setIsSummarizing]);
 
   const handleNodeSelectedForInsightsOrActions = useCallback((nodeId) => {
-    // This function will now handle cleaning the tree of temporary AI modification statuses
-    // upon the first interaction after a modification has been applied.
-    const stripAnnotations = (node) => {
-      if (!node) return null;
-      const { _changeStatus, _modificationDetails, _oldParentId, ...rest } = node;
-      const newNode = { ...rest };
-      if (newNode.children) {
-        newNode.children = newNode.children.map(stripAnnotations);
-      }
-      return newNode;
-    };
-
-    let treeHasAnnotations = false;
-    const checkAnnotations = (node) => {
-        if (treeHasAnnotations || !node) return;
-        if (node._changeStatus && node._changeStatus !== 'unchanged') {
-            treeHasAnnotations = true;
-            return;
-        }
-        if (node.children) {
-            for (const child of node.children) {
-                checkAnnotations(child);
-            }
-        }
-    };
-
-    setTechTreeData(currentTree => {
-      if (!currentTree) {
-        setSelectedNodeForInsights(null);
-        setSelectedGraphNodeId(null);
-        aiInsightsHook.clearAiInsights();
-        return null;
-      }
-      
-      treeHasAnnotations = false; // reset for this run
-      checkAnnotations(currentTree);
-
-      const treeToOperateOn = treeHasAnnotations ? stripAnnotations(currentTree) : currentTree;
-
-      if (nodeId) {
-        const node = findNodeById(treeToOperateOn, nodeId);
-        setSelectedNodeForInsights(node);
-        setSelectedGraphNodeId(nodeId);
-      } else {
-        setSelectedNodeForInsights(null);
-        setSelectedGraphNodeId(null);
-        aiInsightsHook.clearAiInsights();
-      }
-      
-      return treeToOperateOn;
-    });
-  }, [setTechTreeData, setSelectedGraphNodeId, setSelectedNodeForInsights, aiInsightsHook]);
+    if (nodeId && techTreeData) {
+      const node = findNodeById(techTreeData, nodeId);
+      setSelectedNodeForInsights(node); 
+      setSelectedGraphNodeId(nodeId); 
+    } else {
+      setSelectedNodeForInsights(null);
+      setSelectedGraphNodeId(null);
+      aiInsightsHook.clearAiInsights(); 
+    }
+  }, [techTreeData, setSelectedGraphNodeId, aiInsightsHook]);
 
 
   const currentTreeStats = useMemo(() => {
@@ -356,7 +314,7 @@ const App = () => {
       setError("Cannot apply suggestion: No active tree.");
       return;
     }
-    const fullPrompt = `Based on the strategic idea "${suggestion}", please apply relevant modifications to the current tree structure.`;
+    const fullPrompt = `Based on the strategic idea "${suggestion}", please apply relevant modifications to the current tree structure. For example, consider creating new main branches, adding key technologies under existing nodes, or expanding on underdeveloped areas related to this idea.`;
     setModificationPrompt(fullPrompt);
     treeOperationsAI.handleApplyAiModification(fullPrompt);
     setActiveSidebarTab('ai-tools');
