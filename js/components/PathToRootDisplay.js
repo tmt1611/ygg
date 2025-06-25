@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState, useLayoutEffect } from 'react';
+import React, { useRef, useEffect, useState, useLayoutEffect, useCallback } from 'react';
 import { getAncestorIds, findNodeById } from '../utils.js'; 
 
 const PathToRootDisplay = ({
@@ -10,18 +10,29 @@ const PathToRootDisplay = ({
   const containerRef = useRef(null);
   const [scrollState, setScrollState] = useState({ atStart: true, atEnd: true });
 
-  const updateScrollState = () => {
+  const updateScrollState = useCallback(() => {
     const el = containerRef.current;
     if (!el) return;
     const atStart = el.scrollLeft <= 0;
     const atEnd = el.scrollLeft >= el.scrollWidth - el.clientWidth - 1; // -1 for tolerance
     setScrollState({ atStart, atEnd });
-  };
+  }, []);
   
   useLayoutEffect(() => {
-    updateScrollState();
     const el = containerRef.current;
     if (el) {
+        // Scroll active node into view if it's not visible
+        const activeSegment = el.querySelector('.current-focus-path-node');
+        if (activeSegment) {
+            const containerRect = el.getBoundingClientRect();
+            const activeRect = activeSegment.getBoundingClientRect();
+            if (activeRect.left < containerRect.left || activeRect.right > containerRect.right) {
+                activeSegment.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+            }
+        }
+
+        // Update scroll-based fade effects
+        updateScrollState();
         el.addEventListener('scroll', updateScrollState, { passive: true });
         const resizeObserver = new ResizeObserver(updateScrollState);
         resizeObserver.observe(el);
@@ -30,7 +41,7 @@ const PathToRootDisplay = ({
             resizeObserver.unobserve(el);
         };
     }
-  }, [treeData, currentNodeId]); // Rerun when content changes
+  }, [treeData, currentNodeId, updateScrollState]); // Rerun when content changes
 
   if (!treeData || !currentNodeId) {
     return React.createElement("div", { className: "path-to-root-display" }, React.createElement("span", null, "Not available."));

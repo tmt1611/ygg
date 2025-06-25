@@ -241,25 +241,25 @@ const AiSuggestionModal = ({
                 )
             ),
 
+            React.createElement("div", { className: "ai-suggestion-modal-refinement-section" },
+                React.createElement(ModificationPromptInput, {
+                    prompt: followUpPrompt,
+                    setPrompt: setFollowUpPrompt,
+                    onModify: handleInternalRefine,
+                    isLoading: isRefining,
+                    disabled: !apiKeyIsSet || isRefining || !!annotatedTree?._isErrorNode,
+                    isApiKeySet: apiKeyIsSet,
+                    hasTreeData: !!suggestion,
+                    labelOverride: "Refine This Suggestion:"
+                })
+            ),
+
             React.createElement("p", { className: "ai-suggestion-modal-footer-note" },
               annotatedTree?._isErrorNode
                 ? "An error occurred with the AI suggestion. Please refine your prompt or reject this suggestion."
                 : "Review carefully. Applying overwrites the current state. Locked node content should NOT be changed."
             )
           )
-        ),
-
-        React.createElement("div", { className: "ai-suggestion-modal-refinement-section" },
-            React.createElement(ModificationPromptInput, {
-                prompt: followUpPrompt,
-                setPrompt: setFollowUpPrompt,
-                onModify: handleInternalRefine,
-                isLoading: isRefining,
-                disabled: !apiKeyIsSet || isRefining || !!annotatedTree?._isErrorNode,
-                isApiKeySet: apiKeyIsSet,
-                hasTreeData: !!suggestion,
-                labelOverride: "Refine This Suggestion:"
-            })
         ),
 
         React.createElement("div", { className: "ai-suggestion-modal-footer-actions" },
