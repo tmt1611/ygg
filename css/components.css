@@ -1170,6 +1170,48 @@ html[data-theme='dark'] .graph-view-node.proxy rect {
   color: var(--text-on-accent);
 }
 
+/* Graph MiniMap */
+.graph-minimap-container {
+  position: absolute;
+  bottom: 8px;
+  left: 8px;
+  background-color: rgba(var(--panel-bg-rgb), 0.8);
+  backdrop-filter: blur(4px);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  box-shadow: var(--box-shadow-md);
+  z-index: 10;
+  pointer-events: auto;
+  overflow: hidden;
+  width: 200px;
+  height: 150px;
+}
+.graph-minimap-container svg {
+  display: block;
+}
+.minimap-links line {
+  stroke: var(--graph-link-stroke-ecosystem);
+  stroke-width: 0.5px;
+  opacity: 0.5;
+}
+.minimap-nodes circle {
+  fill: var(--graph-node-stroke);
+  stroke: none;
+  opacity: 0.7;
+}
+.minimap-nodes circle.active {
+  fill: var(--graph-node-selected-stroke);
+  stroke: var(--graph-node-selected-stroke);
+  stroke-width: 2px;
+  opacity: 1;
+}
+.minimap-view-rect {
+  fill: rgba(var(--primary-accent-rgb), 0.2);
+  stroke: var(--graph-node-selected-stroke);
+  stroke-width: 1px;
+  cursor: move;
+}
+
 /* Graph Node Tooltip */
 .graph-node-tooltip {
   position: fixed;
