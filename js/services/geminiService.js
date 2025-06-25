@@ -433,6 +433,69 @@ Concise Summary (100-150 words, plain text only):`;
   }
 };
 
+export const generateQuickEdit = async (nodeToEdit, modificationPrompt) => {
+  if (!apiClientState.client || !apiClientState.isKeyAvailable) {
+    throw new Error("Gemini API client not initialized.");
+  }
+
+  const systemInstruction = `You are an AI assistant that modifies a single JSON node object based on user instructions.
+**MANDATORY RULES:**
+1.  **Preserve ID & Lock:** You MUST preserve the original 'id' and 'isLocked' values.
+2.  **Output Format:** Respond ONLY with a single, valid JSON object for the modified node. NO EXTRA TEXT, explanations, or markdown fences.
+3.  **Node Format:** The output must be a valid node object. Example: ${COMMON_NODE_FORMAT_INSTRUCTION}
+4.  **Children:** If the user asks to add children, add them to the 'children' array. For new children, use "NEW_NODE" as the 'id'. Preserve existing children unless asked to remove them.
+5.  **Final Check:** Before outputting, double-check that your entire response is a single JSON object starting with { and ending with }.
+`;
+
+  const fullPrompt = `
+Current Node JSON:
+\`\`\`json
+${JSON.stringify(nodeToEdit, null, 2)}
+\`\`\`
+User instruction: "${modificationPrompt}"
+
+Output the complete, modified JSON for this single node, adhering to ALL rules above.
+`;
+
+  try {
+    const model = apiClientState.client.getGenerativeModel({ 
+      model: "gemini-1.5-flash-latest",
+      systemInstruction: { parts: [{ text: systemInstruction }], role: "model" },
+      generationConfig: { 
+        responseMimeType: "application/json", 
+        temperature: 0.2, // Lower temperature for more predictable, focused edits
+        topK: 40, 
+        topP: 0.95 
+      },
+    });
+
+    const result = await model.generateContent(fullPrompt);
+    const response = result.response;
+    
+    let parsedData = parseGeminiJsonResponse(response.text(), true); // `true` for modification allows array returns, but we expect an object here.
+
+    if (Array.isArray(parsedData)) {
+        console.error("Gemini quick edit returned an array, expected a single node object:", parsedData);
+        throw new Error("AI suggestion resulted in an array of nodes, but a single node object was expected for a quick edit.");
+    }
+
+    if (!isValidTechTreeNodeShape(parsedData)) {
+        console.error("Gemini quick edit resulted in invalid JSON structure.", parsedData);
+        throw new Error("AI suggestion has an invalid node structure.");
+    }
+    
+    // The AI should preserve the ID, but as a safeguard, we enforce it.
+    parsedData.id = nodeToEdit.id;
+
+    // The AI might forget to initialize children, so we do it here.
+    return initializeNodes(parsedData, nodeToEdit._parentId);
+
+  } catch (error) {
+    console.error("Error during quick edit via Gemini API:", error);
+    throw constructApiError(error, "Failed to perform quick edit.", { prompt: fullPrompt, rawResponse: error.rawResponse });
+  }
+};
+
 export const generateNodeInsights = async (
     node,
     parentNode,

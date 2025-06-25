@@ -568,11 +568,6 @@ html[data-theme='ocean'] .panel-header-icon { color: var(--primary-accent-dark);
 .diff-child-added { color: var(--success-color); }
 .diff-child-removed { color: var(--error-color); text-decoration: line-through; }
 .diff-child-changed { color: var(--primary-accent-dark); }
-.quick-edit-children-diff { padding: 6px 8px; border: 1px solid var(--border-color); border-radius: var(--border-radius); background-color: var(--app-bg); }
-.quick-edit-children-diff p { margin: 2px 0; font-family: monospace; font-size: 0.9em; }
-.diff-child-added { color: var(--success-color); }
-.diff-child-removed { color: var(--error-color); text-decoration: line-through; }
-.diff-child-changed { color: var(--primary-accent-dark); }
 
 
 
