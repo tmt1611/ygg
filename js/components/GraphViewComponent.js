@@ -360,30 +360,6 @@ const GraphViewComponent = ({
         const sourceRadius = getNodeRadius(d.source);
         const targetRadius = getNodeRadius(d.target);
 
-        let sx_c, sy_c, tx_c, ty_c;
-
-        if (effectiveLayout === 'radial') {
-            const angle_s = d.source.x - Math.PI / 2;
-            sx_c = d.source.y * Math.cos(angle_s);
-            sy_c = d.source.y * Math.sin(angle_s);
-
-            const angle_t = d.target.x - Math.PI / 2;
-            tx_c = d.target.y * Math.cos(angle_t);
-            ty_c = d.target.y * Math.sin(angle_t);
-        } else if (effectiveLayout === 'vertical') {
-            sx_c = d.source.x; sy_c = d.source.y;
-            tx_c = d.target.x; ty_c = d.target.y;
-        } else { // horizontal
-            sx_c = d.source.y; sy_c = d.source.x;
-            tx_c = d.target.y; ty_c = d.target.x;
-        }
-        
-        const dx = tx_c - sx_c;
-        const dy = ty_c - sy_c;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-
-        if (dist <= sourceRadius + targetRadius) return null;
-
         const sourceCoords = getCoordsForLayout(d.source, effectiveLayout);
         const targetCoords = getCoordsForLayout(d.target, effectiveLayout);
 
