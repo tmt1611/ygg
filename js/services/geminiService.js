@@ -85,10 +85,6 @@ const constructApiError = (error, baseMessage, context = {}) => {
   let detailedMessage = baseMessage;
   if (error?.message) {
     const errorMsgLower = error.message.toLowerCase();
-    if (!error.message.startsWith("AI returned invalid JSON")) {
-        detailedMessage += ` Details: `;
-    }
-    detailedMessage += `${error.message.substring(0,150)}${error.message.length > 150 ? '...' : ''}`;
     
     const quotaIndicators = ["quota", "user_rate_limit", "resource_exhausted", "rate limit"];
     if (quotaIndicators.some(indicator => errorMsgLower.includes(indicator)) || error.status === 429) {
@@ -105,6 +101,11 @@ const constructApiError = (error, baseMessage, context = {}) => {
       const previousSource = apiClientState.activeSource;
       clearActiveApiKey(); 
       detailedMessage = `The API Key (from ${previousSource || 'previous source'}) is invalid or lacks permissions, and has been cleared. Please set a new key in Workspace > API Key Setup.`;
+    } else {
+       if (!error.message.startsWith("AI returned invalid JSON")) {
+           detailedMessage += ` Details: `;
+       }
+       detailedMessage += `${error.message.substring(0,150)}${error.message.length > 150 ? '...' : ''}`;
     }
   }
   errorToThrow.message = detailedMessage;
