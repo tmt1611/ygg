@@ -274,6 +274,29 @@ const App = () => {
     setModificationPrompt(`Regarding the node "${node.name}" and its children, `);
   }, [isSidebarCollapsed, toggleSidebar, setActiveSidebarTab, setModificationPrompt]);
 
+  const handleSwitchToAiOpsTab = useCallback((node) => {
+    const focusInput = () => {
+        const inputElement = document.getElementById('techTreeModificationPrompt');
+        if (inputElement) {
+            inputElement.focus();
+            // Move cursor to the end of the pre-filled text
+            inputElement.setSelectionRange(inputElement.value.length, inputElement.value.length);
+        }
+    };
+
+    if (isSidebarCollapsed) {
+        toggleSidebar();
+        // Wait for sidebar to finish expanding before focusing
+        setTimeout(focusInput, 350); 
+    } else {
+        focusInput();
+    }
+    
+    setActiveSidebarTab('ai-tools');
+    // Pre-fill the prompt for a better workflow
+    setModificationPrompt(`Regarding the node "${node.name}" and its children, `);
+  }, [isSidebarCollapsed, toggleSidebar, setActiveSidebarTab, setModificationPrompt]);
+
   const handleGenerateStrategicSuggestions = useCallback(async () => {
     if (!apiKeyHook.status.isSet || !initialPrompt.trim()) {
       setStrategicSuggestionsError("API Key must be set and project context (initial prompt) must be provided.");
