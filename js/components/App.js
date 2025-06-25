@@ -1,29 +1,29 @@
 import React, { useState, useCallback, useEffect, useMemo } from 'react';
 
 // Components
-import KnowledgeBranchSidebar from './components/KnowledgeBranchSidebar.js';
-import YggdrasilTopBar from './components/YggdrasilTopBar.js'; 
-import ErrorMessage from './components/ErrorMessage.js';
-import MainContentRouter from './components/MainContentRouter.js'; 
-import AppModals from './components/AppModals.js'; 
+import KnowledgeBranchSidebar from './KnowledgeBranchSidebar.js';
+import YggdrasilTopBar from './YggdrasilTopBar.js'; 
+import ErrorMessage from './ErrorMessage.js';
+import MainContentRouter from './MainContentRouter.js'; 
+import AppModals from './AppModals.js'; 
 
 
 
 // Hooks
-import { useAppThemeAndLayout } from './hooks/useAppThemeAndLayout.js';
-import { useHistoryManager } from './hooks/useHistoryManager.js';
-import { useModalManager } from './hooks/useModalManager.js';
-import { useProjectManagement } from './hooks/useProjectManagement.js';
-import { useViewStates } from './hooks/useViewStates.js';
-import { useNodeOperations } from './hooks/useNodeOperations.js';
-import { useTreeOperationsAI } from './hooks/useTreeOperationsAI.js';
-import { useAiInsights } from './hooks/useAiInsights.js';
-import { useProjectLinking } from './hooks/useProjectLinking.js';
-import { useApiKey } from './hooks/useApiKey.js';
+import { useAppThemeAndLayout } from '../hooks/useAppThemeAndLayout.js';
+import { useHistoryManager } from '../hooks/useHistoryManager.js';
+import { useModalManager } from '../hooks/useModalManager.js';
+import { useProjectManagement } from '../hooks/useProjectManagement.js';
+import { useViewStates } from '../hooks/useViewStates.js';
+import { useNodeOperations } from '../hooks/useNodeOperations.js';
+import { useTreeOperationsAI } from '../hooks/useTreeOperationsAI.js';
+import { useAiInsights } from '../hooks/useAiInsights.js';
+import { useProjectLinking } from '../hooks/useProjectLinking.js';
+import { useApiKey } from '../hooks/useApiKey.js';
 
 // Services & Utils
-import * as geminiService from './services/geminiService.js';
-import { findNodeById, countNodesInTree, getTreeDepth, getLockedNodeIds, countNodesByImportance, areAllNodesLocked } from './utils.js';
+import * as geminiService from '../services/geminiService.js';
+import { findNodeById, countNodesInTree, getTreeDepth, getLockedNodeIds, countNodesByImportance, areAllNodesLocked } from '../utils.js';
 
 
 

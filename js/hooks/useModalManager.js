@@ -105,13 +105,6 @@ export const useModalManager = () => {
     setIsAiQuickEditModalOpen(false); setAiQuickEditModalConfig(null); restoreFocus();
   }, [restoreFocus]);
 
-  const openAiQuickEditModal = useCallback((config) => {
-    captureFocus(); setAiQuickEditModalConfig(config); setIsAiQuickEditModalOpen(true);
-  }, [captureFocus]);
-  const closeAiQuickEditModal = useCallback(() => {
-    setIsAiQuickEditModalOpen(false); setAiQuickEditModalConfig(null); restoreFocus();
-  }, [restoreFocus]);
-
   const value = useMemo(() => ({
     isProjectNameModalOpen, projectModalConfig, openProjectNameModal, closeProjectNameModal,
     isAiSuggestionModalOpen, pendingAiSuggestion, openAiSuggestionModal, closeAiSuggestionModal, setPendingAiSuggestion,

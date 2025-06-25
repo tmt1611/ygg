@@ -12,7 +12,6 @@ import LinkProjectModal from './LinkProjectModal.js';
 import ContextMenu from './ContextMenu.js';
 import ViewContextMenu from './ViewContextMenu.js';
 import AiQuickEditModal from './AiQuickEditModal.js';
-import AiQuickEditModal from './AiQuickEditModal.js';
 
 // Hooks and Types (Hook return types removed)
 
