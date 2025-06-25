@@ -29,6 +29,7 @@ export const useAppThemeAndLayout = (addHistoryEntry) => {
 
   useEffect(() => {
     document.documentElement.dataset.theme = themeMode;
+    document.documentElement.dataset.themeBase = ['dark', 'nebula', 'synthwave'].includes(themeMode) ? 'dark' : 'light';
     localStorage.setItem(APP_STORAGE_KEYS.THEME_MODE, themeMode);
   }, [themeMode]);
 
