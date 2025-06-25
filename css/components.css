@@ -530,35 +530,47 @@ html[data-theme-base='light'] .panel-header-icon { color: var(--primary-accent-d
   padding: 4px 8px;
   margin: 2px 0;
   border-radius: var(--border-radius);
-  border: 1px solid var(--border-color);
+  border: 1px solid var(--status-border, var(--border-color));
   position: relative;
   overflow: hidden;
   transition: background-color 0.2s, border-color 0.2s;
+  background-color: var(--status-bg, transparent);
+  opacity: var(--status-opacity, 1);
 }
 .diff-list-item.status-new {
-  background-color: var(--success-bg);
-  border-color: var(--success-color);
+  --status-bg: var(--success-bg);
+  --status-border: var(--success-color);
+  --status-text: var(--success-color);
+  --status-icon: var(--success-color);
 }
 .diff-list-item.status-content_modified {
-  background-color: var(--primary-accent-hover-bg); 
-  border-color: var(--primary-accent-light);
+  --status-bg: var(--primary-accent-hover-bg); 
+  --status-border: var(--primary-accent-light);
+  --status-text: var(--primary-accent-dark);
+  --status-icon: var(--primary-accent);
 }
 .diff-list-item.status-structure_modified {
-  background-color: var(--panel-alt-bg);
-  border-color: var(--secondary-accent-dark);
+  --status-bg: var(--panel-alt-bg);
+  --status-border: var(--secondary-accent-dark);
+  --status-icon: var(--secondary-accent-dark);
 }
 .diff-list-item.status-reparented {
-  background-color: var(--warning-bg);
-  border-color: var(--warning-color);
+  --status-bg: var(--warning-bg);
+  --status-border: var(--warning-color);
+  --status-icon: var(--warning-color);
 }
 .diff-list-item.status-locked_content_changed {
-  background-color: var(--error-bg);
-  border-color: var(--error-color);
+  --status-bg: var(--error-bg);
+  --status-border: var(--error-color);
+  --status-text: var(--error-color);
+  --status-icon: var(--error-color);
 }
 .diff-list-item.status-removed {
-  background-color: rgba(220, 53, 69, 0.1); 
-  border-color: var(--error-color);
-  opacity: 0.7;
+  --status-bg: rgba(220, 53, 69, 0.1); 
+  --status-border: var(--error-color);
+  --status-text: var(--error-color);
+  --status-icon: var(--error-color);
+  --status-opacity: 0.7;
 }
 
 .diff-list-item-header {
@@ -579,19 +591,15 @@ html[data-theme-base='light'] .panel-header-icon { color: var(--primary-accent-d
   gap: 5px;
   font-weight: 500;
   font-size: 0.9em;
+  color: var(--status-text, inherit);
 }
-.status-new .diff-list-item-name-section { color: var(--success-color); }
-.status-content_modified .diff-list-item-name-section { color: var(--primary-accent-dark); }
-.status-locked_content_changed .diff-list-item-name-section { color: var(--error-color); font-weight: bold; }
-.status-removed .diff-list-item-name-section { text-decoration: line-through; color: var(--error-color); }
+.status-locked_content_changed .diff-list-item-name-section { font-weight: bold; }
+.status-removed .diff-list-item-name-section { text-decoration: line-through; }
 
-.diff-change-icon { font-size: 1.1em; }
-.status-new .diff-change-icon { color: var(--success-color); }
-.status-content_modified .diff-change-icon { color: var(--primary-accent); }
-.status-structure_modified .diff-change-icon { color: var(--secondary-accent-dark); }
-.status-reparented .diff-change-icon { color: var(--warning-color); }
-.status-locked_content_changed .diff-change-icon { color: var(--error-color); }
-.status-removed .diff-change-icon { color: var(--error-color); }
+.diff-change-icon { 
+  font-size: 1.1em;
+  color: var(--status-icon, inherit);
+}
 
 .diff-lock-icon {
   color: var(--text-tertiary);

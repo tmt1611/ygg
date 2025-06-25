@@ -65,28 +65,21 @@ export const updateNodeInTree = (node, nodeId, updates) => {
 };
 
 export const addNodeToParent = (tree, parentId, newNodeName, newNodeDescription) => {
-    const newNode = {
-      id: generateUUID(), name: newNodeName, description: newNodeDescription,
-      isLocked: false, importance: 'common', children: []
-    };
-    if (!parentId || tree.id === parentId) {
-        return {
-            ...tree,
-            children: [...(tree.children || []), initializeNodes(newNode, tree.id)]
-        };
-    }
     const addRecursively = (node) => {
         if (node.id === parentId) {
-            return {
-                ...node,
-                children: [...(node.children || []), initializeNodes(newNode, node.id)]
-            };
+            const newNode = initializeNodes({
+                id: 'NEW_NODE', name: newNodeName, description: newNodeDescription,
+                isLocked: false, importance: 'common', children: []
+            }, node.id);
+            return { ...node, children: [...(node.children || []), newNode] };
         }
         if (node.children) {
             return { ...node, children: node.children.map(child => addRecursively(child)) };
         }
         return node;
     };
+
+    if (!parentId) parentId = tree.id;
     return addRecursively(tree);
 };
 

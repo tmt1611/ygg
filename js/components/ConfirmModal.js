@@ -22,9 +22,7 @@ const ConfirmModal = ({
     const handleKeyDown = (event) => {
       if (event.key === 'Escape') {
         event.preventDefault();
-        if (onCancel) {
-          onCancel();
-        }
+        onCancel?.();
       } else if (event.key === 'Enter') {
         // Let button's default 'Enter' behavior work if it has focus
         if (document.activeElement?.tagName !== 'BUTTON') {

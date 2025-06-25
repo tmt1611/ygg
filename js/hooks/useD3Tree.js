@@ -2,6 +2,20 @@ import { useEffect, useMemo, useRef, useCallback, useState, useLayoutEffect } fr
 import { select, zoom, hierarchy, tree, zoomIdentity } from 'd3';
 import { getAllNodesAsMap, findNodeById } from '../utils.js';
 
+const createD3Marker = (defsSelection, id, className) => {
+  defsSelection.append('marker')
+    .attr('id', id)
+    .attr('class', className)
+    .attr('viewBox', '-10 -5 10 10')
+    .attr('refX', 0)
+    .attr('refY', 0)
+    .attr('orient', 'auto')
+    .attr('markerWidth', 6)
+    .attr('markerHeight', 6)
+    .append('svg:path')
+    .attr('d', 'M0,-5L-10,0L0,5');
+};
+
 const defaultTreeConfig = {
   nodeRadius: 16, // Base for 'common', but will be overridden in GraphViewComponent
   // New config for radial layout
@@ -176,22 +190,8 @@ export const useD3Tree = (
 
       const defs = svg.append('defs');
 
-      const createMarker = (id, className) => {
-        defs.append('marker')
-            .attr('id', id)
-            .attr('class', className)
-            .attr('viewBox', '-10 -5 10 10')
-            .attr('refX', 0)
-            .attr('refY', 0)
-            .attr('orient', 'auto')
-            .attr('markerWidth', 6)
-            .attr('markerHeight', 6)
-            .append('svg:path')
-            .attr('d', 'M0,-5L-10,0L0,5');
-      };
-
       // The 'arrowhead' is now drawn manually in GraphViewComponent, so we only need the project one.
-      createMarker('arrowhead-project', 'graph-arrowhead-project');
+      createD3Marker(defs, 'arrowhead-project', 'graph-arrowhead-project');
       
       // The 'g' element will be centered, and nodes will be positioned relative to it.
       const gElement = svg.append("g");
