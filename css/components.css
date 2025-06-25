@@ -1822,7 +1822,6 @@ html[data-theme='ocean'] .panel-variant-sidebar .panel-header-icon {
   background: none;
   border: none;
   box-shadow: none;
-  cursor: pointer;
   font-size: 1.4em;
   font-weight: bold;
   line-height: 1;
@@ -2128,6 +2127,79 @@ html[data-theme='ocean'] .panel-variant-sidebar .panel-toggle-button {
   background: linear-gradient(to left, rgba(var(--panel-bg-rgb), 0.8), transparent);
 }
 
+
+/* Error Boundary */
+.error-boundary-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  width: 100vw;
+  padding: 20px;
+  background-color: var(--app-bg);
+  color: var(--text-primary);
+}
+.error-boundary-content {
+  max-width: 650px;
+  text-align: center;
+  background-color: var(--panel-bg);
+  padding: 30px 40px;
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--box-shadow-lg);
+  border-top: 4px solid var(--error-color);
+}
+.error-boundary-icon {
+  font-size: 3.5em;
+  line-height: 1;
+  margin-bottom: 15px;
+  color: var(--error-color);
+  animation: errorAppear 0.5s ease-out;
+}
+@keyframes errorAppear { from { transform: scale(0.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+.error-boundary-title {
+  font-family: var(--font-family-serif-display);
+  font-size: 2em;
+  margin-bottom: 10px;
+}
+.error-boundary-message {
+  font-size: 1.1em;
+  color: var(--text-secondary);
+  margin-bottom: 20px;
+}
+.error-boundary-subtext {
+  font-size: 0.9em;
+  color: var(--text-tertiary);
+  margin-bottom: 25px;
+  line-height: 1.5;
+}
+.error-boundary-actions {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.error-boundary-details {
+  margin-top: 25px;
+  text-align: left;
+  background-color: var(--panel-alt-bg);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  padding: 10px;
+}
+.error-boundary-details summary {
+  cursor: pointer;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+.error-boundary-details pre {
+  margin-top: 10px;
+  white-space: pre-wrap;
+  word-break: break-all;
+  font-size: 0.8em;
+  color: var(--text-tertiary);
+  max-height: 150px;
+  overflow-y: auto;
+}
 
 /* Error Boundary */
 .error-boundary-container {
