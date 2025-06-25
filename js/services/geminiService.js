@@ -289,7 +289,7 @@ Based on the instruction, provide the complete, modified JSON object for this si
     console.error("Error during quick edit via Gemini API:", error);
     throw constructApiError(error, "Failed to perform quick edit.", { prompt: fullPrompt, rawResponse: error.rawResponse });
   }
-};
+});
 
 
 
