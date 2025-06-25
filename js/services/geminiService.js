@@ -337,7 +337,7 @@ export const modifyTechTreeByGemini = async (
 **MANDATORY RULES:**
 1.  **Minimal Changes:** Only modify nodes directly relevant to the user's instruction. Leave all other nodes completely unchanged, preserving their exact original content and structure.
 2.  **Critical: Preserve IDs & Locks:**
-    - You MUST RETAIN the original 'id' for every existing node, even if you change its name, description, or move it. This is the most important rule.
+    - You MUST RETAIN the original 'id' for every existing node, even if you change its name, description, or move it. This is the most important rule. An existing node in the output MUST have the same 'id' it had in the input.
     - If you create a completely new node, use "NEW_NODE" for its 'id'.
     - You MUST NOT change the 'isLocked' value for any node.
 3.  **Locked Node Content:** If a node's ID is in the 'Locked Node IDs' list, you MUST NOT change its 'name', 'description', or 'importance'. You CAN add new children to it or move it.
