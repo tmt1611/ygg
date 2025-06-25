@@ -373,13 +373,39 @@ Output the complete, modified JSON for the tech tree, adhering to ALL rules abov
     
     let parsedData = parseGeminiJsonResponse(response.text(), true);
 
+    // This reconciliation step attempts to restore IDs and lock states that the AI might have omitted.
+    // This prevents existing nodes from being incorrectly flagged as 'new'.
+    const reconcileData = (original, modified) => {
+        if (!original || !modified) return;
+
+        // Restore ID if missing and enforce original lock state.
+        if ((!modified.id || modified.id === 'NEW_NODE') && original.id) {
+            modified.id = original.id;
+        }
+        modified.isLocked = original.isLocked;
+
+        // Recurse through children, matching by name as a heuristic.
+        if (Array.isArray(original.children) && Array.isArray(modified.children)) {
+            const originalChildrenByName = new Map(original.children.map(c => [c.name, c]));
+
+            modified.children.forEach(modChild => {
+                const originalChild = originalChildrenByName.get(modChild.name);
+                if (originalChild) {
+                    reconcileData(originalChild, modChild);
+                }
+            });
+        }
+    };
+    
     if (Array.isArray(parsedData)) {
         if (parsedData.length > 0 && parsedData.every(isValidTechTreeNodeShape)) {
              parsedData = { 
-                id: 'NEW_NODE_ROOT_WRAPPER', 
+                id: currentTree.id || 'NEW_NODE_ROOT_WRAPPER', // Try to preserve root ID
                 name: `${currentTree.name || 'Modified Tree'} (Wrapped Multi-Root)`,
                 description: "AI suggested multiple root nodes; this is an auto-generated wrapper.",
-                isLocked: false, importance: 'common', children: parsedData,
+                isLocked: currentTree.isLocked || false, 
+                importance: 'common', 
+                children: parsedData,
                 linkedProjectId: currentTree.linkedProjectId || null,
                 linkedProjectName: currentTree.linkedProjectName || null,
             };
@@ -387,6 +413,8 @@ Output the complete, modified JSON for the tech tree, adhering to ALL rules abov
             console.error("Gemini modification resulted in an un-wrappable array or array with invalid items:", parsedData);
             throw new Error("AI suggestion resulted in an array of nodes that cannot be auto-wrapped or contains invalid nodes.");
         }
+    } else if (parsedData) {
+        reconcileData(currentTree, parsedData);
     }
 
     if (!isValidTechTreeNodeShape(parsedData)) {
