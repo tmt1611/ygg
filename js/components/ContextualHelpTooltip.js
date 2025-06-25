@@ -4,19 +4,19 @@ const ContextualHelpTooltip = ({
   helpText,
   position = 'top'
 }) => {
-  // Using a span with tabindex for focusability without button semantics.
+  // Using a button for better accessibility and semantics.
   return (
-    React.createElement("span", {
-      tabIndex: "0",
-      role: "img", // It's a visual symbol with a label
+    React.createElement("button", {
+      type: "button",
       "aria-label": `Help: ${helpText}`,
-      className: "tooltip-container contextual-help-icon"
+      className: "tooltip-container contextual-help-icon",
+      onClick: (e) => e.preventDefault() // Prevent any form submission if it's inside a form
     },
       "?",
       React.createElement("span", {
         className: `tooltip-text position-${position}`,
         role: "tooltip",
-        "aria-hidden": "true"
+        "aria-hidden": "true" // The tooltip content is for visual users; screen readers use the aria-label.
       },
         helpText
       )
