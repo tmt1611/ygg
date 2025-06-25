@@ -6,7 +6,7 @@ const ErrorMessage = ({ error, onClose, mode = 'toast' }) => {
   if (!error || !error.message) return null;
 
   const handleCopy = () => {
-    const errorDetails = `Error: ${error.message}\n\nDetails:\n${error.details}`;
+    const errorDetails = `Error: ${error.message}\n\nDetails:\n${error.details || 'No additional details available.'}`;
     navigator.clipboard.writeText(errorDetails).then(() => {
       setCopyFeedback('Copied!');
       setTimeout(() => setCopyFeedback(''), 2000);
