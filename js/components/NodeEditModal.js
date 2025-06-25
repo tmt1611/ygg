@@ -64,7 +64,8 @@ const NodeEditModal = ({
     },
       React.createElement("div", { className: "modal-content-basic", style: {width: 'clamp(350px, 60vw, 550px)'}},
         React.createElement("form", { onSubmit: handleConfirm },
-          React.createElement("h2", { id: "node-edit-modal-title", style: { fontSize: '1.3em', color: 'var(--text-primary)', marginBottom: '20px' }},
+          React.createElement("h2", { id: "node-edit-modal-title", className: "modal-title" },
+            React.createElement("span", { className: "modal-icon" }, mode === 'addChild' ? '➕' : '✏️'),
             title
           ),
 

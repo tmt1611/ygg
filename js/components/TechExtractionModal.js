@@ -56,7 +56,8 @@ const TechExtractionModal = ({
       onClick: (e) => { if (e.target === e.currentTarget) onClose(); }
     },
       React.createElement("div", { className: "modal-content-basic", style: { width: 'clamp(500px, 90vw, 800px)', maxHeight: '85vh', display: 'flex', flexDirection: 'column' }},
-        React.createElement("h2", { id: "extraction-modal-title", style: { fontSize: '1.3em', color: 'var(--text-primary)', marginBottom: '15px', flexShrink: 0 }},
+        React.createElement("h2", { id: "extraction-modal-title", className: "modal-title" },
+          React.createElement("span", { className: "modal-icon" }, "📤"),
           title 
         ),
         React.createElement("textarea", {

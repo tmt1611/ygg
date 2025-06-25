@@ -65,7 +65,8 @@ const LinkProjectModal = ({
     },
       React.createElement("div", { className: "modal-content-basic", style: { width: 'clamp(400px, 70vw, 600px)' }},
         React.createElement("form", { onSubmit: handleConfirm },
-          React.createElement("h2", { id: "link-project-modal-title", style: { fontSize: '1.3em', color: 'var(--text-primary)', marginBottom: '15px' }},
+          React.createElement("h2", { id: "link-project-modal-title", className: "modal-title" },
+            React.createElement("span", { className: "modal-icon" }, "🔗"),
             "Link Node \"", sourceNodeName, "\" to another Project"
           ),
           React.createElement("p", { style: { color: 'var(--text-secondary)', marginBottom: '10px' }},

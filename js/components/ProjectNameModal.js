@@ -83,7 +83,8 @@ const ProjectNameModal = ({
     },
       React.createElement("div", { className: "modal-content-basic" },
         React.createElement("form", { onSubmit: handleConfirm },
-          React.createElement("h2", { id: "project-name-modal-title", style: { fontSize: '1.3em', color: 'var(--text-primary)', marginBottom: '15px' }},
+          React.createElement("h2", { id: "project-name-modal-title", className: "modal-title" },
+            React.createElement("span", { className: "modal-icon" }, mode === 'createExample' ? '⭐' : '📁'),
             title
           ),
           React.createElement("label", { htmlFor: "project-name-input", style: {display: 'block', marginBottom: '5px'}},
