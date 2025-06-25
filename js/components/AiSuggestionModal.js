@@ -213,7 +213,7 @@ const AiSuggestionModal = ({
             )
           ),
 
-          isSummaryVisible && React.createElement("div", { id: "ai-suggestion-summary-panel", className: "ai-suggestion-modal-summary-panel" },
+          React.createElement("div", { id: "ai-suggestion-summary-panel", className: "ai-suggestion-modal-summary-panel" },
             React.createElement("div", { id: "ai-suggestion-summary", className: "ai-suggestion-modal-summary-section" },
               React.createElement("h4", { className: "ai-suggestion-modal-summary-title" }, "Summary of Changes"),
               !annotatedTree?._isErrorNode ? (

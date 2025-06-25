@@ -100,8 +100,6 @@ const TechTreeListItemComponent = ({
 
   const handleAddChildClick = useCallback((event) => {
     if (event.shiftKey) {
-      onAddQuickChild(node.id);
-    } else {
       onOpenNodeEditModal({
           mode: 'addChild',
           targetNodeId: node.id,
@@ -110,6 +108,8 @@ const TechTreeListItemComponent = ({
           label: "New Child Name",
           placeholder: "Enter new child name",
       });
+    } else {
+      onAddQuickChild(node.id);
     }
   }, [node.id, node.name, onOpenNodeEditModal, onAddQuickChild]);
 
@@ -251,8 +251,8 @@ const TechTreeListItemComponent = ({
             onClick: handleAddChildClick, 
             disabled: isAppBusy, 
             className: "list-item-action-icon base-icon-button",
-            "aria-label": `Add child to ${node.name}. Hold Shift to add without a prompt.`, 
-            title: `Add Child Node (Shift+Click for quick add)`
+            "aria-label": `Add quick child to ${node.name}. Hold Shift to add with details.`, 
+            title: `Add Quick Child (Shift+Click for details)`
           }, '➕'),
           React.createElement("button", {
             onClick: handleCycleImportance,
