@@ -35,22 +35,23 @@ const AiToolsTab = ({
         React.createElement(ModificationPromptInput, {
           prompt: modificationPrompt,
           setPrompt: setModificationPrompt,
-          onModify: onModifyAiTree,
+          onModify: () => onModifyAiTree(modificationPrompt, false), // false = don't use modal
           isLoading: isAiModifying,
           disabled: !hasTechTreeData || !apiKeyIsSet || isAiModifying || isAppBusy,
           isApiKeySet: apiKeyIsSet,
           hasTreeData: hasTechTreeData,
-          labelOverride: null
+          labelOverride: null,
+          buttonText: "Apply AI Modification"
         }),
         hasTechTreeData && canUndoAiMod && (
           React.createElement("button", {
             onClick: onUndoAiModification,
-            disabled: isAiModifying || isAppBusy || isAiSuggestionModalOpen,
+            disabled: isAiModifying || isAppBusy,
             className: "secondary",
             style: { width: '100%', marginTop: '8px' },
             title: isAiSuggestionModalOpen ? "A suggestion preview is open. Please resolve it first." : "Revert the last AI modification or cancel the current suggestion chain."
           },
-            "Undo Last AI Mod"
+            isAiSuggestionModalOpen ? "Cancel Suggestion" : "Undo Last AI Mod"
           )
         )
       ),

@@ -41,7 +41,7 @@ const App = () => {
   const [downloadFeedback, setDownloadFeedback] = useState(false);
   
   const [previousTreeStateForUndo, setPreviousTreeStateForUndo] = useState(null);
-  const [baseForModalDiff, setBaseForModalDiff] = useState(null); 
+  const [baseForModalDiff, setBaseForModalDiff] = useState(null); // This will be used only for modal-based suggestions
 
   const [selectedNodeForInsights, setSelectedNodeForInsights] = useState(null);
 
@@ -111,7 +111,7 @@ const App = () => {
     modalManager, historyManager, projectManager, viewStates, setError,
     techTreeData, setTechTreeData, contextText: initialPrompt, initialPrompt,
     previousTreeStateForUndoProp: previousTreeStateForUndo, setPreviousTreeStateForUndo,
-    baseForModalDiffProp: baseForModalDiff, setBaseForModalDiff, 
+    baseForModalDiffProp: baseForModalDiff, setBaseForModalDiff,
     setIsLoading, setIsModifying, setModificationPrompt: setModificationPrompt,
     selectedGraphNodeId: viewStates.selectedGraphNodeId
   });
@@ -143,7 +143,7 @@ const App = () => {
         setModificationPrompt('');
         if (isAiSuggestionModalOpen) closeAiSuggestionModal();
     }
-  }, [techTreeData, pendingAiSuggestion, previousTreeStateForUndo, baseForModalDiff, isAiSuggestionModalOpen, closeAiSuggestionModal, setPendingAiSuggestion, setModificationPrompt]);
+  }, [techTreeData, pendingAiSuggestion, previousTreeStateForUndo, baseForModalDiff, isAiSuggestionModalOpen, closeAiSuggestionModal, setPendingAiSuggestion]);
 
 
   // --- Event Handlers & Callbacks ---
@@ -306,7 +306,8 @@ const App = () => {
     }
     const fullPrompt = `Based on the strategic idea "${suggestion}", please apply relevant modifications to the current tree structure. For example, consider creating new main branches, adding key technologies under existing nodes, or expanding on underdeveloped areas related to this idea.`;
     setModificationPrompt(fullPrompt);
-    treeOperationsAI.handleApplyAiModification(fullPrompt);
+    // Strategic suggestions are complex, so they should always use the modal for review.
+    treeOperationsAI.handleApplyAiModification(fullPrompt, true); // true for useModal
     setActiveSidebarTab('ai-tools');
   }, [techTreeData, treeOperationsAI, setModificationPrompt, setActiveSidebarTab, setError]);
 
@@ -343,7 +344,7 @@ const App = () => {
           // AI Tools Tab Props
           modificationPrompt: modificationPrompt,
           setModificationPrompt: setModificationPrompt,
-          onModifyAiTree: () => treeOperationsAI.handleApplyAiModification(modificationPrompt),
+          onModifyAiTree: treeOperationsAI.handleApplyAiModification,
           isAiModifying: isModifying,
           canUndoAiMod: canUndoAiModForSidebar,
           onUndoAiModification: treeOperationsAI.handleUndoAiModification,

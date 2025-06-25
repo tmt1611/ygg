@@ -16,7 +16,7 @@ export const useTreeOperationsAI = ({
   previousTreeStateForUndoProp, 
   setPreviousTreeStateForUndo,
   baseForModalDiffProp, 
-  setBaseForModalDiff,  
+  setBaseForModalDiff,
   setIsLoading,
   setIsModifying,
   setModificationPrompt,
@@ -76,15 +76,15 @@ export const useTreeOperationsAI = ({
     openConfirmModal, addHistoryEntry
   ]);
 
-  const handleApplyAiModification = useCallback(async (modificationPromptValue) => {
+  const handleApplyAiModification = useCallback(async (modificationPromptValue, useModal = false) => {
     if (!projectManager) {
         setError("Project system not fully initialized for AI modification.");
         return;
     }
-    const { activeProjectId } = projectManager;
+    const { activeProjectId, handleSaveActiveProject } = projectManager;
 
-    if (!techTreeData && !pendingAiSuggestion) { 
-        setError("No tree data loaded or pending suggestion to modify.");
+    if (!techTreeData) { 
+        setError("No tree data loaded to modify.");
         return;
     }
     if (!modificationPromptValue.trim() || !apiKeyIsSet) {
@@ -101,42 +101,39 @@ export const useTreeOperationsAI = ({
             finalModificationPrompt = `The user has selected the node "${selectedNode.name}" (ID: ${selectedNode.id}). Apply the following instruction primarily to this node and its descendants, maintaining the integrity of the rest of the tree. Instruction: "${modificationPromptValue}"`;
         }
     }
-
-    let currentModificationBase;
-    if (pendingAiSuggestion) { 
-        currentModificationBase = pendingAiSuggestion;
-    } else { 
-        currentModificationBase = techTreeData;
-        if (techTreeData) { 
-          setPreviousTreeStateForUndo(techTreeData); 
-        }
-    }
     
-    if (!currentModificationBase) {
-        setError("Base tree for modification is missing.");
-        setIsModifying(false);
-        return;
-    }
-
-    setBaseForModalDiff(currentModificationBase); 
-
+    // For both modal and direct apply, the "undo" state is the tree *before* this operation.
+    setPreviousTreeStateForUndo(techTreeData); 
+    
     try {
-      const lockedIds = getLockedNodeIds(currentModificationBase);
-      const suggestedTree = await geminiService.modifyTechTreeByGemini(currentModificationBase, finalModificationPrompt, lockedIds);
+      const lockedIds = getLockedNodeIds(techTreeData);
+      const suggestedTree = await geminiService.modifyTechTreeByGemini(techTreeData, finalModificationPrompt, lockedIds);
       
-      setPendingAiSuggestion(suggestedTree); 
-      openAiSuggestionModal(suggestedTree); 
-      addHistoryEntry('TREE_MOD_AI', 'AI proposed modifications.', { prompt: modificationPromptValue, projectId: activeProjectId });
+      if (useModal) {
+        setBaseForModalDiff(techTreeData);
+        setPendingAiSuggestion(suggestedTree); 
+        openAiSuggestionModal(suggestedTree); 
+        addHistoryEntry('TREE_MOD_AI', 'AI proposed modifications (with modal).', { prompt: modificationPromptValue, projectId: activeProjectId });
+      } else {
+        // Direct Apply
+        const annotatedTree = compareAndAnnotateTree(techTreeData, suggestedTree);
+        setTechTreeData(annotatedTree.annotatedTree);
+        handleSaveActiveProject(false);
+        addHistoryEntry('AI_MOD_CONFIRMED', 'AI modifications directly applied.', { prompt: modificationPromptValue, projectId: activeProjectId });
+        setModificationPrompt('');
+      }
     } catch (e) { 
       setError(e); 
       console.error("Gemini API Error (Modify):", e); 
+      // If it fails, revert the undo state since nothing happened.
+      setPreviousTreeStateForUndo(null);
     }
     finally { setIsModifying(false); }
   }, [
-    techTreeData, apiKeyIsSet, projectManager, pendingAiSuggestion,
+    techTreeData, apiKeyIsSet, projectManager,
     openAiSuggestionModal, setPendingAiSuggestion, addHistoryEntry, 
     setError, setPreviousTreeStateForUndo, setIsModifying, setBaseForModalDiff,
-    selectedGraphNodeId
+    selectedGraphNodeId, setTechTreeData, setModificationPrompt
   ]);
 
   const handleConfirmAiSuggestion = useCallback(() => {
@@ -147,10 +144,10 @@ export const useTreeOperationsAI = ({
     const { activeProjectId, handleSaveActiveProject } = projectManager;
     const suggestionToApply = pendingAiSuggestion; 
     if (suggestionToApply) {
-      setPreviousTreeStateForUndo(techTreeData); // Save the state BEFORE applying the suggestion
-      const annotatedTree = compareAndAnnotateTree(techTreeData, suggestionToApply);
+      // The undo state was already set when the suggestion was generated.
+      const annotatedTree = compareAndAnnotateTree(baseForModalDiffProp, suggestionToApply);
       setTechTreeData(annotatedTree.annotatedTree);
-      addHistoryEntry('AI_MOD_CONFIRMED', 'AI modifications applied to project.', { nodeCount: countNodesInTree(suggestionToApply), projectId: activeProjectId });
+      addHistoryEntry('AI_MOD_CONFIRMED', 'AI modifications applied to project from modal.', { nodeCount: countNodesInTree(suggestionToApply), projectId: activeProjectId });
       setModificationPrompt(''); 
       handleSaveActiveProject(false);
       if (viewStates && viewStates.setSelectedGraphNodeId) {
@@ -162,10 +159,10 @@ export const useTreeOperationsAI = ({
     // Do NOT clear the undo state, so the user can revert this confirmed change.
     closeAiSuggestionModal();
   }, [
-    pendingAiSuggestion, projectManager, techTreeData,
+    pendingAiSuggestion, projectManager, baseForModalDiffProp,
     closeAiSuggestionModal, addHistoryEntry, 
     setTechTreeData, setModificationPrompt, setError,
-    setPendingAiSuggestion, setBaseForModalDiff, setPreviousTreeStateForUndo,
+    setPendingAiSuggestion, setBaseForModalDiff,
     viewStates
   ]);
 
@@ -178,7 +175,7 @@ export const useTreeOperationsAI = ({
     addHistoryEntry('AI_MOD_REJECTED', 'AI modification chain discarded.', { projectId: activeProjectId });
     setPendingAiSuggestion(null);    
     setBaseForModalDiff(null);       
-    setPreviousTreeStateForUndo(null); 
+    setPreviousTreeStateForUndo(null); // The action was rejected, so clear the undo state.
     closeAiSuggestionModal();
   }, [projectManager, closeAiSuggestionModal, addHistoryEntry, setPendingAiSuggestion, setBaseForModalDiff, setPreviousTreeStateForUndo]);
 
@@ -188,26 +185,25 @@ export const useTreeOperationsAI = ({
       return;
     }
 
-    if (pendingAiSuggestion || baseForModalDiffProp) { 
-      setTechTreeData(previousTreeStateForUndoProp || null); 
-      addHistoryEntry('AI_MOD_UNDONE', 'AI modification chain cancelled and reverted.', { projectId: projectManager.activeProjectId });
-      setPendingAiSuggestion(null);
-      setBaseForModalDiff(null);
-      setPreviousTreeStateForUndo(null);
-      setModificationPrompt('');
-    } else if (previousTreeStateForUndoProp) { 
+    // If a modal is open, it means we are in a suggestion chain. "Undo" should cancel it.
+    if (pendingAiSuggestion) {
+        handleRejectAiSuggestion();
+        return;
+    }
+
+    // If no modal is open, but there's an undo state, revert to it.
+    if (previousTreeStateForUndoProp) { 
       setTechTreeData(previousTreeStateForUndoProp);
-      addHistoryEntry('AI_MOD_UNDONE', 'Last confirmed AI modification to project tree undone.', { projectId: projectManager.activeProjectId });
+      addHistoryEntry('AI_MOD_UNDONE', 'Last AI modification undone.', { projectId: projectManager.activeProjectId });
       setPreviousTreeStateForUndo(null); 
       setModificationPrompt('');
+      projectManager.handleSaveActiveProject(false); 
     } else {
       setError("No previous AI modification state available to undo.");
-      return; 
     }
-    projectManager.handleSaveActiveProject(false); 
   }, [
-    pendingAiSuggestion, baseForModalDiffProp, previousTreeStateForUndoProp, projectManager, 
-    setError, setTechTreeData, setPreviousTreeStateForUndo, setBaseForModalDiff, setPendingAiSuggestion, addHistoryEntry
+    pendingAiSuggestion, previousTreeStateForUndoProp, projectManager, handleRejectAiSuggestion,
+    setError, setTechTreeData, setPreviousTreeStateForUndo, addHistoryEntry, setModificationPrompt
   ]);
 
   return {

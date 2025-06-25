@@ -9,6 +9,7 @@ const ModificationPromptInput = ({
   isApiKeySet,
   hasTreeData,
   labelOverride,
+  buttonText = 'Suggest Modifications'
 }) => {
   
   let disabledMessage = "";
@@ -47,10 +48,10 @@ const ModificationPromptInput = ({
         isLoading ? (
           React.createElement("span", {style: {display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px'}},
             React.createElement("span", {className: "basic-spinner-animation"}),
-            "Suggesting..."
+            "Applying..."
           )
         ) : (
-          'Suggest Modifications'
+          buttonText
         )
       ),
       disabled && disabledMessage && React.createElement("p", { style: { fontSize: '0.9em', color: 'var(--text-secondary)', marginTop: '5px', textAlign: 'center' }}, disabledMessage)
