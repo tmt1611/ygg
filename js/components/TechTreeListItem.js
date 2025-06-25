@@ -1,4 +1,3 @@
-```javascript:js/components/TechTreeListItem.js
 import React, { useMemo, useCallback, useState, useEffect } from 'react';
 import { NODE_IMPORTANCE_OPTIONS } from '../constants.js';
 
@@ -57,7 +56,7 @@ const TechTreeListItemComponent = ({
         label: "Node Name",
         placeholder: "Enter new node name",
         initialValue: node.name,
-        initialDescription: node.description,
+        initialDescription: node.description
     });
   }, [node.id, node.name, node.description, onOpenNodeEditModal]);
 
