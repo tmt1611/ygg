@@ -2,7 +2,7 @@ console.log('Yggdrasil v3.0: Script initiated.');
 
 import React from 'react';
 import * as ReactDOM from 'react-dom/client';
-import App from './App.js';
+import App from './components/App.js';
 import ErrorBoundary from './components/ErrorBoundary.js';
 
 const rootElement = document.getElementById('root');
