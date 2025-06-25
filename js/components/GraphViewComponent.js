@@ -541,15 +541,14 @@ const GraphViewComponent = ({
     });
 
     // Handle proxy node labels (simple text)
-    nodeGroups.select("text.node-label")
-      .text(d => d.isProxy ? d.data.name : "");
+    nodeGroups.filter(d => d.isProxy).select("text.node-label")
+      .text(d => d.data.name || "");
 
     // Position the foreignObject for regular node labels
-    nodeGroups.select(".node-label-foreign-object")
+    nodeGroups.filter(d => !d.isProxy).select(".node-label-foreign-object")
       .attr("width", 120)
       .attr("height", 50)
       .attr("x", d => {
-          if (d.isProxy) return null;
           const radius = getNodeRadius(d);
           const labelWidth = 120;
           if (d.depth === 0) {
@@ -558,7 +557,6 @@ const GraphViewComponent = ({
           return radius * 0.707; // approx radius / sqrt(2)
       })
       .attr("y", d => {
-          if (d.isProxy) return null;
           const radius = getNodeRadius(d);
           const spacing = 5;
           if (d.depth === 0) {
@@ -569,8 +567,8 @@ const GraphViewComponent = ({
       .attr("transform", null); // Explicitly remove transform if it exists from previous state
 
     // Set the text content for the div inside the foreignObject
-    nodeGroups.select(".node-label-wrapper")
-      .html(d => d.isProxy ? "" : (d.data.name || ""));
+    nodeGroups.filter(d => !d.isProxy).select(".node-label-wrapper")
+      .html(d => d.data.name || "");
 
     nodeGroups.select(".node-rune-icon")
       .attr("transform", null) // No rotation needed for any layout
