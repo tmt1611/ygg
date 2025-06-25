@@ -531,8 +531,6 @@ const GraphViewComponent = ({
       .on("mouseenter", handleNodeMouseEnter)
       .on("mouseleave", handleNodeMouseLeave);
 
-    // The native <title> element is removed to prevent it from interfering with the custom tooltip.
-
     nodeGroups.select("circle").attr("fill", d => {
         if (d.data.importance === 'minor') return 'var(--importance-minor-bg)';
         if (d.data.importance === 'major') return 'var(--importance-major-bg)';

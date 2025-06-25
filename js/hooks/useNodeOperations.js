@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import { findNodeById, updateNodeInTree, addNodeToParent, lockAllNodesInTree, unlockAllNodesInTree, areAllNodesLocked, removeNodeAndChildrenFromTree, updateAllChildren, deleteAllChildren, addPastedNodeToParent, isValidTechTreeNodeShape } from '../utils.js';
 
 export const useNodeOperations = ({
@@ -273,7 +273,7 @@ export const useNodeOperations = ({
   }, [techTreeData, setTechTreeData, handleSaveActiveProject, addHistoryEntry, setError, modalManager]);
 
 
-  return {
+  return useMemo(() => ({
     handleToggleNodeLock,
     handleNodeImportanceChange,
     handleConfirmNodeEdit,
@@ -287,5 +287,10 @@ export const useNodeOperations = ({
     handleDeleteAllChildren,
     handlePasteNode,
     handleConfirmQuickEdit,
-  };
+  }), [
+    handleToggleNodeLock, handleNodeImportanceChange, handleConfirmNodeEdit, handleDeleteNodeWithConfirmation,
+    handleQuickAddChild, handleToggleAllLock, handleAddNodeToRoot, handleLockAllChildren,
+    handleUnlockAllChildren, handleChangeImportanceOfAllChildren, handleDeleteAllChildren,
+    handlePasteNode, handleConfirmQuickEdit
+  ]);
 };

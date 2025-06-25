@@ -127,18 +127,22 @@ const AiSuggestionModal = ({
       applyButtonRef.current?.focus();
       setFollowUpPrompt('');
       
+      const handleEscape = (event) => { if (event.key === 'Escape') onCancel(); };
+      document.addEventListener('keydown', handleEscape);
+      return () => document.removeEventListener('keydown', handleEscape);
+    }
+  }, [isOpen, onCancel]);
+
+  useEffect(() => {
+    if (isOpen) {
       // Expand the removed nodes list if there are critical removals.
       if (comparisonResult?.lockedNodesRemoved?.length > 0) {
         setIsRemovedNodesCollapsed(false);
       } else {
         setIsRemovedNodesCollapsed(true);
       }
-
-      const handleEscape = (event) => { if (event.key === 'Escape') onCancel(); };
-      document.addEventListener('keydown', handleEscape);
-      return () => document.removeEventListener('keydown', handleEscape);
     }
-  }, [isOpen, onCancel, comparisonResult]);
+  }, [isOpen, comparisonResult]);
 
   if (!isOpen || !comparisonResult) return null;
 

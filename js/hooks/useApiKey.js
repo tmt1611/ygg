@@ -89,7 +89,7 @@ export const useApiKey = (addHistoryEntry) => {
     setIsProcessing(false);
   }, [_updateStatus, inputKey]);
 
-  const hookReturn = {
+  return useMemo(() => ({
     selectedMode,
     inputKey,
     status,
@@ -98,7 +98,5 @@ export const useApiKey = (addHistoryEntry) => {
     setInputKey,
     submitPastedKey,
     clearActiveUserKey,
-  };
-  
-  return hookReturn;
+  }), [selectedMode, inputKey, status, isProcessing, changeMode, setInputKey, submitPastedKey, clearActiveUserKey]);
 };

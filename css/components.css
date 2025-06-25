@@ -1901,6 +1901,7 @@ html[data-theme-base='light'] .panel-variant-sidebar .panel-toggle-button {
 
 /* Path to Root Display */
 .path-to-root-display {
+  --path-fade-bg: var(--button-default-bg);
   display: flex;
   align-items: center;
   gap: 4px;
@@ -1913,7 +1914,11 @@ html[data-theme-base='light'] .panel-variant-sidebar .panel-toggle-button {
   max-width: 50vw; /* Prevent it from taking too much space */
   position: relative;
 }
+.path-to-root-display::-webkit-scrollbar { height: 0; width: 0; }
+.path-to-root-display { scrollbar-width: none; }
+
 .path-to-root-display.context-focus-view {
+  --path-fade-bg: var(--app-bg);
   max-width: 100%;
   width: 100%;
   background-color: transparent;
@@ -1935,33 +1940,10 @@ html[data-theme-base='light'] .panel-variant-sidebar .panel-toggle-button {
   border-color: var(--primary-accent-dark);
   font-weight: 600;
 }
-.path-to-root-display::-webkit-scrollbar { height: 0; width: 0; }
-.path-to-root-display { scrollbar-width: none; }
-.path-to-root-display::before, .path-to-root-display::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  width: 20px;
-  pointer-events: none;
-  transition: opacity 0.2s;
-}
-.path-to-root-display::before {
-  left: 0;
-  background: linear-gradient(to right, var(--button-default-bg), transparent);
-}
-.path-to-root-display.context-focus-view::before {
-  background: linear-gradient(to right, var(--app-bg), transparent);
-}
-.path-to-root-display::after {
-  right: 0;
-  background: linear-gradient(to left, var(--button-default-bg), transparent);
-}
-.path-to-root-display.context-focus-view::after {
-  background: linear-gradient(to left, var(--app-bg), transparent);
-}
+
 .path-to-root-display.context-graph-focus {
-  background-color: rgba(var(--panel-bg-rgb), 0.8);
+  --path-fade-bg: rgba(var(--panel-bg-rgb), 0.8);
+  background-color: var(--path-fade-bg);
   backdrop-filter: blur(2px);
 }
 .path-to-root-display.context-graph-focus .path-segment:hover {
@@ -1973,8 +1955,23 @@ html[data-theme-base='light'] .panel-variant-sidebar .panel-toggle-button {
   color: var(--text-on-accent);
   font-weight: 600;
 }
-.path-to-root-display.context-graph-focus::before {
-  background: linear-gradient(to right, rgba(var(--panel-bg-rgb), 0.8), transparent);
+
+.path-to-root-display::before, .path-to-root-display::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 20px;
+  pointer-events: none;
+  transition: opacity 0.2s;
+}
+.path-to-root-display::before {
+  left: 0;
+  background: linear-gradient(to right, var(--path-fade-bg), transparent);
+}
+.path-to-root-display::after {
+  right: 0;
+  background: linear-gradient(to left, var(--path-fade-bg), transparent);
 }
 
 .path-to-root-display.no-scroll-start::before,
@@ -2001,10 +1998,6 @@ html[data-theme-base='light'] .panel-variant-sidebar .panel-toggle-button {
   color: var(--text-tertiary);
   font-size: 0.9em;
   user-select: none;
-}
-
-.path-to-root-display.context-graph-focus::after {
-  background: linear-gradient(to left, rgba(var(--panel-bg-rgb), 0.8), transparent);
 }
 
 
