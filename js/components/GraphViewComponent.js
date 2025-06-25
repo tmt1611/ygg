@@ -543,27 +543,27 @@ const GraphViewComponent = ({
     nodeGroups.filter(d => d.isProxy).select("text.node-label")
       .text(d => d.data.name || "");
 
-    // Position the foreignObject for regular node labels
+    // Position the foreignObject for regular node labels using a transform
     nodeGroups.filter(d => !d.isProxy).select(".node-label-foreign-object")
       .attr("width", 120)
       .attr("height", 50)
-      .attr("x", d => {
+      .attr("x", 0) // Reset x to 0, positioning is handled by transform
+      .attr("y", 0) // Reset y to 0
+      .attr("transform", d => {
           const radius = getNodeRadius(d);
           const labelWidth = 120;
+          let x, y;
+
           if (d.depth === 0) {
-              return -labelWidth / 2;
+              x = -labelWidth / 2;
+              y = radius + 5; // spacing
+          } else {
+              // Position to the bottom-right of the node's origin
+              x = radius * 0.707; // approx radius / sqrt(2)
+              y = radius * 0.707; // approx radius / sqrt(2)
           }
-          return radius * 0.707; // approx radius / sqrt(2)
-      })
-      .attr("y", d => {
-          const radius = getNodeRadius(d);
-          const spacing = 5;
-          if (d.depth === 0) {
-              return radius + spacing;
-          }
-          return radius * 0.707; // approx radius / sqrt(2)
-      })
-      .attr("transform", null); // Explicitly remove transform if it exists from previous state
+          return `translate(${x}, ${y})`;
+      });
 
     // Set the text content for the div inside the foreignObject
     nodeGroups.filter(d => !d.isProxy).select(".node-label-wrapper")
