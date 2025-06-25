@@ -35,13 +35,13 @@ const AiToolsTab = ({
         React.createElement(ModificationPromptInput, {
           prompt: modificationPrompt,
           setPrompt: setModificationPrompt,
-          onModify: () => onModifyAiTree(modificationPrompt, false), // false = don't use modal
+          onModify: () => onModifyAiTree(modificationPrompt, true), // ALWAYS use modal for safety
           isLoading: isAiModifying,
           disabled: !hasTechTreeData || !apiKeyIsSet || isAiModifying || isAppBusy,
           isApiKeySet: apiKeyIsSet,
           hasTreeData: hasTechTreeData,
-          labelOverride: null,
-          buttonText: "Apply AI Modification"
+          labelOverride: null
+          // buttonText prop removed to use the default "Suggest Modifications"
         }),
         hasTechTreeData && canUndoAiMod && (
           React.createElement("button", {
