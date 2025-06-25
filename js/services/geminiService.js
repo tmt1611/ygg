@@ -592,6 +592,6 @@ Each suggestion should be a concise, actionable phrase or short sentence.
     return parsed;
   } catch (error) {
     console.error("Error generating strategic suggestions from Gemini API:", error);
-    throw constructApiError(error, "Failed to generate AI strategic suggestions.", { prompt });
+    throw constructApiError(error, "Failed to generate AI strategic suggestions.", { prompt, rawResponse: error.rawResponse });
   }
 };
