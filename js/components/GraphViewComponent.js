@@ -546,26 +546,27 @@ const GraphViewComponent = ({
 
     // Position the foreignObject for regular node labels
     nodeGroups.select(".node-label-foreign-object")
-      .attr("width", 120) // A fixed, reasonable width for all nodes
-      .attr("height", 50) // Fixed height, CSS will handle overflow
-      .attr("transform", d => {
-        if (d.isProxy) return null;
-        const radius = getNodeRadius(d);
-        const spacing = 5; // A little less spacing is needed
-        const labelWidth = 120;
-        
-        // For non-root nodes, offset diagonally to avoid covering the link to children.
-        // For the root node, position it directly below.
-        if (d.depth === 0) {
-            return `translate(-${labelWidth / 2}, ${radius + spacing})`;
-        }
-        
-        // Diagonal offset to bottom-right
-        const xOffset = radius * 0.707; // approx radius / sqrt(2)
-        const yOffset = radius * 0.707;
-        
-        return `translate(${xOffset}, ${yOffset})`;
-      });
+      .attr("width", 120)
+      .attr("height", 50)
+      .attr("x", d => {
+          if (d.isProxy) return null;
+          const radius = getNodeRadius(d);
+          const labelWidth = 120;
+          if (d.depth === 0) {
+              return -labelWidth / 2;
+          }
+          return radius * 0.707; // approx radius / sqrt(2)
+      })
+      .attr("y", d => {
+          if (d.isProxy) return null;
+          const radius = getNodeRadius(d);
+          const spacing = 5;
+          if (d.depth === 0) {
+              return radius + spacing;
+          }
+          return radius * 0.707; // approx radius / sqrt(2)
+      })
+      .attr("transform", null); // Explicitly remove transform if it exists from previous state
 
     // Set the text content for the div inside the foreignObject
     nodeGroups.select(".node-label-wrapper")

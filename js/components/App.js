@@ -370,7 +370,8 @@ const App = () => {
           // Common Props
           apiKeyIsSet: apiKeyHook.status.isSet,
           hasTechTreeData: !!techTreeData,
-          isAppBusy: isLoading || isModifying || isFetchingStrategicSuggestions
+          isAppBusy: isLoading || isModifying || isFetchingStrategicSuggestions,
+          modalManager
         }),
         
         React.createElement("main", { className: "yggdrasil-core-canvas" },

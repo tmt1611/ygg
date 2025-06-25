@@ -13,7 +13,8 @@ const AiToolsTab = ({
   onApplyStrategicSuggestion,
   apiKeyIsSet, hasTechTreeData, isAppBusy,
   collapsedPanels, onTogglePanel,
-  selectedNode
+  selectedNode,
+  modalManager
 }) => {
   
   const canGenerateStrategicSuggestions = apiKeyIsSet && !!initialPromptForStrategy?.trim() && !isAppBusy && !isFetchingStrategicSuggestions;

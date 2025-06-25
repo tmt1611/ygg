@@ -226,12 +226,10 @@ export const generateQuickEdit = async (nodeToEdit, modificationPrompt) => {
   }
 
   const systemInstruction = `You are an AI assistant that modifies a single JSON node object based on user instructions.
-**MANDATORY RULES:**
+**RULES:**
 1.  **Preserve ID & Lock:** You MUST preserve the original 'id' and 'isLocked' values.
-2.  **Output Format:** Respond ONLY with a single, valid JSON object for the modified node. NO EXTRA TEXT, explanations, or markdown fences.
-3.  **Node Format:** The output must be a valid node object. Example: ${COMMON_NODE_FORMAT_INSTRUCTION}
-4.  **Children:** If the user asks to add children, add them to the 'children' array. For new children, use "NEW_NODE" as the 'id'. Preserve existing children unless asked to remove them.
-5.  **Final Check:** Before outputting, double-check that your entire response is a single JSON object starting with { and ending with }.
+2.  **Node Format:** The output MUST be a valid node object with these keys: "id", "name", "description", "isLocked", "importance", "children".
+3.  **Children:** If the user asks to add children, add them to the 'children' array. For new children, use "NEW_NODE" as the 'id'. Preserve existing children unless asked to remove them.
 `;
 
   const fullPrompt = `
@@ -239,9 +237,10 @@ Current Node JSON:
 \`\`\`json
 ${JSON.stringify(nodeToEdit, null, 2)}
 \`\`\`
+
 User instruction: "${modificationPrompt}"
 
-Output the complete, modified JSON for this single node, adhering to ALL rules above.
+Based on the instruction, provide the complete, modified JSON object for this single node.
 `;
 
   try {

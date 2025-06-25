@@ -13,7 +13,7 @@ const sidebarTabs = [
 const KnowledgeBranchSidebar = (props) => {
   const {
     isCollapsed, onToggleSidebar, activeSidebarTab, setActiveSidebarTab,
-    isAppBusy, apiKeyIsSet, hasTechTreeData,
+    isAppBusy, apiKeyIsSet, hasTechTreeData, modalManager,
   } = props;
   const [collapsedPanels, setCollapsedPanels] = useState(() => {
     const savedState = localStorage.getItem(APP_STORAGE_KEYS.SIDEBAR_PANEL_STATES);
@@ -107,6 +107,7 @@ const KnowledgeBranchSidebar = (props) => {
                 collapsedPanels: collapsedPanels,
                 onTogglePanel: handleTogglePanel,
                 selectedNode: props.selectedNodeForInsights,
+                modalManager: modalManager
               })
             ),
             activeSidebarTab === 'ai-insights' && (
