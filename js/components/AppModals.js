@@ -123,6 +123,7 @@ const AppModals = ({
           onChangeImportance: nodeOperations.handleNodeImportanceChange,
           onEditName: (n) => modalManager.openNodeEditModal({mode:'editName', targetNodeId: n.id, currentNodeName: n.name, currentNodeDescription: n.description, title: `Edit: ${n.name}`, label: 'Node Name', placeholder: 'Enter new name', initialValue: n.name, initialDescription: n.description}),
           onAddChild: (n) => modalManager.openNodeEditModal({mode:'addChild', targetNodeId: n.id, parentNodeName: n.name, title: `Add Child to: ${n.name}`, label: 'New Child Name', placeholder: 'Enter name'}),
+          onAddQuickChild: nodeOperations.handleQuickAddChild,
           onSetFocus: (nodeId) => handleSwitchToFocusView(nodeId),
           onDeleteNode: nodeOperations.handleDeleteNodeWithConfirmation,
           onLockAllChildren: nodeOperations.handleLockAllChildren,

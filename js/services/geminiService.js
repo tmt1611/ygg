@@ -208,15 +208,7 @@ const parseGeminiJsonResponseForInsights = (responseText) => {
     }
 };
 
-const COMMON_NODE_FORMAT_INSTRUCTION = `{ "id": "auto-gen-if-new", "name": "Concise Name (max 50 chars)", "description": "Brief Desc (optional, max 150 chars, '' if none)", "isLocked": false, "importance": "common", "children": [], "linkedProjectId": null, "linkedProjectName": null }`;
-const COMMON_JSON_SYNTAX_RULES = `
-Strict JSON Rules:
-1. Keys and string values in DOUBLE QUOTES. No trailing commas.
-2. Valid importances: "minor", "common", "major". Default: "common" for new nodes.
-3. Output ONLY the single JSON object (for new tree) or the complete modified tree's root JSON object. NO extra text/markdown.
-4. Every single node, from the root to the deepest child, MUST contain all of these exact keys: "id", "name", "description", "isLocked", "importance", "children". If a node has no description, use an empty string: "description": "".
-5. Ensure all string values are properly escaped for JSON.
-`;
+
 
 export const generateTechTree = async (userPrompt) => {
   if (!apiClientState.client || !apiClientState.isKeyAvailable) {
