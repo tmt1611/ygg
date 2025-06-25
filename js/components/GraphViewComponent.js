@@ -40,7 +40,7 @@ const GraphViewComponent = ({
   const [isFocusMode, setIsFocusMode] = useState(false);
   const { tooltip, showTooltip, hideTooltip } = useGraphTooltip();
 
-  const svgContainerDivRef = useRef(null);
+  const svgWrapperRef = useRef(null);
   const svgRef = useRef(null);
   const contextMenuActionsRef = useRef({});
   const [mainViewportSize, setMainViewportSize] = useState({ width: 0, height: 0 });
@@ -142,8 +142,8 @@ const GraphViewComponent = ({
   }, [resetZoom, onAddNodeToRoot]);
 
   useEffect(() => {
-    const container = svgContainerDivRef.current;
-    if (!container) return;
+    const wrapper = svgWrapperRef.current;
+    if (!wrapper) return;
 
     const resizeObserver = new ResizeObserver(entries => {
       if (entries[0]) {
@@ -152,8 +152,8 @@ const GraphViewComponent = ({
       }
     });
 
-    resizeObserver.observe(container);
-    return () => resizeObserver.unobserve(container);
+    resizeObserver.observe(wrapper);
+    return () => resizeObserver.unobserve(wrapper);
   }, []);
 
   const handleSetLayout = useCallback((newLayout) => {
@@ -266,7 +266,6 @@ const GraphViewComponent = ({
   const handleNodeClick = useCallback((event, d) => {
     event.stopPropagation();
     if (isAppBusy) return;
-    hideTooltip();
     hideTooltip();
     if (d.isProxy) {
         if (d.data.isOutgoingLink && onNavigateToLinkedProject) {
@@ -674,21 +673,19 @@ const GraphViewComponent = ({
   ];
 
   return (
-    React.createElement("div", { className: "graph-view-wrapper" },
+    React.createElement("div", { ref: svgWrapperRef, className: "graph-view-wrapper" },
       React.createElement(GraphNodeTooltip, { tooltip: tooltip }),
-      React.createElement("div", { ref: svgContainerDivRef, className: "graph-view-svg-container" },
-        isFocusMode && activeNodeId && (
-            React.createElement("div", { style: { position: 'absolute', top: '8px', left: '8px', zIndex: 10, maxWidth: 'calc(100% - 150px)' }},
-                React.createElement(PathToRootDisplay, {
-                    treeData: treeData,
-                    currentNodeId: activeNodeId,
-                    onSelectPathNode: onSelectNode, // Clicking path now just selects, doesn't force re-layout
-                    pathContext: "graph-focus"
-                })
-            )
-        ),
-        React.createElement("svg", { ref: svgRef, tabIndex: 0, "aria-label": "Interactive graph, use arrow keys to navigate nodes when focused.", style: { display: 'block', width: '100%', height: '100%' }})
+      isFocusMode && activeNodeId && (
+          React.createElement("div", { style: { position: 'absolute', top: '8px', left: '8px', zIndex: 10, maxWidth: 'calc(100% - 150px)' }},
+              React.createElement(PathToRootDisplay, {
+                  treeData: treeData,
+                  currentNodeId: activeNodeId,
+                  onSelectPathNode: onSelectNode, // Clicking path now just selects, doesn't force re-layout
+                  pathContext: "graph-focus"
+              })
+          )
       ),
+      React.createElement("svg", { ref: svgRef, tabIndex: 0, "aria-label": "Interactive graph, use arrow keys to navigate nodes when focused." }),
       React.createElement("div", { className: "graph-view-controls" },
         React.createElement("div", { className: "segmented-control graph-layout-control", role: "radiogroup", "aria-label": "Graph Layout" },
             layoutOptions.map(opt => (

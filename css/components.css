@@ -289,21 +289,18 @@ html[data-theme='ocean'] .yggdrasil-app-body.sidebar-collapsed .knowledge-branch
 }
 .yggdrasil-core-canvas.dimmed-for-overlay { filter: blur(2px) brightness(0.8); }
 
-.yggdrasil-core-canvas .graph-view-svg-container {
+
+
+.graph-view-wrapper > svg {
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  z-index: 1;
-  pointer-events: none;
-}
-
-.graph-view-svg-container svg {
-  display: block; width: 100%; height: 100%;
+  z-index: 5;
   pointer-events: auto;
 }
-.graph-view-svg-container svg:focus {
+.graph-view-wrapper > svg:focus {
   outline: 2px solid var(--primary-accent);
   outline-offset: -2px;
   border-radius: var(--border-radius);
@@ -1107,7 +1104,7 @@ html[data-theme='ocean'] .panel-header-icon { color: var(--primary-accent-dark);
 
 
 
-html[data-theme='dark'] .graph-view-svg-container {
+html[data-theme='dark'] .graph-view-wrapper {
   --grid-line-color: rgba(var(--primary-accent-rgb), 0.08);
   background:
     linear-gradient(var(--grid-line-color) 1px, transparent 1px),
@@ -1115,7 +1112,7 @@ html[data-theme='dark'] .graph-view-svg-container {
     radial-gradient(ellipse at center, rgba(var(--primary-accent-rgb),0.05) 0%, rgba(var(--yggdrasil-leaf-green),0.02) 40%, transparent 75%), var(--app-bg);
   background-size: 25px 25px, 25px 25px, auto, auto;
 }
-html[data-theme='light'] .graph-view-svg-container { 
+html[data-theme='light'] .graph-view-wrapper { 
   --grid-line-color: rgba(169, 154, 147, 0.2);
   background: 
     linear-gradient(var(--grid-line-color) 1px, transparent 1px),
@@ -1124,7 +1121,7 @@ html[data-theme='light'] .graph-view-svg-container {
   background-size: 25px 25px, 25px 25px, auto, auto;
 }
 
-html[data-theme='sol'] .graph-view-svg-container { 
+html[data-theme='sol'] .graph-view-wrapper { 
   --grid-line-color: rgba(184, 175, 158, 0.4);
   background: 
     linear-gradient(var(--grid-line-color) 1px, transparent 1px),
@@ -1133,7 +1130,7 @@ html[data-theme='sol'] .graph-view-svg-container {
   background-size: 25px 25px, 25px 25px, auto, auto;
 }
 
-html[data-theme='ocean'] .graph-view-svg-container { 
+html[data-theme='ocean'] .graph-view-wrapper { 
   --grid-line-color: rgba(0, 131, 143, 0.15);
   background: 
     linear-gradient(var(--grid-line-color) 1px, transparent 1px),
@@ -1142,7 +1139,7 @@ html[data-theme='ocean'] .graph-view-svg-container {
   background-size: 25px 25px, 25px 25px, auto, auto;
 }
 
-html[data-theme='synthwave'] .graph-view-svg-container { 
+html[data-theme='synthwave'] .graph-view-wrapper { 
   --grid-line-color: rgba(255, 0, 255, 0.08);
   background:
     linear-gradient(var(--grid-line-color) 1px, transparent 1px),
@@ -1151,7 +1148,7 @@ html[data-theme='synthwave'] .graph-view-svg-container {
   background-size: 25px 25px, 25px 25px, auto, auto;
 }
 
-.graph-view-wrapper { position: relative; display: flex; height: 100%; width:100%; overflow: hidden; background: var(--app-bg); }
+.graph-view-wrapper { position: relative; display: block; height: 100%; width:100%; overflow: hidden; }
 .graph-view-node circle {
   stroke: var(--graph-node-stroke);
   transition: transform 0.2s ease-out, filter 0.2s ease-out, stroke 0.2s ease-out;
