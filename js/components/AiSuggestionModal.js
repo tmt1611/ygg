@@ -46,29 +46,55 @@ const AiSuggestionModal = ({
   }, [currentTreeForDiff, suggestion, isOpen]);
 
   const displayTree = useMemo(() => {
-    const tree = comparisonResult?.annotatedTree;
-    if (!tree || tree._isErrorNode) return tree;
-    if (!showOnlyChanges) return tree;
+    if (!comparisonResult) return null;
+    const { annotatedTree } = comparisonResult;
+    
+    // If there's an error, or the AI suggested deleting everything
+    if (!annotatedTree || annotatedTree._isErrorNode) {
+        if (removedNodesTree.length > 0) {
+             // Create a wrapper root if multiple subtrees were removed from the top level
+             if (removedNodesTree.length > 1) {
+                return { name: "Multiple Removed Roots", children: removedNodesTree, id: "removed-wrapper", _changeStatus: 'structure_modified' };
+             }
+             return removedNodesTree[0];
+        }
+        return annotatedTree; // Return error node or null
+    }
 
+    // Deep clone to allow safe mutation
+    const displayTreeMutable = JSON.parse(JSON.stringify(annotatedTree));
+    const displayTreeNodesMap = getAllNodesAsMap(displayTreeMutable);
+
+    // Inject removed node subtrees into their original parents if those parents still exist in the new tree
+    removedNodesTree.forEach(removedRoot => {
+        const parentId = removedRoot._parentId;
+        const parentInDisplayTree = displayTreeNodesMap.get(parentId);
+        if (parentInDisplayTree) {
+            parentInDisplayTree.children = parentInDisplayTree.children || [];
+            parentInDisplayTree.children.push(removedRoot);
+        } else {
+            // This case means the parent was also removed. The `removedNodesTree` logic
+            // correctly nests this child under its removed parent, so we don't need to do anything here.
+        }
+    });
+
+    if (!showOnlyChanges) return displayTreeMutable;
+
+    // Filter the combined tree to only show changes
     const filterTree = (node) => {
         if (!node) return null;
-
         let filteredChildren = [];
         if (node.children) {
-            filteredChildren = node.children
-                .map(filterTree)
-                .filter(Boolean);
+            filteredChildren = node.children.map(filterTree).filter(Boolean);
         }
-
         if (node._changeStatus !== 'unchanged' || filteredChildren.length > 0) {
             return { ...node, children: filteredChildren };
         }
-        
         return null;
     };
     
-    return filterTree(tree);
-  }, [comparisonResult, showOnlyChanges]);
+    return filterTree(displayTreeMutable);
+  }, [comparisonResult, showOnlyChanges, removedNodesTree]);
 
   useEffect(() => {
     if (isOpen) {
@@ -235,31 +261,7 @@ const AiSuggestionModal = ({
                   React.createElement("p", { style: { color: 'var(--text-tertiary)', fontSize: '0.9em' } }, "Check the 'Removed Nodes' section below for deletions.")
                 )
               ),
-              removedNodes.length > 0 && !comparisonResult?.annotatedTree?._isErrorNode && (
-                React.createElement("div", { className: "ai-suggestion-modal-removed-nodes-section" },
-                    React.createElement("h4", {
-                      className: `ai-suggestion-modal-removed-nodes-title ${isRemovedNodesCollapsed ? 'collapsed' : ''}`,
-                      onClick: () => setIsRemovedNodesCollapsed(!isRemovedNodesCollapsed),
-                      "aria-expanded": !isRemovedNodesCollapsed,
-                      role: "button",
-                      tabIndex: 0,
-                      onKeyDown: (e) => { if (e.key === 'Enter' || e.key === ' ') setIsRemovedNodesCollapsed(!isRemovedNodesCollapsed); }
-                    },
-                     "Nodes To Be Removed",
-                     " (", removedNodes.length, "):"
-                    ),
-                    React.createElement("ul", { className: `ai-suggestion-modal-removed-nodes-list ${isRemovedNodesCollapsed ? 'collapsed' : ''}` },
-                        !isRemovedNodesCollapsed && removedNodesTree.map(node => (
-                            React.createElement(AiSuggestionPreviewListItem, {
-                                key: `removed-root-${node.id}`,
-                                node: node,
-                                level: 0,
-                                isVisualDiff: true
-                            })
-                        ))
-                    )
-                )
-              )
+              /* The separate removed nodes list is no longer needed as they are integrated into the main display tree. */
             )
           ),
 
