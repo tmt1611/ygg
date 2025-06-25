@@ -1,3 +1,4 @@
+```javascript:js/components/TechTreeListItem.js
 import React, { useMemo, useCallback, useState, useEffect, useRef } from 'react';
 import { NODE_IMPORTANCE_OPTIONS } from '../constants.js';
 
