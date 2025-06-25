@@ -2,6 +2,18 @@ import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react'
 import { NODE_IMPORTANCE_OPTIONS } from '../constants.js';
 import { getNodePathString, cleanTreeForExport } from '../utils.js';
 
+const getCopyLabel = (type, copyFeedback, copyError) => {
+    if (copyError === type) return "Error!";
+    if (copyFeedback === type) return "Copied!";
+    switch (type) {
+        case 'name': return "Name";
+        case 'id': return "ID";
+        case 'path': return "Path";
+        case 'json': return "Node (JSON)";
+        default: return "Copy";
+    }
+};
+
 const ContextMenu = ({
   isOpen, position, node, techTreeData, onClose, onToggleLock, onChangeImportance, onEditName, onAddChild, onAddQuickChild,
   onSetFocus, onDeleteNode, onLinkToProject, onGoToLinkedProject, onUnlinkProject, onGenerateInsights,
@@ -69,18 +81,6 @@ const ContextMenu = ({
 
     const hasChildren = node.children && node.children.length > 0;
 
-    const getCopyLabel = (type) => {
-        if (copyError === type) return "Error!";
-        if (copyFeedback === type) return "Copied!";
-        switch (type) {
-            case 'name': return "Name";
-            case 'id': return "ID";
-            case 'path': return "Path";
-            case 'json': return "Node (JSON)";
-            default: return "Copy";
-        }
-    };
-
     return [
       // Primary Actions
       { id: 'edit', label: "Edit Details...", icon: '✏️', action: () => onEditName(node) },
@@ -146,10 +146,10 @@ const ContextMenu = ({
       {
         id: 'copy-actions', label: "Copy Data...", icon: '📤', hasSubmenu: true,
         submenu: [
-          { id: 'copy-name', label: getCopyLabel('name'), icon: '🔡', action: () => handleCopy('name') },
-          { id: 'copy-id', label: getCopyLabel('id'), icon: '🆔', action: () => handleCopy('id') },
-          { id: 'copy-path', label: getCopyLabel('path'), icon: '🛤️', action: () => handleCopy('path') },
-          { id: 'copy-json', label: getCopyLabel('json'), icon: '📦', action: () => handleCopy('json'), title: "Copy this node and its children as JSON. Can be used to paste as a child elsewhere." },
+          { id: 'copy-name', label: getCopyLabel('name', copyFeedback, copyError), icon: '🔡', action: () => handleCopy('name') },
+          { id: 'copy-id', label: getCopyLabel('id', copyFeedback, copyError), icon: '🆔', action: () => handleCopy('id') },
+          { id: 'copy-path', label: getCopyLabel('path', copyFeedback, copyError), icon: '🛤️', action: () => handleCopy('path') },
+          { id: 'copy-json', label: getCopyLabel('json', copyFeedback, copyError), icon: '📦', action: () => handleCopy('json'), title: "Copy this node and its children as JSON. Can be used to paste as a child elsewhere." },
         ]
       },
       { type: 'separator' },

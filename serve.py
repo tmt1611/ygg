@@ -29,10 +29,14 @@ def run_server():
         
         try:
             webbrowser.open_new_tab(URL)
+        except webbrowser.Error:
+            print("\nCould not open web browser automatically.")
+            print(f"Please open this URL in your browser: {URL}")
+
+        try:
             httpd.serve_forever()
         except KeyboardInterrupt:
-            print("\nServer stopped.")
-            httpd.server_close()
+            print("\nServer stopped by user.")
 
 if __name__ == "__main__":
     run_server()

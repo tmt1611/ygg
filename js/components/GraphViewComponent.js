@@ -19,6 +19,15 @@ const getNodeRadius = (node) => {
     }
 };
 
+const createAcronym = (name) => {
+    if (!name) return '??';
+    const words = name.split(' ').filter(Boolean);
+    if (words.length > 1) {
+        return words.map(word => word[0]).join('').toUpperCase().substring(0, 3);
+    }
+    return name.substring(0, 3).toUpperCase();
+};
+
 const GraphViewComponent = ({
   treeData,
   activeNodeId,
@@ -179,15 +188,6 @@ const GraphViewComponent = ({
     if (!nodes || nodes.length === 0 || !projects) {
         return { proxyNodes: [], projectLinks: [] };
     }
-
-    const createAcronym = (name) => {
-        if (!name) return '??';
-        const words = name.split(' ').filter(Boolean);
-        if (words.length > 1) {
-            return words.map(word => word[0]).join('').toUpperCase().substring(0, 3);
-        }
-        return name.substring(0, 3).toUpperCase();
-    };
 
     const proxyNodes = [];
     const projectLinks = [];
