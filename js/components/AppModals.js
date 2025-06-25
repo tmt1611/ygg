@@ -61,7 +61,7 @@ const AppModals = ({
           suggestion: pendingAiSuggestion,
           onConfirm: treeOperationsAI.handleConfirmAiSuggestion,
           onCancel: treeOperationsAI.handleRejectAiSuggestion,
-          onRefineSuggestion: treeOperationsAI.handleApplyAiModification,
+          onRefineSuggestion: (prompt) => treeOperationsAI.handleApplyAiModification(prompt, true),
           isRefining: isModifying,
           apiKeyIsSet: apiKeyIsSet
         })

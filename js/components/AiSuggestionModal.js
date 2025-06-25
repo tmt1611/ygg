@@ -169,7 +169,7 @@ const AiSuggestionModal = ({
                 "aria-controls": "ai-suggestion-summary-panel",
                 "aria-expanded": isSummaryVisible
               },
-                "❮"
+                "❯"
               )
             ),
             React.createElement("div", { className: "ai-suggestion-modal-content-area", "aria-live": "polite", "aria-atomic": "true" },

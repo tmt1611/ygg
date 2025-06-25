@@ -208,7 +208,7 @@ const parseGeminiJsonResponseForInsights = (responseText) => {
     }
 };
 
-const COMMON_NODE_FORMAT_INSTRUCTION = `{ "id": "auto-gen-if-new", "name": "Concise Name (max 50 chars)", "description": "Brief Desc (optional, max 150 chars, '' if none)", "isLocked": false, "importance": "common", "children": [] }`;
+const COMMON_NODE_FORMAT_INSTRUCTION = `{ "id": "auto-gen-if-new", "name": "Concise Name (max 50 chars)", "description": "Brief Desc (optional, max 150 chars, '' if none)", "isLocked": false, "importance": "common", "children": [], "linkedProjectId": null, "linkedProjectName": null }`;
 const COMMON_JSON_SYNTAX_RULES = `
 Strict JSON Rules:
 1. Keys and string values in DOUBLE QUOTES. No trailing commas.
@@ -272,7 +272,7 @@ export const modifyTechTreeByGemini = async (
     - DO NOT change the 'isLocked' value for ANY node.
 2.  **Locked Node Content:** If a node's ID is in the 'Locked Node IDs' list, you MUST NOT change its 'name', 'description', or 'importance'. You CAN add new children to it or move it.
 3.  **Node Importance:** Must be one of "minor", "common", or "major".
-4.  **Mandatory Fields:** Every single node in your output, including unchanged nodes, MUST contain all of these exact keys: "id", "name", "description", "isLocked", "importance", "children". If a node has no description, use an empty string: "description": "".
+4.  **Mandatory Fields:** Every single node in your output, including unchanged nodes, MUST contain all of these exact keys: "id", "name", "description", "isLocked", "importance", "children". If a node has no description, use an empty string: "description": "". Also preserve "linkedProjectId" and "linkedProjectName" if they exist on a node.
 5.  **Output Format:** Respond ONLY with a single, valid JSON object for the modified tree's root node. NO EXTRA TEXT, explanations, or markdown fences.
 6.  **JSON Syntax:** Strictly follow JSON rules. Example node: ${COMMON_NODE_FORMAT_INSTRUCTION}
 7.  **Maintain Structure:** Avoid unnecessarily drastic changes to the overall tree shape (e.g., adding many new levels of depth) unless the user's instruction explicitly asks for it.

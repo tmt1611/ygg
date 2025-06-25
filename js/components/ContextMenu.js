@@ -32,27 +32,6 @@ const ContextMenu = ({
     }
   }, [isOpen]);
 
-  const handleCopyNodeForPasting = useCallback(() => {
-    if (!node) return;
-    const cleanNodeForExport = (nodeToClean) => {
-        const { _parentId, _changeStatus, _modificationDetails, _oldParentId, ...rest } = nodeToClean;
-        const cleanedNode = { ...rest };
-        if (cleanedNode.children) cleanedNode.children = cleanedNode.children.map(cleanNodeForExport);
-        return cleanedNode;
-    };
-    const textToCopy = JSON.stringify(cleanNodeForExport(node), null, 2);
-    navigator.clipboard.writeText(textToCopy).then(() => {
-        setCopyFeedback('node');
-        setCopyError('');
-        setTimeout(() => setCopyFeedback(''), 1500);
-    }).catch(err => {
-        console.error(`Failed to copy node:`, err);
-        setCopyError('node');
-        setCopyFeedback('');
-        setTimeout(() => setCopyError(''), 1500);
-    });
-  }, [node]);
-
   const handleCopy = useCallback((type) => {
     if (!node) return;
     let textToCopy = '';
@@ -100,11 +79,10 @@ const ContextMenu = ({
         if (copyError === type) return "Error!";
         if (copyFeedback === type) return "Copied!";
         switch (type) {
-            case 'node': return "Copy Node";
             case 'name': return "Name";
             case 'id': return "ID";
             case 'path': return "Path";
-            case 'json': return "as JSON";
+            case 'json': return "Node (JSON)";
             default: return "Copy";
         }
     };
@@ -127,8 +105,7 @@ const ContextMenu = ({
       },
       { type: 'separator' },
       // Structural Actions
-      { id: 'copy-node', label: getCopyLabel('node'), icon: '📋', action: handleCopyNodeForPasting, title: "Copy this node and its children to the clipboard for pasting elsewhere in the tree." },
-      onPasteNode && { id: 'paste-node', label: "Paste Node as Child", icon: '📎', action: () => onPasteNode(node.id), isDisabled: !canPaste, title: canPaste ? "Paste a node (copied as JSON) as a child of this node" : "Clipboard API not available or permission denied" },
+      onPasteNode && { id: 'paste-node', label: "Paste Node as Child", icon: '📎', action: () => onPasteNode(node.id), isDisabled: !canPaste, title: canPaste ? "Paste a node (copied from clipboard) as a child of this node" : "Clipboard API not available or permission denied" },
       { type: 'separator' },
       // Submenus
       {
@@ -177,7 +154,7 @@ const ContextMenu = ({
           { id: 'copy-name', label: getCopyLabel('name'), icon: '🔡', action: () => handleCopy('name') },
           { id: 'copy-id', label: getCopyLabel('id'), icon: '🆔', action: () => handleCopy('id') },
           { id: 'copy-path', label: getCopyLabel('path'), icon: '🛤️', action: () => handleCopy('path') },
-          { id: 'copy-json', label: getCopyLabel('json'), icon: '📦', action: () => handleCopy('json'), title: "Copy node and children as JSON for external use." },
+          { id: 'copy-json', label: getCopyLabel('json'), icon: '📦', action: () => handleCopy('json'), title: "Copy this node and its children as JSON. Can be used to paste as a child elsewhere." },
         ]
       },
       { type: 'separator' },
@@ -186,7 +163,7 @@ const ContextMenu = ({
         { id: 'delete-node', label: "Delete Node...", icon: '🗑️', isDestructive: true, action: () => onDeleteNode(node.id) }
       ] : [])
     ].filter(Boolean);
-  }, [node, onEditName, onAddChild, onToggleLock, onSetFocus, onLinkToProject, onGoToLinkedProject, onUnlinkProject, onDeleteNode, onGenerateInsights, onSwitchToAiOps, handleCopy, incomingLink, handleNavigateToSourceNode, onChangeImportance, onLockAllChildren, onUnlockAllChildren, onChangeImportanceOfAllChildren, onDeleteAllChildren, copyFeedback, copyError, onPasteNode, canPaste, handleCopyNodeForPasting]);
+  }, [node, onEditName, onAddChild, onToggleLock, onSetFocus, onLinkToProject, onGoToLinkedProject, onUnlinkProject, onDeleteNode, onGenerateInsights, onSwitchToAiOps, handleCopy, incomingLink, handleNavigateToSourceNode, onChangeImportance, onLockAllChildren, onUnlockAllChildren, onChangeImportanceOfAllChildren, onDeleteAllChildren, copyFeedback, copyError, onPasteNode, canPaste]);
 
   const focusableItems = useMemo(() => menuItems.filter(item => item.type !== 'separator' && !item.isDisabled), [menuItems]);
   const openSubmenuItems = useMemo(() => {
