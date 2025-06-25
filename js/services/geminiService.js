@@ -200,6 +200,67 @@ const parseGeminiJsonResponse = (responseText, forModification = false) => {
   }
 };
 
+export const generateQuickEdit = withApiClient(async (nodeToEdit, modificationPrompt) => {
+
+  const systemInstruction = `You are an AI assistant that modifies a single JSON node object based on a user instruction.
+**RULES:**
+1.  **Minimal Changes:** Only modify the parts of the node object (e.g., name, description, children) that are directly requested by the user's instruction.
+2.  **Preserve Core Properties:** You MUST preserve the original 'id', 'isLocked', 'linkedProjectId', and 'linkedProjectName' values.
+3.  **Mandatory Fields:** Your output MUST be a single, valid JSON object representing the node. It MUST contain all these keys: "id", "name", "description", "isLocked", "importance", "children", "linkedProjectId", "linkedProjectName".
+4.  **Child Nodes:** If the user asks to add children, add new child objects to the 'children' array. For new children, use "NEW_NODE" as the 'id'. Preserve existing children unless the user explicitly asks to remove them.
+5.  **Output Format:** Respond ONLY with the single, modified JSON object. Do not wrap it in markdown fences or add any other text.
+`;
+
+  const fullPrompt = `
+Current Node JSON:
+\`\`\`json
+${JSON.stringify(nodeToEdit, null, 2)}
+\`\`\`
+
+User instruction: "${modificationPrompt}"
+
+Based on the instruction, provide the complete, modified JSON object for this single node.
+`;
+
+  try {
+    const model = apiClientState.client.getGenerativeModel({ 
+      model: "gemini-1.5-flash-latest",
+      systemInstruction: { parts: [{ text: systemInstruction }], role: "model" },
+      generationConfig: { 
+        responseMimeType: "application/json", 
+        temperature: 0.2, // Lower temperature for more predictable, focused edits
+        topK: 40, 
+        topP: 0.95 
+      },
+    });
+
+    const result = await model.generateContent(fullPrompt);
+    const response = result.response;
+    
+    let parsedData = parseGeminiJsonResponse(response.text(), true); // `true` for modification allows array returns, but we expect an object here.
+
+    if (Array.isArray(parsedData)) {
+        console.error("Gemini quick edit returned an array, expected a single node object:", parsedData);
+        throw new Error("AI suggestion resulted in an array of nodes, but a single node object was expected for a quick edit.");
+    }
+
+    if (!isValidTechTreeNodeShape(parsedData)) {
+        console.error("Gemini quick edit resulted in invalid JSON structure.", parsedData);
+        throw new Error("AI suggestion has an invalid node structure.");
+    }
+    
+    // The AI should preserve the ID, but as a safeguard, we enforce it.
+    parsedData.id = nodeToEdit.id;
+
+    // The AI might forget to initialize children, so we do it here.
+    return initializeNodes(parsedData, nodeToEdit._parentId);
+
+  } catch (error) {
+    console.error("Error during quick edit via Gemini API:", error);
+    throw constructApiError(error, "Failed to perform quick edit.", { prompt: fullPrompt, rawResponse: error.rawResponse });
+  }
+});
+
 const parseGeminiJsonResponseForInsights = (responseText) => {
     const jsonStr = extractJsonFromMarkdown(responseText);
     if (!jsonStr) {
@@ -326,7 +387,7 @@ Ensure: Logical hierarchy, 2-4 levels deep, 2-5 children per parent. Prioritize 
     console.error("Error generating tech tree from Gemini API:", error);
     throw constructApiError(error, "Failed to generate tech tree.");
   }
-};
+});
 
 export const modifyTechTreeByGemini = withApiClient(async (
   currentTree,
@@ -449,7 +510,7 @@ Output the complete, modified JSON for the tech tree, adhering to ALL rules abov
     console.error("Error modifying tech tree via Gemini API:", error);
     throw constructApiError(error, "Failed to modify tech tree using AI.", { prompt: fullPrompt, rawResponse: error.rawResponse });
   }
-};
+});
 
 export const summarizeText = withApiClient(async (textToSummarize) => {
 
@@ -479,7 +540,7 @@ Concise Summary (100-150 words, plain text only):`;
     console.error("Error generating summary from Gemini API:", error);
     throw constructApiError(error, "Failed to generate AI summary.");
   }
-};
+});
 
 export const generateNodeInsights = withApiClient(async (
     node,
@@ -545,7 +606,7 @@ Respond ONLY with the JSON object. No extra text or markdown.
         console.error("Error generating node insights from Gemini API:", error);
         throw constructApiError(error, "Failed to generate AI insights for the node.");
     }
-};
+});
 
 export const generateStrategicSuggestions = withApiClient(async (
   projectContext,
@@ -594,4 +655,4 @@ Each suggestion should be a concise, actionable phrase or short sentence.
     console.error("Error generating strategic suggestions from Gemini API:", error);
     throw constructApiError(error, "Failed to generate AI strategic suggestions.", { prompt, rawResponse: error.rawResponse });
   }
-};
+});
