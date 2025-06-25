@@ -25,7 +25,6 @@ export const useD3Tree = (
   const zoomBehaviorRef = useRef(null);
   const [g, setG] = useState(null);
   const [currentTransform, setCurrentTransform] = useState(zoomIdentity);
-  const [currentTransform, setCurrentTransform] = useState(zoomIdentity);
 
   const rootHierarchy = useMemo(() => {
     if (!treeData) return null;

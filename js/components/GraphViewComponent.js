@@ -6,6 +6,9 @@ import PathToRootDisplay from './PathToRootDisplay.js';
 import GraphMiniMap from './GraphMiniMap.js';
 import { useGraphTooltip } from '../hooks/useGraphTooltip.js';
 import GraphNodeTooltip from './GraphNodeTooltip.js';
+import GraphMiniMap from './GraphMiniMap.js';
+import { useGraphTooltip } from '../hooks/useGraphTooltip.js';
+import GraphNodeTooltip from './GraphNodeTooltip.js';
 
 
 const getNodeRadius = (node) => {
