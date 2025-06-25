@@ -24,6 +24,13 @@ const FocusViewComponent = ({
     return focusNodeData.children.map(child => nodeMap.get(child.id)).filter(Boolean);
   }, [nodeMap, focusNodeData]);
 
+  const siblingsNodeData = useMemo(() => {
+    if (!parentNodeData || !parentNodeData.children) return [];
+    return parentNodeData.children
+      .map(childRef => nodeMap.get(childRef.id))
+      .filter(sibling => sibling && sibling.id !== focusNodeId);
+  }, [nodeMap, parentNodeData, focusNodeId]);
+
   const nodeForDetailPanel = useMemo(() => {
     if (!selectedNodeInPanelId) return focusNodeData; 
     return nodeMap.get(selectedNodeInPanelId) || focusNodeData;
@@ -38,7 +45,7 @@ const FocusViewComponent = ({
   }, [isFocusNodeRoot, activeProjectId, projects, findLinkSource]);
 
   const layoutRef = useRef(null); 
-  const { positions: allNodePositions, height: layoutHeight } = useFocusViewLayout(layoutRef, focusNodeData, parentNodeData, childrenNodeData);
+  const { positions: allNodePositions, height: layoutHeight } = useFocusViewLayout(layoutRef, focusNodeData, parentNodeData, childrenNodeData, siblingsNodeData);
 
   const connectorLines = useMemo(() => {
     if (!allNodePositions || allNodePositions.size === 0) return [];
@@ -47,7 +54,16 @@ const FocusViewComponent = ({
 
     if (focusPos && parentNodeData) {
         const parentPos = allNodePositions.get(parentNodeData.id);
-        if (parentPos) lines.push({ x1: parentPos.x, y1: parentPos.y, x2: focusPos.x, y2: focusPos.y, id: `line-parent-${parentNodeData.id}-to-${focusNodeId}` });
+        if (parentPos) {
+            // Connect parent to focus node and all siblings
+            const allChildrenOnFocusLevel = [focusNodeData, ...siblingsNodeData];
+            allChildrenOnFocusLevel.forEach(childNode => {
+                const childPos = allNodePositions.get(childNode.id);
+                if (childPos) {
+                    lines.push({ x1: parentPos.x, y1: parentPos.y, x2: childPos.x, y2: childPos.y, id: `line-parent-${parentNodeData.id}-to-${childNode.id}` });
+                }
+            });
+        }
     }
     if (focusPos) {
         childrenNodeData.forEach(child => {
@@ -56,7 +72,7 @@ const FocusViewComponent = ({
         });
     }
     return lines;
-  }, [allNodePositions, focusNodeId, parentNodeData, childrenNodeData]);
+  }, [allNodePositions, focusNodeId, parentNodeData, childrenNodeData, siblingsNodeData, focusNodeData]);
 
   const handleNodeClick = useCallback((nodeId, isFocusTarget = false) => {
     onSelectNodeInPanel(nodeId);
@@ -146,6 +162,7 @@ const FocusViewComponent = ({
             parentNodeData && renderNode(parentNodeData, 'parent'),
             parentPlaceholder,
             renderNode(focusNodeData, 'focus'),
+            siblingsNodeData.map((sibling) => renderNode(sibling, 'sibling')),
             childrenNodeData.length > 0 
               ? childrenNodeData.map((child) => renderNode(child, 'child'))
               : childrenPlaceholder

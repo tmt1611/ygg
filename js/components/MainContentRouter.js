@@ -45,6 +45,7 @@ const MainContentRouter = ({
             handleGenerateTree: treeOperationsAI.handleGenerateNewTree,
             isLoadingInitial: isLoading,
             apiKeyIsSet: apiKeyHook.status.isSet,
+            apiKeyHook: apiKeyHook,
             onAddNewProjectFromFile: projectManager.handleAddNewProjectFromFile,
             onLoadAndGoToGraph: projectManager.handleLoadAndGoToGraph,
             exampleProjects: projectManager.projects.filter(p => p.isExample),

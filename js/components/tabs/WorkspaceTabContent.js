@@ -35,7 +35,7 @@ const WorkspaceTabContent = ({
     } catch (e) {
         console.error("Failed to parse workspace panel states from localStorage", e);
     }
-    return new Set(['api-key-setup']); // Collapse API key setup by default
+    return new Set([]); // Keep panels open by default
   });
 
   useEffect(() => {
@@ -62,6 +62,18 @@ const WorkspaceTabContent = ({
   return (
     React.createElement("div", { className: "workspace-tab-container" },
       React.createElement("div", { className: "workspace-content-area", style: { display: 'flex', flexDirection: 'column', gap: '15px' }}, 
+          React.createElement("div", { className: "panel panel-variant-workspace" },
+            React.createElement("div", { className: "collapsible-panel-header", style: { cursor: 'default' } },
+              React.createElement("span", { className: "panel-header-icon" }, "🔑"),
+              React.createElement("h3", null, "API Key Setup"),
+              React.createElement("div", { style: { marginLeft: 'auto' } },
+                React.createElement(ContextualHelpTooltip, { helpText: "Configure your Gemini API Key to enable all AI-powered features in the application." })
+              )
+            ),
+            React.createElement("div", { className: "panel-content-wrapper" },
+              React.createElement(ApiKeySetupPanel, { apiKeyHook, controlsDisabled })
+            )
+          ),
           React.createElement(CollapsiblePanel, {
             panelId: "project-management",
             title: "Project Management",
@@ -139,16 +151,6 @@ const WorkspaceTabContent = ({
               handleDownloadTree, onExtractData, extractionMode, setExtractionMode, isSummarizing,
               currentTreeExists, controlsDisabled, apiKeyIsSet: apiKeyHook.status.isSet
             })
-          ),
-          React.createElement(CollapsiblePanel, {
-            panelId: "api-key-setup",
-            title: "API Key Setup",
-            icon: "🔑",
-            isCollapsed: collapsedPanels.has('api-key-setup'),
-            onToggle: handleTogglePanel,
-            headerActions: React.createElement(ContextualHelpTooltip, { helpText: "Configure your Gemini API Key to enable all AI-powered features in the application." })
-          },
-            React.createElement(ApiKeySetupPanel, { apiKeyHook, controlsDisabled })
           )
       )
     )

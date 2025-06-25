@@ -12,6 +12,7 @@ const ContextMenu = ({
   linkSourceInfoFromView,
 }) => {
   const menuRef = useRef(null);
+  const submenuTimerRef = useRef(null);
   const [openSubmenuId, setOpenSubmenuId] = useState(null);
   const [focusedIndex, setFocusedIndex] = useState(-1);
   const [focusedSubmenuIndex, setFocusedSubmenuIndex] = useState(-1);
@@ -133,9 +134,8 @@ const ContextMenu = ({
       {
         id: 'ai-actions', label: "AI Actions...", icon: '🤖', hasSubmenu: true,
         submenu: [
-          { id: 'ai-quick-edit', label: "Quick Edit with AI...", icon: '✏️', action: () => modalManager.openAiQuickEditModal({ nodeId: node.id }), isDisabled: node.isLocked, title: node.isLocked ? "Unlock node to use AI Quick Edit" : "Make focused changes to this node with AI" },
+          { id: 'ai-modify-node', label: "Modify with AI...", icon: '🤖', action: () => onSwitchToAiOps(node), isDisabled: node.isLocked, title: node.isLocked ? "Unlock node to use AI modifications" : "Modify this node and its children using an AI prompt in the sidebar" },
           { id: 'ai-insights', label: "Node Insights", icon: '💡', action: () => onGenerateInsights(node) },
-          { id: 'ai-modify', label: "Modify with AI...", icon: '🌳', action: () => onSwitchToAiOps(node), title: "Perform larger, structural modifications to the tree" },
         ]
       },
       {
@@ -186,7 +186,7 @@ const ContextMenu = ({
         { id: 'delete-node', label: "Delete Node...", icon: '🗑️', isDestructive: true, action: () => onDeleteNode(node.id) }
       ] : [])
     ].filter(Boolean);
-  }, [node, onEditName, onAddChild, onToggleLock, onSetFocus, onLinkToProject, onGoToLinkedProject, onUnlinkProject, onDeleteNode, onGenerateInsights, onSwitchToAiOps, handleCopy, incomingLink, handleNavigateToSourceNode, onChangeImportance, onLockAllChildren, onUnlockAllChildren, onChangeImportanceOfAllChildren, onDeleteAllChildren, copyFeedback, copyError, onPasteNode, canPaste, handleCopyNodeForPasting, modalManager]);
+  }, [node, onEditName, onAddChild, onToggleLock, onSetFocus, onLinkToProject, onGoToLinkedProject, onUnlinkProject, onDeleteNode, onGenerateInsights, onSwitchToAiOps, handleCopy, incomingLink, handleNavigateToSourceNode, onChangeImportance, onLockAllChildren, onUnlockAllChildren, onChangeImportanceOfAllChildren, onDeleteAllChildren, copyFeedback, copyError, onPasteNode, canPaste, handleCopyNodeForPasting]);
 
   const focusableItems = useMemo(() => menuItems.filter(item => item.type !== 'separator' && !item.isDisabled), [menuItems]);
   const openSubmenuItems = useMemo(() => {
@@ -223,6 +223,7 @@ const ContextMenu = ({
         setFocusedSubmenuIndex(-1);
         setCopyFeedback('');
         setCopyError('');
+        if (submenuTimerRef.current) clearTimeout(submenuTimerRef.current);
         return;
     }
     
@@ -313,12 +314,17 @@ const ContextMenu = ({
             }
         },
         onMouseEnter: () => {
+            if (submenuTimerRef.current) clearTimeout(submenuTimerRef.current);
             if (isSubmenu) {
                 setFocusedSubmenuIndex(index);
             } else {
                 setFocusedIndex(focusableItems.findIndex(fi => fi.id === item.id));
-                if (item.hasSubmenu) setOpenSubmenuId(item.id);
-                else setOpenSubmenuId(null);
+                if (item.hasSubmenu) {
+                    setOpenSubmenuId(item.id);
+                } else {
+                    // This is handled by the main div's onMouseLeave timer now
+                    // setOpenSubmenuId(null);
+                }
             }
         },
         disabled: item.isDisabled,
@@ -334,8 +340,20 @@ const ContextMenu = ({
     );
   };
 
+  const handleMouseLeaveMenu = () => {
+    submenuTimerRef.current = setTimeout(() => {
+      setOpenSubmenuId(null);
+    }, 200);
+  };
+
+  const handleMouseEnterMenu = () => {
+    if (submenuTimerRef.current) {
+      clearTimeout(submenuTimerRef.current);
+    }
+  };
+
   return (
-    React.createElement("div", { ref: menuRef, className: "context-menu", style: menuStyle, role: "menu", "aria-orientation": "vertical", "aria-labelledby": "context-menu-node-name", onKeyDown: handleKeyDown, onMouseLeave: () => setOpenSubmenuId(null) },
+    React.createElement("div", { ref: menuRef, className: "context-menu", style: menuStyle, role: "menu", "aria-orientation": "vertical", "aria-labelledby": "context-menu-node-name", onKeyDown: handleKeyDown, onMouseLeave: handleMouseLeaveMenu, onMouseEnter: handleMouseEnterMenu },
       React.createElement("div", { id: "context-menu-node-name", className: "context-menu-header" },
         React.createElement("span", { className: "context-menu-icon", "aria-hidden": "true" }, importanceRune),
         React.createElement("strong", { title: node.name, style: { flexGrow: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis' } }, node.name.length > 25 ? `${node.name.substring(0, 22)}...` : node.name),
@@ -350,7 +368,7 @@ const ContextMenu = ({
         menuItems.map((item) => renderMenuItem(item, -1, false))
       ),
       openSubmenuId && openSubmenuItems.length > 0 && (
-        React.createElement("div", { className: "context-menu submenu", role: "menu", style: submenuStyle },
+        React.createElement("div", { className: "context-menu submenu", role: "menu", style: submenuStyle, onMouseEnter: handleMouseEnterMenu },
           React.createElement("ul", null,
             openSubmenuItems.map((item, index) => renderMenuItem(item, index, true))
           )

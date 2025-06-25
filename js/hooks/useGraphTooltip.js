@@ -7,11 +7,12 @@ export const useGraphTooltip = () => {
   const [tooltip, setTooltip] = useState({
     visible: false,
     content: null,
+    parent: null,
     position: { x: 0, y: 0 },
   });
   const hoverTimeoutRef = useRef(null);
 
-  const showTooltip = useCallback((nodeData, event) => {
+  const showTooltip = useCallback((nodeData, event, parentData = null) => {
     if (hoverTimeoutRef.current) {
       clearTimeout(hoverTimeoutRef.current);
     }
@@ -36,6 +37,7 @@ export const useGraphTooltip = () => {
       setTooltip({
         visible: true,
         content: nodeData,
+        parent: parentData,
         position: { x, y },
       });
     }, TOOLTIP_DELAY);

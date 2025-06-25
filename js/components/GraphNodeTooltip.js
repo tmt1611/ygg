@@ -2,7 +2,7 @@ import React from 'react';
 import { NODE_IMPORTANCE_OPTIONS } from '../constants.js';
 
 const GraphNodeTooltip = ({ tooltip }) => {
-  const { visible, content, position } = tooltip;
+  const { visible, content, parent, position } = tooltip;
 
   if (!visible || !content) {
     return null;
@@ -21,7 +21,12 @@ const GraphNodeTooltip = ({ tooltip }) => {
     },
       React.createElement("div", { className: "graph-node-tooltip-header" },
         React.createElement("span", { className: "graph-node-tooltip-icon" }, importanceInfo.rune || '•'),
-        React.createElement("h4", { className: "graph-node-tooltip-name" }, name)
+        React.createElement("div", { style: { flexGrow: 1 }},
+          React.createElement("h4", { className: "graph-node-tooltip-name" }, name),
+          parent && React.createElement("div", { className: "graph-node-tooltip-parent" },
+            "Child of: ", parent.name
+          )
+        )
       ),
       React.createElement("div", { className: "graph-node-tooltip-meta" },
         isLocked && React.createElement("span", { className: "graph-node-tooltip-meta-item" }, "🔒 Locked"),

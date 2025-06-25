@@ -4,7 +4,7 @@ import { findNodeById } from '../utils.js';
 // Modal Components
 import ProjectNameModal from './ProjectNameModal.js';
 import AiSuggestionModal from './AiSuggestionModal.js';
-import AiQuickEditModal from './AiQuickEditModal.js';
+
 import ConfirmModal from './ConfirmModal.js';
 import NodeEditModal from './NodeEditModal.js';
 import TechExtractionModal from './TechExtractionModal.js';
@@ -40,7 +40,7 @@ const AppModals = ({
     isLinkProjectModalOpen, linkProjectModalConfig, closeLinkProjectModal,
     isContextMenuOpen, contextMenuPosition, contextMenuNodeId, contextMenuLinkSourceInfo, closeContextMenu,
     isViewContextMenuOpen, viewContextMenuConfig, closeViewContextMenu,
-    isAiQuickEditModalOpen, aiQuickEditModalConfig, closeAiQuickEditModal,
+
   } = modalManager;
 
   return (
@@ -149,16 +149,7 @@ const AppModals = ({
           onClose: closeViewContextMenu,
         })
       ),
-      isAiQuickEditModalOpen && aiQuickEditModalConfig && (
-        React.createElement(AiQuickEditModal, {
-          isOpen: isAiQuickEditModalOpen,
-          node: findNodeById(techTreeData, aiQuickEditModalConfig.nodeId),
-          onConfirm: treeOperationsAI.handleConfirmAiQuickEdit,
-          onCancel: closeAiQuickEditModal,
-          onGenerate: treeOperationsAI.handleGenerateAiQuickEdit,
-          isAppBusy: isModifying,
-        })
-      )
+
     )
   );
 };

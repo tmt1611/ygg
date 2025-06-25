@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 const WelcomeScreen = ({
   initialPrompt,
@@ -9,11 +9,20 @@ const WelcomeScreen = ({
   onAddNewProjectFromFile,
   onLoadAndGoToGraph,
   exampleProjects,
-  isAppBusy
+  isAppBusy,
+  apiKeyHook,
 }) => {
   
+  const [localApiKey, setLocalApiKey] = useState('');
+
   const handleImportClick = () => {
     document.getElementById('import-project-input-welcome')?.click();
+  };
+
+  const handleSetApiKey = () => {
+    if (apiKeyHook && localApiKey.trim()) {
+      apiKeyHook.submitPastedKey(localApiKey.trim());
+    }
   };
 
   return (
@@ -28,9 +37,41 @@ const WelcomeScreen = ({
             placeholder: "Enter a topic to generate your first project, e.g., 'The History of Ancient Rome'",
             value: initialPrompt,
             onChange: (e) => setInitialPrompt(e.target.value),
-            disabled: !apiKeyIsSet || isLoadingInitial || isAppBusy,
+            disabled: isLoadingInitial || isAppBusy,
             rows: 3
           }),
+
+          !apiKeyIsSet && (
+            React.createElement("div", { style: { margin: '15px 0', borderTop: '1px solid var(--border-color)', paddingTop: '15px' }},
+              React.createElement("p", { style: { fontSize: '0.9em', color: 'var(--text-secondary)', margin: '0 0 8px 0' }},
+                "To generate a project, first enter your Gemini API Key. ",
+                React.createElement("a", { href: "https://aistudio.google.com/app/apikey", target: "_blank", rel: "noopener noreferrer" }, "Get a key here.")
+              ),
+              React.createElement("div", { style: { display: 'flex', gap: '8px' }},
+                React.createElement("input", {
+                  type: "password",
+                  placeholder: "Paste your Gemini API Key here",
+                  value: localApiKey,
+                  onChange: (e) => setLocalApiKey(e.target.value),
+                  disabled: isLoadingInitial || isAppBusy || apiKeyHook.isProcessing,
+                  style: { flexGrow: 1 }
+                }),
+                React.createElement("button", {
+                  onClick: handleSetApiKey,
+                  disabled: !localApiKey.trim() || isLoadingInitial || isAppBusy || apiKeyHook.isProcessing,
+                  className: "secondary"
+                },
+                  apiKeyHook.isProcessing ? 'Setting...' : 'Set Key'
+                )
+              ),
+              apiKeyHook.status.message && apiKeyHook.status.type === 'error' && (
+                React.createElement("p", { style: { fontSize: '0.85em', color: 'var(--error-color)', marginTop: '5px', textAlign: 'left' }},
+                  apiKeyHook.status.message
+                )
+              )
+            )
+          ),
+
           React.createElement("button", {
             onClick: handleGenerateTree,
             disabled: !apiKeyIsSet || isLoadingInitial || isAppBusy || !initialPrompt.trim(),
@@ -38,7 +79,7 @@ const WelcomeScreen = ({
           }, 
             isLoadingInitial ? "Generating..." : "🌳 Generate Project"
           ),
-          !apiKeyIsSet && React.createElement("p", { className: "welcome-api-key-warning" }, "An API Key is required for AI generation. Please set one in the Workspace view (you can start from an example or import a project to access it).")
+          !apiKeyIsSet && !apiKeyHook.status.message && React.createElement("p", { className: "welcome-api-key-warning" }, "An API Key is required for AI generation.")
         ),
 
         React.createElement("div", { className: "welcome-screen-secondary-actions" },

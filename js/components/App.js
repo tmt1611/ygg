@@ -112,7 +112,8 @@ const App = () => {
     techTreeData, setTechTreeData, contextText: initialPrompt, initialPrompt,
     previousTreeStateForUndoProp: previousTreeStateForUndo, setPreviousTreeStateForUndo,
     baseForModalDiffProp: baseForModalDiff, setBaseForModalDiff, 
-    setIsLoading, setIsModifying, setModificationPrompt: setModificationPrompt
+    setIsLoading, setIsModifying, setModificationPrompt: setModificationPrompt,
+    selectedGraphNodeId: viewStates.selectedGraphNodeId
   });
 
   const aiInsightsHook = useAiInsights({

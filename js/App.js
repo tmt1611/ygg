@@ -58,7 +58,18 @@ const App = () => {
     if (typeof err === 'string') {
         _setError({ message: err });
     } else if (err instanceof Error) {
-        _setError({ message: err.message, details: err.stack });
+        let details = err.stack;
+        if (err.prompt || err.rawResponse) {
+            details = '';
+            if (err.prompt) {
+                details += `--- PROMPT SENT TO AI ---\n${err.prompt}\n\n`;
+            }
+            if (err.rawResponse) {
+                details += `--- RAW RESPONSE FROM AI ---\n${err.rawResponse}\n\n`;
+            }
+            details += `--- STACK TRACE ---\n${err.stack}`;
+        }
+        _setError({ message: err.message, details: details });
     } else if (typeof err === 'object' && err !== null && err.message) {
         _setError({ message: err.message, details: err.details || JSON.stringify(err, null, 2) });
     } else {
@@ -112,7 +123,8 @@ const App = () => {
     techTreeData, setTechTreeData, contextText: initialPrompt, initialPrompt,
     previousTreeStateForUndoProp: previousTreeStateForUndo, setPreviousTreeStateForUndo,
     baseForModalDiffProp: baseForModalDiff, setBaseForModalDiff, 
-    setIsLoading, setIsModifying, setModificationPrompt: setModificationPrompt
+    setIsLoading, setIsModifying, setModificationPrompt: setModificationPrompt,
+    selectedGraphNodeId: viewStates.selectedGraphNodeId
   });
 
   const aiInsightsHook = useAiInsights({
@@ -196,16 +208,58 @@ const App = () => {
   }, [techTreeData, modalManager, initialPrompt, apiKeyHook.status.isSet, setError, addHistoryEntry, setIsSummarizing]);
 
   const handleNodeSelectedForInsightsOrActions = useCallback((nodeId) => {
-    if (nodeId && techTreeData) {
-      const node = findNodeById(techTreeData, nodeId);
-      setSelectedNodeForInsights(node); 
-      setSelectedGraphNodeId(nodeId); 
-    } else {
-      setSelectedNodeForInsights(null);
-      setSelectedGraphNodeId(null);
-      aiInsightsHook.clearAiInsights(); 
-    }
-  }, [techTreeData, setSelectedGraphNodeId, aiInsightsHook]);
+    // This function will now handle cleaning the tree of temporary AI modification statuses
+    // upon the first interaction after a modification has been applied.
+    const stripAnnotations = (node) => {
+      if (!node) return null;
+      const { _changeStatus, _modificationDetails, _oldParentId, ...rest } = node;
+      const newNode = { ...rest };
+      if (newNode.children) {
+        newNode.children = newNode.children.map(stripAnnotations);
+      }
+      return newNode;
+    };
+
+    let treeHasAnnotations = false;
+    const checkAnnotations = (node) => {
+        if (treeHasAnnotations || !node) return;
+        if (node._changeStatus && node._changeStatus !== 'unchanged') {
+            treeHasAnnotations = true;
+            return;
+        }
+        if (node.children) {
+            for (const child of node.children) {
+                checkAnnotations(child);
+            }
+        }
+    };
+
+    setTechTreeData(currentTree => {
+      if (!currentTree) {
+        setSelectedNodeForInsights(null);
+        setSelectedGraphNodeId(null);
+        aiInsightsHook.clearAiInsights();
+        return null;
+      }
+      
+      treeHasAnnotations = false; // reset for this run
+      checkAnnotations(currentTree);
+
+      const treeToOperateOn = treeHasAnnotations ? stripAnnotations(currentTree) : currentTree;
+
+      if (nodeId) {
+        const node = findNodeById(treeToOperateOn, nodeId);
+        setSelectedNodeForInsights(node);
+        setSelectedGraphNodeId(nodeId);
+      } else {
+        setSelectedNodeForInsights(null);
+        setSelectedGraphNodeId(null);
+        aiInsightsHook.clearAiInsights();
+      }
+      
+      return treeToOperateOn;
+    });
+  }, [setTechTreeData, setSelectedGraphNodeId, setSelectedNodeForInsights, aiInsightsHook]);
 
 
   const currentTreeStats = useMemo(() => {
@@ -275,7 +329,7 @@ const App = () => {
 
   const handleGenerateStrategicSuggestions = useCallback(async () => {
     if (!apiKeyHook.status.isSet || !initialPrompt.trim()) {
-      setStrategicSuggestionsError("API Key must be set and project context (initial prompt) must be provided.");
+      setStrategicSuggestionsError({ message: "API Key must be set and project context (initial prompt) must be provided." });
       return;
     }
     setIsFetchingStrategicSuggestions(true);
@@ -291,7 +345,7 @@ const App = () => {
       addHistoryEntry('AI_STRATEGY_GEN', 'AI strategic suggestions generated for project.');
     } catch (e) {
       console.error("Error generating strategic suggestions:", e);
-      setStrategicSuggestionsError(e.message || "Failed to fetch strategic suggestions from AI.");
+      setStrategicSuggestionsError({ message: e.message || "Failed to fetch strategic suggestions from AI.", details: e.stack });
     } finally {
       setIsFetchingStrategicSuggestions(false);
     }
@@ -302,7 +356,7 @@ const App = () => {
       setError("Cannot apply suggestion: No active tree.");
       return;
     }
-    const fullPrompt = `Based on the strategic idea "${suggestion}", please apply relevant modifications to the current tree structure. For example, consider creating new main branches, adding key technologies under existing nodes, or expanding on underdeveloped areas related to this idea.`;
+    const fullPrompt = `Based on the strategic idea "${suggestion}", please apply relevant modifications to the current tree structure.`;
     setModificationPrompt(fullPrompt);
     treeOperationsAI.handleApplyAiModification(fullPrompt);
     setActiveSidebarTab('ai-tools');

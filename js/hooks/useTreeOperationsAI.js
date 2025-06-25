@@ -20,8 +20,9 @@ export const useTreeOperationsAI = ({
   setIsLoading,
   setIsModifying,
   setModificationPrompt,
+  selectedGraphNodeId,
 }) => {
-  const { openAiSuggestionModal, closeAiSuggestionModal, openConfirmModal, setPendingAiSuggestion, pendingAiSuggestion, openAiQuickEditModal, closeAiQuickEditModal, aiQuickEditModalConfig } = modalManager;
+  const { openAiSuggestionModal, closeAiSuggestionModal, openConfirmModal, setPendingAiSuggestion, pendingAiSuggestion } = modalManager;
   const { addHistoryEntry } = historyManager;
 
   const handleGenerateNewTree = useCallback(async () => {
@@ -93,6 +94,14 @@ export const useTreeOperationsAI = ({
 
     setIsModifying(true); setError(null);
 
+    let finalModificationPrompt = modificationPromptValue;
+    if (selectedGraphNodeId && techTreeData) {
+        const selectedNode = findNodeById(techTreeData, selectedGraphNodeId);
+        if (selectedNode) {
+            finalModificationPrompt = `The user has selected the node "${selectedNode.name}" (ID: ${selectedNode.id}). Apply the following instruction primarily to this node and its descendants, maintaining the integrity of the rest of the tree. Instruction: "${modificationPromptValue}"`;
+        }
+    }
+
     let currentModificationBase;
     if (pendingAiSuggestion) { 
         currentModificationBase = pendingAiSuggestion;
@@ -113,7 +122,7 @@ export const useTreeOperationsAI = ({
 
     try {
       const lockedIds = getLockedNodeIds(currentModificationBase);
-      const suggestedTree = await geminiService.modifyTechTreeByGemini(currentModificationBase, modificationPromptValue, lockedIds);
+      const suggestedTree = await geminiService.modifyTechTreeByGemini(currentModificationBase, finalModificationPrompt, lockedIds);
       
       setPendingAiSuggestion(suggestedTree); 
       openAiSuggestionModal(suggestedTree); 
@@ -126,7 +135,8 @@ export const useTreeOperationsAI = ({
   }, [
     techTreeData, apiKeyIsSet, projectManager, pendingAiSuggestion,
     openAiSuggestionModal, setPendingAiSuggestion, addHistoryEntry, 
-    setError, setPreviousTreeStateForUndo, setIsModifying, setBaseForModalDiff
+    setError, setPreviousTreeStateForUndo, setIsModifying, setBaseForModalDiff,
+    selectedGraphNodeId
   ]);
 
   const handleConfirmAiSuggestion = useCallback(() => {
@@ -143,6 +153,9 @@ export const useTreeOperationsAI = ({
       addHistoryEntry('AI_MOD_CONFIRMED', 'AI modifications applied to project.', { nodeCount: countNodesInTree(suggestionToApply), projectId: activeProjectId });
       setModificationPrompt(''); 
       handleSaveActiveProject(false);
+      if (viewStates && viewStates.setSelectedGraphNodeId) {
+        viewStates.setSelectedGraphNodeId(null);
+      }
     }
     setPendingAiSuggestion(null); 
     setBaseForModalDiff(null);    
@@ -152,7 +165,8 @@ export const useTreeOperationsAI = ({
     pendingAiSuggestion, projectManager, techTreeData,
     closeAiSuggestionModal, addHistoryEntry, 
     setTechTreeData, setModificationPrompt, setError,
-    setPendingAiSuggestion, setBaseForModalDiff, setPreviousTreeStateForUndo
+    setPendingAiSuggestion, setBaseForModalDiff, setPreviousTreeStateForUndo,
+    viewStates
   ]);
 
   const handleRejectAiSuggestion = useCallback(() => {
@@ -196,64 +210,11 @@ export const useTreeOperationsAI = ({
     setError, setTechTreeData, setPreviousTreeStateForUndo, setBaseForModalDiff, setPendingAiSuggestion, addHistoryEntry
   ]);
 
-  const handleGenerateAiQuickEdit = useCallback(async (nodeId, prompt) => {
-    if (!apiKeyIsSet || !techTreeData || !prompt) {
-      setError("Cannot perform quick edit: API key, tree data, and prompt are required.");
-      return null;
-    }
-    const nodeToEdit = findNodeById(techTreeData, nodeId);
-    if (!nodeToEdit) {
-      setError(`Cannot perform quick edit: Node with ID ${nodeId} not found.`);
-      return null;
-    }
-    if (nodeToEdit.isLocked) {
-      setError(`Cannot perform quick edit: Node "${nodeToEdit.name}" is locked.`);
-      return null;
-    }
-
-    try {
-      const modifiedNode = await geminiService.quickEditNode(nodeToEdit, prompt);
-      return modifiedNode;
-    } catch (e) {
-      setError(e);
-      console.error("Gemini API Error (Quick Edit):", e);
-      return null;
-    }
-  }, [apiKeyIsSet, techTreeData, setError]);
-
-  const handleConfirmAiQuickEdit = useCallback((originalNodeId, modifiedNodeData) => {
-    if (!techTreeData || !originalNodeId || !modifiedNodeData) {
-      setError("Could not apply quick edit due to missing data.");
-      return;
-    }
-    
-    // The AI might return children with "NEW_NODE" as ID. We need to initialize them.
-    const initializedModifiedNode = {
-      ...modifiedNodeData,
-      children: modifiedNodeData.children.map(child => {
-        if (child.id === "NEW_NODE") {
-          return initializeNodes(child, modifiedNodeData.id);
-        }
-        // Also re-initialize existing children to update their parentId if they were moved
-        return initializeNodes(child, modifiedNodeData.id);
-      })
-    };
-
-    const updatedTree = updateNodeInTree(techTreeData, originalNodeId, initializedModifiedNode);
-    setTechTreeData(updatedTree);
-    projectManager.handleSaveActiveProject(false);
-    addHistoryEntry('NODE_UPDATED', `Node "${modifiedNodeData.name}" updated via AI Quick Edit.`);
-    closeAiQuickEditModal();
-  }, [techTreeData, setTechTreeData, projectManager, addHistoryEntry, closeAiQuickEditModal, setError]);
-
-
   return {
     handleGenerateNewTree,
     handleApplyAiModification,
     handleConfirmAiSuggestion,
     handleRejectAiSuggestion,
     handleUndoAiModification,
-    handleGenerateAiQuickEdit,
-    handleConfirmAiQuickEdit,
   };
 };

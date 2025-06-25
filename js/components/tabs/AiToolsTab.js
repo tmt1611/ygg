@@ -12,16 +12,21 @@ const AiToolsTab = ({
   strategicSuggestionsError, onGenerateStrategicSuggestions,
   onApplyStrategicSuggestion,
   apiKeyIsSet, hasTechTreeData, isAppBusy,
-  collapsedPanels, onTogglePanel
+  collapsedPanels, onTogglePanel,
+  selectedNode
 }) => {
   
   const canGenerateStrategicSuggestions = apiKeyIsSet && !!initialPromptForStrategy?.trim() && !isAppBusy && !isFetchingStrategicSuggestions;
+
+  const treeModifierTitle = selectedNode 
+    ? `Tree Modifier AI (on: ${selectedNode.name.substring(0, 15)}${selectedNode.name.length > 15 ? '...' : ''})` 
+    : 'Tree Modifier AI';
 
   return (
     React.createElement("div", { style: { display: 'flex', flexDirection: 'column', gap: '12px' } },
       React.createElement(CollapsiblePanel, {
         panelId: 'tree-modifier',
-        title: 'Tree Modifier AI',
+        title: treeModifierTitle,
         icon: '🌳',
         variant: 'sidebar',
         isCollapsed: collapsedPanels.has('tree-modifier'),
@@ -70,7 +75,7 @@ const AiToolsTab = ({
         ),
 
         isFetchingStrategicSuggestions && React.createElement(LoadingSpinner, { message: null }),
-        strategicSuggestionsError && React.createElement(ErrorMessage, { message: strategicSuggestionsError }),
+        strategicSuggestionsError && React.createElement(ErrorMessage, { error: strategicSuggestionsError, mode: "inline" }),
 
         strategicSuggestions && strategicSuggestions.length > 0 && (
           React.createElement("div", { style: { marginTop: '15px' } },

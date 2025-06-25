@@ -13,14 +13,14 @@ export const useAiInsights = ({
 }) => {
   const [aiInsightsIsLoading, setAiInsightsIsLoading] = useState(false);
   const [aiInsightsData, setAiInsightsData] = useState(null);
-  const [aiInsightsError, setAiInsightsError] = useState(null);
+  const [aiInsightsError, setAiInsightsError] = useState(null); // Can be { message, details }
 
   const { addHistoryEntry } = historyManager;
   const { openNodeEditModal } = modalManager;
 
   const handleGenerateAiInsights = useCallback(async (nodeToGetInsightsFor) => {
     if (!nodeToGetInsightsFor || !apiKeyIsSet || !techTreeData) {
-      setAiInsightsError(!apiKeyIsSet ? "API Key not set for insights." : "Node data or project context missing for insights.");
+      setAiInsightsError({ message: !apiKeyIsSet ? "API Key not set for insights." : "Node data or project context missing for insights." });
       setAiInsightsData(null); return;
     }
     setAiInsightsIsLoading(true); setAiInsightsData(null); setAiInsightsError(null);
@@ -39,7 +39,10 @@ export const useAiInsights = ({
       const insights = await geminiService.generateNodeInsights(nodeToGetInsightsFor, parentNode, siblingNodes, childNodes, contextText);
       setAiInsightsData(insights);
       addHistoryEntry('NODE_INSIGHTS_GENERATED', `AI insights generated for "${nodeToGetInsightsFor.name}".`);
-    } catch (e) { console.error("Error generating AI insights:", e); setAiInsightsError(e.message || "Failed to generate AI insights."); }
+    } catch (e) { 
+      console.error("Error generating AI insights:", e); 
+      setAiInsightsError({ message: e.message || "Failed to generate AI insights.", details: e.stack }); 
+    }
     finally { setAiInsightsIsLoading(false); }
   }, [apiKeyIsSet, techTreeData, contextText, addHistoryEntry]);
 

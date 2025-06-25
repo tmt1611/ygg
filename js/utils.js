@@ -6,7 +6,8 @@ export const generateUUID = () => uuidv4();
 export const initializeNodes = (node, parentId = null) => {
   if (!node) return null;
   const newNode = { ...node, _parentId: parentId };
-  if (!newNode.id) {
+  // Assign a new UUID if the node has no ID or has the placeholder ID from AI.
+  if (!newNode.id || newNode.id === 'NEW_NODE') {
     newNode.id = generateUUID();
   }
   if (newNode.children && newNode.children.length > 0) {
@@ -228,6 +229,7 @@ export const getAncestorIds = (nodeId, tree) => {
   if (!tree || !nodeId) return [];
   const nodeMap = getAllNodesAsMap(tree);
   const ancestors = [];
+  const visitedIds = new Set(); // To detect cycles
   
   const startNode = nodeMap.get(nodeId);
   if (!startNode) {
@@ -238,6 +240,12 @@ export const getAncestorIds = (nodeId, tree) => {
   let currentId = startNode._parentId;
 
   while (currentId) {
+    if (visitedIds.has(currentId)) {
+      console.error("Cycle detected in parent hierarchy starting from node ID:", nodeId, "at cycle ID:", currentId);
+      break; // Break the loop to prevent infinite recursion
+    }
+    visitedIds.add(currentId);
+
     const node = nodeMap.get(currentId);
     if (node) {
       ancestors.unshift(node.id); // Add parent ID to the start of the array
@@ -351,7 +359,7 @@ export const compareAndAnnotateTree = (originalTree, modifiedTree) => {
     if (!originalTree) {
         const markAllNew = (node) => {
             if (!node) return null;
-            const newNode = { ...node, _changeStatus: 'new' };
+            const newNode = { ...node, _changeStatus: 'new', _modificationDetails: [{label: 'Status', type: 'critical', to: 'Newly created node'}] };
             if (newNode.children) {
                 newNode.children = newNode.children.map(markAllNew);
             }
@@ -408,9 +416,11 @@ export const compareAndAnnotateTree = (originalTree, modifiedTree) => {
         let structureModified = false;
 
         if (originalNode.isLocked) {
-            if (originalNode.name !== modNode.name || originalNode.description !== modNode.description || originalNode.importance !== modNode.importance) {
+            if (originalNode.name !== modNode.name) { modDetails.push({label: 'Name', from: originalNode.name, to: modNode.name, type: 'critical'}); }
+            if (originalNode.description !== modNode.description) { modDetails.push({label: 'Description', from: originalNode.description, to: modNode.description, type: 'critical'}); }
+            if (originalNode.importance !== modNode.importance) { modDetails.push({label: 'Importance', from: originalNode.importance, to: modNode.importance, type: 'critical'}); }
+            if (modDetails.length > 0) {
                 status = 'locked_content_changed';
-                modDetails.push({label: 'Critical Change', type: 'critical', to: 'Locked node content was illegally modified.'});
                 lockedContentChangedNodes.push(modNode);
             }
         } else {
@@ -432,15 +442,15 @@ export const compareAndAnnotateTree = (originalTree, modifiedTree) => {
             }
         }
 
-        if (contentModified) {
+        if (contentModified && status !== 'locked_content_changed') {
             status = 'content_modified';
             modifiedContentNodes.push(modNode);
         }
 
-        const originalChildrenIds = (originalNode.children || []).map(c => c.id).sort().join(',');
-        const modifiedChildrenIds = (modNode.children || []).map(c => c.id).sort().join(',');
+        const originalChildrenIds = (originalNode.children || []).map(c => c.id).sort();
+        const modifiedChildrenIds = (modNode.children || []).map(c => c.id).sort();
 
-        if (originalChildrenIds !== modifiedChildrenIds) {
+        if (originalChildrenIds.join(',') !== modifiedChildrenIds.join(',')) {
             if (status === 'unchanged') status = 'structure_modified'; 
             structureModified = true;
             structureModifiedNodes.push(modNode);

@@ -72,12 +72,17 @@ export const clearActiveApiKey = () => {
 
 export const isApiKeySet = () => apiClientState.isKeyAvailable && apiClientState.client !== null;
 
-const constructApiError = (error, baseMessage) => {
-  let detailedMessage = baseMessage;
+const constructApiError = (error, baseMessage, context = {}) => {
+  const errorToThrow = new Error();
+  if (context.prompt) errorToThrow.prompt = context.prompt;
+  if (context.rawResponse) errorToThrow.rawResponse = context.rawResponse;
+
   if (!isApiKeySet()) {
-     return new Error("API Key not set or invalid. Please provide a valid API Key in 'Workspace' -> 'Project Management'.");
+     errorToThrow.message = "API Key not set or invalid. Please provide a valid API Key in 'Workspace' -> 'API Key Setup'.";
+     return errorToThrow;
   }
   
+  let detailedMessage = baseMessage;
   if (error?.message) {
     const errorMsgLower = error.message.toLowerCase();
     if (!error.message.startsWith("AI returned invalid JSON")) {
@@ -88,7 +93,8 @@ const constructApiError = (error, baseMessage) => {
     const quotaIndicators = ["quota", "user_rate_limit", "resource_exhausted", "rate limit"];
     if (quotaIndicators.some(indicator => errorMsgLower.includes(indicator)) || error.status === 429) {
       detailedMessage = `API quota exceeded or rate limit hit. Please check your Gemini API usage and limits, or try again later. (Source: ${apiClientState.activeSource || 'current key'})`;
-      return new Error(detailedMessage);
+      errorToThrow.message = detailedMessage;
+      return errorToThrow;
     }
     
     const invalidKeyIndicators = ["api key not valid", "provide an api key", "api_key_invalid", "permission denied", "authentication failed", "invalid api key", "api key authorization failed"];
@@ -101,7 +107,8 @@ const constructApiError = (error, baseMessage) => {
       detailedMessage = `The API Key (from ${previousSource || 'previous source'}) is invalid or lacks permissions, and has been cleared. Please set a new key in Workspace > API Key Setup.`;
     }
   }
-  return new Error(detailedMessage);
+  errorToThrow.message = detailedMessage;
+  return errorToThrow;
 };
 
 
@@ -160,7 +167,9 @@ const parseGeminiJsonResponse = (responseText, forModification = false) => {
     return parsed;
   } catch(e) {
     console.error("Gemini JSON parsing critical error. Raw text:", responseText, "Attempted to parse:", jsonStr, "Error:", e);
-    throw new Error(`AI returned invalid JSON. ${e.message || 'Parsing failed.'} Check console for raw response.`);
+    const newError = new Error(`AI returned invalid JSON. ${e.message || 'Parsing failed.'} Check console for raw response.`);
+    newError.rawResponse = responseText;
+    throw newError;
   }
 };
 
@@ -200,13 +209,13 @@ Strict JSON Rules:
 1. Keys and string values in DOUBLE QUOTES. No trailing commas.
 2. Valid importances: "minor", "common", "major". Default: "common" for new nodes.
 3. Output ONLY the single JSON object (for new tree) or the complete modified tree's root JSON object. NO extra text/markdown.
-4. ALL nodes MUST have: "id", "name", "description" (use "" if empty), "isLocked" (boolean), "importance" (string), "children" (array, can be empty []).
+4. Every single node, from the root to the deepest child, MUST contain all of these exact keys: "id", "name", "description", "isLocked", "importance", "children". If a node has no description, use an empty string: "description": "".
 5. Ensure all string values are properly escaped for JSON.
 `;
 
 export const generateTechTree = async (userPrompt) => {
   if (!apiClientState.client || !apiClientState.isKeyAvailable) {
-    throw new Error("Gemini API client not initialized. Set a valid API Key in 'Workspace' -> 'Project Management'.");
+    throw new Error("Gemini API client not initialized. Set a valid API Key in 'Workspace' -> 'API Key Setup'.");
   }
 
   try {
@@ -258,10 +267,11 @@ export const modifyTechTreeByGemini = async (
     - DO NOT change the 'isLocked' value for ANY node.
 2.  **Locked Node Content:** If a node's ID is in the 'Locked Node IDs' list, you MUST NOT change its 'name', 'description', or 'importance'. You CAN add new children to it or move it.
 3.  **Node Importance:** Must be one of "minor", "common", or "major".
-4.  **Mandatory Fields:** ALL nodes in your output MUST have these fields: 'id', 'name', 'description' (use "" if empty), 'isLocked' (boolean), 'importance' (string), and 'children' (array, can be empty []).
+4.  **Mandatory Fields:** Every single node in your output, including unchanged nodes, MUST contain all of these exact keys: "id", "name", "description", "isLocked", "importance", "children". If a node has no description, use an empty string: "description": "".
 5.  **Output Format:** Respond ONLY with a single, valid JSON object for the modified tree's root node. NO EXTRA TEXT, explanations, or markdown fences.
 6.  **JSON Syntax:** Strictly follow JSON rules. Example node: ${COMMON_NODE_FORMAT_INSTRUCTION}
 7.  **Maintain Structure:** Avoid unnecessarily drastic changes to the overall tree shape (e.g., adding many new levels of depth) unless the user's instruction explicitly asks for it.
+8.  **Final Check:** Before outputting, double-check that your entire response is a single JSON object starting with { and ending with }, and that every single node in the tree has all the mandatory fields from rule #4.
 `;
 
   const fullPrompt = `
@@ -314,13 +324,13 @@ Output the complete, modified JSON for the tech tree, adhering to ALL rules abov
 
   } catch (error) {
     console.error("Error modifying tech tree via Gemini API:", error);
-    throw constructApiError(error, "Failed to modify tech tree using AI.");
+    throw constructApiError(error, "Failed to modify tech tree using AI.", { prompt: fullPrompt, rawResponse: error.rawResponse });
   }
 };
 
 export const summarizeText = async (textToSummarize) => {
   if (!apiClientState.client || !apiClientState.isKeyAvailable) {
-    throw new Error("Gemini API client not initialized. Set a valid API Key in 'Workspace' -> 'Project Management'.");
+    throw new Error("Gemini API client not initialized. Set a valid API Key in 'Workspace' -> 'API Key Setup'.");
   }
 
   const prompt = `You are a helpful assistant. Summarize the following text, which describes a hierarchical tech tree or skill tree. 
@@ -428,19 +438,24 @@ export const generateStrategicSuggestions = async (
     throw new Error("Gemini API client not initialized. Set a valid API Key.");
   }
 
+  const systemInstruction = `You are an AI assistant that provides strategic suggestions for a project.
+You MUST respond with a single, valid JSON array of strings.
+Example: ["Suggestion 1", "Suggestion 2", "Suggestion 3"]
+Output ONLY the JSON array. NO extra text, explanations, or markdown fences.
+`;
+
   const prompt = `
 Project Context: "${projectContext}"
 Current Tree Summary: "${currentTreeSummary}"
 
 Based on the project context and the current state of the tree, suggest 3-5 high-level strategic next steps, new major branches, or key areas of focus that would logically extend, complement, or significantly enhance this project.
 Each suggestion should be a concise, actionable phrase or short sentence.
-Return the suggestions as a JSON array of strings. For example: ["Develop a dedicated AI research branch", "Explore sustainable energy integrations", "Create a beginner-friendly tutorial pathway"].
-Respond ONLY with the JSON array. No extra text or markdown.
 `;
 
   try {
     const model = apiClientState.client.getGenerativeModel({ 
       model: "gemini-1.5-flash-latest",
+      systemInstruction: { parts: [{ text: systemInstruction }], role: "model" },
       generationConfig: { 
         responseMimeType: "application/json", 
         temperature: 0.6, topK: 50, topP: 0.95 
@@ -467,55 +482,6 @@ Respond ONLY with the JSON array. No extra text or markdown.
   }
 };
 
-export const quickEditNode = async (nodeToEdit, modificationPrompt) => {
-  if (!apiClientState.client || !apiClientState.isKeyAvailable) {
-    throw new Error("Gemini API client not initialized. Set a valid API Key.");
-  }
 
-  const systemInstruction = `You are an AI assistant that modifies a single JSON node object from a tech tree based on a user instruction.
-**MANDATORY RULES:**
-1.  **Preserve IDs:** RETAIN the 'id' of the main node and any existing children. For NEW children you add, use "NEW_NODE" as the 'id' value.
-2.  **Locked Node:** The provided node is NOT locked. You are free to change its 'name', 'description', and 'importance'.
-3.  **Node Importance:** Must be one of "minor", "common", or "major".
-4.  **Mandatory Fields:** The returned node object MUST have these fields: 'id', 'name', 'description', 'isLocked', 'importance', and 'children'.
-5.  **Output Format:** Respond ONLY with a single, valid JSON object for the modified node. NO EXTRA TEXT, explanations, or markdown fences.
-6.  **JSON Syntax:** Strictly follow JSON rules.
-`;
 
-  const fullPrompt = `
-Current Node JSON:
-\`\`\`json
-${JSON.stringify(nodeToEdit, null, 2)}
-\`\`\`
-User instruction: "${modificationPrompt}"
 
-Output the complete, modified JSON for this single node, adhering to ALL rules. Respond ONLY with the JSON.
-`;
-
-  try {
-    const model = apiClientState.client.getGenerativeModel({ 
-      model: "gemini-1.5-flash-latest",
-      systemInstruction: { parts: [{ text: systemInstruction }], role: "model" },
-      generationConfig: { 
-        responseMimeType: "application/json", 
-        temperature: 0.3, topK: 40, topP: 0.95 
-      },
-    });
-
-    const result = await model.generateContent(fullPrompt);
-    const response = result.response;
-    
-    const parsedData = parseGeminiJsonResponse(response.text(), true);
-
-    if (!isValidTechTreeNodeShape(parsedData)) {
-        console.error("Gemini quick edit resulted in invalid JSON node structure.", parsedData);
-        throw new Error("AI suggestion has an invalid node structure (e.g., name/children/importance missing or invalid type).");
-    }
-    
-    return parsedData;
-
-  } catch (error) {
-    console.error("Error quick editing node via Gemini API:", error);
-    throw constructApiError(error, "Failed to quick edit node using AI.");
-  }
-};

@@ -52,14 +52,87 @@ const GraphViewComponent = ({
     });
   }, [onOpenViewContextMenu]);
 
+  const handleBackgroundClick = useCallback(() => {
+      onCloseContextMenu();
+      hideTooltip();
+  }, [onCloseContextMenu, hideTooltip]);
+
   const { g, nodes, links, config, resetZoom, zoomIn, zoomOut, centerOnNode, currentTransform, translateTo } = useD3Tree(
     svgRef, 
     treeData, 
     {}, 
-    onCloseContextMenu, 
+    handleBackgroundClick, 
     handleBackgroundContextMenu, 
     layout
   );
+
+  // Keyboard navigation for the graph
+  useEffect(() => {
+    const svg = svgRef.current;
+    if (!svg) return;
+
+    const handleKeyDown = (event) => {
+      if (!['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(event.key)) {
+        return;
+      }
+      event.preventDefault();
+
+      const rootNode = nodes.find(n => n.depth === 0);
+      if (!activeNodeId && rootNode) {
+        onSelectNode(rootNode.data.id);
+        return;
+      }
+
+      const currentNode = nodes.find(n => n.data.id === activeNodeId);
+      if (!currentNode) return;
+
+      let targetNode = null;
+
+      const parent = currentNode.parent;
+      const siblings = parent ? parent.children : (rootNode ? [rootNode] : []);
+      const currentIndex = siblings.findIndex(n => n.data.id === activeNodeId);
+
+      const move = (key) => {
+        switch (key) {
+          case 'up':
+            if (layout === 'vertical' || layout === 'radial') return parent;
+            if (layout === 'horizontal' && currentIndex > 0) return siblings[currentIndex - 1];
+            return null;
+          case 'down':
+            if (layout === 'vertical' || layout === 'radial') return currentNode.children?.[0];
+            if (layout === 'horizontal' && currentIndex < siblings.length - 1) return siblings[currentIndex + 1];
+            return null;
+          case 'left':
+            if (layout === 'horizontal') return parent;
+            if ((layout === 'vertical' || layout === 'radial') && currentIndex > 0) return siblings[currentIndex - 1];
+            return null;
+          case 'right':
+            if (layout === 'horizontal') return currentNode.children?.[0];
+            if ((layout === 'vertical' || layout === 'radial') && currentIndex < siblings.length - 1) return siblings[currentIndex + 1];
+            return null;
+          default: return null;
+        }
+      };
+
+      switch (event.key) {
+        case 'ArrowUp': targetNode = move('up'); break;
+        case 'ArrowDown': targetNode = move('down'); break;
+        case 'ArrowLeft': targetNode = move('left'); break;
+        case 'ArrowRight': targetNode = move('right'); break;
+      }
+
+      if (targetNode) {
+        onSelectNode(targetNode.data.id);
+      }
+    };
+
+    svg.addEventListener('keydown', handleKeyDown);
+    return () => {
+      if (svg) {
+        svg.removeEventListener('keydown', handleKeyDown);
+      }
+    };
+  }, [activeNodeId, onSelectNode, nodes, layout]);
 
   useEffect(() => {
     contextMenuActionsRef.current = {
@@ -67,6 +140,8 @@ const GraphViewComponent = ({
       onAddChildToRoot: onAddNodeToRoot,
     };
   }, [resetZoom, onAddNodeToRoot]);
+
+
 
   useEffect(() => {
     const container = svgContainerDivRef.current;
@@ -193,6 +268,8 @@ const GraphViewComponent = ({
   const handleNodeClick = useCallback((event, d) => {
     event.stopPropagation();
     if (isAppBusy) return;
+    hideTooltip();
+    hideTooltip();
     if (d.isProxy) {
         if (d.data.isOutgoingLink && onNavigateToLinkedProject) {
             onNavigateToLinkedProject(d.data.realProjectId);
@@ -207,10 +284,11 @@ const GraphViewComponent = ({
     } else {
         console.warn("Node ID not found on D3GraphNode data in click handler", d);
     }
-  }, [isAppBusy, onSelectNode, activeNodeId, onNavigateToLinkedProject, handleNavigateToSourceNode]);
+  }, [isAppBusy, onSelectNode, activeNodeId, onNavigateToLinkedProject, handleNavigateToSourceNode, hideTooltip]);
 
   const handleNodeDoubleClick = useCallback((event, d) => {
     event.stopPropagation();
+    hideTooltip();
     if (isAppBusy || d.isProxy) return;
     const nodeId = d.data.id;
     if (nodeId) {
@@ -218,11 +296,11 @@ const GraphViewComponent = ({
     } else {
         console.warn("Node ID not found on D3GraphNode data in double-click handler", d);
     }
-  }, [isAppBusy, onSwitchToFocusView]);
+  }, [isAppBusy, onSwitchToFocusView, hideTooltip]);
 
   const handleNodeMouseEnter = useCallback((event, d) => {
     if (d.isProxy) return;
-    showTooltip(d.data, event);
+    showTooltip(d.data, event, d.parent?.data);
   }, [showTooltip]);
 
   const handleNodeMouseLeave = useCallback(() => {
@@ -232,6 +310,7 @@ const GraphViewComponent = ({
   const handleNodeContextMenu = useCallback((event, d) => {
     event.preventDefault();
     event.stopPropagation();
+    hideTooltip();
     if (isAppBusy || d.isProxy) return;
     const nodeId = d.data.id;
     if (nodeId) {
@@ -244,7 +323,7 @@ const GraphViewComponent = ({
     } else {
         console.warn("Node ID not found on D3GraphNode data in context menu handler", d);
     }
-  }, [isAppBusy, onOpenContextMenu, treeData, activeProjectId, projects, findLinkSource, onSelectNode]);
+  }, [isAppBusy, onOpenContextMenu, treeData, activeProjectId, projects, findLinkSource, onSelectNode, hideTooltip]);
 
   // Effect for drawing the main graph structure
   useEffect(() => {
@@ -570,10 +649,8 @@ const GraphViewComponent = ({
     nodeSelection
       .classed("selected", d => !d.isProxy && d.data.id === activeNodeId);
 
-    nodeSelection.select("circle")
-      .attr("stroke", d => {
-          return d.isProxy ? null : (d.data.id === activeNodeId ? 'var(--graph-node-selected-stroke)' : 'var(--graph-node-stroke)');
-      });
+    // The 'stroke' is now handled by CSS classes (.selected, .status-new, etc.), so we don't set it here.
+    // This prevents JS from overriding the desired CSS-based stroke color.
     
     // Center view on the active node when it changes
     if (activeNodeId) {
@@ -613,7 +690,7 @@ const GraphViewComponent = ({
                 })
             )
         ),
-        React.createElement("svg", { ref: svgRef, style: { display: 'block', width: '100%', height: '100%' }})
+        React.createElement("svg", { ref: svgRef, tabIndex: 0, "aria-label": "Interactive graph, use arrow keys to navigate nodes when focused.", style: { display: 'block', width: '100%', height: '100%' }})
       ),
       React.createElement("div", { className: "graph-view-controls" },
         React.createElement("div", { className: "segmented-control graph-layout-control", role: "radiogroup", "aria-label": "Graph Layout" },

@@ -107,6 +107,7 @@ const KnowledgeBranchSidebar = (props) => {
                 isAppBusy: isAppBusy,
                 collapsedPanels: collapsedPanels,
                 onTogglePanel: handleTogglePanel,
+                selectedNode: props.selectedNodeForInsights,
               })
             ),
             activeSidebarTab === 'ai-insights' && (
