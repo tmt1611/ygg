@@ -258,18 +258,6 @@ export const useNodeOperations = ({
     }
   }, [techTreeData, setTechTreeData, handleSaveActiveProject, addHistoryEntry, setError]);
 
-  const handleNodeNameChange = useCallback((nodeId, newName) => {
-    if (!techTreeData) return;
-    const nodeToUpdate = findNodeById(techTreeData, nodeId);
-    if (nodeToUpdate && nodeToUpdate.name !== newName && newName.trim() !== "") {
-      const oldName = nodeToUpdate.name;
-      const updatedTree = updateNodeInTree(techTreeData, nodeId, { name: newName });
-      setTechTreeData(updatedTree);
-      handleSaveActiveProject(false);
-      addHistoryEntry('NODE_UPDATED', `Node renamed from "${oldName}" to "${newName}".`);
-    }
-  }, [techTreeData, setTechTreeData, handleSaveActiveProject, addHistoryEntry]);
-
   const handleConfirmQuickEdit = useCallback((originalNodeId, suggestedNodeData) => {
     if (!techTreeData) {
       setError("Cannot apply quick edit: No active tree.");
@@ -298,7 +286,6 @@ export const useNodeOperations = ({
     handleChangeImportanceOfAllChildren,
     handleDeleteAllChildren,
     handlePasteNode,
-    handleNodeNameChange,
     handleConfirmQuickEdit,
   };
 };

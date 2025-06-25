@@ -2,8 +2,10 @@
 import http.server
 import socketserver
 import os
+import webbrowser
 
 PORT = 8080
+URL = f"http://localhost:{PORT}"
 
 # This handler will serve files from the directory where the script is run.
 # Make sure to run this script from the project's root directory.
@@ -18,10 +20,11 @@ with socketserver.TCPServer(("", PORT), Handler) as httpd:
     print("=====================================================")
     print(f"\nServing on port {PORT}")
     print(f"Please make sure you are running this from the project root directory.")
-    print(f"Open your browser and go to: http://localhost:{PORT}")
+    print(f"Opening app in your default browser: {URL}")
     print("\nTo stop the server, press Ctrl+C in this terminal.")
     print("=====================================================")
     try:
+        webbrowser.open_new_tab(URL)
         httpd.serve_forever()
     except KeyboardInterrupt:
         print("\nServer stopped.")

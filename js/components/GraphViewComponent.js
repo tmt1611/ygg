@@ -448,8 +448,8 @@ const GraphViewComponent = ({
 
         const midX = (sx + tx) / 2;
         const midY = (sy + ty) / 2;
-        // Point from child (t) to parent (s) to reverse the arrow direction.
-        const angle = Math.atan2(sy - ty, sx - tx) * 180 / Math.PI;
+        // Point from parent (s) to child (t) for correct arrow direction.
+        const angle = Math.atan2(ty - sy, tx - sx) * 180 / Math.PI;
         
         return `translate(${midX}, ${midY}) rotate(${angle})`;
       })

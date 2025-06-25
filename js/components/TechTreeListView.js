@@ -4,7 +4,6 @@ import TechTreeListItem from './TechTreeListItem.js';
 
 const TechTreeListViewComponent = ({
     treeData, showDescriptions, onToggleLock, onAddQuickChild, onNodeImportanceChange,
-    onNodeNameChange,
     onOpenNodeEditModal, searchTerm, isAppBusy, collapsedNodeIds, onToggleCollapseNode,
     onSwitchToFocusView,
     onNavigateToLinkedProject,
@@ -39,7 +38,6 @@ const TechTreeListViewComponent = ({
             key: treeData.id, node: treeData,
             showDescriptionsGlobal: showDescriptions,
             onToggleLock: onToggleLock, onAddQuickChild: onAddQuickChild, onNodeImportanceChange: onNodeImportanceChange,
-            onNodeNameChange: onNodeNameChange,
             onOpenNodeEditModal: onOpenNodeEditModal, level: 0,
             searchTerm: searchTerm, isAppBusy: isAppBusy,
             collapsedNodeIds: collapsedNodeIds, onToggleCollapseNode: onToggleCollapseNode,
