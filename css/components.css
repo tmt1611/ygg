@@ -393,6 +393,8 @@ html[data-theme='ocean'] .panel-header-icon { color: var(--primary-accent-dark);
 .modal-content-basic .modal-title .modal-icon { font-size: 1.2em; line-height: 1; }
 .modal-content-basic.confirm-danger .modal-title { color: var(--error-color); }
 .modal-content-basic.confirm-danger { border-top-color: var(--error-color); }
+.modal-content-basic.confirm-danger .modal-title { color: var(--error-color); }
+.modal-content-basic.confirm-danger { border-top-color: var(--error-color); }
 
 @keyframes modalFadeIn { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
 
