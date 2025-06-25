@@ -398,41 +398,6 @@ html[data-theme='ocean'] .panel-header-icon { color: var(--primary-accent-dark);
 
 @keyframes modalFadeIn { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
 
-/* AI Quick Edit Modal */
-.ai-quick-edit-layout {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-  margin: 15px 0;
-  max-height: 65vh;
-  overflow-y: auto;
-  padding-right: 5px;
-}
-.ai-quick-edit-prompt-section, .ai-quick-edit-preview-section { display: flex; flex-direction: column; gap: 8px; }
-.ai-quick-edit-prompt-section textarea { min-height: 100px; resize: vertical; }
-.ai-quick-edit-preview-section { background-color: var(--panel-alt-bg); border: 1px solid var(--border-color); border-radius: var(--border-radius); padding: 10px; min-height: 150px; }
-.ai-quick-edit-preview-title { font-size: 1em; font-weight: 600; color: var(--text-primary); margin: 0 0 10px 0; padding-bottom: 5px; border-bottom: 1px solid var(--border-color); }
-.ai-quick-edit-placeholder { text-align: center; color: var(--text-tertiary); font-style: italic; margin-top: 20px; }
-.ai-quick-edit-diff-container { display: flex; flex-direction: column; gap: 12px; }
-.quick-edit-diff-item { font-size: 0.9em; }
-.quick-edit-diff-label { color: var(--text-secondary); text-transform: uppercase; font-size: 0.8em; font-weight: 600; }
-.quick-edit-diff-content {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  margin-top: 4px;
-}
-.quick-edit-diff-content pre { margin: 0; padding: 6px 8px; border-radius: var(--border-radius); white-space: pre-wrap; word-break: break-word; font-size: 0.9em; line-height: 1.4; }
-.diff-from pre { background-color: var(--error-bg); border: 1px solid var(--error-color); opacity: 0.8; }
-.diff-to pre { background-color: var(--success-bg); border: 1px solid var(--success-color); }
-.diff-tag { font-size: 0.7em; font-weight: bold; color: var(--text-tertiary); margin-bottom: 2px; display: block; }
-.quick-edit-children-diff { padding: 6px 8px; border: 1px solid var(--border-color); border-radius: var(--border-radius); background-color: var(--app-bg); }
-.quick-edit-children-diff p { margin: 2px 0; font-family: monospace; font-size: 0.9em; }
-.diff-child-added { color: var(--success-color); }
-.diff-child-removed { color: var(--error-color); text-decoration: line-through; }
-.diff-child-changed { color: var(--primary-accent-dark); }
-
-
 /* AI Suggestion Modal Styles */
 .ai-suggestion-modal-layout { display: flex; flex-grow: 1; gap: 15px; overflow: hidden; transition: gap 0.3s ease; }
 .ai-suggestion-modal-layout.summary-hidden { gap: 0; }
@@ -568,6 +533,40 @@ html[data-theme='ocean'] .panel-header-icon { color: var(--primary-accent-dark);
   font-size: 0.9em;
   opacity: 0.7;
 }
+
+/* AI Quick Edit Modal */
+.ai-quick-edit-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin: 15px 0;
+  max-height: 65vh;
+  overflow-y: auto;
+  padding-right: 5px;
+}
+.ai-quick-edit-prompt-section, .ai-quick-edit-preview-section { display: flex; flex-direction: column; gap: 8px; }
+.ai-quick-edit-prompt-section textarea { min-height: 100px; resize: vertical; }
+.ai-quick-edit-preview-section { background-color: var(--panel-alt-bg); border: 1px solid var(--border-color); border-radius: var(--border-radius); padding: 10px; min-height: 150px; }
+.ai-quick-edit-preview-title { font-size: 1em; font-weight: 600; color: var(--text-primary); margin: 0 0 10px 0; padding-bottom: 5px; border-bottom: 1px solid var(--border-color); }
+.ai-quick-edit-placeholder { text-align: center; color: var(--text-tertiary); font-style: italic; margin-top: 20px; }
+.ai-quick-edit-diff-container { display: flex; flex-direction: column; gap: 12px; }
+.quick-edit-diff-item { font-size: 0.9em; }
+.quick-edit-diff-label { color: var(--text-secondary); text-transform: uppercase; font-size: 0.8em; font-weight: 600; }
+.quick-edit-diff-content {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 4px;
+}
+.quick-edit-diff-content pre { margin: 0; padding: 6px 8px; border-radius: var(--border-radius); white-space: pre-wrap; word-break: break-word; font-size: 0.9em; line-height: 1.4; }
+.diff-from pre { background-color: var(--error-bg); border: 1px solid var(--error-color); opacity: 0.8; }
+.diff-to pre { background-color: var(--success-bg); border: 1px solid var(--success-color); }
+.diff-tag { font-size: 0.7em; font-weight: bold; color: var(--text-tertiary); margin-bottom: 2px; display: block; }
+.quick-edit-children-diff { padding: 6px 8px; border: 1px solid var(--border-color); border-radius: var(--border-radius); background-color: var(--app-bg); }
+.quick-edit-children-diff p { margin: 2px 0; font-family: monospace; font-size: 0.9em; }
+.diff-child-added { color: var(--success-color); }
+.diff-child-removed { color: var(--error-color); text-decoration: line-through; }
+.diff-child-changed { color: var(--primary-accent-dark); }
 
 
 
@@ -2118,119 +2117,10 @@ html[data-theme='ocean'] .panel-variant-sidebar .panel-toggle-button {
   user-select: none;
 }
 
-.path-to-root-display.context-graph-focus {
-  background-color: rgba(var(--panel-bg-rgb), 0.8);
-  backdrop-filter: blur(2px);
-}
-.path-to-root-display.context-graph-focus .path-segment:hover {
-  background-color: var(--primary-accent-hover-bg);
-  color: var(--primary-accent-dark);
-}
-.path-to-root-display.context-graph-focus .path-segment.current-focus-path-node {
-  background-color: var(--primary-accent);
-  color: var(--text-on-accent);
-  font-weight: 600;
-}
-.path-to-root-display.context-graph-focus::before {
-  background: linear-gradient(to right, rgba(var(--panel-bg-rgb), 0.8), transparent);
-}
 .path-to-root-display.context-graph-focus::after {
   background: linear-gradient(to left, rgba(var(--panel-bg-rgb), 0.8), transparent);
 }
 
-.path-to-root-display.context-graph-focus {
-  background-color: rgba(var(--panel-bg-rgb), 0.8);
-  backdrop-filter: blur(2px);
-}
-.path-to-root-display.context-graph-focus .path-segment:hover {
-  background-color: var(--primary-accent-hover-bg);
-  color: var(--primary-accent-dark);
-}
-.path-to-root-display.context-graph-focus .path-segment.current-focus-path-node {
-  background-color: var(--primary-accent);
-  color: var(--text-on-accent);
-  font-weight: 600;
-}
-.path-to-root-display.context-graph-focus::before {
-  background: linear-gradient(to right, rgba(var(--panel-bg-rgb), 0.8), transparent);
-}
-.path-to-root-display.context-graph-focus::after {
-  background: linear-gradient(to left, rgba(var(--panel-bg-rgb), 0.8), transparent);
-}
-
-
-/* Error Boundary */
-.error-boundary-container {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 100vh;
-  width: 100vw;
-  padding: 20px;
-  background-color: var(--app-bg);
-  color: var(--text-primary);
-}
-.error-boundary-content {
-  max-width: 650px;
-  text-align: center;
-  background-color: var(--panel-bg);
-  padding: 30px 40px;
-  border-radius: var(--border-radius-lg);
-  box-shadow: var(--box-shadow-lg);
-  border-top: 4px solid var(--error-color);
-}
-.error-boundary-icon {
-  font-size: 3.5em;
-  line-height: 1;
-  margin-bottom: 15px;
-  color: var(--error-color);
-  animation: errorAppear 0.5s ease-out;
-}
-@keyframes errorAppear { from { transform: scale(0.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-.error-boundary-title {
-  font-family: var(--font-family-serif-display);
-  font-size: 2em;
-  margin-bottom: 10px;
-}
-.error-boundary-message {
-  font-size: 1.1em;
-  color: var(--text-secondary);
-  margin-bottom: 20px;
-}
-.error-boundary-subtext {
-  font-size: 0.9em;
-  color: var(--text-tertiary);
-  margin-bottom: 25px;
-  line-height: 1.5;
-}
-.error-boundary-actions {
-  display: flex;
-  justify-content: center;
-  gap: 12px;
-  flex-wrap: wrap;
-}
-.error-boundary-details {
-  margin-top: 25px;
-  text-align: left;
-  background-color: var(--panel-alt-bg);
-  border: 1px solid var(--border-color);
-  border-radius: var(--border-radius);
-  padding: 10px;
-}
-.error-boundary-details summary {
-  cursor: pointer;
-  font-weight: 500;
-  color: var(--text-secondary);
-}
-.error-boundary-details pre {
-  margin-top: 10px;
-  white-space: pre-wrap;
-  word-break: break-all;
-  font-size: 0.8em;
-  color: var(--text-tertiary);
-  max-height: 150px;
-  overflow-y: auto;
-}
 
 /* Error Boundary */
 .error-boundary-container {
