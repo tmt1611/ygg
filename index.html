@@ -685,24 +685,31 @@
       button:active { transform: translateY(0px); box-shadow: inset 0 1px 2px rgba(0,0,0,0.1); }
       button:disabled, input:disabled { cursor: not-allowed; background-color: var(--disabled-bg); color: var(--disabled-text); border-color: var(--disabled-border); opacity: 0.7; box-shadow: none; transform: none;}
       
-      button.primary { 
-        background-color: var(--button-primary-bg); color: var(--button-primary-text); border-color: var(--button-primary-bg); 
+      button.primary,
+      button.success,
+      button.danger {
         background-image: linear-gradient(to bottom, rgba(255,255,255,0.08), rgba(0,0,0,0.08));
       }
-      html[data-theme-base='dark'] button.primary { background-image: linear-gradient(to bottom, rgba(255,255,255,0.1), rgba(0,0,0,0.1)); }
+      html[data-theme-base='dark'] button.primary,
+      html[data-theme-base='dark'] button.success,
+      html[data-theme-base='dark'] button.danger {
+        background-image: linear-gradient(to bottom, rgba(255,255,255,0.1), rgba(0,0,0,0.1));
+      }
+
+      button.primary { 
+        background-color: var(--button-primary-bg); color: var(--button-primary-text); border-color: var(--button-primary-bg); 
+      }
       button.primary:hover { background-color: var(--button-primary-hover-bg); border-color: var(--button-primary-hover-bg); }
       button.primary:active { background-color: var(--button-primary-active-bg); }
       
       button.success { 
         background-color: var(--success-color); color: var(--text-on-accent); border-color: var(--success-color); 
-        background-image: linear-gradient(to bottom, rgba(255,255,255,0.08), rgba(0,0,0,0.08));
       }
       button.success:hover { background-color: var(--button-success-hover-bg); border-color: var(--button-success-hover-border); }
       button.success:active { background-color: var(--button-success-hover-border); }
       
       button.danger { 
         background-color: var(--error-color); color: var(--text-on-accent); border-color: var(--error-color); 
-        background-image: linear-gradient(to bottom, rgba(255,255,255,0.08), rgba(0,0,0,0.08));
       }
       button.danger:hover { background-color: var(--button-danger-hover-bg); border-color: var(--button-danger-hover-border); }
       button.danger:active { background-color: var(--button-danger-hover-border); }

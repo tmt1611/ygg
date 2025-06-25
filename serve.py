@@ -2,14 +2,13 @@
 import http.server
 import socketserver
 import webbrowser
+from functools import partial
 
 PORT = 8080
 DIRECTORY = "." # Serve files from the current directory
 URL = f"http://localhost:{PORT}"
 
-class Handler(http.server.SimpleHTTPRequestHandler):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, directory=DIRECTORY, **kwargs)
+Handler = partial(http.server.SimpleHTTPRequestHandler, directory=DIRECTORY)
 
 # Allow reusing the address to avoid "Address already in use" error on quick restarts
 socketserver.TCPServer.allow_reuse_address = True
