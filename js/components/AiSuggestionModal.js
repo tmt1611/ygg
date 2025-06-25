@@ -48,37 +48,49 @@ const AiSuggestionModal = ({
   const displayTree = useMemo(() => {
     if (!comparisonResult) return null;
     const { annotatedTree } = comparisonResult;
-    
-    // If there's an error, or the AI suggested deleting everything
+
+    // If there's an error, or the AI suggested deleting everything and returned nothing.
     if (!annotatedTree || annotatedTree._isErrorNode) {
-        if (removedNodesTree.length > 0) {
-             // Create a wrapper root if multiple subtrees were removed from the top level
-             if (removedNodesTree.length > 1) {
-                return { name: "Multiple Removed Roots", children: removedNodesTree, id: "removed-wrapper", _changeStatus: 'structure_modified' };
-             }
-             return removedNodesTree[0];
+      if (removedNodesTree.length > 0) {
+        // If there are removed nodes, show them.
+        if (removedNodesTree.length > 1) {
+          return { name: "Multiple Removed Roots", children: removedNodesTree, id: "removed-wrapper", _changeStatus: 'structure_modified' };
         }
-        return annotatedTree; // Return error node or null
+        return removedNodesTree[0];
+      }
+      return annotatedTree; // Return error node or null
     }
 
     // Deep clone to allow safe mutation
     const displayTreeMutable = JSON.parse(JSON.stringify(annotatedTree));
     const displayTreeNodesMap = getAllNodesAsMap(displayTreeMutable);
-
-    // Inject removed node subtrees into their original parents if those parents still exist in the new tree
+    
+    const unparentedRemovedRoots = [];
     removedNodesTree.forEach(removedRoot => {
         const parentId = removedRoot._parentId;
-        const parentInDisplayTree = displayTreeNodesMap.get(parentId);
+        const parentInDisplayTree = parentId ? displayTreeNodesMap.get(parentId) : null;
         if (parentInDisplayTree) {
             parentInDisplayTree.children = parentInDisplayTree.children || [];
             parentInDisplayTree.children.push(removedRoot);
         } else {
-            // This case means the parent was also removed. The `removedNodesTree` logic
-            // correctly nests this child under its removed parent, so we don't need to do anything here.
+            // Parent doesn't exist in new tree, or it's a root of a removed branch.
+            unparentedRemovedRoots.push(removedRoot);
         }
     });
 
-    if (!showOnlyChanges) return displayTreeMutable;
+    let finalTree = displayTreeMutable;
+    if (unparentedRemovedRoots.length > 0) {
+      // Create a virtual root to hold both the modified tree and any branches that were completely removed.
+      finalTree = {
+          id: 'virtual-root-diff',
+          name: 'Modification Preview',
+          description: 'A virtual root showing both the new structure and removed branches.',
+          children: [displayTreeMutable, ...unparentedRemovedRoots],
+          _changeStatus: 'structure_modified',
+      };
+    }
+    
+    if (!showOnlyChanges) return finalTree;
 
     // Filter the combined tree to only show changes
     const filterTree = (node) => {
@@ -87,13 +99,14 @@ const AiSuggestionModal = ({
         if (node.children) {
             filteredChildren = node.children.map(filterTree).filter(Boolean);
         }
-        if (node._changeStatus !== 'unchanged' || filteredChildren.length > 0) {
+        // Keep node if it has changes itself OR if it has children with changes OR it's the virtual root
+        if (node._changeStatus !== 'unchanged' || filteredChildren.length > 0 || node.id === 'virtual-root-diff') {
             return { ...node, children: filteredChildren };
         }
         return null;
     };
     
-    return filterTree(displayTreeMutable);
+    return filterTree(finalTree);
   }, [comparisonResult, showOnlyChanges, removedNodesTree]);
 
   useEffect(() => {
