@@ -19,18 +19,26 @@ const ConfirmModal = ({
       confirmButtonRef.current.focus();
     }
 
-    const handleEscape = (event) => {
+    const handleKeyDown = (event) => {
       if (event.key === 'Escape') {
+        event.preventDefault();
         if (onCancel) {
           onCancel();
         }
+      } else if (event.key === 'Enter') {
+        // Let button's default 'Enter' behavior work if it has focus
+        if (document.activeElement?.tagName !== 'BUTTON') {
+          event.preventDefault();
+          onConfirm();
+        }
       }
     };
-    document.addEventListener('keydown', handleEscape);
+    
+    document.addEventListener('keydown', handleKeyDown);
     return () => {
-      document.removeEventListener('keydown', handleEscape);
+      document.removeEventListener('keydown', handleKeyDown);
     };
-  }, [isOpen, onCancel]);
+  }, [isOpen, onConfirm, onCancel]);
 
 
   if (!isOpen) {

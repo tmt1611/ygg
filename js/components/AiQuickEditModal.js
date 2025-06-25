@@ -86,6 +86,15 @@ const AiQuickEditModal = ({ isOpen, node, onConfirm, onCancel, apiKeyIsSet }) =>
     }
   };
 
+  const handleKeyDown = (event) => {
+    if (event.key === 'Enter' && (event.ctrlKey || event.metaKey)) {
+      event.preventDefault();
+      if (!isLoading && prompt.trim() && apiKeyIsSet) {
+        handleGeneratePreview();
+      }
+    }
+  };
+
   const handleConfirm = () => {
     if (diff && diff.to) {
       onConfirm(node.id, diff.to);
@@ -107,9 +116,10 @@ const AiQuickEditModal = ({ isOpen, node, onConfirm, onCancel, apiKeyIsSet }) =>
             React.createElement("textarea", {
               ref: promptInputRef,
               id: "ai-quick-edit-prompt",
-              placeholder: "e.g., 'Fix typo in name', 'Add a child named...', 'Rewrite description to be more concise.'",
+              placeholder: "e.g., 'Fix typo in name', 'Add a child named...', 'Rewrite description to be more concise.' (Ctrl+Enter to submit)",
               value: prompt,
               onChange: (e) => setPrompt(e.target.value),
+              onKeyDown: handleKeyDown,
               disabled: isLoading || !apiKeyIsSet,
             }),
             React.createElement("button", {

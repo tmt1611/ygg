@@ -20,14 +20,21 @@ const TechExtractionModal = ({
 
   useEffect(() => {
     if (!isOpen) return;
-    const handleEscape = (event) => {
+    const handleKeyDown = (event) => {
       if (event.key === 'Escape') {
+        event.preventDefault();
         onClose();
+      } else if (event.key === 'Enter') {
+        // Let buttons handle their own Enter clicks.
+        if (document.activeElement?.tagName !== 'BUTTON') {
+          event.preventDefault();
+          onClose();
+        }
       }
     };
-    document.addEventListener('keydown', handleEscape);
+    document.addEventListener('keydown', handleKeyDown);
     return () => {
-      document.removeEventListener('keydown', handleEscape);
+      document.removeEventListener('keydown', handleKeyDown);
     };
   }, [isOpen, onClose]);
 
