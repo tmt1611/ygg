@@ -378,23 +378,42 @@ Output the complete, modified JSON for the tech tree, adhering to ALL rules abov
     const reconcileData = (original, modified) => {
         if (!original || !modified) return;
 
-        // Restore ID if missing and enforce original lock state.
-        if ((!modified.id || modified.id === 'NEW_NODE') && original.id) {
+        // Force the modified node to take the ID and lock state of the original node it's being compared against.
+        if (original.id) {
             modified.id = original.id;
         }
         modified.isLocked = original.isLocked;
 
-        // Recurse through children, matching by name as a heuristic.
-        if (Array.isArray(original.children) && Array.isArray(modified.children)) {
-            const originalChildrenByName = new Map(original.children.map(c => [c.name, c]));
+        const originalChildren = original.children || [];
+        const modifiedChildren = modified.children || [];
+        if (modifiedChildren.length === 0) return;
 
-            modified.children.forEach(modChild => {
-                const originalChild = originalChildrenByName.get(modChild.name);
-                if (originalChild) {
-                    reconcileData(originalChild, modChild);
-                }
-            });
-        }
+        // Create maps for faster lookups
+        const originalChildrenById = new Map(originalChildren.map(c => [c.id, c]));
+        const originalChildrenByName = new Map(originalChildren.map(c => [c.name, c]));
+        const usedOriginalIds = new Set();
+
+        // Pass 1: Match by ID. This is the most reliable.
+        modifiedChildren.forEach(modChild => {
+            if (modChild.id && modChild.id !== 'NEW_NODE' && originalChildrenById.has(modChild.id)) {
+                const originalChild = originalChildrenById.get(modChild.id);
+                reconcileData(originalChild, modChild);
+                usedOriginalIds.add(originalChild.id);
+            }
+        });
+
+        // Pass 2: Match by name for nodes that didn't have a matching ID.
+        modifiedChildren.forEach(modChild => {
+            // Skip if it already has a valid, matched ID from pass 1
+            if (modChild.id && modChild.id !== 'NEW_NODE' && usedOriginalIds.has(modChild.id)) return;
+
+            const originalChild = originalChildrenByName.get(modChild.name);
+            // Ensure this original child hasn't been matched by ID already
+            if (originalChild && !usedOriginalIds.has(originalChild.id)) {
+                reconcileData(originalChild, modChild);
+                usedOriginalIds.add(originalChild.id);
+            }
+        });
     };
     
     if (Array.isArray(parsedData)) {
