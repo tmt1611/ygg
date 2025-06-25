@@ -4,7 +4,7 @@ import { getNodePathString, cleanTreeForExport } from '../utils.js';
 
 const ContextMenu = ({
   isOpen, position, node, techTreeData, onClose, onToggleLock, onChangeImportance, onEditName, onAddChild, onAddQuickChild,
-  onSetFocus, onDeleteNode, onLinkToProject, onGoToLinkedProject, onUnlinkProject, onGenerateInsights, onSwitchToAiOps,
+  onSetFocus, onDeleteNode, onLinkToProject, onGoToLinkedProject, onUnlinkProject, onGenerateInsights,
   onLockAllChildren, onUnlockAllChildren, onChangeImportanceOfAllChildren, onDeleteAllChildren,
   onPasteNode,
   modalManager,
@@ -107,7 +107,6 @@ const ContextMenu = ({
         id: 'ai-actions', label: "AI Actions...", icon: '🤖', hasSubmenu: true,
         submenu: [
           { id: 'ai-quick-edit', label: "Quick Edit with AI...", icon: '✍️', action: () => modalManager.openAiQuickEditModal({ targetNodeId: node.id }), isDisabled: node.isLocked, title: node.isLocked ? "Unlock node to use AI quick edit" : "Make a small, targeted change to this node using an AI prompt" },
-          { id: 'ai-modify-node', label: "Full Modify with AI...", icon: '🤖', action: () => onSwitchToAiOps(node), isDisabled: node.isLocked, title: node.isLocked ? "Unlock node to use AI modifications" : "Modify this node and its children using an AI prompt in the sidebar" },
           { id: 'ai-insights', label: "Node Insights", icon: '💡', action: () => onGenerateInsights(node) },
         ]
       },
@@ -159,7 +158,7 @@ const ContextMenu = ({
         { id: 'delete-node', label: "Delete Node...", icon: '🗑️', isDestructive: true, action: () => onDeleteNode(node.id) }
       ] : [])
     ].filter(Boolean);
-  }, [node, onEditName, onAddChild, onAddQuickChild, onToggleLock, onSetFocus, onLinkToProject, onGoToLinkedProject, onUnlinkProject, onDeleteNode, onGenerateInsights, onSwitchToAiOps, handleCopy, incomingLink, handleNavigateToSourceNode, onChangeImportance, onLockAllChildren, onUnlockAllChildren, onChangeImportanceOfAllChildren, onDeleteAllChildren, copyFeedback, copyError, onPasteNode, canPaste, modalManager]);
+  }, [node, onEditName, onAddChild, onAddQuickChild, onToggleLock, onSetFocus, onLinkToProject, onGoToLinkedProject, onUnlinkProject, onDeleteNode, onGenerateInsights, handleCopy, incomingLink, handleNavigateToSourceNode, onChangeImportance, onLockAllChildren, onUnlockAllChildren, onChangeImportanceOfAllChildren, onDeleteAllChildren, copyFeedback, copyError, onPasteNode, canPaste, modalManager]);
 
   const focusableItems = useMemo(() => menuItems.filter(item => item.type !== 'separator' && !item.isDisabled), [menuItems]);
   const openSubmenuItems = useMemo(() => {

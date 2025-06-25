@@ -94,13 +94,7 @@ export const useTreeOperationsAI = ({
 
     setIsModifying(true); setError(null);
 
-    let finalModificationPrompt = modificationPromptValue;
-    if (selectedGraphNodeId && techTreeData) {
-        const selectedNode = findNodeById(techTreeData, selectedGraphNodeId);
-        if (selectedNode) {
-            finalModificationPrompt = `The user has selected the node "${selectedNode.name}" (ID: ${selectedNode.id}). Apply the following instruction primarily to this node and its descendants, maintaining the integrity of the rest of the tree. Instruction: "${modificationPromptValue}"`;
-        }
-    }
+    const finalModificationPrompt = modificationPromptValue;
     
     // For both modal and direct apply, the "undo" state is the tree *before* this operation.
     setPreviousTreeStateForUndo(techTreeData); 
@@ -113,13 +107,13 @@ export const useTreeOperationsAI = ({
         setBaseForModalDiff(techTreeData);
         setPendingAiSuggestion(suggestedTree); 
         openAiSuggestionModal(suggestedTree); 
-        addHistoryEntry('TREE_MOD_AI', 'AI proposed modifications (with modal).', { prompt: modificationPromptValue, projectId: activeProjectId });
+        addHistoryEntry('TREE_MOD_AI', 'AI proposed modifications (with modal).', { prompt: finalModificationPrompt, projectId: activeProjectId });
       } else {
         // Direct Apply
         const annotatedTree = compareAndAnnotateTree(techTreeData, suggestedTree);
         setTechTreeData(annotatedTree.annotatedTree);
         handleSaveActiveProject(false);
-        addHistoryEntry('AI_MOD_CONFIRMED', 'AI modifications directly applied.', { prompt: modificationPromptValue, projectId: activeProjectId });
+        addHistoryEntry('AI_MOD_CONFIRMED', 'AI modifications directly applied.', { prompt: finalModificationPrompt, projectId: activeProjectId });
         setModificationPrompt('');
       }
     } catch (e) { 
@@ -133,7 +127,7 @@ export const useTreeOperationsAI = ({
     techTreeData, apiKeyIsSet, projectManager,
     openAiSuggestionModal, setPendingAiSuggestion, addHistoryEntry, 
     setError, setPreviousTreeStateForUndo, setIsModifying, setBaseForModalDiff,
-    selectedGraphNodeId, setTechTreeData, setModificationPrompt
+    setTechTreeData, setModificationPrompt
   ]);
 
   const handleConfirmAiSuggestion = useCallback(() => {

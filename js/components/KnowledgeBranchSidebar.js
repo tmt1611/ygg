@@ -106,7 +106,6 @@ const KnowledgeBranchSidebar = (props) => {
                 isAppBusy: isAppBusy,
                 collapsedPanels: collapsedPanels,
                 onTogglePanel: handleTogglePanel,
-                selectedNode: props.selectedNodeForInsights,
                 modalManager: modalManager
               })
             ),
@@ -121,7 +120,8 @@ const KnowledgeBranchSidebar = (props) => {
                 onUseAlternativeName: props.onUseAlternativeName,
                 onAddSuggestedChild: props.onAddSuggestedChildFromInsight,
                 isAppBusy: isAppBusy,
-                apiKeyIsSet: apiKeyIsSet
+                apiKeyIsSet: apiKeyIsSet,
+                modalManager: modalManager
               })
             ),
             activeSidebarTab === 'history' && (

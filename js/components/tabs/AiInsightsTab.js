@@ -28,6 +28,7 @@ const AiInsightsTab = ({
   onAddSuggestedChild,
   isAppBusy,
   apiKeyIsSet,
+  modalManager,
 }) => {
   if (!node) {
     return React.createElement("p", { style: { textAlign: 'center', color: 'var(--text-tertiary)', fontSize: '0.9em', padding: '15px 5px' } }, "Select a node in Graph, List, or Focus view to see Node Insight.");
@@ -60,6 +61,15 @@ const AiInsightsTab = ({
 
       insightsData ? (
         React.createElement("div", { className: "ai-insights-content-sections" },
+          React.createElement("div", { className: "ai-insights-section" },
+            React.createElement("h4", null, "AI-Powered Actions"),
+            React.createElement("button", {
+              onClick: () => modalManager.openAiQuickEditModal({ targetNodeId: node.id }),
+              disabled: isAppBusy || node.isLocked,
+              className: "primary panel-button ai-insights-action-button",
+              title: node.isLocked ? "Unlock node to use AI quick edit" : "Make a small, targeted change to this node using an AI prompt"
+            }, "✍️ Quick Edit with AI...")
+          ),
           React.createElement("div", { className: "ai-insights-section" },
             React.createElement("h4", null, "Suggested Description"),
             React.createElement("p", { className: "ai-insight-text" }, insightsData.suggested_description),

@@ -13,15 +13,12 @@ const AiToolsTab = ({
   onApplyStrategicSuggestion,
   apiKeyIsSet, hasTechTreeData, isAppBusy,
   collapsedPanels, onTogglePanel,
-  selectedNode,
   modalManager
 }) => {
   
   const canGenerateStrategicSuggestions = apiKeyIsSet && !!initialPromptForStrategy?.trim() && !isAppBusy && !isFetchingStrategicSuggestions;
 
-  const treeModifierTitle = selectedNode 
-    ? `Tree Modifier AI (on: ${selectedNode.name.substring(0, 15)}${selectedNode.name.length > 15 ? '...' : ''})` 
-    : 'Tree Modifier AI';
+  const treeModifierTitle = 'Tree Modifier AI';
 
   return (
     React.createElement("div", { style: { display: 'flex', flexDirection: 'column', gap: '12px' } },
