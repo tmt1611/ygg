@@ -5,34 +5,33 @@ const FocusNodeDisplay = React.forwardRef(
     
     const importanceLabel = node.importance ? node.importance.charAt(0).toUpperCase() + node.importance.slice(1) : 'Common';
     
-    const titleLines = [
-        `Object: ${node.name}`,
-        `Importance: ${importanceLabel}`,
-        `Details: ${node.description?.substring(0, 100) || 'N/A'}${node.description && node.description.length > 100 ? '...' : ''}`
-    ];
-    if (node.isLocked) {
-        titleLines.push('System Lock Active');
-    }
+    const titleLines = [`Object: ${node.name}`, `Importance: ${importanceLabel}`];
+    const ariaLabelParts = [`Celestial Object: ${node.name}`, `Importance: ${importanceLabel}`];
 
-    const ariaLabelParts = [
-        `Celestial Object: ${node.name}`,
-        `Importance: ${importanceLabel}`
-    ];
+    const truncatedDescription = node.description ? 
+      (node.description.length > 100 ? `${node.description.substring(0, 100)}...` : node.description)
+      : 'N/A';
+    titleLines.push(`Details: ${truncatedDescription}`);
+
     if (node.isLocked) {
-        ariaLabelParts.push('System Lock Active');
+      titleLines.push('System Lock Active');
+      ariaLabelParts.push('System Lock Active');
     }
-    ariaLabelParts.push('Activate for detailed scan or navigation options.');
 
     let displayLinkIcon = "";
     if (node.linkedProjectId) {
       displayLinkIcon = "🔗";
-      titleLines.push(`Hyperspace Link (Outgoing): ${node.linkedProjectName || 'Unknown Project'}`);
+      const linkText = `Hyperspace Link (Outgoing): ${node.linkedProjectName || 'Unknown Project'}`;
+      titleLines.push(linkText);
       ariaLabelParts.push(`Hyperspace link to ${node.linkedProjectName || 'Unknown Project'}`);
     } else if (isRootNode && linkSourceInfo) {
       displayLinkIcon = "↩️";
-      titleLines.push(`Hyperspace Link (Incoming from): ${linkSourceInfo.sourceProjectName} / ${linkSourceInfo.sourceNodeName}`);
+      const linkText = `Hyperspace Link (Incoming from): ${linkSourceInfo.sourceProjectName} / ${linkSourceInfo.sourceNodeName}`;
+      titleLines.push(linkText);
       ariaLabelParts.push(`Hyperspace link from ${linkSourceInfo.sourceProjectName}`);
     }
+    
+    ariaLabelParts.push('Activate for detailed scan or navigation options.');
     
     const titleText = titleLines.join('\n');
     const ariaLabelText = ariaLabelParts.join(', ');

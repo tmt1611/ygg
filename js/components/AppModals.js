@@ -30,7 +30,6 @@ const AppModals = ({
   activeProjectId,
   yggdrasilViewMode,
   onGenerateInsights,
-  onSwitchToAiOps,
 }) => {
   const {
     isProjectNameModalOpen, projectModalConfig, closeProjectNameModal,

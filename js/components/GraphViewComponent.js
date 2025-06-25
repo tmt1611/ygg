@@ -66,15 +66,24 @@ const GraphViewComponent = ({
     layout
   );
 
+  const getCoordsForLayout = useCallback((node, layout) => {
+    if (!node) return { x: 0, y: 0 };
+    if (layout === 'radial') {
+      const angle = node.x - Math.PI / 2;
+      return { x: node.y * Math.cos(angle), y: node.y * Math.sin(angle) };
+    }
+    if (layout === 'vertical') return { x: node.x, y: node.y };
+    // horizontal
+    return { x: node.y, y: node.x };
+  }, []);
+
   // Keyboard navigation for the graph
   useEffect(() => {
     const svg = svgRef.current;
     if (!svg) return;
 
     const handleKeyDown = (event) => {
-      if (!['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(event.key)) {
-        return;
-      }
+      if (!['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(event.key)) return;
       event.preventDefault();
 
       const rootNode = nodes.find(n => n.depth === 0);
@@ -86,39 +95,26 @@ const GraphViewComponent = ({
       const currentNode = nodes.find(n => n.data.id === activeNodeId);
       if (!currentNode) return;
 
-      let targetNode = null;
-
       const parent = currentNode.parent;
       const siblings = parent ? parent.children : (rootNode ? [rootNode] : []);
       const currentIndex = siblings.findIndex(n => n.data.id === activeNodeId);
 
-      const move = (key) => {
-        switch (key) {
-          case 'up':
-            if (layout === 'vertical' || layout === 'radial') return parent;
-            if (layout === 'horizontal' && currentIndex > 0) return siblings[currentIndex - 1];
-            return null;
-          case 'down':
-            if (layout === 'vertical' || layout === 'radial') return currentNode.children?.[0];
-            if (layout === 'horizontal' && currentIndex < siblings.length - 1) return siblings[currentIndex + 1];
-            return null;
-          case 'left':
-            if (layout === 'horizontal') return parent;
-            if ((layout === 'vertical' || layout === 'radial') && currentIndex > 0) return siblings[currentIndex - 1];
-            return null;
-          case 'right':
-            if (layout === 'horizontal') return currentNode.children?.[0];
-            if ((layout === 'vertical' || layout === 'radial') && currentIndex < siblings.length - 1) return siblings[currentIndex + 1];
-            return null;
-          default: return null;
-        }
+      const keyMap = {
+        radial: { up: 'parent', down: 'child', left: 'prev_sibling', right: 'next_sibling' },
+        vertical: { up: 'parent', down: 'child', left: 'prev_sibling', right: 'next_sibling' },
+        horizontal: { up: 'prev_sibling', down: 'next_sibling', left: 'parent', right: 'child' },
       };
 
-      switch (event.key) {
-        case 'ArrowUp': targetNode = move('up'); break;
-        case 'ArrowDown': targetNode = move('down'); break;
-        case 'ArrowLeft': targetNode = move('left'); break;
-        case 'ArrowRight': targetNode = move('right'); break;
+      const direction = { ArrowUp: 'up', ArrowDown: 'down', ArrowLeft: 'left', ArrowRight: 'right' }[event.key];
+      const moveAction = keyMap[layout][direction];
+      let targetNode = null;
+
+      switch (moveAction) {
+        case 'parent': targetNode = parent; break;
+        case 'child': targetNode = currentNode.children?.[0]; break;
+        case 'prev_sibling': targetNode = currentIndex > 0 ? siblings[currentIndex - 1] : null; break;
+        case 'next_sibling': targetNode = currentIndex < siblings.length - 1 ? siblings[currentIndex + 1] : null; break;
+        default: break;
       }
 
       if (targetNode) {
@@ -388,10 +384,19 @@ const GraphViewComponent = ({
 
         if (dist <= sourceRadius + targetRadius) return null;
 
-        const sx = sx_c + (dx / dist) * sourceRadius;
-        const sy = sy_c + (dy / dist) * sourceRadius;
-        const tx = tx_c - (dx / dist) * targetRadius;
-        const ty = ty_c - (dy / dist) * targetRadius;
+        const sourceCoords = getCoordsForLayout(d.source, effectiveLayout);
+        const targetCoords = getCoordsForLayout(d.target, effectiveLayout);
+
+        const dx = targetCoords.x - sourceCoords.x;
+        const dy = targetCoords.y - sourceCoords.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+
+        if (dist <= sourceRadius + targetRadius) return null;
+
+        const sx = sourceCoords.x + (dx / dist) * sourceRadius;
+        const sy = sourceCoords.y + (dy / dist) * sourceRadius;
+        const tx = targetCoords.x - (dx / dist) * targetRadius;
+        const ty = targetCoords.y - (dy / dist) * targetRadius;
 
         return `M${sx},${sy}L${tx},${ty}`;
       });
@@ -417,33 +422,19 @@ const GraphViewComponent = ({
         const sourceRadius = getNodeRadius(d.source);
         const targetRadius = getNodeRadius(d.target);
 
-        let sx_c, sy_c, tx_c, ty_c;
-
-        if (effectiveLayout === 'radial') {
-            const angle_s = d.source.x - Math.PI / 2;
-            sx_c = d.source.y * Math.cos(angle_s);
-            sy_c = d.source.y * Math.sin(angle_s);
-            const angle_t = d.target.x - Math.PI / 2;
-            tx_c = d.target.y * Math.cos(angle_t);
-            ty_c = d.target.y * Math.sin(angle_t);
-        } else if (effectiveLayout === 'vertical') {
-            sx_c = d.source.x; sy_c = d.source.y;
-            tx_c = d.target.x; ty_c = d.target.y;
-        } else { // horizontal
-            sx_c = d.source.y; sy_c = d.source.x;
-            tx_c = d.target.y; ty_c = d.target.x;
-        }
+        const sourceCoords = getCoordsForLayout(d.source, effectiveLayout);
+        const targetCoords = getCoordsForLayout(d.target, effectiveLayout);
         
-        const dx = tx_c - sx_c;
-        const dy = ty_c - sy_c;
+        const dx = targetCoords.x - sourceCoords.x;
+        const dy = targetCoords.y - sourceCoords.y;
         const dist = Math.sqrt(dx * dx + dy * dy);
 
         if (dist <= sourceRadius + targetRadius) return "translate(-10000, -10000)"; // Hide if nodes overlap
 
-        const sx = sx_c + (dx / dist) * sourceRadius;
-        const sy = sy_c + (dy / dist) * sourceRadius;
-        const tx = tx_c - (dx / dist) * targetRadius;
-        const ty = ty_c - (dy / dist) * targetRadius;
+        const sx = sourceCoords.x + (dx / dist) * sourceRadius;
+        const sy = sourceCoords.y + (dy / dist) * sourceRadius;
+        const tx = targetCoords.x - (dx / dist) * targetRadius;
+        const ty = targetCoords.y - (dy / dist) * targetRadius;
 
         const midX = (sx + tx) / 2;
         const midY = (sy + ty) / 2;
@@ -513,17 +504,8 @@ const GraphViewComponent = ({
         return classes.join(' ');
       })
       .attr("transform", d => {
-        if (effectiveLayout === 'radial') {
-            // Use cartesian coordinates for radial layout to keep text horizontal
-            const angle = d.x - Math.PI / 2; // Adjust angle to start from top
-            const x = d.y * Math.cos(angle);
-            const y = d.y * Math.sin(angle);
-            return `translate(${x}, ${y})`;
-        } else if (effectiveLayout === 'vertical') {
-            return `translate(${d.x}, ${d.y})`;
-        } else { // horizontal
-            return `translate(${d.y}, ${d.x})`;
-        }
+        const { x, y } = getCoordsForLayout(d, effectiveLayout);
+        return `translate(${x}, ${y})`;
       })
       .on("click", handleNodeClick)
       .on("dblclick", handleNodeDoubleClick)

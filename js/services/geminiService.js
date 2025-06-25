@@ -24,13 +24,13 @@ let apiClientState = {
 const _initializeClient = (key, source) => {
   if (!key?.trim()) {
     apiClientState = { client: null, isKeyAvailable: false, activeKey: null, activeSource: null };
-    return { success: false, message: source === 'environment' ? "Environment API Key is missing or empty." : "Pasted API Key cannot be empty." };
+    return { success: false, source: null, message: source === 'environment' ? "Environment API Key is missing or empty." : "Pasted API Key cannot be empty." };
   }
 
   try {
     const newClient = new GoogleGenerativeAI(key);
     apiClientState = { client: newClient, isKeyAvailable: true, activeKey: key, activeSource: source };
-    return { success: true, message: `API Key from ${source} set successfully. AI features enabled.` };
+    return { success: true, source, message: `API Key from ${source} set successfully. AI features enabled.` };
   } catch (error) {
     apiClientState = { client: null, isKeyAvailable: false, activeKey: null, activeSource: null };
     console.error(`Error initializing Gemini API client with ${source} API Key:`, error);
@@ -42,7 +42,7 @@ const _initializeClient = (key, source) => {
     } else if (error.message) {
         userMessage += ` Details: ${error.message.substring(0, 100)}${error.message.length > 100 ? '...' : ''}`;
     }
-    return { success: false, message: userMessage };
+    return { success: false, source: null, message: userMessage };
   }
 };
 
@@ -55,12 +55,11 @@ export const attemptLoadEnvKey = async () => {
     }
   } catch (e) {
     console.warn("Could not access process.env.API_KEY. This is expected in some browser environments.");
-    envKey = undefined;
+    // envKey remains undefined, which is handled below
   }
 
   if (envKey?.trim()) {
-    const result = _initializeClient(envKey, 'environment');
-    return { ...result, source: result.success ? 'environment' : null };
+    return _initializeClient(envKey, 'environment');
   }
   
   // If envKey is not found or empty, and there's no active key from another source, reset.
@@ -72,8 +71,7 @@ export const attemptLoadEnvKey = async () => {
 };
 
 export const setPastedApiKey = async (pastedKey) => {
-  const result = _initializeClient(pastedKey, 'pasted');
-  return { ...result, source: result.success ? 'pasted' : null };
+  return _initializeClient(pastedKey, 'pasted');
 };
 
 export const clearActiveApiKey = () => {
