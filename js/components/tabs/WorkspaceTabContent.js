@@ -78,6 +78,7 @@ const WorkspaceTabContent = ({
             panelId: "project-management",
             title: "Project Management",
             icon: "🗂️",
+            variant: "workspace",
             isCollapsed: collapsedPanels.has('project-management'),
             onToggle: handleTogglePanel,
             headerActions: React.createElement(ContextualHelpTooltip, { helpText: "Manage your saved projects and examples. Create new projects, import from files, or load existing work." })
@@ -92,6 +93,7 @@ const WorkspaceTabContent = ({
             panelId: "ai-generation",
             title: "AI Structure Generation",
             icon: "🧠",
+            variant: "workspace",
             isCollapsed: collapsedPanels.has('ai-generation'),
             onToggle: handleTogglePanel,
             headerActions: React.createElement(ContextualHelpTooltip, { helpText: "Use AI to generate a new tree structure from a topic or regenerate the structure for the current project's context." })
@@ -105,6 +107,7 @@ const WorkspaceTabContent = ({
             panelId: "project-overview",
             title: "Project Overview",
             icon: "📊",
+            variant: "workspace",
             isCollapsed: collapsedPanels.has('project-overview'),
             onToggle: handleTogglePanel
           },
@@ -143,6 +146,7 @@ const WorkspaceTabContent = ({
             panelId: "data-operations",
             title: "Data Operations",
             icon: "📤",
+            variant: "workspace",
             isCollapsed: collapsedPanels.has('data-operations'),
             onToggle: handleTogglePanel,
             headerActions: React.createElement(ContextualHelpTooltip, { helpText: "Save and download the active project, or extract data as raw text or an AI-generated summary." })
