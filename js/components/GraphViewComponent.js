@@ -6,6 +6,9 @@ import PathToRootDisplay from './PathToRootDisplay.js';
 import GraphMiniMap from './GraphMiniMap.js';
 import { useGraphTooltip } from '../hooks/useGraphTooltip.js';
 import GraphNodeTooltip from './GraphNodeTooltip.js';
+import GraphMiniMap from './GraphMiniMap.js';
+import { useGraphTooltip } from '../hooks/useGraphTooltip.js';
+import GraphNodeTooltip from './GraphNodeTooltip.js';
 
 
 const getNodeRadius = (node) => {
@@ -165,6 +168,21 @@ const GraphViewComponent = ({
       setTimeout(resetZoom, 50);
     }
   }, [layout, resetZoom]);
+
+  const handleToggleFocusMode = useCallback(() => {
+    setIsFocusMode(prev => {
+        const newMode = !prev;
+        if (newMode && !activeNodeId) {
+            // If turning on focus mode without a selected node, do nothing.
+            return false;
+        }
+        // Center on the active node when entering focus mode
+        if (newMode && activeNodeId) {
+            centerOnNode(activeNodeId);
+        }
+        return newMode;
+    });
+  }, [activeNodeId, centerOnNode]);
 
   const handleToggleFocusMode = useCallback(() => {
     setIsFocusMode(prev => {
