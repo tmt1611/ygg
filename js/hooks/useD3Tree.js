@@ -260,12 +260,6 @@ export const useD3Tree = (
     }
   }, []);
 
-  const translateTo = useCallback((x, y) => {
-    if (svgSelectionRef.current && zoomBehaviorRef.current) {
-        svgSelectionRef.current.transition().duration(750).call(zoomBehaviorRef.current.translateTo, x, y);
-    }
-  }, []);
-
 
   return { 
     g,
