@@ -29,10 +29,10 @@ class ErrorBoundary extends Component {
 --- YGGDRASIL ERROR REPORT ---
 Date: ${new Date().toISOString()}
 User Agent: ${navigator.userAgent}
-Error: ${error.toString()}
+Error: ${error?.toString()}
 
 Stack Trace:
-${error.stack}
+${error?.stack || 'Not available'}
 
 Component Stack:
 ${errorInfo?.componentStack || 'Not available'}
@@ -106,7 +106,8 @@ ${errorInfo?.componentStack || 'Not available'}
               React.createElement("details", { className: "error-boundary-details" },
                 React.createElement("summary", null, "Technical Details"),
                 React.createElement("pre", null,
-                  this.state.error.toString(),
+                  this.state.error?.toString(),
+                  "\n\n--- COMPONENT STACK ---\n",
                   this.state.errorInfo?.componentStack
                 )
               )

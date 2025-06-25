@@ -73,7 +73,9 @@ export const clearActiveApiKey = () => {
 export const isApiKeySet = () => apiClientState.isKeyAvailable && apiClientState.client !== null;
 
 const constructApiError = (error, baseMessage, context = {}) => {
-  const errorToThrow = new Error();
+  // Use the original error object to preserve its stack trace, or create a new one.
+  const errorToThrow = error instanceof Error ? error : new Error(baseMessage);
+  
   if (context.prompt) errorToThrow.prompt = context.prompt;
   if (context.rawResponse) errorToThrow.rawResponse = context.rawResponse;
 
@@ -88,8 +90,7 @@ const constructApiError = (error, baseMessage, context = {}) => {
     
     const quotaIndicators = ["quota", "user_rate_limit", "resource_exhausted", "rate limit"];
     if (quotaIndicators.some(indicator => errorMsgLower.includes(indicator)) || error.status === 429) {
-      detailedMessage = `API quota exceeded or rate limit hit. Please check your Gemini API usage and limits, or try again later. (Source: ${apiClientState.activeSource || 'current key'})`;
-      errorToThrow.message = detailedMessage;
+      errorToThrow.message = `API quota exceeded or rate limit hit. Please check your Gemini API usage and limits, or try again later. (Source: ${apiClientState.activeSource || 'current key'})`;
       return errorToThrow;
     }
     
@@ -100,14 +101,17 @@ const constructApiError = (error, baseMessage, context = {}) => {
         (error.status && httpErrorCodes.includes(error.status))) { 
       const previousSource = apiClientState.activeSource;
       clearActiveApiKey(); 
-      detailedMessage = `The API Key (from ${previousSource || 'previous source'}) is invalid or lacks permissions, and has been cleared. Please set a new key in Workspace > API Key Setup.`;
-    } else {
-       if (!error.message.startsWith("AI returned invalid JSON")) {
-           detailedMessage += ` Details: `;
-       }
-       detailedMessage += `${error.message.substring(0,150)}${error.message.length > 150 ? '...' : ''}`;
+      errorToThrow.message = `The API Key (from ${previousSource || 'previous source'}) is invalid or lacks permissions, and has been cleared. Please set a new key in Workspace > API Key Setup.`;
+      return errorToThrow;
     }
+    
+    // For other errors, append details to the base message.
+    if (!error.message.startsWith("AI returned invalid JSON")) {
+        detailedMessage += ` Details: `;
+    }
+    detailedMessage += `${error.message.substring(0,150)}${error.message.length > 150 ? '...' : ''}`;
   }
+
   errorToThrow.message = detailedMessage;
   return errorToThrow;
 };
