@@ -29,10 +29,10 @@ export const useNodeOperations = ({
     handleSaveActiveProject(false);
 
     // Reset focus if the focused node or its ancestor was deleted
-    if (focusNodeId === nodeIdToDelete || (newTree && !findNodeById(newTree, focusNodeId))) {
+    if (focusNodeId && !findNodeById(newTree, focusNodeId)) {
         setFocusNodeId(null);
     }
-    if (selectedNodeInFocusPanelId === nodeIdToDelete || (newTree && !findNodeById(newTree, selectedNodeInFocusPanelId))) {
+    if (selectedNodeInFocusPanelId && !findNodeById(newTree, selectedNodeInFocusPanelId)) {
         setSelectedNodeInFocusPanelId(null);
     }
   }, [techTreeData, setTechTreeData, addHistoryEntry, handleSaveActiveProject, focusNodeId, selectedNodeInFocusPanelId, setFocusNodeId, setSelectedNodeInFocusPanelId]);

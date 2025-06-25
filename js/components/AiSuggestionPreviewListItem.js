@@ -52,7 +52,7 @@ const AiSuggestionPreviewListItem = ({ node, level, isVisualDiff = false }) => {
   };
 
   return (
-    React.createElement("li", { style: { listStyle: 'none' }, "aria-label": `Node: ${node.name}, Change Status: ${node._changeStatus || 'Unchanged'}`}, 
+    React.createElement("li", { "aria-label": `Node: ${node.name}, Change Status: ${node._changeStatus || 'Unchanged'}`}, 
       React.createElement("div", { style: itemStyle, className: itemClassName, title: titleText },
         React.createElement("div", { className: "diff-list-item-header" },
             React.createElement("span", { className: "diff-list-item-name-section" },

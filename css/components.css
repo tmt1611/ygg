@@ -56,8 +56,6 @@ html[data-theme-base='light'] .yggdrasil-top-bar-nav-button:hover {
   border-color: var(--primary-accent-dark);
   font-weight: 600;
 }
-html[data-theme='dark'] .yggdrasil-top-bar-nav-button.active { color: var(--yggdrasil-bark-bg); }
-
 /* Search bar styles */
 .yggdrasil-top-bar-search-wrapper {
   margin-left: 12px;
@@ -171,8 +169,6 @@ html[data-theme-base='light'] .yggdrasil-top-bar-active-project {
 
 .yggdrasil-app-body.sidebar-collapsed .knowledge-branch-sidebar { width: var(--sidebar-collapsed-width); }
 .yggdrasil-app-body.sidebar-collapsed .knowledge-branch-sidebar .sidebar-header-title,
-.yggdrasil-app-body.sidebar-collapsed .knowledge-branch-sidebar .sidebar-header-subtitle,
-.yggdrasil-app-body.sidebar-collapsed .knowledge-branch-sidebar .sidebar-header-mode-icon,
 .yggdrasil-app-body.sidebar-collapsed .knowledge-branch-sidebar .sidebar-tab-switcher { display: none; } /* Hide tab switcher when collapsed */
 
 .yggdrasil-app-body.sidebar-collapsed .knowledge-branch-sidebar .sidebar-header { padding: 8px 4px; } /* Reduced padding */
@@ -221,7 +217,6 @@ html[data-theme-base='light'] .sidebar-tab-button:hover {
   color: var(--text-on-accent);
   font-weight: 600;
 }
-html[data-theme='dark'] .sidebar-tab-button.active { color: var(--yggdrasil-bark-bg); }
 .sidebar-tab-icon { font-size: 1.3em; } /* Adjust icon size */
 .sidebar-tab-label { font-size: 0.75em; display: block; margin-top: 1px; } /* Smaller label */
 
@@ -1575,7 +1570,7 @@ html[data-theme-base='dark'] .segmented-control button.active {
   border-color: rgba(var(--focus-panel-text), 0.3);
   padding: 3px;
 }
-:is(html[data-theme='dark'], html[data-theme='synthwave']) .focus-view-importance-control {
+html[data-theme-base='dark'] .focus-view-importance-control {
   background-color: var(--panel-alt-bg);
   border-color: var(--border-color-strong);
 }
