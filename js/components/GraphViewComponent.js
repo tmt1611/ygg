@@ -60,7 +60,7 @@ const GraphViewComponent = ({
       hideTooltip();
   }, [onCloseContextMenu, hideTooltip]);
 
-  const { g, nodes, links, config, resetZoom, zoomIn, zoomOut, centerOnNode, currentTransform, translateTo } = useD3Tree(
+  const { g, nodes, links, config, resetZoom, zoomToFit, zoomIn, zoomOut, centerOnNode, currentTransform, translateTo } = useD3Tree(
     svgRef, 
     treeData, 
     {}, 
@@ -716,9 +716,10 @@ const GraphViewComponent = ({
                 disabled: isAppBusy || (!isFocusMode && !activeNodeId),
                 className: isFocusMode ? 'active' : ''
             }, '🔬'),
-            React.createElement("button", { onClick: zoomIn, title: "Zoom In", disabled: isAppBusy }, "➕"),
-            React.createElement("button", { onClick: zoomOut, title: "Zoom Out", disabled: isAppBusy }, "➖"),
-            React.createElement("button", { onClick: resetZoom, title: "Reset Zoom & Pan", disabled: isAppBusy }, "🎯")
+            React.createElement("button", { onClick: zoomToFit, title: "Zoom to Fit", disabled: isAppBusy || isFocusMode }, "⛶"),
+            React.createElement("button", { onClick: resetZoom, title: "Reset View", disabled: isAppBusy || isFocusMode }, "🎯"),
+            React.createElement("button", { onClick: zoomIn, title: "Zoom In", disabled: isAppBusy || isFocusMode }, "➕"),
+            React.createElement("button", { onClick: zoomOut, title: "Zoom Out", disabled: isAppBusy || isFocusMode }, "➖")
         )
       ),
       React.createElement(GraphMiniMap, {

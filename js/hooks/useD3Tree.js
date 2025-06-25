@@ -116,6 +116,55 @@ export const useD3Tree = (
     }
   }, [layout, margin.top, margin.left]);
 
+  const zoomToFit = useCallback(() => {
+    if (!svgSelectionRef.current || !zoomBehaviorRef.current || !svgRef.current.parentElement || !nodesAndLinks.nodes || nodesAndLinks.nodes.length === 0) return;
+
+    const { nodes } = nodesAndLinks;
+    const { clientWidth, clientHeight } = svgRef.current.parentElement;
+    if (clientWidth === 0 || clientHeight === 0) return;
+
+    let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+
+    nodes.forEach(node => {
+        let x, y;
+        if (layout === 'radial') {
+            const angle = node.x - Math.PI / 2;
+            x = node.y * Math.cos(angle);
+            y = node.y * Math.sin(angle);
+        } else if (layout === 'vertical') {
+            x = node.x;
+            y = node.y;
+        } else { // horizontal
+            x = node.y;
+            y = node.x;
+        }
+        const padding = 30; // A fixed padding around each node for bounds calculation
+        if (x - padding < minX) minX = x - padding;
+        if (x + padding > maxX) maxX = x + padding;
+        if (y - padding < minY) minY = y - padding;
+        if (y + padding > maxY) maxY = y + padding;
+    });
+
+    const boundsWidth = maxX - minX;
+    const boundsHeight = maxY - minY;
+
+    if (boundsWidth === 0 || boundsHeight === 0) {
+        resetZoom();
+        return;
+    }
+
+    const scaleX = clientWidth / boundsWidth;
+    const scaleY = clientHeight / boundsHeight;
+    const scale = Math.min(scaleX, scaleY) * 0.9; // 0.9 for padding
+
+    const translateX = (clientWidth / 2) - (scale * (minX + boundsWidth / 2));
+    const translateY = (clientHeight / 2) - (scale * (minY + boundsHeight / 2));
+
+    const transform = zoomIdentity.translate(translateX, translateY).scale(scale);
+
+    svgSelectionRef.current.transition().duration(750).call(zoomBehaviorRef.current.transform, transform);
+  }, [nodesAndLinks, layout, resetZoom]);
+
   useLayoutEffect(() => {
     if (!svgRef.current) return;
 
@@ -218,6 +267,7 @@ export const useD3Tree = (
     links: nodesAndLinks.links,
     config: finalConfig,
     resetZoom,
+    zoomToFit,
     zoomIn,
     zoomOut,
     centerOnNode,
