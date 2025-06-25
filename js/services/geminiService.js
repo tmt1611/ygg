@@ -225,11 +225,13 @@ export const generateQuickEdit = async (nodeToEdit, modificationPrompt) => {
     throw new Error("Gemini API client not initialized.");
   }
 
-  const systemInstruction = `You are an AI assistant that modifies a single JSON node object based on user instructions.
+  const systemInstruction = `You are an AI assistant that modifies a single JSON node object based on a user instruction.
 **RULES:**
-1.  **Preserve ID & Lock:** You MUST preserve the original 'id' and 'isLocked' values.
-2.  **Node Format:** The output MUST be a valid node object with these keys: "id", "name", "description", "isLocked", "importance", "children".
-3.  **Children:** If the user asks to add children, add them to the 'children' array. For new children, use "NEW_NODE" as the 'id'. Preserve existing children unless asked to remove them.
+1.  **Minimal Changes:** Only modify the parts of the node object (e.g., name, description, children) that are directly requested by the user's instruction.
+2.  **Preserve Core Properties:** You MUST preserve the original 'id', 'isLocked', 'linkedProjectId', and 'linkedProjectName' values.
+3.  **Mandatory Fields:** Your output MUST be a single, valid JSON object representing the node. It MUST contain all these keys: "id", "name", "description", "isLocked", "importance", "children", "linkedProjectId", "linkedProjectName".
+4.  **Child Nodes:** If the user asks to add children, add new child objects to the 'children' array. For new children, use "NEW_NODE" as the 'id'. Preserve existing children unless the user explicitly asks to remove them.
+5.  **Output Format:** Respond ONLY with the single, modified JSON object. Do not wrap it in markdown fences or add any other text.
 `;
 
   const fullPrompt = `
@@ -333,16 +335,17 @@ export const modifyTechTreeByGemini = async (
 
   const systemInstruction = `You are an AI assistant that modifies a JSON tech tree based on user instructions.
 **MANDATORY RULES:**
-1.  **Preserve IDs & Locks:**
+1.  **Minimal Changes:** Only modify nodes directly relevant to the user's instruction. Leave all other nodes completely unchanged, preserving their exact original content and structure.
+2.  **Preserve IDs & Locks:**
     - RETAIN existing 'id' values for all nodes. For NEW nodes you create, use "NEW_NODE" as the 'id' value.
     - DO NOT change the 'isLocked' value for ANY node.
-2.  **Locked Node Content:** If a node's ID is in the 'Locked Node IDs' list, you MUST NOT change its 'name', 'description', or 'importance'. You CAN add new children to it or move it.
-3.  **Node Importance:** Must be one of "minor", "common", or "major".
-4.  **Mandatory Fields:** Every single node in your output, including unchanged nodes, MUST contain all of these exact keys: "id", "name", "description", "isLocked", "importance", "children". If a node has no description, use an empty string: "description": "". Also preserve "linkedProjectId" and "linkedProjectName" if they exist on a node.
-5.  **Output Format:** Respond ONLY with a single, valid JSON object for the modified tree's root node. NO EXTRA TEXT, explanations, or markdown fences.
-6.  **JSON Syntax:** Strictly follow JSON rules. Example node: ${COMMON_NODE_FORMAT_INSTRUCTION}
-7.  **Maintain Structure:** Avoid unnecessarily drastic changes to the overall tree shape (e.g., adding many new levels of depth) unless the user's instruction explicitly asks for it.
-8.  **Final Check:** Before outputting, double-check that your entire response is a single JSON object starting with { and ending with }, and that every single node in the tree has all the mandatory fields from rule #4.
+3.  **Locked Node Content:** If a node's ID is in the 'Locked Node IDs' list, you MUST NOT change its 'name', 'description', or 'importance'. You CAN add new children to it or move it.
+4.  **Node Importance:** Must be one of "minor", "common", or "major".
+5.  **Mandatory Fields:** Every single node in your output, including unchanged nodes, MUST contain all of these exact keys: "id", "name", "description", "isLocked", "importance", "children". If a node has no description, use an empty string: "description": "". Also preserve "linkedProjectId" and "linkedProjectName" if they exist on a node.
+6.  **Output Format:** Respond ONLY with a single, valid JSON object for the modified tree's root node. NO EXTRA TEXT, explanations, or markdown fences.
+7.  **JSON Syntax:** Strictly follow JSON rules. Example node: ${COMMON_NODE_FORMAT_INSTRUCTION}
+8.  **Maintain Structure:** Avoid unnecessarily drastic changes to the overall tree shape (e.g., adding many new levels of depth) unless the user's instruction explicitly asks for it.
+9.  **Final Check:** Before outputting, double-check that your entire response is a single JSON object starting with { and ending with }, and that every single node in the tree has all the mandatory fields from rule #5.
 `;
 
   const fullPrompt = `
