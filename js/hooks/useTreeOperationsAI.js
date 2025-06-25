@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
 import * as geminiService from '../services/geminiService.js';
-import { getLockedNodeIds, countNodesInTree, compareAndAnnotateTree, findNodeById, updateNodeInTree, initializeNodes, cleanTreeForExport } from '../utils.js';
+import { getLockedNodeIds, countNodesInTree, compareAndAnnotateTree, findNodeById, updateNodeInTree, initializeNodes, cleanTreeForExport, cleanTreeForState } from '../utils.js';
 
 export const useTreeOperationsAI = ({
   apiKeyIsSet,
@@ -111,7 +111,8 @@ export const useTreeOperationsAI = ({
       } else {
         // Direct Apply
         const annotatedTree = compareAndAnnotateTree(techTreeData, suggestedTree);
-        setTechTreeData(annotatedTree.annotatedTree);
+        const cleanTree = cleanTreeForState(annotatedTree.annotatedTree);
+        setTechTreeData(cleanTree);
         handleSaveActiveProject(false);
         addHistoryEntry('AI_MOD_CONFIRMED', 'AI modifications directly applied.', { prompt: finalModificationPrompt, projectId: activeProjectId });
         setModificationPrompt('');
@@ -139,8 +140,10 @@ export const useTreeOperationsAI = ({
     const suggestionToApply = pendingAiSuggestion; 
     if (suggestionToApply) {
       // The undo state was already set when the suggestion was generated.
+      // We annotate to get a consistent structure, then clean it for the main state.
       const annotatedTree = compareAndAnnotateTree(baseForModalDiffProp, suggestionToApply);
-      setTechTreeData(annotatedTree.annotatedTree);
+      const cleanTree = cleanTreeForState(annotatedTree.annotatedTree);
+      setTechTreeData(cleanTree);
       addHistoryEntry('AI_MOD_CONFIRMED', 'AI modifications applied to project from modal.', { nodeCount: countNodesInTree(suggestionToApply), projectId: activeProjectId });
       setModificationPrompt(''); 
       handleSaveActiveProject(false);

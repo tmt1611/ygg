@@ -375,6 +375,17 @@ export const cleanTreeForExport = (nodeToClean) => {
     return cleanedNode;
 };
 
+export const cleanTreeForState = (nodeToClean) => {
+    if (!nodeToClean) return null;
+    // This function specifically removes annotation properties but keeps internal ones like _parentId.
+    const { _changeStatus, _modificationDetails, _oldParentId, ...rest } = nodeToClean;
+    const cleanedNode = { ...rest };
+    if (cleanedNode.children && Array.isArray(cleanedNode.children)) {
+        cleanedNode.children = cleanedNode.children.map(cleanTreeForState);
+    }
+    return cleanedNode;
+};
+
 // wrapSvgText has been removed in favor of using <foreignObject> for more robust text wrapping.
 
 export const compareAndAnnotateTree = (originalTree, modifiedTree) => {
