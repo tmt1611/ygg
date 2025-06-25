@@ -1281,6 +1281,15 @@ html[data-theme='light'] .graph-node-tooltip-icon {
   fill-opacity: 0.7;
   stroke: var(--panel-bg);
   stroke-width: 0.5px;
+  transition: all 0.2s ease-out;
+}
+
+.minimap-nodes circle.active {
+  fill: var(--primary-accent);
+  stroke: var(--primary-accent-dark);
+  stroke-width: 1.5px; /* Scaled by viewBox */
+  fill-opacity: 1;
+  r: 7;
 }
 
 .minimap-view-rect {

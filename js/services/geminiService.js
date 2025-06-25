@@ -2,6 +2,19 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { initializeNodes, isValidTechTreeNodeShape } from "../utils.js";
 
+const COMMON_NODE_FORMAT_INSTRUCTION = `{
+  "id": "string (or 'NEW_NODE' for new nodes)",
+  "name": "string",
+  "description": "string",
+  "isLocked": boolean,
+  "importance": "string ('minor', 'common', or 'major')",
+  "children": [ ... (array of node objects) ],
+  "linkedProjectId": "string or null (if exists)",
+  "linkedProjectName": "string or null (if exists)"
+}`;
+
+const COMMON_JSON_SYNTAX_RULES = `Strictly follow JSON syntax: all strings enclosed in double quotes, no trailing commas.`;
+
 let apiClientState = {
   client: null,
   isKeyAvailable: false,

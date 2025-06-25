@@ -12,6 +12,7 @@ const GraphMiniMap = ({
   viewTransform,
   translateTo,
   mainViewportSize,
+  activeNodeId,
 }) => {
   const miniMapRef = useRef(null);
   const viewRectRef = useRef(null);
@@ -38,7 +39,7 @@ const GraphMiniMap = ({
       maxX = Math.max(maxX, x);
       minY = Math.min(minY, y);
       maxY = Math.max(maxY, y);
-      return { x, y };
+      return { x, y, id: node.data.id };
     });
 
     const width = maxX - minX;
@@ -120,7 +121,13 @@ const GraphMiniMap = ({
         ),
         React.createElement("g", { className: "minimap-nodes" },
           nodePositions.map((node, i) =>
-            React.createElement("circle", { key: i, cx: node.x, cy: node.y, r: 5 })
+            React.createElement("circle", {
+              key: node.id || i,
+              cx: node.x,
+              cy: node.y,
+              r: 5,
+              className: activeNodeId === node.id ? 'active' : '',
+            })
           )
         ),
         React.createElement("rect", {

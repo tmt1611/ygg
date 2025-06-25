@@ -724,7 +724,8 @@ const GraphViewComponent = ({
         layout: layout,
         viewTransform: currentTransform,
         translateTo: translateTo,
-        mainViewportSize: mainViewportSize
+        mainViewportSize: mainViewportSize,
+        activeNodeId: activeNodeId
       })
     )
   );
