@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import { NODE_IMPORTANCE_OPTIONS } from '../constants.js';
-import { getNodePathString } from '../utils.js';
+import { getNodePathString, cleanTreeForExport } from '../utils.js';
 
 const ContextMenu = ({
   isOpen, position, node, techTreeData, onClose, onToggleLock, onChangeImportance, onEditName, onAddChild, onAddQuickChild,
@@ -40,13 +40,7 @@ const ContextMenu = ({
         case 'name': textToCopy = node.name; break;
         case 'path': textToCopy = getNodePathString(node.id, techTreeData); break;
         case 'json':
-            const cleanNodeForExport = (nodeToClean) => {
-                const { _parentId, _changeStatus, _modificationDetails, _oldParentId, ...rest } = nodeToClean;
-                const cleanedNode = { ...rest };
-                if (cleanedNode.children) cleanedNode.children = cleanedNode.children.map(cleanNodeForExport);
-                return cleanedNode;
-            };
-            textToCopy = JSON.stringify(cleanNodeForExport(node), null, 2);
+            textToCopy = JSON.stringify(cleanTreeForExport(node), null, 2);
             break;
         default: return;
     }

@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
 import * as geminiService from '../services/geminiService.js';
-import { getLockedNodeIds, countNodesInTree, compareAndAnnotateTree, findNodeById, updateNodeInTree, initializeNodes } from '../utils.js';
+import { getLockedNodeIds, countNodesInTree, compareAndAnnotateTree, findNodeById, updateNodeInTree, initializeNodes, cleanTreeForExport } from '../utils.js';
 
 export const useTreeOperationsAI = ({
   apiKeyIsSet,

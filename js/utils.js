@@ -365,6 +365,16 @@ export const downloadObjectAsJson = (exportObj, exportName) => {
   URL.revokeObjectURL(url);
 };
 
+export const cleanTreeForExport = (nodeToClean) => {
+    if (!nodeToClean) return null;
+    const { _parentId, _changeStatus, _modificationDetails, _oldParentId, ...rest } = nodeToClean;
+    const cleanedNode = { ...rest };
+    if (cleanedNode.children && Array.isArray(cleanedNode.children)) {
+        cleanedNode.children = cleanedNode.children.map(cleanTreeForExport);
+    }
+    return cleanedNode;
+};
+
 // wrapSvgText has been removed in favor of using <foreignObject> for more robust text wrapping.
 
 export const compareAndAnnotateTree = (originalTree, modifiedTree) => {

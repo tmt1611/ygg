@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from 'react';
-import { generateUUID, initializeNodes, findNodeById, updateNodeInTree, getAllNodesAsMap, downloadObjectAsJson } from '../utils.js';
+import { generateUUID, initializeNodes, findNodeById, updateNodeInTree, getAllNodesAsMap, downloadObjectAsJson, cleanTreeForExport } from '../utils.js';
 import { APP_STORAGE_KEYS, ELF_WARFARE_STRUCTURE_JSON_STRING, ADVANCED_NATURE_MAGIC_JSON_STRING } from '../constants.js';
 
 const downloadProjectFile = (project, addHistoryEntry) => {
@@ -200,7 +200,7 @@ export const useProjectManagement = ({
   const saveNewProject = useCallback((treeToSave, name, isExample = false) => {
     if (!treeToSave) { setError("No tree data to save as project."); return null; }
     const newProject = {
-      id: generateUUID(), name: name, treeData: treeToSave,
+      id: generateUUID(), name: name, treeData: cleanTreeForExport(treeToSave),
       lastModified: new Date().toISOString(), isExample: isExample,
     };
     setProjects(prev => [...prev, newProject]);
@@ -300,7 +300,7 @@ export const useProjectManagement = ({
     
     const updatedProject = { 
         ...projects[projectIndex], 
-        treeData: currentTechTreeData, 
+        treeData: cleanTreeForExport(currentTechTreeData), 
         name: currentContextText, 
         lastModified: new Date().toISOString(), 
         isExample: false

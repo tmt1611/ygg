@@ -1170,7 +1170,7 @@ html[data-theme='synthwave'] .graph-view-wrapper {
   font-size: 11px;
   line-height: 1.3;
   color: var(--graph-node-text);
-  background-color: rgba(var(--app-bg-rgb), 0.9);
+  background-color: rgba(var(--app-bg-rgb), 0.6);
   padding: 3px 5px;
   border-radius: var(--border-radius);
   text-align: center;
