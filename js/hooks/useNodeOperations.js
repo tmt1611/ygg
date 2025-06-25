@@ -270,6 +270,20 @@ export const useNodeOperations = ({
     }
   }, [techTreeData, setTechTreeData, handleSaveActiveProject, addHistoryEntry]);
 
+  const handleConfirmQuickEdit = useCallback((originalNodeId, suggestedNodeData) => {
+    if (!techTreeData) {
+      setError("Cannot apply quick edit: No active tree.");
+      return;
+    }
+    // The suggestedNodeData is just the single node object. We need to replace it in the tree.
+    // The `updateNodeInTree` function is perfect for this.
+    const updatedTree = updateNodeInTree(techTreeData, originalNodeId, suggestedNodeData);
+    setTechTreeData(updatedTree);
+    handleSaveActiveProject(false);
+    addHistoryEntry('NODE_UPDATED', `Node "${suggestedNodeData.name}" updated via AI Quick Edit.`);
+    modalManager.closeAiQuickEditModal();
+  }, [techTreeData, setTechTreeData, handleSaveActiveProject, addHistoryEntry, setError, modalManager]);
+
 
   return {
     handleToggleNodeLock,
@@ -285,5 +299,6 @@ export const useNodeOperations = ({
     handleDeleteAllChildren,
     handlePasteNode,
     handleNodeNameChange,
+    handleConfirmQuickEdit,
   };
 };

@@ -32,6 +32,9 @@ export const useModalManager = () => {
   const [isLinkProjectModalOpen, setIsLinkProjectModalOpen] = useState(false);
   const [linkProjectModalConfig, setLinkProjectModalConfig] = useState(null);
 
+  const [isAiQuickEditModalOpen, setIsAiQuickEditModalOpen] = useState(false);
+  const [aiQuickEditModalConfig, setAiQuickEditModalConfig] = useState(null);
+
   const captureFocus = useCallback(() => {
     if (document.activeElement instanceof HTMLElement) {
       lastFocusedElementRef.current = document.activeElement;
@@ -95,6 +98,13 @@ export const useModalManager = () => {
     setIsLinkProjectModalOpen(false); setLinkProjectModalConfig(null); restoreFocus();
   }, [restoreFocus]);
 
+  const openAiQuickEditModal = useCallback((config) => {
+    captureFocus(); setAiQuickEditModalConfig(config); setIsAiQuickEditModalOpen(true);
+  }, [captureFocus]);
+  const closeAiQuickEditModal = useCallback(() => {
+    setIsAiQuickEditModalOpen(false); setAiQuickEditModalConfig(null); restoreFocus();
+  }, [restoreFocus]);
+
   const value = useMemo(() => ({
     isProjectNameModalOpen, projectModalConfig, openProjectNameModal, closeProjectNameModal,
     isAiSuggestionModalOpen, pendingAiSuggestion, openAiSuggestionModal, closeAiSuggestionModal, setPendingAiSuggestion,
@@ -104,6 +114,7 @@ export const useModalManager = () => {
     isViewContextMenuOpen, viewContextMenuConfig, openViewContextMenu, closeViewContextMenu,
     isTechExtractionModalOpen, extractedTechsContent, extractionModalTitle, extractionMode, openTechExtractionModal, closeTechExtractionModal, setExtractionMode,
     isLinkProjectModalOpen, linkProjectModalConfig, openLinkProjectModal, closeLinkProjectModal,
+    isAiQuickEditModalOpen, aiQuickEditModalConfig, openAiQuickEditModal, closeAiQuickEditModal,
     restoreFocus,
   }), [
     isProjectNameModalOpen, projectModalConfig, openProjectNameModal, closeProjectNameModal,
@@ -114,6 +125,7 @@ export const useModalManager = () => {
     isViewContextMenuOpen, viewContextMenuConfig, openViewContextMenu, closeViewContextMenu,
     isTechExtractionModalOpen, extractedTechsContent, extractionModalTitle, extractionMode, openTechExtractionModal, closeTechExtractionModal, setExtractionMode,
     isLinkProjectModalOpen, linkProjectModalConfig, openLinkProjectModal, closeLinkProjectModal,
+    isAiQuickEditModalOpen, aiQuickEditModalConfig, openAiQuickEditModal, closeAiQuickEditModal,
     restoreFocus,
   ]);
 

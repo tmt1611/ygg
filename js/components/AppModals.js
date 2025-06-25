@@ -11,6 +11,7 @@ import TechExtractionModal from './TechExtractionModal.js';
 import LinkProjectModal from './LinkProjectModal.js';
 import ContextMenu from './ContextMenu.js';
 import ViewContextMenu from './ViewContextMenu.js';
+import AiQuickEditModal from './AiQuickEditModal.js';
 
 // Hooks and Types (Hook return types removed)
 
@@ -40,6 +41,7 @@ const AppModals = ({
     isLinkProjectModalOpen, linkProjectModalConfig, closeLinkProjectModal,
     isContextMenuOpen, contextMenuPosition, contextMenuNodeId, contextMenuLinkSourceInfo, closeContextMenu,
     isViewContextMenuOpen, viewContextMenuConfig, closeViewContextMenu,
+    isAiQuickEditModalOpen, aiQuickEditModalConfig, closeAiQuickEditModal,
 
   } = modalManager;
 
@@ -148,6 +150,16 @@ const AppModals = ({
           isOpen: isViewContextMenuOpen,
           config: viewContextMenuConfig,
           onClose: closeViewContextMenu,
+        })
+      ),
+
+      isAiQuickEditModalOpen && aiQuickEditModalConfig && techTreeData && (
+        React.createElement(AiQuickEditModal, {
+          isOpen: isAiQuickEditModalOpen,
+          node: findNodeById(techTreeData, aiQuickEditModalConfig.targetNodeId),
+          onConfirm: nodeOperations.handleConfirmQuickEdit,
+          onCancel: closeAiQuickEditModal,
+          apiKeyIsSet: apiKeyIsSet,
         })
       ),
 

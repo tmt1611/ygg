@@ -10,7 +10,11 @@ export const initializeNodes = (node, parentId = null) => {
   if (!newNode.id || newNode.id === 'NEW_NODE') {
     newNode.id = generateUUID();
   }
-  if (newNode.children && newNode.children.length > 0) {
+  // Ensure children is an array
+  if (!Array.isArray(newNode.children)) {
+    newNode.children = [];
+  }
+  if (newNode.children.length > 0) {
     newNode.children = newNode.children.map(child => initializeNodes(child, newNode.id));
   }
   return newNode;
