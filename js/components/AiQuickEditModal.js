@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import * as geminiService from '../services/geminiService.js';
-import { initializeNodes, isValidTechTreeNodeShape } from '../utils.js';
+import { initializeNodes } from '../utils.js';
 import LoadingSpinner from './LoadingSpinner.js';
 import ErrorMessage from './ErrorMessage.js';
 import TechExtractionModal from './TechExtractionModal.js';
@@ -93,7 +93,7 @@ const AiQuickEditModal = ({ isOpen, node, onConfirm, onCancel, apiKeyIsSet, sele
         if (typeof parsedData !== 'object' || parsedData === null || Array.isArray(parsedData)) {
             throw new Error("Pasted content must be a single JSON object.");
         }
-        const initializedNode = initializeNodes(parsedData, null);
+        const initializedNode = initializeNodes(parsedData, node._parentId);
         const finalNode = { ...initializedNode, id: node.id }; // Enforce original ID
         setDiff({ from: node, to: finalNode });
       } catch (e) {
@@ -194,7 +194,7 @@ const AiQuickEditModal = ({ isOpen, node, onConfirm, onCancel, apiKeyIsSet, sele
                   onClick: handleShowPrompt,
                   disabled: isLoading || !prompt.trim(),
                   className: "secondary",
-                  title: "Show the full prompt that will be sent to the AI (only works for text prompts)"
+                  title: "Show the full prompt that will be sent to the AI (only for text prompts)"
                 }, '📋')
               ),
               !apiKeyIsSet && React.createElement("p", { style: { color: 'var(--text-secondary)', fontSize: '0.9em', textAlign: 'center' } }, "API Key not set. AI prompt features are disabled, but you can still paste a JSON node object.")
