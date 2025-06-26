@@ -23,66 +23,41 @@ let apiClientState = {
   client: null,
   isKeyAvailable: false,
   activeKey: null,
-  activeSource: null,
   activeModel: AVAILABLE_MODELS[0].id,
 };
 
-const _initializeClient = (key, source) => {
+const _initializeClient = (key) => {
   if (!key?.trim()) {
-    apiClientState = { ...apiClientState, client: null, isKeyAvailable: false, activeKey: null, activeSource: null };
-    return { success: false, source: null, message: source === 'environment' ? "Environment API Key is missing or empty." : "Pasted API Key cannot be empty." };
+    apiClientState = { ...apiClientState, client: null, isKeyAvailable: false, activeKey: null };
+    return { success: false, message: "API Key cannot be empty." };
   }
 
   try {
     const newClient = new GoogleGenerativeAI(key);
-    apiClientState = { ...apiClientState, client: newClient, isKeyAvailable: true, activeKey: key, activeSource: source };
-    return { success: true, source, message: `API Key from ${source} set successfully. AI features enabled.` };
+    apiClientState = { ...apiClientState, client: newClient, isKeyAvailable: true, activeKey: key };
+    return { success: true, message: `API Key set successfully. AI features enabled.` };
   } catch (error) {
-    apiClientState = { ...apiClientState, client: null, isKeyAvailable: false, activeKey: null, activeSource: null };
-    console.error(`Error initializing Gemini API client with ${source} API Key:`, error);
-    let userMessage = `Failed to initialize AI client with ${source} API Key.`;
-    if (error.message?.toLowerCase().includes("api key not valid") || 
+    apiClientState = { ...apiClientState, client: null, isKeyAvailable: false, activeKey: null };
+    console.error(`Error initializing Gemini API client:`, error);
+    let userMessage = `Failed to initialize AI client.`;
+    if (error.message?.toLowerCase().includes("api key not valid") ||
         error.message?.toLowerCase().includes("provide an api key") ||
         error.message?.toLowerCase().includes("api_key_invalid")) {
-        userMessage = `The ${source} API Key appears to be invalid. Please check the key and try again.`;
+        userMessage = `The provided API Key appears to be invalid. Please check the key and try again.`;
     } else if (error.message) {
         userMessage += ` Details: ${error.message.substring(0, 100)}${error.message.length > 100 ? '...' : ''}`;
     }
-    return { success: false, source: null, message: userMessage };
+    return { success: false, message: userMessage };
   }
 };
 
-export const attemptLoadEnvKey = async () => {
-  let envKey;
-  try {
-    // Safely access process.env, which may not exist in all browser environments
-    if (typeof process !== 'undefined' && process.env) {
-      envKey = process.env.API_KEY;
-    }
-  } catch (e) {
-    console.warn("Could not access process.env.API_KEY. This is expected in some browser environments.");
-    // envKey remains undefined, which is handled below
-  }
-
-  if (envKey?.trim()) {
-    return _initializeClient(envKey, 'environment');
-  }
-  
-  // If envKey is not found or empty, and there's no active key from another source, reset.
-  if (!apiClientState.isKeyAvailable) { 
-    apiClientState = { client: null, isKeyAvailable: false, activeKey: null, activeSource: null };
-  }
-  
-  return { success: false, message: "API_KEY not found in environment. Provide key manually or set in deployment.", source: null };
-};
-
-export const setPastedApiKey = async (pastedKey) => {
-  return _initializeClient(pastedKey, 'pasted');
+export const setApiKey = async (apiKey) => {
+  return _initializeClient(apiKey);
 };
 
 export const clearActiveApiKey = () => {
-    apiClientState = { ...apiClientState, client: null, isKeyAvailable: false, activeKey: null, activeSource: null };
-    return { success: true, message: "API Key cleared. Provide a new key to enable AI features.", source: null };
+    apiClientState = { ...apiClientState, client: null, isKeyAvailable: false, activeKey: null };
+    return { success: true, message: "API Key cleared. Provide a new key to enable AI features." };
 };
 
 export const setActiveModel = (modelId) => {
@@ -126,7 +101,7 @@ const constructApiError = (error, baseMessage, context = {}) => {
     
     const quotaIndicators = ["quota", "user_rate_limit", "resource_exhausted", "rate limit"];
     if (quotaIndicators.some(indicator => errorMsgLower.includes(indicator)) || error.status === 429) {
-      errorToThrow.message = `API quota exceeded or rate limit hit. Please check your Gemini API usage and limits, or try again later. (Source: ${apiClientState.activeSource || 'current key'})`;
+      errorToThrow.message = `API quota exceeded or rate limit hit. Please check your Gemini API usage and limits, or try again later.`;
       return errorToThrow;
     }
     
@@ -134,10 +109,9 @@ const constructApiError = (error, baseMessage, context = {}) => {
     const httpErrorCodes = [400, 401, 403]; 
 
     if (invalidKeyIndicators.some(indicator => errorMsgLower.includes(indicator)) || 
-        (error.status && httpErrorCodes.includes(error.status))) { 
-      const previousSource = apiClientState.activeSource;
-      clearActiveApiKey(); 
-      errorToThrow.message = `The API Key (from ${previousSource || 'previous source'}) is invalid or lacks permissions, and has been cleared. Please set a new key in Workspace > API Key Setup.`;
+        (error.status && httpErrorCodes.includes(error.status))) {
+      clearActiveApiKey();
+      errorToThrow.message = `The API Key is invalid or lacks permissions, and has been cleared. Please set a new key in Workspace > API Key Setup.`;
       return errorToThrow;
     }
     

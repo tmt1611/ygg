@@ -21,7 +21,7 @@ const WelcomeScreen = ({
 
   const handleSetApiKey = () => {
     if (apiKeyHook && localApiKey.trim()) {
-      apiKeyHook.submitPastedKey(localApiKey.trim());
+      apiKeyHook.setApiKey(localApiKey.trim());
     }
   };
 
