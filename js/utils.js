@@ -3,49 +3,30 @@ import { select } from 'd3';
 
 export const generateUUID = () => uuidv4();
 
-export const initializeNodes = (node, parentId = null) => {
+export const initializeNodes = (node, parentId = null, forceNewIds = false) => {
   if (typeof node !== 'object' || node === null) {
-    // If the input is not a valid object, return null. This prevents errors from malformed
-    // `children` arrays, e.g., [{}, null, {}]. The caller should filter out nulls.
     console.warn("initializeNodes received invalid input, returning null. Input:", node);
     return null;
   }
   
-  // Assign a new UUID if the node has no ID or has the placeholder ID from AI.
-  const newId = (!node.id || node.id === 'NEW_NODE') ? generateUUID() : node.id;
-  
+  const newId = (forceNewIds || !node.id || node.id === 'NEW_NODE') ? generateUUID() : node.id;
+
+  // Initialize children first, so we can use the result in the new node object.
+  const initializedChildren = Array.isArray(node.children) 
+    ? node.children.map(child => initializeNodes(child, newId, forceNewIds)).filter(Boolean)
+    : [];
+
   const newNode = {
-    // Start with a clean slate of defaults to guarantee all fields exist.
     id: newId,
-    name: "Untitled Node",
-    description: "",
-    isLocked: false,
-    importance: 'common',
-    children: [],
-    linkedProjectId: null,
-    linkedProjectName: null,
-    _parentId: parentId,
-    // Safely spread the provided node properties.
-    ...node,
-    // Re-validate and sanitize critical properties after spreading,
-    // ensuring they have the correct type and fallbacks.
-    id: newId, // Ensure the ID is not overwritten by the spread.
     name: (typeof node.name === 'string' && node.name.trim()) ? node.name.trim() : "Untitled Node",
     description: typeof node.description === 'string' ? node.description : "",
     isLocked: typeof node.isLocked === 'boolean' ? node.isLocked : false,
     importance: ['minor', 'common', 'major'].includes(node.importance) ? node.importance : 'common',
+    children: initializedChildren,
     linkedProjectId: node.linkedProjectId || null,
     linkedProjectName: node.linkedProjectName || null,
+    _parentId: parentId,
   };
-  
-  // Recursively initialize children, ensuring it's an array and filtering out any nulls.
-  if (Array.isArray(node.children)) {
-    newNode.children = node.children
-      .map(child => initializeNodes(child, newNode.id))
-      .filter(Boolean); // Filter out any null children resulting from invalid input.
-  } else {
-    newNode.children = [];
-  }
 
   return newNode;
 };
@@ -333,38 +314,9 @@ export const isValidTechTreeNodeShape = (node) => {
     return hasName; // It's a valid leaf node if it has a name.
 };
 
-export const reinitializeNodeIds = (node, newParentId = null) => {
-  if (!node) return null;
-  // Create a new ID for the current node
-  const newId = generateUUID();
-  
-  // Create a new node object with the new ID, parent ID, and all defaults.
-  // This ensures that pasted nodes are fully compliant with the app's data structure.
-  const newNode = {
-    ...node, // Keep any other properties from the paste
-    id: newId,
-    _parentId: newParentId,
-    name: node.name || "Pasted Node",
-    description: node.description ?? "",
-    isLocked: node.isLocked ?? false,
-    importance: ['minor', 'common', 'major'].includes(node.importance) ? node.importance : 'common',
-    children: Array.isArray(node.children) ? node.children : [],
-    linkedProjectId: node.linkedProjectId ?? null, // Preserve links if they exist, but they might be invalid in the new context.
-    linkedProjectName: node.linkedProjectName ?? null,
-  };
-  
-  // If there are children, recursively call this function for each child,
-  // passing the new ID of the current node as their new parent ID.
-  if (newNode.children.length > 0) {
-    newNode.children = newNode.children.map(child => reinitializeNodeIds(child, newId));
-  }
-  
-  return newNode;
-};
-
 export const addPastedNodeToParent = (tree, parentId, nodeToPaste) => {
     // First, create a deep copy of the node to paste with all new IDs
-    const reinitializedNode = reinitializeNodeIds(nodeToPaste, parentId);
+    const reinitializedNode = initializeNodes(nodeToPaste, parentId, true);
 
     const addRecursively = (node) => {
         if (node.id === parentId) {

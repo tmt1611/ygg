@@ -232,10 +232,6 @@ export const useNodeOperations = ({
       const clipboardText = await navigator.clipboard.readText();
       const parsedNode = JSON.parse(clipboardText);
 
-      if (!isValidTechTreeNodeShape(parsedNode)) {
-        throw new Error("Clipboard content is not a valid node structure.");
-      }
-      
       const parentNode = findNodeById(techTreeData, targetNodeId);
       if (!parentNode) {
         throw new Error("Target node for paste operation not found.");

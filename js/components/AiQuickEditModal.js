@@ -93,9 +93,6 @@ const AiQuickEditModal = ({ isOpen, node, onConfirm, onCancel, apiKeyIsSet, sele
             throw new Error("Pasted content must be a single JSON object.");
         }
         const initializedNode = initializeNodes(parsedData, null);
-        if (!isValidTechTreeNodeShape(initializedNode)) {
-          throw new Error("Pasted JSON object does not have the required node structure (e.g., missing 'name').");
-        }
         const finalNode = { ...initializedNode, id: node.id }; // Enforce original ID
         setDiff({ from: node, to: finalNode });
       } catch (e) {
