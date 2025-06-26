@@ -9,9 +9,17 @@ const DataOperationsPanel = ({
   isSummarizing,
   currentTreeExists,
   controlsDisabled,
-  apiKeyIsSet
+  apiKeyIsSet,
+  modalManager
 }) => {
   const extractButtonDisabled = controlsDisabled || !currentTreeExists || (extractionMode === 'summary' && !apiKeyIsSet);
+
+  const handleShowSummaryPrompt = () => {
+    if (!apiKeyIsSet || !currentTreeExists) return;
+    const { getPromptTextFor } = require('../../services/geminiService.js');
+    const promptText = getPromptTextFor('summarize', { text: '[The current project context and full JSON tree structure goes here]' });
+    modalManager.openTechExtractionModal(promptText, "AI Summary Prompt");
+  };
 
   return (
     React.createElement("div", null,
@@ -34,6 +42,13 @@ const DataOperationsPanel = ({
                 disabled: !apiKeyIsSet || controlsDisabled || !currentTreeExists }),
               "AI Summary of Structure",
               React.createElement(ContextualHelpTooltip, { helpText: "Uses AI to generate a concise summary of the current project's structure. Requires a valid API Key." }),
+              React.createElement("button", {
+                onClick: (e) => { e.preventDefault(); handleShowSummaryPrompt(); },
+                disabled: !apiKeyIsSet || !currentTreeExists,
+                className: "base-icon-button",
+                style: { marginLeft: 'auto', padding: '2px', fontSize: '1em' },
+                title: "Show summary prompt"
+              }, "📋"),
               !apiKeyIsSet && currentTreeExists && React.createElement("span", { style: { fontSize: '0.8em', color: 'var(--error-color)', marginLeft: '8px' }}, "(API Key Required)")
             )
           ),

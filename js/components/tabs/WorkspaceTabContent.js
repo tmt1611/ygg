@@ -6,6 +6,7 @@ import DataOperationsPanel from '../panels/DataOperationsPanel.js';
 import CollapsiblePanel from '../CollapsiblePanel.js';
 import ContextualHelpTooltip from '../ContextualHelpTooltip.js';
 import { APP_STORAGE_KEYS } from '../../constants.js';
+import { getPromptTextFor } from '../../services/geminiService.js';
 
 const StatDisplay = ({ label, value, valueClassName }) => (
   React.createElement("div", { className: "stat-item" },
@@ -23,6 +24,7 @@ const WorkspaceTabContent = ({
   currentTreeStats,
   contextText,
   handleToggleAllLock,
+  modalManager,
 }) => {
 
   const [collapsedPanels, setCollapsedPanels] = useState(() => {
@@ -37,6 +39,11 @@ const WorkspaceTabContent = ({
     }
     return new Set([]); // Keep panels open by default
   });
+
+  const handleShowGenerationPrompt = () => {
+    const promptText = getPromptTextFor('generateTree', { prompt: initialPrompt });
+    modalManager.openTechExtractionModal(promptText, "AI Structure Generation Prompt");
+  };
 
   useEffect(() => {
     localStorage.setItem(APP_STORAGE_KEYS.WORKSPACE_PANEL_STATES, JSON.stringify(Array.from(collapsedPanels)));
@@ -100,7 +107,8 @@ const WorkspaceTabContent = ({
           },
             React.createElement(AiGenerationPanel, {
               initialPrompt, setInitialPrompt, handleGenerateTree, isLoadingInitial,
-              generateUIDisabled, activeUserProjectExists, apiKeyIsSet: apiKeyHook.status.isSet
+              generateUIDisabled, activeUserProjectExists, apiKeyIsSet: apiKeyHook.status.isSet,
+              handleShowPrompt: handleShowGenerationPrompt
             })
           ),
           React.createElement(CollapsiblePanel, {
@@ -153,7 +161,8 @@ const WorkspaceTabContent = ({
           },
             React.createElement(DataOperationsPanel, {
               handleDownloadTree, onExtractData, extractionMode, setExtractionMode, isSummarizing,
-              currentTreeExists, controlsDisabled, apiKeyIsSet: apiKeyHook.status.isSet
+              currentTreeExists, controlsDisabled, apiKeyIsSet: apiKeyHook.status.isSet,
+              modalManager
             })
           )
       )

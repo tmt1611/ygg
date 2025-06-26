@@ -586,30 +586,28 @@ export const getPromptTextFor = (type, payload) => {
     quickEdit: (p) => getQuickEditPrompt(p.node, p.prompt),
     projectInsights: (p) => getProjectInsightsPrompt(p.tree, p.context),
     strategicSuggestions: (p) => getStrategicSuggestionsPrompt(p.context, p.summary),
+    summarize: (p) => ({ userPrompt: getSummarizeTextPrompt(p.text) })
   };
 
   const getPrompt = getPromptFunctions[type];
   if (!getPrompt) {
     return "No prompt available for this action type.";
   }
+
+  // Create a placeholder payload for previewing the prompt structure
+  const placeholderPayload = {
+    ...payload,
+    tree: payload.tree ? '[The full current JSON tree structure goes here]' : undefined,
+    node: payload.node ? '[The single JSON node object goes here]' : undefined,
+    lockedIds: payload.lockedIds ? '[An array of locked node IDs goes here]' : undefined,
+    summary: payload.summary ? '[A summary of the current tree goes here]' : undefined,
+    text: payload.text ? '[The full text to be summarized goes here]' : undefined,
+  };
   
-  const instructions = getPrompt(payload);
+  const instructions = getPrompt(placeholderPayload);
   if (!instructions) return "Could not generate prompt preview.";
 
-  const systemInstructionText = instructions.systemInstruction || "No system instruction provided.";
+  const systemInstructionText = instructions.systemInstruction || "No system instruction provided for this action.";
   
-  // Re-construct the user prompt with placeholders if payload values are strings,
-  // otherwise use the original prompt which contains the full data.
-  // This allows for clean previews without duplicating prompt logic.
-  const userPromptText = instructions.userPrompt
-    .replace(
-      JSON.stringify(payload.tree, null, 2), 
-      typeof payload.tree === 'string' ? payload.tree : JSON.stringify(payload.tree, null, 2)
-    )
-    .replace(
-      JSON.stringify(payload.node, null, 2), 
-      typeof payload.node === 'string' ? payload.node : JSON.stringify(payload.node, null, 2)
-    );
-
-  return `--- SYSTEM INSTRUCTION ---\n${systemInstructionText}\n\n--- USER PROMPT ---\n${userPromptText}`;
+  return `--- SYSTEM INSTRUCTION ---\n${systemInstructionText}\n\n--- USER PROMPT ---\n${instructions.userPrompt}`;
 };

@@ -8,7 +8,8 @@ const AiGenerationPanel = ({
   isLoadingInitial,
   generateUIDisabled,
   activeUserProjectExists,
-  apiKeyIsSet
+  apiKeyIsSet,
+  handleShowPrompt
 }) => {
   return (
     React.createElement("div", null,
@@ -19,16 +20,25 @@ const AiGenerationPanel = ({
         disabled: generateUIDisabled, "aria-describedby": generateUIDisabled && !apiKeyIsSet ? "prompt-disabled-reason-gen" : undefined, 
         title: "Describe the main topic or context for the tech tree. This will guide AI generation."
       }),
-      React.createElement("button", { onClick: handleGenerateTree, disabled: generateUIDisabled || !initialPrompt.trim(),
-        style: { width: '100%', padding: '10px' }, className: "primary", "aria-busy": isLoadingInitial,
-        title: generateUIDisabled ? (apiKeyIsSet ? "Enter a prompt first" : "API Key required") : (activeUserProjectExists ? "Regenerate structure for current project based on this context" : "Generate a new project and structure based on this context")
-      },
-        isLoadingInitial ? (
-          React.createElement("span", {style: {display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px'}},
-            React.createElement("span", {className: "basic-spinner-animation"}),
-            "Generating..."
-          )
-        ) : (activeUserProjectExists ? 'Regenerate Structure for Context' : 'Generate New Structure')
+      React.createElement("div", { style: { display: 'flex', gap: '8px' } },
+        React.createElement("button", { onClick: handleGenerateTree, disabled: generateUIDisabled || !initialPrompt.trim(),
+          style: { flex: 1, padding: '10px' }, className: "primary", "aria-busy": isLoadingInitial,
+          title: generateUIDisabled ? (apiKeyIsSet ? "Enter a prompt first" : "API Key required") : (activeUserProjectExists ? "Regenerate structure for current project based on this context" : "Generate a new project and structure based on this context")
+        },
+          isLoadingInitial ? (
+            React.createElement("span", {style: {display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px'}},
+              React.createElement("span", {className: "basic-spinner-animation"}),
+              "Generating..."
+            )
+          ) : (activeUserProjectExists ? 'Regenerate Structure for Context' : 'Generate New Structure')
+        ),
+        React.createElement("button", {
+          onClick: handleShowPrompt,
+          disabled: generateUIDisabled || !initialPrompt.trim(),
+          className: 'secondary',
+          style: { flexShrink: 0, padding: '0 12px' },
+          title: "Show the prompt that will be sent to the AI"
+        }, "📋")
       ),
       React.createElement("p", {style: {fontSize: '0.85em', color: 'var(--text-tertiary)', marginTop: '8px'}},
         "This will generate or regenerate the tree for the current project context (topic). If no project is active (e.g., after starting from an example), a new one will be created using this context as its name."

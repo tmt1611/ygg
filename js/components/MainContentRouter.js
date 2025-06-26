@@ -78,6 +78,7 @@ const MainContentRouter = ({
           currentTreeStats: currentTreeStats,
           contextText: initialPrompt,
           handleToggleAllLock: nodeOperations.handleToggleAllLock,
+          modalManager: modalManager,
         });
 
       case 'graph':

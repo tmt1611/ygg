@@ -67,6 +67,9 @@ const TechExtractionModal = ({
           React.createElement("span", { className: "modal-icon" }, "📤"),
           title 
         ),
+        title.toLowerCase().includes("prompt") && React.createElement("p", { style: { fontSize: '0.85em', color: 'var(--text-secondary)', margin: '-10px 0 10px 0', padding: '8px', background: 'var(--panel-alt-bg)', borderRadius: 'var(--border-radius)'}},
+          "This is the prompt structure sent to the AI. Placeholders like `[...]` are replaced with the full data from the application before sending."
+        ),
         React.createElement("textarea", {
           ref: textareaRef,
           value: content,
