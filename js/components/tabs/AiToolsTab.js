@@ -115,8 +115,8 @@ const AiToolsTab = ({
             disabled: !hasTechTreeData || isAppBusy,
             className: "secondary",
             style: { flex: 1, fontSize: '0.85em' },
-            title: "Directly replace the current tree with a JSON structure from text"
-          }, "Apply from Text...")
+            title: "Preview and apply a full tree structure from pasted JSON"
+          }, "Paste & Preview Tree...")
         ),
         hasTechTreeData && canUndoAiMod && (
           React.createElement("button", {

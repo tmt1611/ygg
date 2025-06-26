@@ -21,7 +21,6 @@ export const useTreeOperationsAI = ({
   setIsLoading,
   setIsModifying,
   setModificationPrompt,
-  selectedGraphNodeId,
 }) => {
   const { openAiSuggestionModal, closeAiSuggestionModal, openConfirmModal, closeConfirmModal, setPendingAiSuggestion, pendingAiSuggestion } = modalManager;
   const { addHistoryEntry } = historyManager;
