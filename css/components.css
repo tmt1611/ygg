@@ -1259,7 +1259,7 @@ html[data-theme-base='dark'] .ai-insight-text { color: var(--text-on-dark-bg); }
   display: flex; flex-direction: column; gap: 4px;
 }
 .ai-insights-list li {
-  display: flex; justify-content: space-between; align-items: center;
+  display: flex; justify-content: space-between; align-items: flex-start;
   padding: 4px 8px; /* Reduced padding */
   border-radius: var(--border-radius);
   background: rgba(var(--panel-bg-rgb), 0.2);
