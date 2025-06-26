@@ -115,7 +115,7 @@ const AiToolsTab = ({
             disabled: !hasTechTreeData || isAppBusy,
             className: "secondary",
             style: { flex: 1, fontSize: '0.85em' },
-            title: "Manually apply a JSON response from an external AI tool"
+            title: "Directly replace the current tree with a JSON structure from text"
           }, "Apply from Text...")
         ),
         hasTechTreeData && canUndoAiMod && (
