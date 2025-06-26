@@ -1,21 +1,6 @@
-
 import { useState, useCallback } from 'react';
 import * as geminiService from '../services/geminiService.js';
 import { findNodeById, updateNodeInTree, addNodeToParent } from '../utils.js';
-import React from 'react';
-
-const DescriptionDiff = ({ from, to }) => (
-  React.createElement('div', { style: { display: 'flex', flexDirection: 'column', gap: '10px', textAlign: 'left', fontSize: '0.9em' } },
-    React.createElement('div', null,
-      React.createElement('strong', { style: { color: 'var(--text-secondary)', display: 'block', textTransform: 'uppercase', fontSize: '0.9em', marginBottom: '4px' } }, 'Current Description:'),
-      React.createElement('pre', { style: { whiteSpace: 'pre-wrap', wordBreak: 'break-word', background: 'var(--panel-alt-bg)', border: '1px solid var(--border-color)', padding: '8px', borderRadius: 'var(--border-radius)', margin: 0, maxHeight: '150px', overflowY: 'auto' } }, from || React.createElement("i", null, "(empty)"))
-    ),
-    React.createElement('div', null,
-      React.createElement('strong', { style: { color: 'var(--text-secondary)', display: 'block', textTransform: 'uppercase', fontSize: '0.9em', marginBottom: '4px' } }, 'Suggested Description:'),
-      React.createElement('pre', { style: { whiteSpace: 'pre-wrap', wordBreak: 'break-word', background: 'var(--success-bg)', border: '1px solid var(--success-color)', padding: '8px', borderRadius: 'var(--border-radius)', margin: 0, maxHeight: '150px', overflowY: 'auto' } }, to || React.createElement("i", null, "(empty)"))
-    )
-  )
-);
 import React from 'react';
 
 const DescriptionDiff = ({ from, to }) => (
