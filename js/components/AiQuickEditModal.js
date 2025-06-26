@@ -59,6 +59,7 @@ const AiQuickEditModal = ({ isOpen, node, onConfirm, onCancel, apiKeyIsSet, sele
   const [diff, setDiff] = useState(null);
   const promptInputRef = useRef(null);
   const [showPromptModal, setShowPromptModal] = useState(false);
+  const [showPromptModal, setShowPromptModal] = useState(false);
 
   useEffect(() => {
     if (isOpen) {
