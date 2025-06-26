@@ -1,7 +1,7 @@
 import React from 'react';
 
 // Using a button for better accessibility and semantics.
-const ContextualHelpTooltip = ({ helpText, position = 'top' }) => (
+const ContextualHelpTooltip = React.memo(({ helpText, position = 'top' }) => (
   React.createElement("button", {
     type: "button",
     "aria-label": `Help: ${helpText}`,
@@ -17,6 +17,6 @@ const ContextualHelpTooltip = ({ helpText, position = 'top' }) => (
       helpText
     )
   )
-);
+));
 
 export default ContextualHelpTooltip;

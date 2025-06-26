@@ -6,7 +6,7 @@ const KEYWORD_REGEX_PART = DYNAMIC_KEYWORDS.map(kw => `\\b${kw}\\b`).join('|');
 // This regex will split the string by quoted content and keywords, keeping them in the results.
 const TOKENIZER_REGEX = new RegExp(`(".*?")|(${KEYWORD_REGEX_PART})`, 'gi');
 
-const HistoryItem = ({ entry }) => {
+const HistoryItem = React.memo(({ entry }) => {
     const { icon, color } = EVENT_TYPE_INFO[entry.type] || EVENT_TYPE_INFO.default;
     const title = `Type: ${entry.type}\nTimestamp: ${new Date(entry.timestamp).toLocaleString()}${entry.details ? `\nDetails: ${JSON.stringify(entry.details)}` : ''}`;
 
@@ -40,6 +40,6 @@ const HistoryItem = ({ entry }) => {
             )
         )
     );
-};
+});
 
 export default HistoryItem;

@@ -1,7 +1,7 @@
 import React from 'react';
 import { NODE_IMPORTANCE_OPTIONS } from '../constants.js';
 
-const GraphNodeTooltip = ({ tooltip }) => {
+const GraphNodeTooltip = React.memo(({ tooltip }) => {
   const { visible, content, parent, position } = tooltip;
 
   if (!visible || !content) {
@@ -42,6 +42,6 @@ const GraphNodeTooltip = ({ tooltip }) => {
       )
     )
   );
-};
+});
 
 export default GraphNodeTooltip;
