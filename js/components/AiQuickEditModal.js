@@ -84,7 +84,8 @@ const AiQuickEditModal = ({ isOpen, node, onConfirm, onCancel, apiKeyIsSet, sele
     setError(null);
     setDiff(null);
 
-    const isJsonAttempt = prompt.trim().startsWith('{');
+    const trimmedPrompt = prompt.trim();
+    const isJsonAttempt = trimmedPrompt.startsWith('{') && trimmedPrompt.endsWith('}');
 
     if (isJsonAttempt) {
       try {

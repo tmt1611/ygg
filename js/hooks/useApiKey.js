@@ -40,7 +40,7 @@ export const useApiKey = (addHistoryEntry) => {
     setIsProcessing(false);
   }, [_updateStatus, addHistoryEntry]);
 
-  const setApiKey = useCallback(async (keyToSubmit) => {
+  const setApiKey = useCallback((keyToSubmit) => {
     setIsProcessing(true);
     const key = (keyToSubmit || inputKey).trim();
     if (!key) {
@@ -48,7 +48,8 @@ export const useApiKey = (addHistoryEntry) => {
       setIsProcessing(false);
       return;
     }
-    const result = await geminiService.setApiKey(key);
+    // geminiService.setApiKey is currently synchronous.
+    const result = geminiService.setApiKey(key);
     _updateStatus(result);
     if (result.success) {
       setInputKey(key);
