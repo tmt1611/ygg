@@ -4,10 +4,11 @@ import LoadingSpinner from './LoadingSpinner.js';
 import ErrorMessage from './ErrorMessage.js';
 import TechExtractionModal from './TechExtractionModal.js';
 
-const DiffItem = ({ label, from, to }) => {
+const DiffItem = ({ label, from, to, showPromptModal, quickEditPrompt, setShowPromptModal }) => {
   if (from === to) return null;
-  return (
-    React.createElement("div", { className: "quick-edit-diff-item" },
+
+  const elements = [
+    React.createElement("div", { key: "diff", className: "quick-edit-diff-item" },
       React.createElement("div", { className: "quick-edit-diff-label" }, label),
       React.createElement("div", { className: "quick-edit-diff-content" },
         React.createElement("div", { className: "diff-from" },
@@ -19,18 +20,26 @@ const DiffItem = ({ label, from, to }) => {
           React.createElement("pre", null, to || React.createElement("i", null, "(empty)"))
         )
       )
-      ),
-      showPromptModal && (
-        React.createElement(TechExtractionModal, {
-          isOpen: showPromptModal,
-          content: quickEditPrompt,
-          title: "AI Quick Edit Prompt",
-          onClose: () => setShowPromptModal(false)
-        })
-      )
     )
-  );
+  ];
+
+  if (showPromptModal) {
+    elements.push(
+      React.createElement(TechExtractionModal, {
+        key: "modal",
+        isOpen: showPromptModal,
+        content: quickEditPrompt,
+        title: "AI Quick Edit Prompt",
+        onClose: () => setShowPromptModal(false)
+      })
+    );
+  }
+
+  return elements;
 };
+
+
+
 
 const ChildrenDiff = ({ from, to }) => {
   const fromIds = new Set(from.map(c => c.id));

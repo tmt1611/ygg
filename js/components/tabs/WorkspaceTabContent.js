@@ -95,7 +95,7 @@ const WorkspaceTabContent = ({
             React.createElement(ProjectManagementPanel, {
               projects, activeProjectId, onLoadProject, onRenameProject, onDeleteProject, 
               onAddNewProjectFromFile, onCreateEmptyProject, onSaveAsExample, onLoadAndGoToGraph,
-              onPasteNewProject: projectManager.handlePasteNewProject,
+              onPasteNewProject: onPasteNewProject,
               isAppBusy, currentTreeExists
             })
           ),
