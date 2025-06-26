@@ -158,7 +158,7 @@ const extractJsonFromMarkdown = (text) => {
   return trimmedText; // Return as-is if no clear JSON object/array is found
 };
 
-const parseGeminiJsonResponse = (responseText, forModification = false) => {
+export const parseGeminiJsonResponse = (responseText, forModification = false) => {
   const jsonStr = extractJsonFromMarkdown(responseText);
   if (!jsonStr) {
     throw new Error("AI returned an empty response.");
