@@ -34,9 +34,6 @@ export const useModalManager = () => {
   const [isAiQuickEditModalOpen, setIsAiQuickEditModalOpen] = useState(false);
   const [aiQuickEditModalConfig, setAiQuickEditModalConfig] = useState(null);
 
-  const [isAiQuickEditModalOpen, setIsAiQuickEditModalOpen] = useState(false);
-  const [aiQuickEditModalConfig, setAiQuickEditModalConfig] = useState(null);
-
   const captureFocus = useCallback(() => {
     if (document.activeElement instanceof HTMLElement) {
       lastFocusedElementRef.current = document.activeElement;

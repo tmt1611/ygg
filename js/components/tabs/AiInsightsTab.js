@@ -2,9 +2,6 @@ import React, { useState } from 'react';
 import LoadingSpinner from '../LoadingSpinner.js';
 import ErrorMessage from '../ErrorMessage.js';
 import { getPromptTextFor } from '../../services/geminiService.js';
-import { getPromptTextFor } from '../../services/geminiService.js';
-import { getPromptTextFor } from '../../services/geminiService.js';
-import { getPromptTextFor } from '../../services/geminiService.js';
 
 
 const AiInsightsTab = ({
