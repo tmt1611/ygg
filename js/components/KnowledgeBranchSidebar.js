@@ -119,7 +119,6 @@ const KnowledgeBranchSidebar = (props) => {
                 error: props.aiInsightsError,
                 onGenerateInsights: props.onGenerateProjectInsights,
                 onApplyManualInsights: props.onApplyManualInsights,
-                onApplyManualInsights: props.onApplyManualInsights,
                 onPreviewAndUseDescription: props.onPreviewAndUseDescription,
                 onAddSuggestedChildToNode: props.onAddSuggestedChildToNode,
                 onAddNewBranchToRoot: props.onAddNewBranchToRoot,
