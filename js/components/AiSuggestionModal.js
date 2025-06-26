@@ -81,65 +81,30 @@ const AiSuggestionModal = ({
     if (!comparisonResult) return null;
     const { annotatedTree } = comparisonResult;
 
-    // If there's an error, or the AI suggested deleting everything and returned nothing.
+    // The main display tree should only show the new state.
+    // Errors and removed nodes are handled separately in the render logic.
     if (!annotatedTree || annotatedTree._isErrorNode) {
-      if (removedNodesTree.length > 0) {
-        // If there are removed nodes, show them.
-        if (removedNodesTree.length > 1) {
-          return { name: "Multiple Removed Roots", children: removedNodesTree, id: "removed-wrapper", _changeStatus: 'structure_modified' };
-        }
-        return removedNodesTree[0];
-      }
-      return annotatedTree; // Return error node or null
-    }
-
-    // Deep clone to allow safe mutation
-    const displayTreeMutable = JSON.parse(JSON.stringify(annotatedTree));
-    const displayTreeNodesMap = getAllNodesAsMap(displayTreeMutable);
-    
-    const unparentedRemovedRoots = [];
-    removedNodesTree.forEach(removedRoot => {
-        const parentId = removedRoot._parentId;
-        const parentInDisplayTree = parentId ? displayTreeNodesMap.get(parentId) : null;
-        if (parentInDisplayTree) {
-            parentInDisplayTree.children = parentInDisplayTree.children || [];
-            parentInDisplayTree.children.push(removedRoot);
-        } else {
-            // Parent doesn't exist in new tree, or it's a root of a removed branch.
-            unparentedRemovedRoots.push(removedRoot);
-        }
-    });
-
-    let finalTree = displayTreeMutable;
-    if (unparentedRemovedRoots.length > 0) {
-      // Create a virtual root to hold both the modified tree and any branches that were completely removed.
-      finalTree = {
-          id: 'virtual-root-diff',
-          name: 'Modification Preview',
-          description: 'A virtual root showing both the new structure and removed branches.',
-          children: [displayTreeMutable, ...unparentedRemovedRoots],
-          _changeStatus: 'structure_modified',
-      };
+      return null;
     }
     
-    if (!showOnlyChanges) return finalTree;
+    if (!showOnlyChanges) return annotatedTree;
 
-    // Filter the combined tree to only show changes
+    // Filter the tree to only show nodes with changes
     const filterTree = (node) => {
         if (!node) return null;
         let filteredChildren = [];
         if (node.children) {
             filteredChildren = node.children.map(filterTree).filter(Boolean);
         }
-        // Keep node if it has changes itself OR if it has children with changes OR it's the virtual root
-        if (node._changeStatus !== 'unchanged' || filteredChildren.length > 0 || node.id === 'virtual-root-diff') {
+        // Keep node if it has changes itself OR if it has children with changes
+        if (node._changeStatus !== 'unchanged' || filteredChildren.length > 0) {
             return { ...node, children: filteredChildren };
         }
         return null;
     };
     
-    return filterTree(finalTree);
-  }, [comparisonResult, showOnlyChanges, removedNodesTree]);
+    return filterTree(annotatedTree);
+  }, [comparisonResult, showOnlyChanges]);
 
   useEffect(() => {
     if (isOpen) {
@@ -274,7 +239,26 @@ const AiSuggestionModal = ({
                   React.createElement("p", { style: { color: 'var(--text-tertiary)', fontSize: '0.9em' } }, "Check the 'Removed Nodes' section below for deletions.")
                 )
               ),
-              /* The separate removed nodes list is no longer needed as they are integrated into the main display tree. */
+              ),
+              removedNodesTree.length > 0 && (
+                React.createElement("div", { className: "ai-suggestion-modal-summary-section", style: { marginTop: '15px' } },
+                    React.createElement("h4", { 
+                        className: "ai-suggestion-modal-summary-title", 
+                        onClick: () => setIsRemovedNodesCollapsed(!isRemovedNodesCollapsed),
+                        style: { cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '5px', marginBottom: isRemovedNodesCollapsed ? 0 : '8px' }
+                    },
+                        React.createElement("span", { style: { transform: isRemovedNodesCollapsed ? 'rotate(-90deg)' : 'none', transition: 'transform 0.2s', display: 'inline-block' } }, '▼'),
+                        `Removed Branches (${comparisonResult.removedNodes.length} total nodes)`
+                    ),
+                    !isRemovedNodesCollapsed && (
+                        React.createElement("ul", { style: { listStyle: 'none', padding: 0, margin: '10px 0 0 0' } },
+                            removedNodesTree.map(removedRoot => (
+                                React.createElement(AiSuggestionPreviewListItem, { key: removedRoot.id, node: removedRoot, level: 0, isVisualDiff: true })
+                            ))
+                        )
+                    )
+                )
+              )
             )
           ),
 
