@@ -17,6 +17,22 @@ const DescriptionDiff = ({ from, to }) => (
       )
   )
 );
+import React from 'react';
+
+const DescriptionDiff = ({ from, to }) => (
+  React.createElement("div", { className: "quick-edit-diff-item", style: { border: 'none', padding: 0, background: 'transparent' } },
+      React.createElement("div", { className: "quick-edit-diff-content" },
+          React.createElement("div", { className: "diff-from" },
+            React.createElement("span", { className: "diff-tag" }, "Current Description"),
+            React.createElement("pre", null, from || React.createElement("i", null, "(empty)"))
+          ),
+          React.createElement("div", { className: "diff-to" },
+            React.createElement("span", { className: "diff-tag" }, "Suggested Description"),
+            React.createElement("pre", null, to || React.createElement("i", null, "(empty)"))
+          )
+      )
+  )
+);
 
 export const useAiInsights = ({
   apiKeyIsSet,
