@@ -341,6 +341,8 @@ const App = () => {
           onPreviewAndUseDescription: aiInsightsHook.handlePreviewAndUseSuggestedDescription,
           onAddSuggestedChildToNode: aiInsightsHook.handleAddSuggestedChildToNode,
           onAddNewBranchToRoot: aiInsightsHook.handleAddNewBranchToRoot,
+          setModificationPrompt: setModificationPrompt,
+          setActiveSidebarTab: setActiveSidebarTab,
           // History Tab Props
           history: historyManager.history,
           onClearHistory: handleClearHistoryWithConfirmation,
