@@ -246,22 +246,31 @@ export const useProjectManagement = ({
           const content = e.target?.result; 
           const parsedJson = JSON.parse(content);
           let newProject;
-          if (parsedJson.id && parsedJson.name && parsedJson.treeData && parsedJson.lastModified) {
-            // Full project object format
-            newProject = { ...parsedJson, treeData: initializeNodes(parsedJson.treeData), isExample: parsedJson.isExample || false };
-          } else if (parsedJson.name && parsedJson.tree) { 
-             // Older project object format
-            newProject = {
-              id: generateUUID(), name: parsedJson.context || parsedJson.name || file.name.replace(/\.json$|\.project\.json$/i, '') || "Imported Project",
-              treeData: initializeNodes(parsedJson.tree), lastModified: new Date().toISOString(), isExample: false,
-            };
-          } else if (parsedJson.name && (Array.isArray(parsedJson.children) || parsedJson.children === undefined)) {
-            // A single tree node object, common from AI tools
-            newProject = {
-                id: generateUUID(), name: parsedJson.name || "Imported Project",
-                treeData: initializeNodes(parsedJson), lastModified: new Date().toISOString(), isExample: false
-            };
-          } else { throw new Error("Invalid JSON structure. It must be a full project object or a single tree node object."); }
+          let treeObject;
+          let projectName;
+          let existingId = null;
+
+          if (parsedJson.id && parsedJson.name && parsedJson.treeData && parsedJson.lastModified) { // Full project object
+            treeObject = parsedJson.treeData;
+            projectName = parsedJson.name;
+            existingId = parsedJson.id;
+          } else if (parsedJson.tree) { // Older project object with context
+            treeObject = parsedJson.tree;
+            projectName = parsedJson.context || parsedJson.name;
+          } else if (isValidTechTreeNodeShape(parsedJson)) { // Just a tree node
+            treeObject = parsedJson;
+            projectName = parsedJson.name;
+          } else {
+            throw new Error("Invalid JSON structure. Must be a full project object, an older project object with a 'tree' property, or a single valid tree node.");
+          }
+
+          const newProject = {
+            id: existingId || generateUUID(),
+            name: projectName || file.name.replace(/\.json$|\.project\.json$/i, '') || "Imported Project",
+            treeData: initializeNodes(treeObject),
+            lastModified: new Date().toISOString(),
+            isExample: parsedJson.isExample || false,
+          };
           
           const existingProjectIndex = projects.findIndex(p => p.id === newProject.id);
           if (existingProjectIndex !== -1) {

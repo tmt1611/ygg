@@ -4,26 +4,49 @@ import { select } from 'd3';
 export const generateUUID = () => uuidv4();
 
 export const initializeNodes = (node, parentId = null) => {
-  if (!node) return null;
+  if (typeof node !== 'object' || node === null) {
+    // If the input is not a valid object, return null. This prevents errors from malformed
+    // `children` arrays, e.g., [{}, null, {}]. The caller should filter out nulls.
+    console.warn("initializeNodes received invalid input, returning null. Input:", node);
+    return null;
+  }
+  
   // Assign a new UUID if the node has no ID or has the placeholder ID from AI.
   const newId = (!node.id || node.id === 'NEW_NODE') ? generateUUID() : node.id;
   
   const newNode = {
-    ...node, // Keep any other properties the AI might add
+    // Start with a clean slate of defaults to guarantee all fields exist.
     id: newId,
-    name: node.name || "Untitled Node",
-    description: node.description ?? "", // Use nullish coalescing for empty strings
-    isLocked: node.isLocked ?? false,
-    importance: ['minor', 'common', 'major'].includes(node.importance) ? node.importance : 'common',
-    children: Array.isArray(node.children) ? node.children : [],
-    linkedProjectId: node.linkedProjectId ?? null,
-    linkedProjectName: node.linkedProjectName ?? null,
+    name: "Untitled Node",
+    description: "",
+    isLocked: false,
+    importance: 'common',
+    children: [],
+    linkedProjectId: null,
+    linkedProjectName: null,
     _parentId: parentId,
+    // Safely spread the provided node properties.
+    ...node,
+    // Re-validate and sanitize critical properties after spreading,
+    // ensuring they have the correct type and fallbacks.
+    id: newId, // Ensure the ID is not overwritten by the spread.
+    name: (typeof node.name === 'string' && node.name.trim()) ? node.name.trim() : "Untitled Node",
+    description: typeof node.description === 'string' ? node.description : "",
+    isLocked: typeof node.isLocked === 'boolean' ? node.isLocked : false,
+    importance: ['minor', 'common', 'major'].includes(node.importance) ? node.importance : 'common',
+    linkedProjectId: node.linkedProjectId || null,
+    linkedProjectName: node.linkedProjectName || null,
   };
   
-  if (newNode.children.length > 0) {
-    newNode.children = newNode.children.map(child => initializeNodes(child, newNode.id));
+  // Recursively initialize children, ensuring it's an array and filtering out any nulls.
+  if (Array.isArray(node.children)) {
+    newNode.children = node.children
+      .map(child => initializeNodes(child, newNode.id))
+      .filter(Boolean); // Filter out any null children resulting from invalid input.
+  } else {
+    newNode.children = [];
   }
+
   return newNode;
 };
 
