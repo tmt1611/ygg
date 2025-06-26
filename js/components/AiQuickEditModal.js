@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import * as geminiService from '../services/geminiService.js';
-import { initializeNodes } from '../utils.js';
+import { initializeNodes, isValidTechTreeNodeShape } from '../utils.js';
 import LoadingSpinner from './LoadingSpinner.js';
 import ErrorMessage from './ErrorMessage.js';
 import TechExtractionModal from './TechExtractionModal.js';
@@ -58,7 +58,6 @@ const AiQuickEditModal = ({ isOpen, node, onConfirm, onCancel, apiKeyIsSet, sele
   const [error, setError] = useState(null);
   const [diff, setDiff] = useState(null);
   const promptInputRef = useRef(null);
-  const [manualJson, setManualJson] = useState('');
   const [showPromptModal, setShowPromptModal] = useState(false);
 
   useEffect(() => {
@@ -66,7 +65,6 @@ const AiQuickEditModal = ({ isOpen, node, onConfirm, onCancel, apiKeyIsSet, sele
       setPrompt('');
       setDiff(null);
       setError(null);
-      setManualJson('');
       setTimeout(() => promptInputRef.current?.focus(), 50);
     }
   }, [isOpen]);
@@ -80,11 +78,41 @@ const AiQuickEditModal = ({ isOpen, node, onConfirm, onCancel, apiKeyIsSet, sele
     return () => document.removeEventListener('keydown', handleEscape);
   }, [isOpen, onCancel]);
 
-  const handleGeneratePreview = async () => {
+  const handleGenerateClick = async () => {
     if (!prompt.trim() || !node) return;
     setIsLoading(true);
     setError(null);
     setDiff(null);
+
+    // Attempt to parse as JSON first. If it succeeds and is a valid node, treat it as manual input.
+    try {
+      // Use a raw parse, as our custom parser is too lenient for this initial check.
+      const parsedData = JSON.parse(prompt);
+      
+      if (typeof parsedData === 'object' && parsedData !== null && !Array.isArray(parsedData)) {
+        // It's a single object, now validate its shape.
+        const initializedNode = initializeNodes(parsedData, null);
+        
+        if (!isValidTechTreeNodeShape(initializedNode)) {
+          throw new Error("Pasted JSON does not have the required node structure (e.g., missing 'name').");
+        }
+
+        const finalNode = { ...initializedNode, id: node.id }; // Enforce original ID
+        setDiff({ from: node, to: finalNode });
+        setIsLoading(false);
+        return; // Success, stop here.
+      }
+    } catch (e) {
+      // It's not valid JSON, or failed validation. Fall through to treat as a text prompt.
+      // If no API key is set, we can show the JSON error now.
+      if (!apiKeyIsSet) {
+        setError({ message: `Input is not valid JSON and no API key is set for text prompts. Error: ${e.message}` });
+        setIsLoading(false);
+        return;
+      }
+    }
+
+    // Treat as a natural language prompt
     try {
       const suggestedNode = await geminiService.generateQuickEdit(node, prompt, selectedModel);
       setDiff({ from: node, to: suggestedNode });
@@ -95,48 +123,31 @@ const AiQuickEditModal = ({ isOpen, node, onConfirm, onCancel, apiKeyIsSet, sele
     }
   };
 
-  const handleApplyManualJson = () => {
-    if (!manualJson.trim()) {
-      setError({ message: "Manual input is empty." });
-      return;
-    }
-    setError(null);
-    try {
-      const parsedNode = geminiService.parseGeminiJsonResponse(manualJson, true);
-
-      if (Array.isArray(parsedNode)) {
-        throw new Error("Pasted content appears to be an array of nodes. Quick Edit only accepts a single node object.");
-      }
-      
-      // Initialize the node to ensure all fields are present and correctly typed.
-      // parentId can be null here because updateNodeInTree will preserve the original parent context.
-      const initializedNode = initializeNodes(parsedNode, null);
-
-      // The AI should preserve the ID, but user-pasted content might not. Enforce it.
-      const finalNode = {
-        ...initializedNode,
-        id: node.id,
-      };
-
-      setDiff({ from: node, to: finalNode });
-    } catch(e) {
-      setError({ message: `JSON Paste Error: ${e.message}` });
-    }
-  };
-
   const handleShowPrompt = () => {
+    let isLikelyJson = false;
+    try {
+        JSON.parse(prompt);
+        isLikelyJson = true;
+    } catch (e) { /* is not JSON */ }
+
+    if (isLikelyJson) {
+        setError({ message: "Cannot show prompt for JSON input. This feature is only for text-based instructions." });
+        return;
+    }
+
     if (!prompt.trim()) {
       setError({ message: "Please enter a prompt first to see what would be sent."});
       return;
     }
+    setError(null);
     setShowPromptModal(true);
   };
 
   const handleKeyDown = (event) => {
     if (event.key === 'Enter' && (event.ctrlKey || event.metaKey)) {
       event.preventDefault();
-      if (!isLoading && prompt.trim() && apiKeyIsSet) {
-        handleGeneratePreview();
+      if (!isLoading && prompt.trim()) {
+        handleGenerateClick();
       }
     }
   };
@@ -161,20 +172,21 @@ const AiQuickEditModal = ({ isOpen, node, onConfirm, onCancel, apiKeyIsSet, sele
           ),
           React.createElement("div", { className: "ai-quick-edit-layout" },
             React.createElement("div", { className: "ai-quick-edit-prompt-section" },
-              React.createElement("label", { htmlFor: "ai-quick-edit-prompt" }, "1. Describe your change:"),
+              React.createElement("label", { htmlFor: "ai-quick-edit-prompt" }, "1. Describe your change or paste a JSON node object:"),
               React.createElement("textarea", {
                 ref: promptInputRef,
                 id: "ai-quick-edit-prompt",
-                placeholder: "e.g., 'Fix typo in name', 'Add a child named...', 'Rewrite description to be more concise.' (Ctrl+Enter to submit)",
+                placeholder: "e.g., 'Fix typo in name', or paste a single JSON node object here. (Ctrl+Enter to submit)",
                 value: prompt,
                 onChange: (e) => setPrompt(e.target.value),
                 onKeyDown: handleKeyDown,
-                disabled: isLoading || !apiKeyIsSet,
+                disabled: isLoading,
+                style: { minHeight: '120px' }
               }),
               React.createElement("div", { style: {display: 'flex', gap: '8px'}},
                 React.createElement("button", {
-                  onClick: handleGeneratePreview,
-                  disabled: !prompt.trim() || isLoading || !apiKeyIsSet,
+                  onClick: handleGenerateClick,
+                  disabled: !prompt.trim() || isLoading,
                   className: "secondary",
                   style: {flex: 1}
                 },
@@ -182,37 +194,18 @@ const AiQuickEditModal = ({ isOpen, node, onConfirm, onCancel, apiKeyIsSet, sele
                 ),
                 React.createElement("button", {
                   onClick: handleShowPrompt,
-                  disabled: isLoading || !apiKeyIsSet || !prompt.trim(),
+                  disabled: isLoading || !prompt.trim(),
                   className: "secondary",
-                  title: "Show the full prompt that will be sent to the AI"
+                  title: "Show the full prompt that will be sent to the AI (only works for text prompts)"
                 }, '📋')
               ),
-              !apiKeyIsSet && React.createElement("p", { style: { color: 'var(--error-color)', fontSize: '0.9em', textAlign: 'center' } }, "API Key not set. This feature is disabled.")
-            ),
-
-            React.createElement("hr", null),
-
-            React.createElement("div", { className: "ai-quick-edit-prompt-section" },
-              React.createElement("label", { htmlFor: "ai-quick-edit-manual" }, "2. Or, paste AI output here:"),
-              React.createElement("textarea", {
-                id: "ai-quick-edit-manual",
-                placeholder: "Paste the single JSON node object from an external AI tool here.",
-                value: manualJson,
-                onChange: (e) => setManualJson(e.target.value),
-                disabled: isLoading,
-                style: {minHeight: '80px', fontFamily: 'monospace'}
-              }),
-              React.createElement("button", {
-                onClick: handleApplyManualJson,
-                disabled: !manualJson.trim() || isLoading,
-                className: "secondary"
-              }, "Generate Preview from Manual Input")
+              !apiKeyIsSet && React.createElement("p", { style: { color: 'var(--text-secondary)', fontSize: '0.9em', textAlign: 'center' } }, "API Key not set. AI prompt features are disabled, but you can still paste a JSON node object.")
             ),
             
             React.createElement("hr", null),
 
             React.createElement("div", { className: "ai-quick-edit-preview-section" },
-              React.createElement("h3", { className: "ai-quick-edit-preview-title" }, "3. Preview of Changes"),
+              React.createElement("h3", { className: "ai-quick-edit-preview-title" }, "2. Preview of Changes"),
               error && React.createElement(ErrorMessage, { error: error, onClose: () => setError(null), mode: "inline" }),
               isLoading && React.createElement(LoadingSpinner, { message: "Analyzing..." }),
               !isLoading && !diff && !error && React.createElement("p", { className: "ai-quick-edit-placeholder" }, "Preview will appear here after generation."),

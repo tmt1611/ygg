@@ -41,12 +41,6 @@ const WorkspaceTabContent = ({
     return new Set([]); // Keep panels open by default
   });
 
-  const handleShowGenerationPrompt = () => {
-    if (!initialPrompt.trim()) return;
-    const promptText = getPromptTextFor('generateTree', { prompt: initialPrompt });
-    modalManager.openTechExtractionModal(promptText, "AI Structure Generation Prompt");
-  };
-
   useEffect(() => {
     localStorage.setItem(APP_STORAGE_KEYS.WORKSPACE_PANEL_STATES, JSON.stringify(Array.from(collapsedPanels)));
   }, [collapsedPanels]);
@@ -56,43 +50,6 @@ const WorkspaceTabContent = ({
     const promptText = getPromptTextFor('generateTree', { prompt: initialPrompt });
     modalManager.openTechExtractionModal(promptText, "AI Structure Generation Prompt");
   };
-
-  useEffect(() => {
-    localStorage.setItem(APP_STORAGE_KEYS.WORKSPACE_PANEL_STATES, JSON.stringify(Array.from(collapsedPanels)));
-  }, [collapsedPanels]);
-
-  const [collapsedPanels, setCollapsedPanels] = useState(() => {
-    const savedState = localStorage.getItem(APP_STORAGE_KEYS.WORKSPACE_PANEL_STATES);
-    try {
-        if (savedState) {
-            const parsed = JSON.parse(savedState);
-            return new Set(Array.isArray(parsed) ? parsed : []);
-        }
-    } catch (e) {
-        console.error("Failed to parse workspace panel states from localStorage", e);
-    }
-    return new Set([]); // Keep panels open by default
-  });
-
-  const handleShowGenerationPrompt = () => {
-    if (!initialPrompt.trim()) return;
-    const promptText = getPromptTextFor('generateTree', { prompt: initialPrompt });
-    modalManager.openTechExtractionModal(promptText, "AI Structure Generation Prompt");
-  };
-
-  useEffect(() => {
-    localStorage.setItem(APP_STORAGE_KEYS.WORKSPACE_PANEL_STATES, JSON.stringify(Array.from(collapsedPanels)));
-  }, [collapsedPanels]);
-
-  const handleShowGenerationPrompt = () => {
-    if (!initialPrompt.trim()) return;
-    const promptText = getPromptTextFor('generateTree', { prompt: initialPrompt });
-    modalManager.openTechExtractionModal(promptText, "AI Structure Generation Prompt");
-  };
-
-  useEffect(() => {
-    localStorage.setItem(APP_STORAGE_KEYS.WORKSPACE_PANEL_STATES, JSON.stringify(Array.from(collapsedPanels)));
-  }, [collapsedPanels]);
 
   const handleTogglePanel = (panelId) => {
     setCollapsedPanels(prev => {

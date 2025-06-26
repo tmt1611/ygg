@@ -13,7 +13,10 @@ const AiGenerationPanel = ({
 }) => {
   return (
     React.createElement("div", null,
-      React.createElement("label", { htmlFor: "techTreeContextPrompt", style: {marginBottom: '5px'}}, "Project Context / AI Topic:"),
+      React.createElement("label", { htmlFor: "techTreeContextPrompt", style: {marginBottom: '5px'}},
+        "Project Context / AI Topic:",
+        React.createElement(ContextualHelpTooltip, { helpText: "This text is the core idea for your project. The AI uses it to generate the initial tree structure and to understand the topic when making modifications." })
+      ),
       React.createElement("textarea", { id: "techTreeContextPrompt", style: { width: '100%', minHeight: '100px', resize: 'vertical', marginBottom: '10px' },
         placeholder: "e.g., 'Machine Learning Fundamentals', 'Game Development Pipeline', 'Sustainable Energy Sources'",
         value: initialPrompt, onChange: (e) => setInitialPrompt(e.target.value),

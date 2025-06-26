@@ -195,11 +195,15 @@ export const parseGeminiJsonResponse = (responseText, forModification = false) =
 const getQuickEditPrompt = (nodeToEdit, modificationPrompt) => {
   const systemInstruction = `You are an AI assistant that modifies a single JSON node object based on a user instruction.
 **RULES:**
-1.  **Minimal Changes:** Only modify the parts of the node object (e.g., name, description, children) that are directly requested by the user's instruction.
-2.  **Preserve Core Properties:** You MUST preserve the original 'id', 'isLocked', 'linkedProjectId', and 'linkedProjectName' values.
-3.  **Mandatory Fields:** Your output MUST be a single, valid JSON object representing the node. It MUST contain all these keys: "id", "name", "description", "isLocked", "importance", "children", "linkedProjectId", "linkedProjectName".
-4.  **Child Nodes:** If the user asks to add children, add new child objects to the 'children' array. For new children, use "NEW_NODE" as the 'id'. Preserve existing children unless the user explicitly asks to remove them.
-5.  **Output Format:** Respond ONLY with the single, modified JSON object. Do not wrap it in markdown fences or add any other text.
+1.  **Output Format**: Your entire response MUST be a single, valid JSON object representing the modified node. Do not use markdown fences (like \`\`\`json). Do not add any text before or after the JSON object.
+2.  **Preserve Core Properties**: You MUST preserve the original 'id', 'isLocked', 'linkedProjectId', and 'linkedProjectName' values from the input node.
+3.  **Minimal Changes**: Only modify the parts of the node object (e.g., name, description, children) that are directly requested by the user's instruction.
+4.  **Child Management**:
+    - When adding new children, add new child objects to the 'children' array. For new children, use "NEW_NODE" as the 'id'.
+    - Preserve all existing children in the 'children' array unless the user explicitly asks to remove or modify one.
+5.  **Required Node Fields**: The output JSON object MUST contain all of these keys: "id", "name", "description", "isLocked", "importance", "children", "linkedProjectId", "linkedProjectName".
+6.  **Node Schema Example**:
+    ${COMMON_NODE_FORMAT_INSTRUCTION}
 `;
 
   const userPrompt = `
@@ -210,7 +214,7 @@ ${JSON.stringify(nodeToEdit, null, 2)}
 
 User instruction: "${modificationPrompt}"
 
-Based on the instruction, provide the complete, modified JSON object for this single node.
+Based on the instruction, provide the complete, modified JSON object for this single node, adhering strictly to ALL rules above.
 `;
   return { systemInstruction, userPrompt };
 };
@@ -417,24 +421,22 @@ export const summarizeText = withApiClient(async (textToSummarize, modelId) => {
 const getProjectInsightsPrompt = (tree, projectContext) => {
   const systemInstruction = `You are an expert project analyst. Your task is to analyze a JSON representation of a technology or skill tree and provide high-level insights.
 **RULES:**
-1.  **Output Format:** You MUST respond with a single, valid JSON object.
-2.  **JSON Structure:** The JSON object must have these exact keys:
+1.  **Output Format**: Your entire response MUST be a single, valid JSON object. Do not use markdown fences or add any surrounding text.
+2.  **JSON Structure**: The JSON object must have these exact top-level keys: "overall_summary", "key_node_insights", "suggested_new_branches".
     - \`overall_summary\`: A string (2-3 sentences) summarizing the project's scope, strengths, and potential weaknesses.
-    - \`key_node_insights\`: An array of 2-4 objects. Each object represents a key node you've identified for improvement. Each object must have:
-        - \`node_id\`: The string ID of the node from the input tree.
-        - \`node_name\`: The string name of the node from the input tree.
-        - \`critique\`: A string (1-2 sentences) explaining why this node is key and how it could be improved (e.g., vague description, needs more children).
-        - \`suggested_description\`: A string with a new, improved description for the node.
-    - \`suggested_new_branches\`: An array of 1-3 objects. Each object represents a potential new top-level branch to add to the root of the tree. Each object must have:
-        - \`name\`: A string for the new branch's name.
-        - \`description\`: A string explaining what this branch would cover and why it's a good addition.
-3.  **JSON Syntax:** Strictly follow JSON rules. NO EXTRA TEXT, explanations, or markdown fences.
+    - \`key_node_insights\`: An array of 2-4 objects. Each object MUST have these keys: "node_id" (string), "node_name" (string), "critique" (string, 1-2 sentences), and "suggested_description" (string, new description).
+    - \`suggested_new_branches\`: An array of 1-3 objects. Each object MUST have these keys: "name" (string) and "description" (string).
+3.  **Content**:
+    - Identify key nodes that are underdeveloped, vague, or critically important.
+    - Suggest new high-level branches that logically expand the project.
+    - Your analysis should be based on the provided 'Project Context' and the tree structure.
+4.  **JSON Syntax Rules**: Strictly follow JSON syntax. All keys and string values must be in double quotes. No trailing commas.
 `;
 
   const userPrompt = `
 Project Context: "${projectContext || 'General Technology/Skills'}"
 
-Analyze the following tech tree and provide insights based on the rules. Identify key nodes that are underdeveloped or critically important. Suggest new high-level branches that would logically expand the project.
+Analyze the following tech tree and provide insights based on the rules.
 
 Tech Tree JSON:
 \`\`\`json
@@ -483,9 +485,11 @@ export const generateProjectInsights = withApiClient(async (tree, projectContext
 
 const getStrategicSuggestionsPrompt = (projectContext, currentTreeSummary) => {
   const systemInstruction = `You are an AI assistant that provides strategic suggestions for a project.
-You MUST respond with a single, valid JSON array of strings.
-Example: ["Suggestion 1", "Suggestion 2", "Suggestion 3"]
-Output ONLY the JSON array. NO extra text, explanations, or markdown fences.
+**RULES:**
+1.  **Output Format**: Your entire response MUST be a single, valid JSON array of strings.
+2.  **Content**: Each string in the array should be a concise, actionable, high-level strategic suggestion.
+3.  **Example**: \`["Develop a new branch for defensive tactics", "Expand the magic system with elemental spells", "Add a section on resource gathering"]\`
+4.  **Restrictions**: Do NOT use markdown fences. Do NOT add any text before or after the JSON array.
 `;
 
   const userPrompt = `
@@ -493,7 +497,6 @@ Project Context: "${projectContext}"
 Current Tree Summary: "${currentTreeSummary}"
 
 Based on the project context and the current state of the tree, suggest 3-5 high-level strategic next steps, new major branches, or key areas of focus that would logically extend, complement, or significantly enhance this project.
-Each suggestion should be a concise, actionable phrase or short sentence.
 `;
   return { systemInstruction, userPrompt };
 };
