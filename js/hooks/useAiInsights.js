@@ -2,6 +2,20 @@
 import { useState, useCallback } from 'react';
 import * as geminiService from '../services/geminiService.js';
 import { findNodeById, updateNodeInTree, addNodeToParent } from '../utils.js';
+import React from 'react';
+
+const DescriptionDiff = ({ from, to }) => (
+  React.createElement('div', { style: { display: 'flex', flexDirection: 'column', gap: '10px', textAlign: 'left', fontSize: '0.9em' } },
+    React.createElement('div', null,
+      React.createElement('strong', { style: { color: 'var(--text-secondary)', display: 'block', textTransform: 'uppercase', fontSize: '0.9em', marginBottom: '4px' } }, 'Current Description:'),
+      React.createElement('pre', { style: { whiteSpace: 'pre-wrap', wordBreak: 'break-word', background: 'var(--panel-alt-bg)', border: '1px solid var(--border-color)', padding: '8px', borderRadius: 'var(--border-radius)', margin: 0, maxHeight: '150px', overflowY: 'auto' } }, from || React.createElement("i", null, "(empty)"))
+    ),
+    React.createElement('div', null,
+      React.createElement('strong', { style: { color: 'var(--text-secondary)', display: 'block', textTransform: 'uppercase', fontSize: '0.9em', marginBottom: '4px' } }, 'Suggested Description:'),
+      React.createElement('pre', { style: { whiteSpace: 'pre-wrap', wordBreak: 'break-word', background: 'var(--success-bg)', border: '1px solid var(--success-color)', padding: '8px', borderRadius: 'var(--border-radius)', margin: 0, maxHeight: '150px', overflowY: 'auto' } }, to || React.createElement("i", null, "(empty)"))
+    )
+  )
+);
 
 export const useAiInsights = ({
   apiKeyIsSet,
@@ -40,18 +54,29 @@ export const useAiInsights = ({
     }
   }, [apiKeyIsSet, selectedModel, techTreeData, contextText, addHistoryEntry]);
 
-  const handleUseSuggestedDescription = useCallback((nodeId, suggestedDescription) => {
-    setTechTreeData(prevTree => {
-      if (!prevTree) return null;
-      const nodeToUpdate = findNodeById(prevTree, nodeId);
-      if (nodeToUpdate) {
-        const updatedTree = updateNodeInTree(prevTree, nodeId, { description: suggestedDescription });
-        addHistoryEntry('NODE_UPDATED', `Node "${nodeToUpdate.name}" description updated via AI insight.`);
-        return updatedTree;
-      }
-      return prevTree;
+  const handlePreviewAndUseSuggestedDescription = useCallback((nodeId, nodeName, suggestedDescription) => {
+    if (!techTreeData) return;
+    const nodeToUpdate = findNodeById(techTreeData, nodeId);
+    if (!nodeToUpdate) return;
+    
+    const currentDescription = nodeToUpdate.description || '';
+    
+    modalManager.openConfirmModal({
+        title: `Update Description for "${nodeName}"?`,
+        message: React.createElement(DescriptionDiff, { from: currentDescription, to: suggestedDescription }),
+        confirmText: 'Apply Suggestion',
+        confirmButtonStyle: 'primary',
+        onConfirm: () => {
+            setTechTreeData(prevTree => {
+                if (!prevTree) return null;
+                const updatedTree = updateNodeInTree(prevTree, nodeId, { description: suggestedDescription });
+                addHistoryEntry('NODE_UPDATED', `Node "${nodeName}" description updated via AI insight.`);
+                return updatedTree;
+            });
+            modalManager.closeConfirmModal();
+        },
     });
-  }, [setTechTreeData, addHistoryEntry]);
+  }, [techTreeData, modalManager, setTechTreeData, addHistoryEntry]);
   
   const handleAddSuggestedChildToNode = useCallback((nodeId, childName, childDescription) => {
     const parentNode = findNodeById(techTreeData, nodeId);
@@ -97,7 +122,7 @@ export const useAiInsights = ({
   return {
     aiInsightsIsLoading, aiInsightsData, aiInsightsError,
     handleGenerateProjectInsights,
-    handleUseSuggestedDescription,
+    handlePreviewAndUseSuggestedDescription,
     handleAddSuggestedChildToNode,
     handleAddNewBranchToRoot,
     clearAiInsights,

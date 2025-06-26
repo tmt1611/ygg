@@ -338,7 +338,7 @@ const App = () => {
           aiInsightsError: aiInsightsError,
           onGenerateProjectInsights: handleGenerateProjectInsights,
           onApplyManualInsights: aiInsightsHook.handleApplyManualInsights,
-          onUseSuggestedDescription: aiInsightsHook.handleUseSuggestedDescription,
+          onPreviewAndUseDescription: aiInsightsHook.handlePreviewAndUseSuggestedDescription,
           onAddSuggestedChildToNode: aiInsightsHook.handleAddSuggestedChildToNode,
           onAddNewBranchToRoot: aiInsightsHook.handleAddNewBranchToRoot,
           // History Tab Props

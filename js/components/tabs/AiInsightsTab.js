@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import LoadingSpinner from '../LoadingSpinner.js';
 import ErrorMessage from '../ErrorMessage.js';
 import { getPromptTextFor } from '../../services/geminiService.js';
@@ -10,9 +10,11 @@ const AiInsightsTab = ({
   error,
   onGenerateInsights,
   onApplyManualInsights,
-  onUseDescription,
+  onPreviewAndUseDescription,
   onAddSuggestedChildToNode,
   onAddNewBranchToRoot,
+  setModificationPrompt,
+  setActiveSidebarTab,
   isAppBusy,
   apiKeyIsSet,
   hasTechTreeData,
@@ -20,6 +22,33 @@ const AiInsightsTab = ({
   contextText,
   modalManager,
 }) => {
+  const [selectedCritiques, setSelectedCritiques] = useState(new Set());
+
+  const handleCritiqueSelectionChange = (critiqueIdentifier, isSelected) => {
+    setSelectedCritiques(prev => {
+      const newSet = new Set(prev);
+      if (isSelected) {
+        newSet.add(critiqueIdentifier);
+      } else {
+        newSet.delete(critiqueIdentifier);
+      }
+      return newSet;
+    });
+  };
+
+  const handleSendCritiquesToModifier = () => {
+    if (selectedCritiques.size === 0) return;
+
+    const critiquesToApply = insightsData.key_node_insights
+      .filter(item => selectedCritiques.has(item.node_id))
+      .map(item => `Regarding the node "${item.node_name}", the AI suggested: "${item.critique}". Please apply this critique.`);
+    
+    const fullPrompt = `Please apply the following critiques to the tech tree:\n- ${critiquesToApply.join('\n- ')}`;
+    
+    setModificationPrompt(fullPrompt);
+    setActiveSidebarTab('ai-tools');
+    setSelectedCritiques(new Set()); // Clear selection after use
+  };
 
   const fetchButtonDisabled = !hasTechTreeData || !apiKeyIsSet || isLoading || isAppBusy;
   let fetchButtonTitle = "Generate AI-powered insights for the entire project";
@@ -106,19 +135,38 @@ const AiInsightsTab = ({
 
           insightsData.key_node_insights?.length > 0 && (
             React.createElement("div", { className: "ai-insights-section" },
-              React.createElement("h4", null, "Key Node Insights"),
+              React.createElement("div", { style: { display: 'flex', alignItems: 'center', justifyContent: 'space-between' } },
+                React.createElement("h4", null, "Key Node Insights"),
+                React.createElement("button", {
+                  onClick: handleSendCritiquesToModifier,
+                  disabled: selectedCritiques.size === 0 || isAppBusy,
+                  className: "secondary panel-button",
+                  style: { padding: '3px 8px', fontSize: '0.8em' },
+                  title: "Send selected critiques to the Tree Modifier AI"
+                }, `Send ${selectedCritiques.size} to Modifier`)
+              ),
               React.createElement("ul", { className: "ai-insights-list" },
                 insightsData.key_node_insights.map((item, index) => (
-                  React.createElement("li", { key: `key-node-${index}`},
-                    React.createElement("div", { className: "ai-insights-list-item-content" },
-                      React.createElement("span", { className: "ai-insights-list-item-name" }, item.node_name),
-                      React.createElement("p", { className: "ai-insights-list-item-desc" }, item.critique),
-                       React.createElement("button", {
-                        onClick: () => onUseDescription(item.node_id, item.suggested_description),
+                  React.createElement("li", { key: `key-node-${index}`, style: { alignItems: 'flex-start', gap: '8px' }},
+                    React.createElement("input", {
+                      type: "checkbox",
+                      id: `critique-checkbox-${item.node_id}`,
+                      checked: selectedCritiques.has(item.node_id),
+                      onChange: (e) => handleCritiqueSelectionChange(item.node_id, e.target.checked),
+                      "aria-label": `Select critique for ${item.node_name}`,
+                      style: { marginTop: '6px', flexShrink: 0 }
+                    }),
+                    React.createElement("div", { className: "ai-insights-list-item-content", style: { display: 'flex', flexDirection: 'column', gap: '6px'} },
+                      React.createElement("label", { htmlFor: `critique-checkbox-${item.node_id}`, style: { cursor: 'pointer' } },
+                        React.createElement("span", { className: "ai-insights-list-item-name" }, item.node_name),
+                        React.createElement("p", { className: "ai-insights-list-item-desc" }, item.critique)
+                      ),
+                       item.suggested_description && React.createElement("button", {
+                        onClick: () => onPreviewAndUseDescription(item.node_id, item.node_name, item.suggested_description),
                         disabled: isAppBusy,
                         className: "secondary panel-button ai-insights-action-button",
-                        title: `Apply this description to "${item.node_name}"`
-                      }, "Use Suggested Description")
+                        title: `Preview and apply suggested description for "${item.node_name}"`
+                      }, "Preview & Use Description")
                     )
                   )
                 ))
