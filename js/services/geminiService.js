@@ -593,18 +593,9 @@ export const getPromptTextFor = (type, payload) => {
   if (!getPrompt) {
     return "No prompt available for this action type.";
   }
-
-  // Create a placeholder payload for previewing the prompt structure
-  const placeholderPayload = {
-    ...payload,
-    tree: payload.tree ? '[The full current JSON tree structure goes here]' : undefined,
-    node: payload.node ? '[The single JSON node object goes here]' : undefined,
-    lockedIds: payload.lockedIds ? '[An array of locked node IDs goes here]' : undefined,
-    summary: payload.summary ? '[A summary of the current tree goes here]' : undefined,
-    text: payload.text ? '[The full text to be summarized goes here]' : undefined,
-  };
   
-  const instructions = getPrompt(placeholderPayload);
+  // Use the real payload directly to construct the exact prompt.
+  const instructions = getPrompt(payload);
   if (!instructions) return "Could not generate prompt preview.";
 
   const systemInstructionText = instructions.systemInstruction || "No system instruction provided for this action.";

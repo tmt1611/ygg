@@ -10,14 +10,17 @@ const DataOperationsPanel = ({
   currentTreeExists,
   controlsDisabled,
   apiKeyIsSet,
-  modalManager
+  modalManager,
+  techTreeData,
+  contextText
 }) => {
   const extractButtonDisabled = controlsDisabled || !currentTreeExists || (extractionMode === 'summary' && !apiKeyIsSet);
 
   const handleShowSummaryPrompt = () => {
-    if (!apiKeyIsSet || !currentTreeExists) return;
+    if (!apiKeyIsSet || !currentTreeExists || !techTreeData) return;
     const { getPromptTextFor } = require('../../services/geminiService.js');
-    const promptText = getPromptTextFor('summarize', { text: '[The current project context and full JSON tree structure goes here]' });
+    const projectSummaryContext = `Project: ${contextText || 'Unnamed Project'}\nContext: ${contextText}\nNodes:\n${JSON.stringify(techTreeData, (key, value) => (key.startsWith('_') ? undefined : value), 2)}`;
+    const promptText = getPromptTextFor('summarize', { text: projectSummaryContext });
     modalManager.openTechExtractionModal(promptText, "AI Summary Prompt");
   };
 

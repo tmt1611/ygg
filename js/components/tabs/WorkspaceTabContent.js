@@ -23,6 +23,7 @@ const WorkspaceTabContent = ({
   isAppBusy,
   currentTreeStats,
   contextText,
+  techTreeData,
   handleToggleAllLock,
   modalManager,
 }) => {
@@ -162,7 +163,9 @@ const WorkspaceTabContent = ({
             React.createElement(DataOperationsPanel, {
               handleDownloadTree, onExtractData, extractionMode, setExtractionMode, isSummarizing,
               currentTreeExists, controlsDisabled, apiKeyIsSet: apiKeyHook.status.isSet,
-              modalManager
+              modalManager,
+              techTreeData: techTreeData,
+              contextText: contextText
             })
           )
       )

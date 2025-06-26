@@ -5,6 +5,7 @@ import LoadingSpinner from '../LoadingSpinner.js';
 import ErrorMessage from '../ErrorMessage.js';
 import ContextualHelpTooltip from '../ContextualHelpTooltip.js';
 import { getPromptTextFor } from '../../services/geminiService.js';
+import { getLockedNodeIds, countNodesInTree } from '../../utils.js';
 
 const AiToolsTab = ({
   modificationPrompt, setModificationPrompt, treeOperationsAI, isAiModifying,
@@ -12,7 +13,7 @@ const AiToolsTab = ({
   initialPromptForStrategy, strategicSuggestions, isFetchingStrategicSuggestions,
   strategicSuggestionsError, onGenerateStrategicSuggestions,
   onApplyStrategicSuggestion,
-  apiKeyIsSet, hasTechTreeData, isAppBusy,
+  apiKeyIsSet, hasTechTreeData, techTreeData, isAppBusy,
   collapsedPanels, onTogglePanel,
   modalManager
 }) => {
@@ -20,17 +21,22 @@ const AiToolsTab = ({
   const canGenerateStrategicSuggestions = apiKeyIsSet && !!initialPromptForStrategy?.trim() && !isAppBusy && !isFetchingStrategicSuggestions;
 
   const handleShowModificationPrompt = () => {
-    const promptText = getPromptTextFor('modifyTree', { tree: null, prompt: modificationPrompt, lockedIds: [] });
+    if (!techTreeData) return;
+    const promptText = getPromptTextFor('modifyTree', { tree: techTreeData, prompt: modificationPrompt, lockedIds: getLockedNodeIds(techTreeData) });
     modalManager.openTechExtractionModal(
-      `The full prompt will include the complete current tree structure and a list of locked node IDs. Below is the user-facing instruction portion:\n\n---\n\n${promptText}`,
+      promptText,
       "AI Tree Modification Prompt"
     );
   };
   
   const handleShowStrategicPrompt = () => {
-      const promptText = getPromptTextFor('strategicSuggestions', { context: initialPromptForStrategy, summary: "..." });
+      let treeSummary = "No current tree structure or it's empty.";
+      if (techTreeData) {
+        treeSummary = `Current main branches: ${techTreeData.children?.map(c => c.name).join(', ') || 'None (root only)'}. Total nodes: ${countNodesInTree(techTreeData)}.`;
+      }
+      const promptText = getPromptTextFor('strategicSuggestions', { context: initialPromptForStrategy, summary: treeSummary });
       modalManager.openTechExtractionModal(
-      `The full prompt will include a summary of the current tree structure. Below is the user-facing instruction portion:\n\n---\n\n${promptText}`,
+      promptText,
       "AI Strategic Advisor Prompt"
     );
   };

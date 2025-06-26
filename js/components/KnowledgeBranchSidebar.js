@@ -13,7 +13,7 @@ const sidebarTabs = [
 const KnowledgeBranchSidebar = (props) => {
   const {
     isCollapsed, onToggleSidebar, activeSidebarTab, setActiveSidebarTab,
-    isAppBusy, apiKeyHook, hasTechTreeData, modalManager,
+    isAppBusy, apiKeyHook, hasTechTreeData, modalManager, techTreeData, contextText,
   } = props;
   const [collapsedPanels, setCollapsedPanels] = useState(() => {
     const savedState = localStorage.getItem(APP_STORAGE_KEYS.SIDEBAR_PANEL_STATES);
@@ -106,7 +106,8 @@ const KnowledgeBranchSidebar = (props) => {
                 isAppBusy: isAppBusy,
                 collapsedPanels: collapsedPanels,
                 onTogglePanel: handleTogglePanel,
-                modalManager: modalManager
+                modalManager: modalManager,
+                techTreeData: techTreeData
               })
             ),
             activeSidebarTab === 'ai-insights' && (
@@ -121,7 +122,9 @@ const KnowledgeBranchSidebar = (props) => {
                 isAppBusy: isAppBusy,
                 apiKeyIsSet: apiKeyHook.status.isSet,
                 modalManager: modalManager,
-                hasTechTreeData: hasTechTreeData
+                hasTechTreeData: hasTechTreeData,
+                techTreeData: techTreeData,
+                contextText: contextText
               })
             ),
             activeSidebarTab === 'history' && (

@@ -344,7 +344,9 @@ const App = () => {
           apiKeyHook: apiKeyHook,
           hasTechTreeData: !!techTreeData,
           isAppBusy: isLoading || isModifying || isFetchingStrategicSuggestions,
-          modalManager
+          modalManager,
+          techTreeData: techTreeData,
+          contextText: initialPrompt
         }),
         
         React.createElement("main", { className: "yggdrasil-core-canvas" },

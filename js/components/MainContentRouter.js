@@ -76,6 +76,7 @@ const MainContentRouter = ({
           isSummarizing: isSummarizing,
           isAppBusy: isAppBusy,
           currentTreeStats: currentTreeStats,
+          techTreeData: techTreeData,
           contextText: initialPrompt,
           handleToggleAllLock: nodeOperations.handleToggleAllLock,
           modalManager: modalManager,

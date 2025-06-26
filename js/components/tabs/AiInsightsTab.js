@@ -15,6 +15,8 @@ const AiInsightsTab = ({
   isAppBusy,
   apiKeyIsSet,
   hasTechTreeData,
+  techTreeData,
+  contextText,
   modalManager,
 }) => {
 
@@ -26,9 +28,10 @@ const AiInsightsTab = ({
   else if (isAppBusy) fetchButtonTitle = "Application is busy, please wait.";
   
   const handleShowPrompt = () => {
-    const promptText = getPromptTextFor('projectInsights', { tree: null, context: '...' });
+    if (!techTreeData) return;
+    const promptText = getPromptTextFor('projectInsights', { tree: techTreeData, context: contextText });
      modalManager.openTechExtractionModal(
-      `The full prompt will include the complete current tree structure and the project context. Below is the user-facing instruction portion:\n\n---\n\n${promptText}`,
+      promptText,
       "AI Project Insights Prompt"
     );
   };
