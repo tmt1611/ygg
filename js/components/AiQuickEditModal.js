@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import * as geminiService from '../services/geminiService.js';
-import { initializeNodes } from '../utils.js';
+import { initializeNodes, isValidTechTreeNodeShape } from '../utils.js';
 import LoadingSpinner from './LoadingSpinner.js';
 import ErrorMessage from './ErrorMessage.js';
 import TechExtractionModal from './TechExtractionModal.js';
@@ -92,6 +92,9 @@ const AiQuickEditModal = ({ isOpen, node, onConfirm, onCancel, apiKeyIsSet, sele
         const parsedData = JSON.parse(prompt);
         if (typeof parsedData !== 'object' || parsedData === null || Array.isArray(parsedData)) {
             throw new Error("Pasted content must be a single JSON object.");
+        }
+        if (!isValidTechTreeNodeShape(parsedData)) {
+            throw new Error("The pasted JSON is not a valid node object. It must have a 'name' property and an optional 'children' array.");
         }
         const initializedNode = initializeNodes(parsedData, node._parentId);
         const finalNode = { ...initializedNode, id: node.id }; // Enforce original ID

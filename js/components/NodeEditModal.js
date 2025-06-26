@@ -103,10 +103,7 @@ const NodeEditModal = ({
             )
           ),
 
-          React.createElement("p", { style: { fontSize: '0.85em', color: 'var(--text-secondary)', marginTop: '8px', marginBottom: '20px' }},
-            "Press Enter to confirm or Escape to cancel."
-          ),
-          React.createElement("div", { style: { display: 'flex', justifyContent: 'flex-end', gap: '10px' }},
+          React.createElement("div", { className: "ai-suggestion-modal-footer-actions" },
             React.createElement("button", {
               type: "button",
               onClick: onCancel,

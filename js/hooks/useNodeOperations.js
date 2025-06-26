@@ -232,6 +232,11 @@ export const useNodeOperations = ({
       const clipboardText = await navigator.clipboard.readText();
       const parsedNode = JSON.parse(clipboardText);
 
+      // Validate the structure before attempting to add it.
+      if (!isValidTechTreeNodeShape(parsedNode)) {
+        throw new Error("The pasted JSON is not a valid node object. It must have a 'name' property and an optional 'children' array.");
+      }
+
       const parentNode = findNodeById(techTreeData, targetNodeId);
       if (!parentNode) {
         throw new Error("Target node for paste operation not found.");

@@ -2,16 +2,10 @@ import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react'
 import { NODE_IMPORTANCE_OPTIONS } from '../constants.js';
 import { getNodePathString, cleanTreeForExport } from '../utils.js';
 
-const getCopyLabel = (type, copyFeedback, copyError) => {
-    if (copyError === type) return "Error!";
-    if (copyFeedback === type) return "Copied!";
-    switch (type) {
-        case 'name': return "Name";
-        case 'id': return "ID";
-        case 'path': return "Path";
-        case 'json': return "Node (JSON)";
-        default: return "Copy";
-    }
+const getCopyIcon = (type, copyFeedback, copyError, defaultIcon) => {
+    if (copyError === type) return '❌';
+    if (copyFeedback === type) return '✅';
+    return defaultIcon;
 };
 
 const ContextMenu = ({
@@ -146,10 +140,10 @@ const ContextMenu = ({
       {
         id: 'copy-actions', label: "Copy Data...", icon: '📤', hasSubmenu: true,
         submenu: [
-          { id: 'copy-name', label: getCopyLabel('name', copyFeedback, copyError), icon: '🔡', action: () => handleCopy('name') },
-          { id: 'copy-id', label: getCopyLabel('id', copyFeedback, copyError), icon: '🆔', action: () => handleCopy('id') },
-          { id: 'copy-path', label: getCopyLabel('path', copyFeedback, copyError), icon: '🛤️', action: () => handleCopy('path') },
-          { id: 'copy-json', label: getCopyLabel('json', copyFeedback, copyError), icon: '📦', action: () => handleCopy('json'), title: "Copy this node and its children as JSON. Can be used to paste as a child elsewhere." },
+          { id: 'copy-name', label: "Name", icon: getCopyIcon('name', copyFeedback, copyError, '🔡'), action: () => handleCopy('name') },
+          { id: 'copy-id', label: "ID", icon: getCopyIcon('id', copyFeedback, copyError, '🆔'), action: () => handleCopy('id') },
+          { id: 'copy-path', label: "Path", icon: getCopyIcon('path', copyFeedback, copyError, '🛤️'), action: () => handleCopy('path') },
+          { id: 'copy-json', label: "Node (JSON)", icon: getCopyIcon('json', copyFeedback, copyError, '📦'), action: () => handleCopy('json'), title: "Copy this node and its children as JSON. Can be used to paste as a child elsewhere." },
         ]
       },
       { type: 'separator' },
@@ -269,8 +263,6 @@ const ContextMenu = ({
     
     const focusableList = isSubmenu ? openSubmenuItems.filter(i => !i.isDisabled) : focusableItems;
     const isFocused = isSubmenu ? focusedSubmenuIndex === index : focusedIndex === focusableItems.findIndex(fi => fi.id === item.id);
-    const isCopied = item.id.startsWith('copy-') && copyFeedback === item.id.substring(5);
-    const hasCopyError = item.id.startsWith('copy-') && copyError === item.id.substring(5);
 
     return React.createElement("li", { key: item.id, role: "none" },
       React.createElement("button", {
@@ -305,7 +297,7 @@ const ContextMenu = ({
         "aria-expanded": item.hasSubmenu ? openSubmenuId === item.id : undefined,
         "aria-checked": item.isChecked,
       },
-        React.createElement("span", { className: "context-menu-icon" }, isCopied ? '✅' : (hasCopyError ? '❌' : item.icon)),
+        React.createElement("span", { className: "context-menu-icon" }, item.icon),
         React.createElement("span", { className: "context-menu-label" }, item.label),
         item.hasSubmenu && React.createElement("span", { className: "context-menu-submenu-indicator" }, "›")
       )
