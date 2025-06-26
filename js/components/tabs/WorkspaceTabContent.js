@@ -51,6 +51,16 @@ const WorkspaceTabContent = ({
     localStorage.setItem(APP_STORAGE_KEYS.WORKSPACE_PANEL_STATES, JSON.stringify(Array.from(collapsedPanels)));
   }, [collapsedPanels]);
 
+  const handleShowGenerationPrompt = () => {
+    if (!initialPrompt.trim()) return;
+    const promptText = getPromptTextFor('generateTree', { prompt: initialPrompt });
+    modalManager.openTechExtractionModal(promptText, "AI Structure Generation Prompt");
+  };
+
+  useEffect(() => {
+    localStorage.setItem(APP_STORAGE_KEYS.WORKSPACE_PANEL_STATES, JSON.stringify(Array.from(collapsedPanels)));
+  }, [collapsedPanels]);
+
   const handleTogglePanel = (panelId) => {
     setCollapsedPanels(prev => {
       const newSet = new Set(prev);
