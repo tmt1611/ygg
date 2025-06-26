@@ -7,7 +7,6 @@ import CollapsiblePanel from '../CollapsiblePanel.js';
 import ContextualHelpTooltip from '../ContextualHelpTooltip.js';
 import { APP_STORAGE_KEYS } from '../../constants.js';
 import { getPromptTextFor } from '../../services/geminiService.js';
-import { getPromptTextFor } from '../../services/geminiService.js';
 
 const StatDisplay = ({ label, value, valueClassName }) => (
   React.createElement("div", { className: "stat-item" },
