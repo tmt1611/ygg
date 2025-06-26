@@ -4,6 +4,8 @@ import LoadingSpinner from './LoadingSpinner.js';
 import ErrorMessage from './ErrorMessage.js';
 import { getPromptTextFor } from '../services/geminiService.js';
 import TechExtractionModal from './TechExtractionModal.js';
+import { getPromptTextFor } from '../services/geminiService.js';
+import TechExtractionModal from './TechExtractionModal.js';
 
 const DiffItem = ({ label, from, to }) => {
   if (from === to) return null;
@@ -65,6 +67,7 @@ const AiQuickEditModal = ({ isOpen, node, onConfirm, onCancel, apiKeyIsSet, sele
   const promptInputRef = useRef(null);
   const [manualJson, setManualJson] = useState('');
   const [showPromptModal, setShowPromptModal] = useState(false);
+  const [showPromptModal, setShowPromptModal] = useState(false);
 
   useEffect(() => {
     if (isOpen) {
@@ -116,6 +119,14 @@ const AiQuickEditModal = ({ isOpen, node, onConfirm, onCancel, apiKeyIsSet, sele
     } catch(e) {
       setError({ message: `JSON Parse Error: ${e.message}` });
     }
+  };
+
+  const handleShowPrompt = () => {
+    if (!prompt.trim()) {
+      setError({ message: "Please enter a prompt first to see what would be sent."});
+      return;
+    }
+    setShowPromptModal(true);
   };
 
   const handleShowPrompt = () => {
