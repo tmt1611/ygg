@@ -181,7 +181,7 @@ const App = () => {
       setIsSummarizing(true); setError(null);
       try {
         const projectSummaryContext = `Project: ${initialPrompt || 'Unnamed Project'}\nContext: ${initialPrompt}\nNodes:\n${JSON.stringify(techTreeData, (key, value) => (key.startsWith('_') ? undefined : value), 2)}`;
-        contentToDisplay = await geminiService.summarizeText(projectSummaryContext);
+        contentToDisplay = await geminiService.summarizeText(projectSummaryContext, apiKeyHook.selectedModel);
         title = "AI Generated Summary";
         addHistoryEntry('AI_SUMMARY_GEN', 'AI summary generated for the current tree.');
       } catch (e) { setError(e); setIsSummarizing(false); return; }
@@ -262,7 +262,7 @@ const App = () => {
       if (techTreeData) {
         treeSummary = `Current main branches: ${techTreeData.children?.map(c => c.name).join(', ') || 'None (root only)'}. Total nodes: ${countNodesInTree(techTreeData)}.`;
       }
-      const suggestions = await geminiService.generateStrategicSuggestions(initialPrompt, treeSummary);
+      const suggestions = await geminiService.generateStrategicSuggestions(initialPrompt, treeSummary, apiKeyHook.selectedModel);
       setStrategicSuggestions(suggestions);
       addHistoryEntry('AI_STRATEGY_GEN', 'AI strategic suggestions generated for project.');
     } catch (e) {

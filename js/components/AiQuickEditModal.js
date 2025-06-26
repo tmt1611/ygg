@@ -46,7 +46,7 @@ const ChildrenDiff = ({ from, to }) => {
   );
 };
 
-const AiQuickEditModal = ({ isOpen, node, onConfirm, onCancel, apiKeyIsSet }) => {
+const AiQuickEditModal = ({ isOpen, node, onConfirm, onCancel, apiKeyIsSet, selectedModel }) => {
   const [prompt, setPrompt] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -77,7 +77,7 @@ const AiQuickEditModal = ({ isOpen, node, onConfirm, onCancel, apiKeyIsSet }) =>
     setError(null);
     setDiff(null);
     try {
-      const suggestedNode = await geminiService.generateQuickEdit(node, prompt);
+      const suggestedNode = await geminiService.generateQuickEdit(node, prompt, selectedModel);
       setDiff({ from: node, to: suggestedNode });
     } catch (e) {
       setError(e);

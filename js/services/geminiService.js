@@ -269,12 +269,12 @@ Based on the instruction, provide the complete, modified JSON object for this si
   return { systemInstruction, userPrompt };
 };
 
-export const generateQuickEdit = withApiClient(async (nodeToEdit, modificationPrompt) => {
+export const generateQuickEdit = withApiClient(async (nodeToEdit, modificationPrompt, modelId) => {
   const { systemInstruction, userPrompt } = getQuickEditPrompt(nodeToEdit, modificationPrompt);
 
   try {
     const model = apiClientState.client.getGenerativeModel({ 
-      model: apiClientState.activeModel,
+      model: modelId || apiClientState.activeModel,
       systemInstruction: { parts: [{ text: systemInstruction }], role: "model" },
       generationConfig: { 
         responseMimeType: "application/json", 
@@ -325,11 +325,11 @@ Ensure: Logical hierarchy, 2-4 levels deep, 2-5 children per parent. Prioritize 
   return { systemInstruction, userPrompt: finalUserPrompt };
 };
 
-export const generateTechTree = withApiClient(async (userPrompt) => {
+export const generateTechTree = withApiClient(async (userPrompt, modelId) => {
   const { systemInstruction, userPrompt: finalUserPrompt } = getGenerateTechTreePrompt(userPrompt);
   try {
     const model = apiClientState.client.getGenerativeModel({ 
-      model: apiClientState.activeModel,
+      model: modelId || apiClientState.activeModel,
       systemInstruction: {
         parts: [{ text: systemInstruction }],
         role: "model"
@@ -386,12 +386,13 @@ Output the complete, modified JSON for the tech tree, adhering to ALL rules abov
 export const modifyTechTreeByGemini = withApiClient(async (
   currentTree,
   modificationPrompt,
-  lockedNodeIds
+  lockedNodeIds,
+  modelId
 ) => {
   const { systemInstruction, userPrompt } = getModifyTechTreePrompt(currentTree, modificationPrompt, lockedNodeIds);
   try {
     const model = apiClientState.client.getGenerativeModel({ 
-      model: apiClientState.activeModel,
+      model: modelId || apiClientState.activeModel,
       systemInstruction: { parts: [{ text: systemInstruction }], role: "model" },
       generationConfig: { 
         responseMimeType: "application/json", 
@@ -493,11 +494,11 @@ ${textToSummarize.substring(0, 30000)}
 Concise Summary (100-150 words, plain text only):`;
 };
 
-export const summarizeText = withApiClient(async (textToSummarize) => {
+export const summarizeText = withApiClient(async (textToSummarize, modelId) => {
   const prompt = getSummarizeTextPrompt(textToSummarize);
   try {
     const model = apiClientState.client.getGenerativeModel({ 
-      model: apiClientState.activeModel,
+      model: modelId || apiClientState.activeModel,
       generationConfig: { 
         temperature: 0.5, topK: 40, topP: 0.95 
       },
@@ -545,11 +546,11 @@ Respond ONLY with the JSON object.
   return { systemInstruction, userPrompt };
 };
 
-export const generateProjectInsights = withApiClient(async (tree, projectContext) => {
+export const generateProjectInsights = withApiClient(async (tree, projectContext, modelId) => {
     const { systemInstruction, userPrompt } = getProjectInsightsPrompt(tree, projectContext);
     try {
         const model = apiClientState.client.getGenerativeModel({ 
-          model: apiClientState.activeModel,
+          model: modelId || apiClientState.activeModel,
           systemInstruction: { parts: [{ text: systemInstruction }], role: "model" },
           generationConfig: { 
             responseMimeType: "application/json", 
@@ -598,12 +599,13 @@ Each suggestion should be a concise, actionable phrase or short sentence.
 
 export const generateStrategicSuggestions = withApiClient(async (
   projectContext,
-  currentTreeSummary
+  currentTreeSummary,
+  modelId
 ) => {
   const { systemInstruction, userPrompt } = getStrategicSuggestionsPrompt(projectContext, currentTreeSummary);
   try {
     const model = apiClientState.client.getGenerativeModel({ 
-      model: apiClientState.activeModel,
+      model: modelId || apiClientState.activeModel,
       systemInstruction: { parts: [{ text: systemInstruction }], role: "model" },
       generationConfig: { 
         responseMimeType: "application/json", 

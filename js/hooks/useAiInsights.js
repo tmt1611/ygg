@@ -29,7 +29,7 @@ export const useAiInsights = ({
     setAiInsightsData(null);
     setAiInsightsError(null);
     try {
-      const insights = await geminiService.generateProjectInsights(techTreeData, contextText);
+      const insights = await geminiService.generateProjectInsights(techTreeData, contextText, selectedModel);
       setAiInsightsData(insights);
       addHistoryEntry('NODE_INSIGHTS_GENERATED', `AI project insights generated for "${contextText}".`);
     } catch (e) {

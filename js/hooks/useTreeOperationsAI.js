@@ -4,6 +4,7 @@ import { getLockedNodeIds, countNodesInTree, compareAndAnnotateTree, findNodeByI
 
 export const useTreeOperationsAI = ({
   apiKeyIsSet,
+  selectedModel,
   modalManager,
   historyManager,
   projectManager,
@@ -44,7 +45,7 @@ export const useTreeOperationsAI = ({
       setBaseForModalDiff(null);
       setPreviousTreeStateForUndo(null);
       try {
-        const newTree = await geminiService.generateTechTree(initialPrompt);
+        const newTree = await geminiService.generateTechTree(initialPrompt, selectedModel);
         setTechTreeData(newTree);
 
         if (!activeProjectId) {
@@ -101,7 +102,7 @@ export const useTreeOperationsAI = ({
     
     try {
       const lockedIds = getLockedNodeIds(techTreeData);
-      const suggestedTree = await geminiService.modifyTechTreeByGemini(techTreeData, finalModificationPrompt, lockedIds);
+      const suggestedTree = await geminiService.modifyTechTreeByGemini(techTreeData, finalModificationPrompt, lockedIds, selectedModel);
       
       if (useModal) {
         setBaseForModalDiff(techTreeData);
