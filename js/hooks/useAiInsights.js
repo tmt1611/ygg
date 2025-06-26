@@ -4,19 +4,17 @@ import { findNodeById, updateNodeInTree, addNodeToParent } from '../utils.js';
 import React from 'react';
 
 const DescriptionDiff = ({ from, to }) => (
-  React.createElement('div', { style: { display: 'flex', flexDirection: 'column', gap: '10px', textAlign: 'left' } },
-    React.createElement("div", { className: "quick-edit-diff-item" },
-        React.createElement("div", { className: "quick-edit-diff-content" },
-            React.createElement("div", { className: "diff-from" },
-              React.createElement("span", { className: "diff-tag" }, "Current Description"),
-              React.createElement("pre", { style: { maxHeight: '150px', overflowY: 'auto' } }, from || React.createElement("i", null, "(empty)"))
-            ),
-            React.createElement("div", { className: "diff-to" },
-              React.createElement("span", { className: "diff-tag" }, "Suggested Description"),
-              React.createElement("pre", { style: { maxHeight: '150px', overflowY: 'auto' } }, to || React.createElement("i", null, "(empty)"))
-            )
-        )
-    )
+  React.createElement("div", { className: "quick-edit-diff-item", style: { border: 'none', padding: 0, background: 'transparent' } },
+      React.createElement("div", { className: "quick-edit-diff-content" },
+          React.createElement("div", { className: "diff-from" },
+            React.createElement("span", { className: "diff-tag" }, "Current Description"),
+            React.createElement("pre", null, from || React.createElement("i", null, "(empty)"))
+          ),
+          React.createElement("div", { className: "diff-to" },
+            React.createElement("span", { className: "diff-tag" }, "Suggested Description"),
+            React.createElement("pre", null, to || React.createElement("i", null, "(empty)"))
+          )
+      )
   )
 );
 

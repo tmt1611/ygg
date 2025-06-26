@@ -43,6 +43,7 @@ const WorkspaceTabContent = ({
   });
 
   const handleShowGenerationPrompt = () => {
+    if (!initialPrompt.trim()) return;
     const promptText = getPromptTextFor('generateTree', { prompt: initialPrompt });
     modalManager.openTechExtractionModal(promptText, "AI Structure Generation Prompt");
   };
