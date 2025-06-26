@@ -26,7 +26,7 @@ const MainContentRouter = ({
   } = appHooks;
 
   const {
-    handleExtractData, handleNodeSelectedForInsightsOrActions,
+    handleExtractData, handleNodeSelectedForSidebar,
     onOpenViewContextMenu,
     onAddNodeToRoot,
   } = appCallbacks;
