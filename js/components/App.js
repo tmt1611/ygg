@@ -200,11 +200,12 @@ const App = () => {
 
   const handleNodeSelectedForSidebar = useCallback((nodeId) => {
     setSelectedNodeIdForSidebar(nodeId);
-    setSelectedGraphNodeId(nodeId); 
-    if (!nodeId) {
-      aiInsightsHook.clearAiInsights(); 
-    }
-  }, [setSelectedGraphNodeId, aiInsightsHook]);
+    setSelectedGraphNodeId(nodeId);
+    // Project-wide insights should persist across node selections.
+    // if (!nodeId) {
+    //   aiInsightsHook.clearAiInsights();
+    // }
+  }, [setSelectedGraphNodeId]);
 
 
   const currentTreeStats = useMemo(() => {

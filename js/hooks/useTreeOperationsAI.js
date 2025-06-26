@@ -148,8 +148,10 @@ export const useTreeOperationsAI = ({
       addHistoryEntry('AI_MOD_CONFIRMED', 'AI modifications applied to project from modal.', { nodeCount: countNodesInTree(suggestionToApply), projectId: activeProjectId });
       setModificationPrompt(''); 
       handleSaveActiveProject(false);
-      if (viewStates && viewStates.setSelectedGraphNodeId) {
+      if (viewStates) {
         viewStates.setSelectedGraphNodeId(null);
+        viewStates.setFocusNodeId(null);
+        viewStates.setSelectedNodeInFocusPanelId(null);
       }
     }
     setPendingAiSuggestion(null); 
