@@ -472,7 +472,7 @@ export const useProjectManagement = ({
         setError(null);
         closeConfirmModal();
 
-      } catch (err) => {
+      } catch (err) {
         setError({ message: err.message, details: err.stack });
         // Don't close the modal on error
       }
