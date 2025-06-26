@@ -56,7 +56,15 @@ export const useAiInsights = ({
   const handlePreviewAndUseSuggestedDescription = useCallback((nodeId, nodeName, suggestedDescription) => {
     if (!techTreeData) return;
     const nodeToUpdate = findNodeById(techTreeData, nodeId);
-    if (!nodeToUpdate) return;
+    if (!nodeToUpdate) {
+        modalManager.openConfirmModal({
+            title: "Node Not Found",
+            message: `The node "${nodeName}" could not be found, it may have been moved or deleted.`,
+            confirmText: 'OK',
+            onConfirm: modalManager.closeConfirmModal,
+        });
+        return;
+    }
     
     const currentDescription = nodeToUpdate.description || '';
     
@@ -85,8 +93,15 @@ export const useAiInsights = ({
         title: `Add Suggested Child to: ${parentNode.name}`, label: "New Child Name", placeholder: "Confirm or edit child name",
         initialValue: childName, initialDescription: childDescription,
       });
+    } else {
+        modalManager.openConfirmModal({
+            title: "Parent Node Not Found",
+            message: `The node intended to be the parent could not be found. It may have been moved or deleted.`,
+            confirmText: 'OK',
+            onConfirm: modalManager.closeConfirmModal,
+        });
     }
-  }, [techTreeData, openNodeEditModal]);
+  }, [techTreeData, openNodeEditModal, modalManager]);
 
   const handleAddNewBranchToRoot = useCallback((branchName, branchDescription) => {
     if (techTreeData) {
