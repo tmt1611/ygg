@@ -50,6 +50,7 @@ const MainContentRouter = ({
             onLoadAndGoToGraph: projectManager.handleLoadAndGoToGraph,
             exampleProjects: projectManager.projects.filter(p => p.isExample),
             isAppBusy: isAppBusy,
+            modalManager: modalManager,
           });
         }
         if (isLoading) return React.createElement(LoadingSpinner, { message: "Generating Structure..." });

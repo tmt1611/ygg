@@ -1,5 +1,6 @@
 import React from 'react';
 import ContextualHelpTooltip from '../ContextualHelpTooltip.js';
+import { getPromptTextFor } from '../../services/geminiService.js';
 
 const DataOperationsPanel = ({
   handleDownloadTree,
@@ -18,7 +19,6 @@ const DataOperationsPanel = ({
 
   const handleShowSummaryPrompt = () => {
     if (!apiKeyIsSet || !currentTreeExists || !techTreeData) return;
-    const { getPromptTextFor } = require('../../services/geminiService.js');
     const projectSummaryContext = `Project: ${contextText || 'Unnamed Project'}\nContext: ${contextText}\nNodes:\n${JSON.stringify(techTreeData, (key, value) => (key.startsWith('_') ? undefined : value), 2)}`;
     const promptText = getPromptTextFor('summarize', { text: projectSummaryContext });
     modalManager.openTechExtractionModal(promptText, "AI Summary Prompt");

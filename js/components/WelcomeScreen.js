@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { getPromptTextFor } from '../../services/geminiService.js';
 
 const WelcomeScreen = ({
   initialPrompt,
@@ -12,9 +13,16 @@ const WelcomeScreen = ({
   exampleProjects,
   isAppBusy,
   apiKeyHook,
+  modalManager,
 }) => {
   
   const [localApiKey, setLocalApiKey] = useState('');
+
+  const handleShowPrompt = () => {
+    if (!initialPrompt.trim() || !modalManager) return;
+    const promptText = getPromptTextFor('generateTree', { prompt: initialPrompt });
+    modalManager.openTechExtractionModal(promptText, "AI Structure Generation Prompt");
+  };
 
   const handleImportClick = () => {
     document.getElementById('import-project-input-welcome')?.click();
