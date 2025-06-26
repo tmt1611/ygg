@@ -173,11 +173,14 @@ const AiQuickEditModal = ({ isOpen, node, onConfirm, onCancel, apiKeyIsSet, sele
           ),
           React.createElement("div", { className: "ai-quick-edit-layout" },
             React.createElement("div", { className: "ai-quick-edit-prompt-section" },
-              React.createElement("label", { htmlFor: "ai-quick-edit-prompt" }, "1. Describe your change or paste a JSON node object:"),
+              React.createElement("label", { htmlFor: "ai-quick-edit-prompt" }, "1. Enter instructions or paste a JSON node object:"),
+              React.createElement("p", { style: {fontSize: '0.8em', color: 'var(--text-tertiary)', margin: '0 0 5px 0'}},
+                "Use natural language to have the AI edit the node, or paste a complete JSON object for the node to replace its content."
+              ),
               React.createElement("textarea", {
                 ref: promptInputRef,
                 id: "ai-quick-edit-prompt",
-                placeholder: "e.g., 'Fix typo in name', or paste a single JSON node object here. (Ctrl+Enter to submit)",
+                placeholder: "e.g., 'Fix typo in name and add a child for React Hooks'.\nOr, paste a single JSON node object here to replace the current node's data. (Ctrl+Enter to submit)",
                 value: prompt,
                 onChange: (e) => setPrompt(e.target.value),
                 onKeyDown: handleKeyDown,
@@ -188,19 +191,19 @@ const AiQuickEditModal = ({ isOpen, node, onConfirm, onCancel, apiKeyIsSet, sele
                 React.createElement("button", {
                   onClick: handleGenerateClick,
                   disabled: !prompt.trim() || isLoading,
-                  className: "secondary",
+                  className: "primary",
                   style: {flex: 1}
                 },
                   isLoading ? "Generating..." : "Generate Preview"
                 ),
                 React.createElement("button", {
                   onClick: handleShowPrompt,
-                  disabled: isLoading || !prompt.trim(),
+                  disabled: isLoading || !prompt.trim() || (prompt.trim().startsWith('{') && prompt.trim().endsWith('}')),
                   className: "secondary",
                   title: "Show the full prompt that will be sent to the AI (only for text prompts)"
                 }, '📋')
               ),
-              !apiKeyIsSet && React.createElement("p", { style: { color: 'var(--text-secondary)', fontSize: '0.9em', textAlign: 'center' } }, "API Key not set. AI prompt features are disabled, but you can still paste a JSON node object.")
+              !apiKeyIsSet && React.createElement("p", { style: { color: 'var(--text-secondary)', fontSize: '0.9em', textAlign: 'center' } }, "Pasting a JSON object works without an API key. For text prompts, a key is required.")
             ),
             
             React.createElement("hr", null),
