@@ -210,7 +210,7 @@ export const useProjectManagement = ({
     }
     addHistoryEntry('PROJECT_CREATED', `${isExample ? 'Example p' : 'P'}roject "${name}" saved.`);
     return newProject;
-  }, [addHistoryEntry, setError, setInitialPrompt, setActiveProjectId]);
+  }, [addHistoryEntry, setError, setInitialPrompt]);
 
   const internalCreateNewProject = useCallback((name) => {
     if (projects.some(p => !p.isExample && p.name.toLowerCase() === name.toLowerCase())) {

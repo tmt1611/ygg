@@ -20,6 +20,15 @@ const DiffItem = ({ label, from, to }) => {
           React.createElement("pre", null, to || React.createElement("i", null, "(empty)"))
         )
       )
+      ),
+      showPromptModal && (
+        React.createElement(TechExtractionModal, {
+          isOpen: showPromptModal,
+          content: quickEditPrompt,
+          title: "AI Quick Edit Prompt",
+          onClose: () => setShowPromptModal(false)
+        })
+      )
     )
   );
 };
