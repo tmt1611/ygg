@@ -22,6 +22,7 @@ const AppModals = ({
   treeOperationsAI,
   isModifying,
   apiKeyIsSet,
+  selectedModel,
   nodeOperations,
   projectLinkingHook,
   techTreeData,
@@ -132,7 +133,7 @@ const AppModals = ({
           onChangeImportanceOfAllChildren: nodeOperations.handleChangeImportanceOfAllChildren,
           onDeleteAllChildren: nodeOperations.handleDeleteAllChildren,
           onPasteNode: nodeOperations.handlePasteNode,
-          onGenerateInsights: onGenerateInsights,
+          onGenerateInsights: () => onGenerateInsights(findNodeById(techTreeData, contextMenuNodeId)),
           onLinkToProject: (nodeId) => projectLinkingHook.handleOpenLinkProjectModal(nodeId),
           onGoToLinkedProject: (projectId) => projectLinkingHook.handleNavigateToLinkedProject(projectId),
           onUnlinkProject: (nodeId) => projectLinkingHook.handleUnlinkProjectFromNode(nodeId),
@@ -158,6 +159,7 @@ const AppModals = ({
           onConfirm: nodeOperations.handleConfirmQuickEdit,
           onCancel: closeAiQuickEditModal,
           apiKeyIsSet: apiKeyIsSet,
+          selectedModel: selectedModel,
         })
       ),
 

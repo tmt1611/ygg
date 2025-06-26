@@ -43,7 +43,7 @@ const App = () => {
   const [previousTreeStateForUndo, setPreviousTreeStateForUndo] = useState(null);
   const [baseForModalDiff, setBaseForModalDiff] = useState(null); // This will be used only for modal-based suggestions
 
-  const [selectedNodeForInsights, setSelectedNodeForInsights] = useState(null);
+  const [selectedNodeIdForSidebar, setSelectedNodeIdForSidebar] = useState(null);
 
   const [strategicSuggestions, setStrategicSuggestions] = useState(null);
   const [isFetchingStrategicSuggestions, setIsFetchingStrategicSuggestions] = useState(false);
@@ -108,6 +108,7 @@ const App = () => {
 
   const treeOperationsAI = useTreeOperationsAI({
     apiKeyIsSet: apiKeyHook.status.isSet,
+    selectedModel: apiKeyHook.selectedModel,
     modalManager, historyManager, projectManager, viewStates, setError,
     techTreeData, setTechTreeData, contextText: initialPrompt, initialPrompt,
     previousTreeStateForUndoProp: previousTreeStateForUndo, setPreviousTreeStateForUndo,
@@ -118,10 +119,11 @@ const App = () => {
 
   const aiInsightsHook = useAiInsights({
     apiKeyIsSet: apiKeyHook.status.isSet,
+    selectedModel: apiKeyHook.selectedModel,
     historyManager, techTreeData, contextText: initialPrompt, setTechTreeData,
     modalManager
   });
-  const { aiInsightsData, aiInsightsIsLoading, aiInsightsError, handleGenerateAiInsights } = aiInsightsHook;
+  const { aiInsightsData, aiInsightsIsLoading, aiInsightsError, handleGenerateProjectInsights } = aiInsightsHook;
 
 
   const projectLinkingHook = useProjectLinking({
@@ -196,17 +198,13 @@ const App = () => {
     modalManager.openTechExtractionModal(contentToDisplay, title, modalManager.extractionMode);
   }, [techTreeData, modalManager, initialPrompt, apiKeyHook.status.isSet, setError, addHistoryEntry, setIsSummarizing]);
 
-  const handleNodeSelectedForInsightsOrActions = useCallback((nodeId) => {
-    if (nodeId && techTreeData) {
-      const node = findNodeById(techTreeData, nodeId);
-      setSelectedNodeForInsights(node); 
-      setSelectedGraphNodeId(nodeId); 
-    } else {
-      setSelectedNodeForInsights(null);
-      setSelectedGraphNodeId(null);
+  const handleNodeSelectedForSidebar = useCallback((nodeId) => {
+    setSelectedNodeIdForSidebar(nodeId);
+    setSelectedGraphNodeId(nodeId); 
+    if (!nodeId) {
       aiInsightsHook.clearAiInsights(); 
     }
-  }, [techTreeData, setSelectedGraphNodeId, aiInsightsHook]);
+  }, [setSelectedGraphNodeId, aiInsightsHook]);
 
 
   const currentTreeStats = useMemo(() => {
@@ -243,13 +241,13 @@ const App = () => {
     });
   }, [modalManager, clearHistory, addHistoryEntry]);
 
-  const handleGenerateInsightsAndSwitchTab = useCallback((node) => {
+  const handleGenerateInsightsAndSwitchTab = useCallback(() => {
     if (isSidebarCollapsed) {
       toggleSidebar();
     }
     setActiveSidebarTab('ai-insights');
-    handleGenerateAiInsights(node);
-  }, [isSidebarCollapsed, toggleSidebar, setActiveSidebarTab, handleGenerateAiInsights]);
+    handleGenerateProjectInsights();
+  }, [isSidebarCollapsed, toggleSidebar, setActiveSidebarTab, handleGenerateProjectInsights]);
 
   const handleGenerateStrategicSuggestions = useCallback(async () => {
     if (!apiKeyHook.status.isSet || !initialPrompt.trim()) {
@@ -273,7 +271,7 @@ const App = () => {
     } finally {
       setIsFetchingStrategicSuggestions(false);
     }
-  }, [apiKeyHook.status.isSet, initialPrompt, techTreeData, addHistoryEntry]);
+  }, [apiKeyHook.status.isSet, initialPrompt, techTreeData, addHistoryEntry, apiKeyHook.selectedModel]);
 
   const handleApplyStrategicSuggestion = useCallback((suggestion) => {
     if (!techTreeData) {
@@ -320,7 +318,7 @@ const App = () => {
           // AI Tools Tab Props
           modificationPrompt: modificationPrompt,
           setModificationPrompt: setModificationPrompt,
-          onModifyAiTree: treeOperationsAI.handleApplyAiModification,
+          treeOperationsAI: treeOperationsAI,
           isAiModifying: isModifying,
           canUndoAiMod: canUndoAiModForSidebar,
           onUndoAiModification: treeOperationsAI.handleUndoAiModification,
@@ -332,19 +330,18 @@ const App = () => {
           onGenerateStrategicSuggestions: handleGenerateStrategicSuggestions,
           onApplyStrategicSuggestion: handleApplyStrategicSuggestion,
           // AI Insights Tab Props
-          selectedNodeForInsights: selectedNodeForInsights,
           aiInsightsData: aiInsightsData,
           aiInsightsIsLoading: aiInsightsIsLoading,
           aiInsightsError: aiInsightsError,
-          onGenerateAiNodeInsights: () => handleGenerateAiInsights(selectedNodeForInsights),
-          onUseSuggestedDescription: (desc) => aiInsightsHook.handleUseSuggestedDescription(selectedNodeForInsights.id, desc),
-          onUseAlternativeName: (altName) => aiInsightsHook.handleUseAlternativeName(selectedNodeForInsights.id, altName),
-          onAddSuggestedChildFromInsight: (name, desc) => aiInsightsHook.handleAddSuggestedChildFromInsight(selectedNodeForInsights.id, name, desc),
+          onGenerateProjectInsights: handleGenerateProjectInsights,
+          onUseSuggestedDescription: aiInsightsHook.handleUseSuggestedDescription,
+          onAddSuggestedChildToNode: aiInsightsHook.handleAddSuggestedChildToNode,
+          onAddNewBranchToRoot: aiInsightsHook.handleAddNewBranchToRoot,
           // History Tab Props
           history: historyManager.history,
           onClearHistory: handleClearHistoryWithConfirmation,
           // Common Props
-          apiKeyIsSet: apiKeyHook.status.isSet,
+          apiKeyHook: apiKeyHook,
           hasTechTreeData: !!techTreeData,
           isAppBusy: isLoading || isModifying || isFetchingStrategicSuggestions,
           modalManager
@@ -367,7 +364,7 @@ const App = () => {
               modalManager
             },
             appCallbacks: {
-              handleExtractData, handleNodeSelectedForInsightsOrActions,
+              handleExtractData, handleNodeSelectedForSidebar,
               onOpenViewContextMenu: modalManager.openViewContextMenu,
               onAddNodeToRoot: nodeOperations.handleAddNodeToRoot,
             },
@@ -385,6 +382,7 @@ const App = () => {
         treeOperationsAI: treeOperationsAI,
         isModifying: isModifying,
         apiKeyIsSet: apiKeyHook.status.isSet,
+        selectedModel: apiKeyHook.selectedModel,
         nodeOperations: nodeOperations,
         projectLinkingHook: projectLinkingHook,
         techTreeData: techTreeData,

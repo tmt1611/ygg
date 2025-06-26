@@ -107,7 +107,7 @@ const ContextMenu = ({
         id: 'ai-actions', label: "AI Actions...", icon: '🤖', hasSubmenu: true,
         submenu: [
           { id: 'ai-quick-edit', label: "Quick Edit with AI...", icon: '✍️', action: () => modalManager.openAiQuickEditModal({ targetNodeId: node.id }), isDisabled: node.isLocked, title: node.isLocked ? "Unlock node to use AI quick edit" : "Make a small, targeted change to this node using an AI prompt" },
-          { id: 'ai-insights', label: "Node Insights", icon: '💡', action: () => onGenerateInsights(node) },
+          { id: 'ai-insights', label: "Project Insights", icon: '💡', action: () => onGenerateInsights() },
         ]
       },
       {

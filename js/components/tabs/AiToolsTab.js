@@ -4,9 +4,10 @@ import ModificationPromptInput from '../ModificationPromptInput.js';
 import LoadingSpinner from '../LoadingSpinner.js';
 import ErrorMessage from '../ErrorMessage.js';
 import ContextualHelpTooltip from '../ContextualHelpTooltip.js';
+import { getPromptTextFor } from '../../services/geminiService.js';
 
 const AiToolsTab = ({
-  modificationPrompt, setModificationPrompt, onModifyAiTree, isAiModifying,
+  modificationPrompt, setModificationPrompt, treeOperationsAI, isAiModifying,
   canUndoAiMod, onUndoAiModification, isAiSuggestionModalOpen,
   initialPromptForStrategy, strategicSuggestions, isFetchingStrategicSuggestions,
   strategicSuggestionsError, onGenerateStrategicSuggestions,
@@ -17,6 +18,23 @@ const AiToolsTab = ({
 }) => {
   
   const canGenerateStrategicSuggestions = apiKeyIsSet && !!initialPromptForStrategy?.trim() && !isAppBusy && !isFetchingStrategicSuggestions;
+
+  const handleShowModificationPrompt = () => {
+    const promptText = getPromptTextFor('modifyTree', { tree: null, prompt: modificationPrompt, lockedIds: [] });
+    modalManager.openTechExtractionModal(
+      `The full prompt will include the complete current tree structure and a list of locked node IDs. Below is the user-facing instruction portion:\n\n---\n\n${promptText}`,
+      "AI Tree Modification Prompt"
+    );
+  };
+  
+  const handleShowStrategicPrompt = () => {
+      const promptText = getPromptTextFor('strategicSuggestions', { context: initialPromptForStrategy, summary: "..." });
+      modalManager.openTechExtractionModal(
+      `The full prompt will include a summary of the current tree structure. Below is the user-facing instruction portion:\n\n---\n\n${promptText}`,
+      "AI Strategic Advisor Prompt"
+    );
+  };
+
 
   const treeModifierTitle = 'Tree Modifier AI';
 
@@ -33,14 +51,28 @@ const AiToolsTab = ({
         React.createElement(ModificationPromptInput, {
           prompt: modificationPrompt,
           setPrompt: setModificationPrompt,
-          onModify: () => onModifyAiTree(modificationPrompt, true), // ALWAYS use modal for safety
+          onModify: () => treeOperationsAI.handleApplyAiModification(modificationPrompt, true), // ALWAYS use modal for safety
           isLoading: isAiModifying,
           disabled: !hasTechTreeData || !apiKeyIsSet || isAiModifying || isAppBusy,
           isApiKeySet: apiKeyIsSet,
           hasTreeData: hasTechTreeData,
           labelOverride: null
-          // buttonText prop removed to use the default "Suggest Modifications"
         }),
+        React.createElement("div", { style: { display: 'flex', gap: '8px', marginTop: '8px' }},
+          React.createElement("button", {
+            onClick: handleShowModificationPrompt,
+            className: 'secondary',
+            style: { flex: 1, fontSize: '0.85em' },
+            title: "Show the prompt that will be sent to the AI"
+          }, "Show Prompt"),
+          React.createElement("button", {
+            onClick: () => treeOperationsAI.handleStartSuggestionWithJson(),
+            disabled: !hasTechTreeData || isAppBusy,
+            className: "secondary",
+            style: { flex: 1, fontSize: '0.85em' },
+            title: "Manually apply a JSON response from an external AI tool"
+          }, "Apply from Text...")
+        ),
         hasTechTreeData && canUndoAiMod && (
           React.createElement("button", {
             onClick: onUndoAiModification,
@@ -63,14 +95,22 @@ const AiToolsTab = ({
         onToggle: onTogglePanel,
         headerActions: React.createElement(ContextualHelpTooltip, { helpText: "Get AI-powered suggestions for high-level next steps or new development pathways for your project based on its current context and structure." })
       },
-        React.createElement("button", {
-          onClick: onGenerateStrategicSuggestions,
-          disabled: !canGenerateStrategicSuggestions,
-          className: "primary panel-button",
-          style: { width: '100%' },
-          title: !apiKeyIsSet ? "API Key required for AI suggestions." : !initialPromptForStrategy?.trim() ? "Project context (name/topic) must be set." : isAppBusy || isFetchingStrategicSuggestions ? "Processing another task..." : "Generate AI suggestions for project development"
-        },
-          isFetchingStrategicSuggestions ? "Analyzing..." : "✨ Generate Strategic Ideas"
+        React.createElement("div", { style: { display: 'flex', gap: '8px'}},
+          React.createElement("button", {
+            onClick: onGenerateStrategicSuggestions,
+            disabled: !canGenerateStrategicSuggestions,
+            className: "primary panel-button",
+            style: { flexGrow: 1 },
+            title: !apiKeyIsSet ? "API Key required for AI suggestions." : !initialPromptForStrategy?.trim() ? "Project context (name/topic) must be set." : isAppBusy || isFetchingStrategicSuggestions ? "Processing another task..." : "Generate AI suggestions for project development"
+          },
+            isFetchingStrategicSuggestions ? "Analyzing..." : "✨ Generate Ideas"
+          ),
+          React.createElement("button", {
+            onClick: handleShowStrategicPrompt,
+            className: 'secondary',
+            style: { flexShrink: 0, padding: '0 10px' },
+            title: "Show the prompt that will be sent to the AI"
+          }, "📋")
         ),
 
         isFetchingStrategicSuggestions && React.createElement(LoadingSpinner, { message: null }),

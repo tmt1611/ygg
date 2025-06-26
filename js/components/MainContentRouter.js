@@ -85,7 +85,7 @@ const MainContentRouter = ({
           treeData: techTreeData,
           activeNodeId: viewStates.selectedGraphNodeId,
           searchTerm: graphSearchTerm,
-          onSelectNode: handleNodeSelectedForInsightsOrActions,
+          onSelectNode: handleNodeSelectedForSidebar,
           onSwitchToFocusView: viewStates.handleSwitchToFocusView,
           onOpenContextMenu: modalManager.openContextMenu,
           onCloseContextMenu: modalManager.closeContextMenu,

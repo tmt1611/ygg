@@ -1,8 +1,12 @@
 import { useState, useCallback, useEffect, useMemo } from 'react';
 import * as geminiService from '../services/geminiService.js';
+import { APP_STORAGE_KEYS } from '../constants.js';
 
 export const useApiKey = (addHistoryEntry) => {
   const [selectedMode, setSelectedMode] = useState('environment');
+  const [selectedModel, setSelectedModel] = useState(() => {
+    return localStorage.getItem(APP_STORAGE_KEYS.AI_MODEL) || geminiService.AVAILABLE_MODELS[0].id;
+  });
   const [inputKey, setInputKey] = useState('');
   const [status, setStatus] = useState({ message: 'Initializing...', type: 'info', isSet: false, source: null });
   const [isProcessing, setIsProcessing] = useState(true);
@@ -25,6 +29,11 @@ export const useApiKey = (addHistoryEntry) => {
       addHistoryEntry('API_KEY_STATUS_CHANGED', historyMessage);
     }
   }, [addHistoryEntry]);
+
+  useEffect(() => {
+    geminiService.setActiveModel(selectedModel);
+    localStorage.setItem(APP_STORAGE_KEYS.AI_MODEL, selectedModel);
+  }, [selectedModel]);
 
   useEffect(() => {
     const initializeApiKey = async () => {
@@ -91,12 +100,14 @@ export const useApiKey = (addHistoryEntry) => {
 
   return useMemo(() => ({
     selectedMode,
+    selectedModel,
     inputKey,
     status,
     isProcessing,
     changeMode,
+    setSelectedModel,
     setInputKey,
     submitPastedKey,
     clearActiveUserKey,
-  }), [selectedMode, inputKey, status, isProcessing, changeMode, setInputKey, submitPastedKey, clearActiveUserKey]);
+  }), [selectedMode, selectedModel, inputKey, status, isProcessing, changeMode, setSelectedModel, setInputKey, submitPastedKey, clearActiveUserKey]);
 };

@@ -1,6 +1,11 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { initializeNodes, isValidTechTreeNodeShape } from "../utils.js";
 
+export const AVAILABLE_MODELS = [
+  { id: "gemini-1.5-flash-latest", name: "Gemini 1.5 Flash (Latest)" },
+  { id: "gemini-1.5-pro-latest", name: "Gemini 1.5 Pro (Latest)" },
+];
+
 const COMMON_NODE_FORMAT_INSTRUCTION = `{
   "id": "string (or 'NEW_NODE' for new nodes)",
   "name": "string",
@@ -19,20 +24,21 @@ let apiClientState = {
   isKeyAvailable: false,
   activeKey: null,
   activeSource: null,
+  activeModel: AVAILABLE_MODELS[0].id,
 };
 
 const _initializeClient = (key, source) => {
   if (!key?.trim()) {
-    apiClientState = { client: null, isKeyAvailable: false, activeKey: null, activeSource: null };
+    apiClientState = { ...apiClientState, client: null, isKeyAvailable: false, activeKey: null, activeSource: null };
     return { success: false, source: null, message: source === 'environment' ? "Environment API Key is missing or empty." : "Pasted API Key cannot be empty." };
   }
 
   try {
     const newClient = new GoogleGenerativeAI(key);
-    apiClientState = { client: newClient, isKeyAvailable: true, activeKey: key, activeSource: source };
+    apiClientState = { ...apiClientState, client: newClient, isKeyAvailable: true, activeKey: key, activeSource: source };
     return { success: true, source, message: `API Key from ${source} set successfully. AI features enabled.` };
   } catch (error) {
-    apiClientState = { client: null, isKeyAvailable: false, activeKey: null, activeSource: null };
+    apiClientState = { ...apiClientState, client: null, isKeyAvailable: false, activeKey: null, activeSource: null };
     console.error(`Error initializing Gemini API client with ${source} API Key:`, error);
     let userMessage = `Failed to initialize AI client with ${source} API Key.`;
     if (error.message?.toLowerCase().includes("api key not valid") || 
@@ -75,8 +81,16 @@ export const setPastedApiKey = async (pastedKey) => {
 };
 
 export const clearActiveApiKey = () => {
-    apiClientState = { client: null, isKeyAvailable: false, activeKey: null, activeSource: null };
+    apiClientState = { ...apiClientState, client: null, isKeyAvailable: false, activeKey: null, activeSource: null };
     return { success: true, message: "API Key cleared. Provide a new key to enable AI features.", source: null };
+};
+
+export const setActiveModel = (modelId) => {
+  if (AVAILABLE_MODELS.some(m => m.id === modelId)) {
+    apiClientState.activeModel = modelId;
+    return { success: true, message: `AI model set to ${modelId}.` };
+  }
+  return { success: false, message: `Invalid model ID: ${modelId}.` };
 };
 
 
@@ -232,8 +246,7 @@ const parseGeminiJsonResponseForInsights = (responseText) => {
     }
 };
 
-export const generateQuickEdit = withApiClient(async (nodeToEdit, modificationPrompt) => {
-
+const getQuickEditPrompt = (nodeToEdit, modificationPrompt) => {
   const systemInstruction = `You are an AI assistant that modifies a single JSON node object based on a user instruction.
 **RULES:**
 1.  **Minimal Changes:** Only modify the parts of the node object (e.g., name, description, children) that are directly requested by the user's instruction.
@@ -243,7 +256,7 @@ export const generateQuickEdit = withApiClient(async (nodeToEdit, modificationPr
 5.  **Output Format:** Respond ONLY with the single, modified JSON object. Do not wrap it in markdown fences or add any other text.
 `;
 
-  const fullPrompt = `
+  const userPrompt = `
 Current Node JSON:
 \`\`\`json
 ${JSON.stringify(nodeToEdit, null, 2)}
@@ -253,10 +266,15 @@ User instruction: "${modificationPrompt}"
 
 Based on the instruction, provide the complete, modified JSON object for this single node.
 `;
+  return { systemInstruction, userPrompt };
+};
+
+export const generateQuickEdit = withApiClient(async (nodeToEdit, modificationPrompt) => {
+  const { systemInstruction, userPrompt } = getQuickEditPrompt(nodeToEdit, modificationPrompt);
 
   try {
     const model = apiClientState.client.getGenerativeModel({ 
-      model: "gemini-1.5-flash-latest",
+      model: apiClientState.activeModel,
       systemInstruction: { parts: [{ text: systemInstruction }], role: "model" },
       generationConfig: { 
         responseMimeType: "application/json", 
@@ -266,7 +284,7 @@ Based on the instruction, provide the complete, modified JSON object for this si
       },
     });
 
-    const result = await model.generateContent(fullPrompt);
+    const result = await model.generateContent(userPrompt);
     const response = result.response;
     
     let parsedData = parseGeminiJsonResponse(response.text(), true); // `true` for modification allows array returns, but we expect an object here.
@@ -289,25 +307,31 @@ Based on the instruction, provide the complete, modified JSON object for this si
 
   } catch (error) {
     console.error("Error during quick edit via Gemini API:", error);
-    throw constructApiError(error, "Failed to perform quick edit.", { prompt: fullPrompt, rawResponse: error.rawResponse });
+    throw constructApiError(error, "Failed to perform quick edit.", { prompt: userPrompt, rawResponse: error.rawResponse });
   }
 });
 
 
 
-export const generateTechTree = withApiClient(async (userPrompt) => {
-
-  try {
-    const model = apiClientState.client.getGenerativeModel({ 
-      model: "gemini-1.5-flash-latest",
-      systemInstruction: {
-        parts: [{ text: `
+const getGenerateTechTreePrompt = (userPrompt) => {
+  const systemInstruction = `
 You are an AI assistant that generates structured technology trees.
 You MUST respond with a single, valid JSON object representing the root node.
 Node format example: ${COMMON_NODE_FORMAT_INSTRUCTION}
 ${COMMON_JSON_SYNTAX_RULES}
 Ensure: Logical hierarchy, 2-4 levels deep, 2-5 children per parent. Prioritize clarity and key items.
-`}],
+`;
+  const finalUserPrompt = `Topic: "${userPrompt}"`;
+  return { systemInstruction, userPrompt: finalUserPrompt };
+};
+
+export const generateTechTree = withApiClient(async (userPrompt) => {
+  const { systemInstruction, userPrompt: finalUserPrompt } = getGenerateTechTreePrompt(userPrompt);
+  try {
+    const model = apiClientState.client.getGenerativeModel({ 
+      model: apiClientState.activeModel,
+      systemInstruction: {
+        parts: [{ text: systemInstruction }],
         role: "model"
       },
       generationConfig: { 
@@ -316,7 +340,7 @@ Ensure: Logical hierarchy, 2-4 levels deep, 2-5 children per parent. Prioritize 
       },
     });
 
-    const result = await model.generateContent( `Topic: "${userPrompt}"` );
+    const result = await model.generateContent(finalUserPrompt);
     const response = result.response;
     const parsedData = parseGeminiJsonResponse(response.text(), false);
      if (Array.isArray(parsedData) || !isValidTechTreeNodeShape(parsedData)) {
@@ -329,13 +353,7 @@ Ensure: Logical hierarchy, 2-4 levels deep, 2-5 children per parent. Prioritize 
     throw constructApiError(error, "Failed to generate tech tree.");
   }
 });
-
-export const modifyTechTreeByGemini = withApiClient(async (
-  currentTree,
-  modificationPrompt,
-  lockedNodeIds
-) => {
-
+const getModifyTechTreePrompt = (currentTree, modificationPrompt, lockedNodeIds) => {
   const systemInstruction = `You are an AI assistant that modifies a JSON tech tree based on user instructions.
 **MANDATORY RULES:**
 1.  **Minimal Changes:** Only modify nodes directly relevant to the user's instruction. Leave all other nodes completely unchanged, preserving their exact original content and structure.
@@ -352,7 +370,7 @@ export const modifyTechTreeByGemini = withApiClient(async (
 9.  **Final Check:** Before outputting, double-check that your entire response is a single JSON object starting with { and ending with }, and that every single node in the tree has all the mandatory fields from rule #5.
 `;
 
-  const fullPrompt = `
+  const userPrompt = `
 Current Tree (JSON):
 \`\`\`json
 ${JSON.stringify(currentTree, null, 2)}
@@ -362,9 +380,18 @@ User instruction: "${modificationPrompt}"
 
 Output the complete, modified JSON for the tech tree, adhering to ALL rules above. Respond ONLY with the JSON.
 `;
+  return { systemInstruction, userPrompt };
+};
+
+export const modifyTechTreeByGemini = withApiClient(async (
+  currentTree,
+  modificationPrompt,
+  lockedNodeIds
+) => {
+  const { systemInstruction, userPrompt } = getModifyTechTreePrompt(currentTree, modificationPrompt, lockedNodeIds);
   try {
     const model = apiClientState.client.getGenerativeModel({ 
-      model: "gemini-1.5-flash-latest",
+      model: apiClientState.activeModel,
       systemInstruction: { parts: [{ text: systemInstruction }], role: "model" },
       generationConfig: { 
         responseMimeType: "application/json", 
@@ -372,7 +399,7 @@ Output the complete, modified JSON for the tech tree, adhering to ALL rules abov
       },
     });
 
-    const result = await model.generateContent(fullPrompt);
+    const result = await model.generateContent(userPrompt);
     const response = result.response;
     
     let parsedData = parseGeminiJsonResponse(response.text(), true);
@@ -449,13 +476,12 @@ Output the complete, modified JSON for the tech tree, adhering to ALL rules abov
 
   } catch (error) {
     console.error("Error modifying tech tree via Gemini API:", error);
-    throw constructApiError(error, "Failed to modify tech tree using AI.", { prompt: fullPrompt, rawResponse: error.rawResponse });
+    throw constructApiError(error, "Failed to modify tech tree using AI.", { prompt: userPrompt, rawResponse: error.rawResponse });
   }
 });
 
-export const summarizeText = withApiClient(async (textToSummarize) => {
-
-  const prompt = `You are a helpful assistant. Summarize the following text, which describes a hierarchical tech tree or skill tree. 
+const getSummarizeTextPrompt = (textToSummarize) => {
+  return `You are a helpful assistant. Summarize the following text, which describes a hierarchical tech tree or skill tree. 
 Provide a concise overview (100-150 words), highlighting its main purpose, key branches, and overall theme or focus.
 Do not use markdown formatting in your response.
 
@@ -465,10 +491,13 @@ ${textToSummarize.substring(0, 30000)}
 ---
 
 Concise Summary (100-150 words, plain text only):`;
+};
 
+export const summarizeText = withApiClient(async (textToSummarize) => {
+  const prompt = getSummarizeTextPrompt(textToSummarize);
   try {
     const model = apiClientState.client.getGenerativeModel({ 
-      model: "gemini-1.5-flash-latest",
+      model: apiClientState.activeModel,
       generationConfig: { 
         temperature: 0.5, topK: 40, topP: 0.95 
       },
@@ -483,94 +512,98 @@ Concise Summary (100-150 words, plain text only):`;
   }
 });
 
-export const generateNodeInsights = withApiClient(async (
-    node,
-    parentNode,
-    siblingNodes, 
-    childNodes,
-    projectContext
-) => {
-
-    const parentInfo = parentNode ? `It is a child of "${parentNode.name}".` : "It is a root node.";
-    const childrenInfo = childNodes.length > 0
-        ? `Its current children are: ${childNodes.map(c => `"${c.name}"`).join(', ')}.`
-        : "It currently has no children.";
-    const siblingInfo = siblingNodes.length > 0
-        ? `Its sibling nodes (other children of the same parent) are: ${siblingNodes.map(s => `"${s.name}"`).join(', ')}.`
-        : "It has no sibling nodes (it's either a root or an only child).";
-
-    const prompt = `
-Context for the entire tech tree project: "${projectContext || 'General Technology/Skills'}"
-
-Analyze the following specific node within this tech tree:
-Node Name: "${node.name}"
-Node Description: "${node.description || '(No description provided)'}"
-Node Importance: "${node.importance || 'Common'}"
-${parentInfo}
-${siblingInfo}
-${childrenInfo}
-
-Based on this information and the project context, provide the following insights in JSON format:
-1.  "suggested_description": A concise (1-2 sentences, max 150 characters) and insightful alternative or improved description for this node. This string must be valid JSON content.
-2.  "alternative_names": An array of 2-3 short, distinct strings. Each string must be a valid JSON string value (e.g., ["Synonym 1", "Alternate Term"]).
-3.  "potential_children": An array of 2-4 distinct potential new child nodes that would logically extend from THIS node ("${node.name}"). For each potential child, provide a "name" (string, concise) and a "description" (string, 1 sentence, max 100 characters). All strings must be valid JSON content.
-4.  "key_concepts": An array of 2-3 key concepts, technologies, or skills closely related to THIS node but not necessarily direct children. Each string must be a valid JSON string value.
-
-Output JSON structure must be:
-{
-  "suggested_description": "string",
-  "alternative_names": ["string", "string", ...],
-  "potential_children": [
-    { "name": "string", "description": "string" },
-    { "name": "string", "description": "string" },
-    ...
-  ],
-  "key_concepts": ["string", "string", ...]
-}
-Adhere strictly to JSON syntax: all strings enclosed in double quotes, no trailing commas. Ensure no extraneous text appears between a field's value (e.g., after a description string's closing quote) and the next comma or closing brace/bracket, or after the final closing brace of the JSON object.
-Respond ONLY with the JSON object. No extra text or markdown.
+const getProjectInsightsPrompt = (tree, projectContext) => {
+  const systemInstruction = `You are an expert project analyst. Your task is to analyze a JSON representation of a technology or skill tree and provide high-level insights.
+**RULES:**
+1.  **Output Format:** You MUST respond with a single, valid JSON object.
+2.  **JSON Structure:** The JSON object must have these exact keys:
+    - \`overall_summary\`: A string (2-3 sentences) summarizing the project's scope, strengths, and potential weaknesses.
+    - \`key_node_insights\`: An array of 2-4 objects. Each object represents a key node you've identified for improvement. Each object must have:
+        - \`node_id\`: The string ID of the node from the input tree.
+        - \`node_name\`: The string name of the node from the input tree.
+        - \`critique\`: A string (1-2 sentences) explaining why this node is key and how it could be improved (e.g., vague description, needs more children).
+        - \`suggested_description\`: A string with a new, improved description for the node.
+    - \`suggested_new_branches\`: An array of 1-3 objects. Each object represents a potential new top-level branch to add to the root of the tree. Each object must have:
+        - \`name\`: A string for the new branch's name.
+        - \`description\`: A string explaining what this branch would cover and why it's a good addition.
+3.  **JSON Syntax:** Strictly follow JSON rules. NO EXTRA TEXT, explanations, or markdown fences.
 `;
 
+  const userPrompt = `
+Project Context: "${projectContext || 'General Technology/Skills'}"
+
+Analyze the following tech tree and provide insights based on the rules. Identify key nodes that are underdeveloped or critically important. Suggest new high-level branches that would logically expand the project.
+
+Tech Tree JSON:
+\`\`\`json
+${JSON.stringify(tree, null, 2)}
+\`\`\`
+
+Respond ONLY with the JSON object.
+`;
+
+  return { systemInstruction, userPrompt };
+};
+
+export const generateProjectInsights = withApiClient(async (tree, projectContext) => {
+    const { systemInstruction, userPrompt } = getProjectInsightsPrompt(tree, projectContext);
     try {
         const model = apiClientState.client.getGenerativeModel({ 
-          model: "gemini-1.5-flash-latest",
+          model: apiClientState.activeModel,
+          systemInstruction: { parts: [{ text: systemInstruction }], role: "model" },
           generationConfig: { 
             responseMimeType: "application/json", 
-            temperature: 0.45, topK: 50, topP: 0.93 
+            temperature: 0.5, topK: 50, topP: 0.95
           },
         });
         
-        const result = await model.generateContent(prompt);
+        const result = await model.generateContent(userPrompt);
         const response = result.response;
-        return parseGeminiJsonResponseForInsights(response.text());
+        
+        const jsonStr = extractJsonFromMarkdown(response.text());
+        if (!jsonStr) {
+          throw new Error("AI returned an empty response for project insights.");
+        }
+        
+        // Manual validation because the structure is complex
+        const parsed = JSON.parse(jsonStr);
+        if (typeof parsed !== 'object' || parsed === null || typeof parsed.overall_summary !== 'string' || !Array.isArray(parsed.key_node_insights) || !Array.isArray(parsed.suggested_new_branches)) {
+            throw new Error("Root structure of project insights is invalid.");
+        }
+        // Could add more detailed validation here if needed
+        
+        return parsed;
     } catch (error) {
-        console.error("Error generating node insights from Gemini API:", error);
-        throw constructApiError(error, "Failed to generate AI insights for the node.");
+        console.error("Error generating project insights from Gemini API:", error);
+        throw constructApiError(error, "Failed to generate AI project insights.", { prompt: userPrompt, rawResponse: error.rawResponse });
     }
 });
 
-export const generateStrategicSuggestions = withApiClient(async (
-  projectContext,
-  currentTreeSummary
-) => {
-
+const getStrategicSuggestionsPrompt = (projectContext, currentTreeSummary) => {
   const systemInstruction = `You are an AI assistant that provides strategic suggestions for a project.
 You MUST respond with a single, valid JSON array of strings.
 Example: ["Suggestion 1", "Suggestion 2", "Suggestion 3"]
 Output ONLY the JSON array. NO extra text, explanations, or markdown fences.
 `;
 
-  const prompt = `
+  const userPrompt = `
 Project Context: "${projectContext}"
 Current Tree Summary: "${currentTreeSummary}"
 
 Based on the project context and the current state of the tree, suggest 3-5 high-level strategic next steps, new major branches, or key areas of focus that would logically extend, complement, or significantly enhance this project.
 Each suggestion should be a concise, actionable phrase or short sentence.
 `;
+  return { systemInstruction, userPrompt };
+};
 
+export const generateStrategicSuggestions = withApiClient(async (
+  projectContext,
+  currentTreeSummary
+) => {
+  const { systemInstruction, userPrompt } = getStrategicSuggestionsPrompt(projectContext, currentTreeSummary);
   try {
     const model = apiClientState.client.getGenerativeModel({ 
-      model: "gemini-1.5-flash-latest",
+      model: apiClientState.activeModel,
       systemInstruction: { parts: [{ text: systemInstruction }], role: "model" },
       generationConfig: { 
         responseMimeType: "application/json", 
@@ -578,7 +611,7 @@ Each suggestion should be a concise, actionable phrase or short sentence.
       },
     });
     
-    const result = await model.generateContent(prompt);
+    const result = await model.generateContent(userPrompt);
     const response = result.response;
 
     const jsonStr = extractJsonFromMarkdown(response.text());
@@ -594,6 +627,23 @@ Each suggestion should be a concise, actionable phrase or short sentence.
     return parsed;
   } catch (error) {
     console.error("Error generating strategic suggestions from Gemini API:", error);
-    throw constructApiError(error, "Failed to generate AI strategic suggestions.", { prompt, rawResponse: error.rawResponse });
+    throw constructApiError(error, "Failed to generate AI strategic suggestions.", { prompt: userPrompt, rawResponse: error.rawResponse });
   }
 });
+
+export const getPromptTextFor = (type, payload) => {
+  switch (type) {
+    case 'generateTree':
+      return getGenerateTechTreePrompt(payload.prompt).userPrompt;
+    case 'modifyTree':
+      return getModifyTechTreePrompt(payload.tree, payload.prompt, payload.lockedIds).userPrompt;
+    case 'quickEdit':
+      return getQuickEditPrompt(payload.node, payload.prompt).userPrompt;
+    case 'projectInsights':
+      return getProjectInsightsPrompt(payload.tree, payload.context).userPrompt;
+    case 'strategicSuggestions':
+      return getStrategicSuggestionsPrompt(payload.context, payload.summary).userPrompt;
+    default:
+      return "No prompt available for this action type.";
+  }
+};

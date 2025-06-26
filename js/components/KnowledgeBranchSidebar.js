@@ -6,14 +6,14 @@ import { APP_STORAGE_KEYS } from '../constants.js';
 
 const sidebarTabs = [
     { id: 'ai-tools', label: 'AI Ops', icon: '🧠' },
-    { id: 'ai-insights', label: 'Node Insight', icon: '💡' },
+    { id: 'ai-insights', label: 'Project Insight', icon: '💡' },
     { id: 'history', label: 'History', icon: '📜' },
 ];
 
 const KnowledgeBranchSidebar = (props) => {
   const {
     isCollapsed, onToggleSidebar, activeSidebarTab, setActiveSidebarTab,
-    isAppBusy, apiKeyIsSet, hasTechTreeData, modalManager,
+    isAppBusy, apiKeyHook, hasTechTreeData, modalManager,
   } = props;
   const [collapsedPanels, setCollapsedPanels] = useState(() => {
     const savedState = localStorage.getItem(APP_STORAGE_KEYS.SIDEBAR_PANEL_STATES);
@@ -90,7 +90,7 @@ const KnowledgeBranchSidebar = (props) => {
               React.createElement(AiToolsTab, {
                 modificationPrompt: props.modificationPrompt,
                 setModificationPrompt: props.setModificationPrompt,
-                onModifyAiTree: props.onModifyAiTree,
+                treeOperationsAI: props.treeOperationsAI,
                 isAiModifying: props.isAiModifying,
                 canUndoAiMod: props.canUndoAiMod,
                 onUndoAiModification: props.onUndoAiModification,
@@ -101,7 +101,7 @@ const KnowledgeBranchSidebar = (props) => {
                 strategicSuggestionsError: props.strategicSuggestionsError,
                 onGenerateStrategicSuggestions: props.onGenerateStrategicSuggestions,
                 onApplyStrategicSuggestion: props.onApplyStrategicSuggestion,
-                apiKeyIsSet: apiKeyIsSet,
+                apiKeyIsSet: apiKeyHook.status.isSet,
                 hasTechTreeData: hasTechTreeData,
                 isAppBusy: isAppBusy,
                 collapsedPanels: collapsedPanels,
@@ -111,17 +111,17 @@ const KnowledgeBranchSidebar = (props) => {
             ),
             activeSidebarTab === 'ai-insights' && (
               React.createElement(AiInsightsTab, {
-                node: props.selectedNodeForInsights,
                 insightsData: props.aiInsightsData,
                 isLoading: props.aiInsightsIsLoading,
                 error: props.aiInsightsError,
-                onGenerateInsights: props.onGenerateAiNodeInsights,
+                onGenerateInsights: props.onGenerateProjectInsights,
                 onUseDescription: props.onUseSuggestedDescription,
-                onUseAlternativeName: props.onUseAlternativeName,
-                onAddSuggestedChild: props.onAddSuggestedChildFromInsight,
+                onAddSuggestedChildToNode: props.onAddSuggestedChildToNode,
+                onAddNewBranchToRoot: props.onAddNewBranchToRoot,
                 isAppBusy: isAppBusy,
-                apiKeyIsSet: apiKeyIsSet,
-                modalManager: modalManager
+                apiKeyIsSet: apiKeyHook.status.isSet,
+                modalManager: modalManager,
+                hasTechTreeData: hasTechTreeData
               })
             ),
             activeSidebarTab === 'history' && (
