@@ -404,6 +404,7 @@ export const compareAndAnnotateTree = (originalTree, modifiedTree) => {
         };
     }
     const originalNodesMap = getAllNodesAsMap(originalTree);
+    // We only need the modified map to check for new parents, not for the main loop.
     const modifiedNodesMap = getAllNodesAsMap(modifiedTree);
 
     const removedNodes = [];
@@ -425,17 +426,21 @@ export const compareAndAnnotateTree = (originalTree, modifiedTree) => {
 
     const annotateRecursively = (modNode) => {
         if (!modNode) return null;
-        let originalNode = originalNodesMap.get(modNode.id);
-        const modDetails = [];
         
-        if (modNode.id === "NEW_NODE" || !originalNode) {
+        // This is the definitive check for a new node.
+        if (!originalNodesMap.has(modNode.id)) {
             const newNode = { ...modNode, _changeStatus: 'new', _modificationDetails: [{label: 'Status', type: 'critical', to: 'Newly created node'}] };
             newNodes.push(newNode);
+            // If the parent is new, all its children must also be new.
             if (newNode.children) {
                 newNode.children = newNode.children.map(child => annotateRecursively(child));
             }
             return newNode;
         }
+
+        // If we reach here, the node existed before.
+        const originalNode = originalNodesMap.get(modNode.id);
+        const modDetails = [];
         
         let status = 'unchanged';
         let contentModified = false;
