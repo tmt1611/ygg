@@ -5,11 +5,11 @@ import LoadingSpinner from './LoadingSpinner.js';
 import ErrorMessage from './ErrorMessage.js';
 import TechExtractionModal from './TechExtractionModal.js';
 
-const DiffItem = ({ label, from, to, showPromptModal, quickEditPrompt, setShowPromptModal }) => {
+const DiffItem = ({ label, from, to }) => {
   if (from === to) return null;
 
-  const elements = [
-    React.createElement("div", { key: "diff", className: "quick-edit-diff-item" },
+  return (
+    React.createElement("div", { className: "quick-edit-diff-item" },
       React.createElement("div", { className: "quick-edit-diff-label" }, label),
       React.createElement("div", { className: "quick-edit-diff-content" },
         React.createElement("div", { className: "diff-from" },
@@ -22,21 +22,7 @@ const DiffItem = ({ label, from, to, showPromptModal, quickEditPrompt, setShowPr
         )
       )
     )
-  ];
-
-  if (showPromptModal) {
-    elements.push(
-      React.createElement(TechExtractionModal, {
-        key: "modal",
-        isOpen: showPromptModal,
-        content: quickEditPrompt,
-        title: "AI Quick Edit Prompt",
-        onClose: () => setShowPromptModal(false)
-      })
-    );
-  }
-
-  return elements;
+  );
 };
 
 
