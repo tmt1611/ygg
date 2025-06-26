@@ -398,6 +398,7 @@ const App = () => {
         activeProjectId: projectManager.activeProjectId,
         yggdrasilViewMode: yggdrasilViewMode,
         onGenerateInsights: handleGenerateInsightsAndSwitchTab,
+        modificationPrompt: modificationPrompt,
       })
     )
   );

@@ -31,6 +31,7 @@ const AppModals = ({
   activeProjectId,
   yggdrasilViewMode,
   onGenerateInsights,
+  modificationPrompt,
 }) => {
   const {
     isProjectNameModalOpen, projectModalConfig, closeProjectNameModal,
@@ -63,9 +64,10 @@ const AppModals = ({
           suggestion: pendingAiSuggestion,
           onConfirm: treeOperationsAI.handleConfirmAiSuggestion,
           onCancel: treeOperationsAI.handleRejectAiSuggestion,
-          onRefineSuggestion: (prompt) => treeOperationsAI.handleApplyAiModification(prompt, true),
+          onRefineSuggestion: (refinementPrompt, previousSuggestion, originalPromptText) => treeOperationsAI.handleApplyAiModification(refinementPrompt, true, { previousSuggestion, originalPrompt: originalPromptText }),
           isRefining: isModifying,
-          apiKeyIsSet: apiKeyIsSet
+          apiKeyIsSet: apiKeyIsSet,
+          originalPrompt: modificationPrompt
         })
       ),
       isConfirmModalOpen && confirmModalConfig && (

@@ -12,6 +12,7 @@ const AiSuggestionModal = ({
   onRefineSuggestion,
   isRefining,
   apiKeyIsSet,
+  originalPrompt,
 }) => {
   const applyButtonRef = useRef(null);
   const [followUpPrompt, setFollowUpPrompt] = useState('');
@@ -178,7 +179,7 @@ const AiSuggestionModal = ({
 
   const handleInternalRefine = () => {
     if (followUpPrompt.trim()) {
-      onRefineSuggestion(followUpPrompt);
+      onRefineSuggestion(followUpPrompt, suggestion, originalPrompt);
     }
   };
 

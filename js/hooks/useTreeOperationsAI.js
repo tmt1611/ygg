@@ -76,7 +76,7 @@ export const useTreeOperationsAI = ({
     openConfirmModal, addHistoryEntry
   ]);
 
-  const handleApplyAiModification = useCallback(async (modificationPromptValue, useModal = false) => {
+  const handleApplyAiModification = useCallback(async (modificationPromptValue, useModal = false, refinementContext = null) => {
     if (!projectManager) {
         setError("Project system not fully initialized for AI modification.");
         return;
@@ -94,7 +94,22 @@ export const useTreeOperationsAI = ({
 
     setIsModifying(true); setError(null);
 
-    const finalModificationPrompt = modificationPromptValue;
+    let finalModificationPrompt = modificationPromptValue;
+    if (refinementContext?.previousSuggestion && refinementContext?.originalPrompt) {
+        finalModificationPrompt = `The user's original request was: "${refinementContext.originalPrompt}"
+
+Your previous output for that request was:
+\`\`\`json
+${JSON.stringify(cleanTreeForExport(refinementContext.previousSuggestion), null, 2)}
+\`\`\`
+
+The user was not satisfied and has provided this new instruction for refinement: "${modificationPromptValue}"
+
+Please generate a new, complete JSON for the entire tree that incorporates this refinement. Adhere strictly to all original rules.
+`;
+        // Update the prompt in the sidebar to reflect the full context being sent
+        setModificationPrompt(finalModificationPrompt);
+    }
     
     // For both modal and direct apply, the "undo" state is the tree *before* this operation.
     setPreviousTreeStateForUndo(techTreeData); 
@@ -180,8 +195,9 @@ export const useTreeOperationsAI = ({
     setPendingAiSuggestion(null);    
     setBaseForModalDiff(null);       
     setPreviousTreeStateForUndo(null); // The action was rejected, so clear the undo state.
+    setModificationPrompt(''); // Also clear the prompt from the sidebar UI
     closeAiSuggestionModal();
-  }, [projectManager, closeAiSuggestionModal, addHistoryEntry, setPendingAiSuggestion, setBaseForModalDiff, setPreviousTreeStateForUndo]);
+  }, [projectManager, closeAiSuggestionModal, addHistoryEntry, setPendingAiSuggestion, setBaseForModalDiff, setPreviousTreeStateForUndo, setModificationPrompt]);
 
   const handleUndoAiModification = useCallback(() => {
     if (!projectManager) {
