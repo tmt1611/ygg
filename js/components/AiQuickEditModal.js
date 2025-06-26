@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef, useMemo } from 'react';
 import * as geminiService from '../services/geminiService.js';
 import LoadingSpinner from './LoadingSpinner.js';
 import ErrorMessage from './ErrorMessage.js';
-import { getPromptTextFor } from '../services/geminiService.js';
 import TechExtractionModal from './TechExtractionModal.js';
 
 const DiffItem = ({ label, from, to }) => {
@@ -143,7 +142,7 @@ const AiQuickEditModal = ({ isOpen, node, onConfirm, onCancel, apiKeyIsSet, sele
 
   if (!isOpen || !node) return null;
 
-  const quickEditPrompt = showPromptModal ? getPromptTextFor('quickEdit', { node: node, prompt: prompt }) : '';
+  const quickEditPrompt = showPromptModal ? geminiService.getPromptTextFor('quickEdit', { node: node, prompt: prompt }) : '';
 
   return (
     React.createElement(React.Fragment, null,
