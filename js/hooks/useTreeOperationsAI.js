@@ -234,7 +234,11 @@ export const useTreeOperationsAI = ({
           return;
         }
         try {
-          const suggestedTree = geminiService.parseGeminiJsonResponse(pastedJson, true);
+          const suggestedTreeRaw = geminiService.parseGeminiJsonResponse(pastedJson, true);
+          // Initialize nodes immediately to assign unique IDs to any new nodes.
+          // This is critical for diffing and for D3's data binding to work correctly.
+          const suggestedTree = initializeNodes(suggestedTreeRaw);
+          
           setPreviousTreeStateForUndo(techTreeData);
           setBaseForModalDiff(techTreeData);
           setPendingAiSuggestion(suggestedTree);
