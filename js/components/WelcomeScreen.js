@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { getPromptTextFor } from '../../services/geminiService.js';
+import { getPromptTextFor } from '../services/geminiService.js';
 
 const WelcomeScreen = ({
   initialPrompt,
