@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import React, { useCallback } from 'react';
 import * as geminiService from '../services/geminiService.js';
 import { getLockedNodeIds, countNodesInTree, compareAndAnnotateTree, findNodeById, updateNodeInTree, initializeNodes, cleanTreeForExport, cleanTreeForState } from '../utils.js';
 
