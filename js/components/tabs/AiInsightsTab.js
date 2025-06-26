@@ -166,7 +166,28 @@ const AiInsightsTab = ({
                         disabled: isAppBusy,
                         className: "secondary panel-button ai-insights-action-button",
                         title: `Preview and apply suggested description for "${item.node_name}"`
-                      }, "Preview & Use Description")
+                      }, "Preview & Use Description"),
+                      item.suggested_children && item.suggested_children.length > 0 && (
+                        React.createElement("div", { style: { marginTop: '8px' } },
+                          React.createElement("h5", { style: { fontSize: '0.8em', fontWeight: 'bold', color: 'var(--text-secondary)', margin: '0 0 4px 0', textTransform: 'uppercase', letterSpacing: '0.5px' } }, "Suggested Children:"),
+                          React.createElement("ul", { className: "ai-insights-list" },
+                            item.suggested_children.map((child, childIndex) => (
+                              React.createElement("li", { key: `sug-child-${item.node_id}-${childIndex}` },
+                                React.createElement("div", { className: "ai-insights-list-item-content" },
+                                  React.createElement("span", { className: "ai-insights-list-item-name" }, child.name),
+                                  React.createElement("p", { className: "ai-insights-list-item-desc" }, child.description)
+                                ),
+                                React.createElement("button", {
+                                  onClick: () => onAddSuggestedChildToNode(item.node_id, child.name, child.description),
+                                  disabled: isAppBusy,
+                                  className: "add-child-btn base-icon-button",
+                                  title: `Add "${child.name}" as a child to "${item.node_name}"`
+                                }, "➕")
+                              )
+                            ))
+                          )
+                        )
+                      )
                     )
                   )
                 ))

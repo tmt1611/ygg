@@ -435,10 +435,10 @@ const getProjectInsightsPrompt = (tree, projectContext) => {
 1.  **Output Format**: Your entire response MUST be a single, valid JSON object. Do not use markdown fences or add any surrounding text.
 2.  **JSON Structure**: The JSON object must have these exact top-level keys: "overall_summary", "key_node_insights", "suggested_new_branches".
     - \`overall_summary\`: A string (2-3 sentences) summarizing the project's scope, strengths, and potential weaknesses.
-    - \`key_node_insights\`: An array of 2-4 objects. Each object MUST have these keys: "node_id" (string), "node_name" (string), "critique" (string, 1-2 sentences), and "suggested_description" (string, new description).
+    - \`key_node_insights\`: An array of 2-4 objects. Each object MUST have these keys: "node_id" (string), "node_name" (string), "critique" (string, 1-2 sentences), "suggested_description" (string, new description), and "suggested_children" (an array of 1-2 objects for potential new child nodes, or an empty array [] if no children are suggested for this node. Each child object must have "name" and "description" string keys).
     - \`suggested_new_branches\`: An array of 1-3 objects. Each object MUST have these keys: "name" (string) and "description" (string).
 3.  **Content**:
-    - Identify key nodes that are underdeveloped, vague, or critically important.
+    - Identify key nodes that are underdeveloped, vague, or critically important. For these nodes, suggest new child nodes that would logically expand them.
     - Suggest new high-level branches that logically expand the project.
     - Your analysis should be based on the provided 'Project Context' and the tree structure.
 4.  **JSON Syntax Rules**: Strictly follow JSON syntax. All keys and string values must be in double quotes. No trailing commas.
