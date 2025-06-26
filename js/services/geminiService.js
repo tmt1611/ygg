@@ -623,3 +623,20 @@ export const getPromptTextFor = (type, payload) => {
       return "No prompt available for this action type.";
   }
 };
+
+export const getPromptTextFor = (type, payload) => {
+  switch (type) {
+    case 'generateTree':
+      return getGenerateTechTreePrompt(payload.prompt).userPrompt;
+    case 'modifyTree':
+      return getModifyTechTreePrompt(payload.tree, payload.prompt, payload.lockedIds).userPrompt;
+    case 'quickEdit':
+      return getQuickEditPrompt(payload.node, payload.prompt).userPrompt;
+    case 'projectInsights':
+      return getProjectInsightsPrompt(payload.tree, payload.context).userPrompt;
+    case 'strategicSuggestions':
+      return getStrategicSuggestionsPrompt(payload.context, payload.summary).userPrompt;
+    default:
+      return "No prompt available for this action type.";
+  }
+};

@@ -23,7 +23,7 @@ export const useTreeOperationsAI = ({
   setModificationPrompt,
   selectedGraphNodeId,
 }) => {
-  const { openAiSuggestionModal, closeAiSuggestionModal, openConfirmModal, setPendingAiSuggestion, pendingAiSuggestion } = modalManager;
+  const { openAiSuggestionModal, closeAiSuggestionModal, openConfirmModal, closeConfirmModal, setPendingAiSuggestion, pendingAiSuggestion } = modalManager;
   const { addHistoryEntry } = historyManager;
 
   const handleGenerateNewTree = useCallback(async () => {
@@ -204,11 +204,50 @@ export const useTreeOperationsAI = ({
     setError, setTechTreeData, setPreviousTreeStateForUndo, addHistoryEntry, setModificationPrompt
   ]);
 
+  const handleStartSuggestionWithJson = useCallback(() => {
+    let pastedJson = '';
+    const handleInputChange = (e) => {
+      pastedJson = e.target.value;
+    };
+
+    openConfirmModal({
+      title: "Apply Manual AI Response",
+      message: React.createElement('div', null,
+        React.createElement('p', {style: {marginBottom: '10px'}}, 'Paste the complete JSON object for the modified tree from your external AI tool below.'),
+        React.createElement('textarea', {
+          onChange: handleInputChange,
+          style: { width: '100%', minHeight: '200px', resize: 'vertical', fontFamily: 'monospace' },
+          placeholder: '{"id": "root...", "name": "...", "children": [...]}'
+        })
+      ),
+      confirmText: "Preview Changes",
+      onConfirm: () => {
+        if (!pastedJson.trim()) {
+          setError("Pasted content is empty.");
+          return;
+        }
+        try {
+          const suggestedTree = geminiService.parseGeminiJsonResponse(pastedJson, true);
+          setPreviousTreeStateForUndo(techTreeData);
+          setBaseForModalDiff(techTreeData);
+          setPendingAiSuggestion(suggestedTree);
+          openAiSuggestionModal(suggestedTree);
+          addHistoryEntry('TREE_MOD_AI', 'Manual JSON response loaded for modification preview.');
+          closeConfirmModal();
+        } catch (e) {
+          setError(`Failed to parse manual JSON. ${e.message}`);
+          // Don't close the confirm modal on error so the user can fix their input
+        }
+      },
+    });
+  }, [techTreeData, openConfirmModal, setError, setPreviousTreeStateForUndo, setBaseForModalDiff, setPendingAiSuggestion, openAiSuggestionModal, addHistoryEntry, closeConfirmModal]);
+
   return {
     handleGenerateNewTree,
     handleApplyAiModification,
     handleConfirmAiSuggestion,
     handleRejectAiSuggestion,
     handleUndoAiModification,
+    handleStartSuggestionWithJson,
   };
 };
