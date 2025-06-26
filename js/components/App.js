@@ -58,7 +58,9 @@ const App = () => {
     if (typeof err === 'string') {
         _setError({ message: err });
     } else if (err instanceof Error) {
-        _setError({ message: err.message, details: err.stack });
+        // Use custom details if provided by our services, otherwise fallback to stack.
+        const details = err.details ? err.details : err.stack;
+        _setError({ message: err.message, details: details });
     } else if (typeof err === 'object' && err !== null && err.message) {
         _setError({ message: err.message, details: err.details || JSON.stringify(err, null, 2) });
     } else {

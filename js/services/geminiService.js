@@ -87,8 +87,19 @@ const constructApiError = (error, baseMessage, context = {}) => {
   // Use the original error object to preserve its stack trace, or create a new one.
   const errorToThrow = error instanceof Error ? error : new Error(baseMessage);
   
-  if (context.prompt) errorToThrow.prompt = context.prompt;
-  if (context.rawResponse) errorToThrow.rawResponse = context.rawResponse;
+  const detailsParts = [];
+  if (error.stack) detailsParts.push(`--- Stack Trace ---\n${error.stack}`);
+  
+  // Attach custom context properties to the error object for potential direct use.
+  if (context.prompt) {
+    errorToThrow.prompt = context.prompt;
+    detailsParts.push(`\n--- Prompt Sent to AI ---\n${context.prompt}`);
+  }
+  if (context.rawResponse) {
+    errorToThrow.rawResponse = context.rawResponse;
+    detailsParts.push(`\n--- Raw AI Response ---\n${context.rawResponse}`);
+  }
+  errorToThrow.details = detailsParts.join('\n');
 
   if (!isApiKeySet() && !error.message?.includes("Gemini API client not initialized")) {
      errorToThrow.message = "API Key not set or invalid. Please provide a valid API Key in 'Workspace' -> 'API Key Setup'.";
