@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import * as geminiService from '../services/geminiService.js';
+import { initializeNodes } from '../utils.js';
 import LoadingSpinner from './LoadingSpinner.js';
 import ErrorMessage from './ErrorMessage.js';
 import TechExtractionModal from './TechExtractionModal.js';
@@ -115,14 +116,25 @@ const AiQuickEditModal = ({ isOpen, node, onConfirm, onCancel, apiKeyIsSet, sele
     }
     setError(null);
     try {
-      const parsedNode = JSON.parse(manualJson);
-      // Basic validation
-      if (typeof parsedNode !== 'object' || !parsedNode.name) {
-          throw new Error("Invalid JSON structure. Must be an object with at least a 'name' property.");
+      const parsedNode = geminiService.parseGeminiJsonResponse(manualJson, true);
+
+      if (Array.isArray(parsedNode)) {
+        throw new Error("Pasted content appears to be an array of nodes. Quick Edit only accepts a single node object.");
       }
-      setDiff({ from: node, to: parsedNode });
+      
+      // Initialize the node to ensure all fields are present and correctly typed.
+      // parentId can be null here because updateNodeInTree will preserve the original parent context.
+      const initializedNode = initializeNodes(parsedNode, null);
+
+      // The AI should preserve the ID, but user-pasted content might not. Enforce it.
+      const finalNode = {
+        ...initializedNode,
+        id: node.id,
+      };
+
+      setDiff({ from: node, to: finalNode });
     } catch(e) {
-      setError({ message: `JSON Parse Error: ${e.message}` });
+      setError({ message: `JSON Paste Error: ${e.message}` });
     }
   };
 

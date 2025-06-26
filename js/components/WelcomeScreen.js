@@ -92,8 +92,10 @@ const WelcomeScreen = ({
         ),
 
         React.createElement("div", { className: "welcome-screen-secondary-actions" },
-          React.createElement("button", { onClick: handleImportClick, className: "secondary" }, "Import a Project..."),
+          React.createElement("button", { onClick: handleImportClick, className: "secondary" }, "Import from File..."),
           React.createElement("input", { type: "file", id: "import-project-input-welcome", accept: ".json,.project.json", onChange: onAddNewProjectFromFile, style: { display: 'none' } }),
+          React.createElement("span", null, "or"),
+          React.createElement("button", { onClick: onPasteNewProject, className: "secondary" }, "Paste from JSON..."),
           React.createElement("span", null, "or start from an example:")
         ),
 

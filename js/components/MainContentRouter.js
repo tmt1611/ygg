@@ -47,6 +47,7 @@ const MainContentRouter = ({
             apiKeyIsSet: apiKeyHook.status.isSet,
             apiKeyHook: apiKeyHook,
             onAddNewProjectFromFile: projectManager.handleAddNewProjectFromFile,
+            onPasteNewProject: projectManager.handlePasteNewProject,
             onLoadAndGoToGraph: projectManager.handleLoadAndGoToGraph,
             exampleProjects: projectManager.projects.filter(p => p.isExample),
             isAppBusy: isAppBusy,
