@@ -7,6 +7,7 @@ const WelcomeScreen = ({
   isLoadingInitial,
   apiKeyIsSet,
   onAddNewProjectFromFile,
+  onPasteNewProject,
   onLoadAndGoToGraph,
   exampleProjects,
   isAppBusy,

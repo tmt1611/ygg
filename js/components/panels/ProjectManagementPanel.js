@@ -4,7 +4,7 @@ import ProjectListItem from './ProjectListItem.js';
 
 const ProjectManagementPanel = ({
   projects, activeProjectId, onLoadProject, onRenameProject, onDeleteProject,
-  onAddNewProjectFromFile, onCreateEmptyProject, onSaveAsExample, onLoadAndGoToGraph,
+  onAddNewProjectFromFile, onCreateEmptyProject, onSaveAsExample, onLoadAndGoToGraph, onPasteNewProject,
   isAppBusy, currentTreeExists
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -37,7 +37,10 @@ const ProjectManagementPanel = ({
           React.createElement("span", { className: "button-icon", "aria-hidden": "true" }, "➕"), "Create New Project"
         ),
         React.createElement("button", { onClick: handleImportButtonClick, disabled: isAppBusy, className: "primary panel-button", title: "Import a project from a .json or .project.json file." },
-            React.createElement("span", { className: "button-icon", "aria-hidden": "true" }, "📄"), "Import from JSON"
+            React.createElement("span", { className: "button-icon", "aria-hidden": "true" }, "📄"), "Import from File"
+        ),
+        React.createElement("button", { onClick: onPasteNewProject, disabled: isAppBusy, className: "primary panel-button", title: "Create a new project by pasting JSON content." },
+            React.createElement("span", { className: "button-icon", "aria-hidden": "true" }, "📋"), "Paste from JSON"
         ),
         React.createElement("input", { type: "file", id: "import-project-input", accept: ".json,.project.json", onChange: onAddNewProjectFromFile, style: { display: 'none' }, disabled: isAppBusy }),
         React.createElement("button", { onClick: onSaveAsExample, disabled: !currentTreeExists || isAppBusy, className: "secondary panel-button", title: "Save the currently active tree structure as a new example project template." },

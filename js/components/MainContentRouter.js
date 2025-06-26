@@ -62,6 +62,7 @@ const MainContentRouter = ({
           onDeleteProject: projectManager.handleDeleteProject,
           onAddNewProjectFromFile: projectManager.handleAddNewProjectFromFile,
           onCreateEmptyProject: projectManager.handleCreateNewProject,
+          onPasteNewProject: projectManager.handlePasteNewProject,
           onSaveAsExample: projectManager.handleSaveCurrentTreeAsExampleProject,
           onLoadAndGoToGraph: projectManager.handleLoadAndGoToGraph,
           initialPrompt: initialPrompt,

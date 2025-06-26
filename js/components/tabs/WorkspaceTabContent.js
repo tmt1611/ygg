@@ -16,7 +16,7 @@ const StatDisplay = ({ label, value, valueClassName }) => (
 );
 
 const WorkspaceTabContent = ({
-  projects, activeProjectId, onLoadProject, onRenameProject, onDeleteProject, onAddNewProjectFromFile, onCreateEmptyProject, onSaveAsExample, onLoadAndGoToGraph,
+  projects, activeProjectId, onLoadProject, onRenameProject, onDeleteProject, onAddNewProjectFromFile, onCreateEmptyProject, onSaveAsExample, onLoadAndGoToGraph, onPasteNewProject,
   initialPrompt, setInitialPrompt, handleGenerateTree, isLoadingInitial, handleDownloadTree,
   apiKeyHook,
   onExtractData, extractionMode, setExtractionMode, isSummarizing,
@@ -94,6 +94,7 @@ const WorkspaceTabContent = ({
             React.createElement(ProjectManagementPanel, {
               projects, activeProjectId, onLoadProject, onRenameProject, onDeleteProject, 
               onAddNewProjectFromFile, onCreateEmptyProject, onSaveAsExample, onLoadAndGoToGraph,
+              onPasteNewProject: projectManager.handlePasteNewProject,
               isAppBusy, currentTreeExists
             })
           ),

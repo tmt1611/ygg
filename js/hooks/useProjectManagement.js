@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { generateUUID, initializeNodes, findNodeById, updateNodeInTree, getAllNodesAsMap, downloadObjectAsJson, cleanTreeForExport } from '../utils.js';
 import { APP_STORAGE_KEYS, ELF_WARFARE_STRUCTURE_JSON_STRING, ADVANCED_NATURE_MAGIC_JSON_STRING } from '../constants.js';
 
@@ -437,11 +437,74 @@ export const useProjectManagement = ({
     }
   }, [projects, viewStates, handleSetActiveProject, setError]);
 
+  const handlePasteNewProject = useCallback(() => {
+    let pastedJson = '';
+    const handleInputChange = (e) => {
+      pastedJson = e.target.value;
+    };
+
+    const parseAndLoad = (jsonString) => {
+      try {
+        const parsedJson = JSON.parse(jsonString);
+        let newProject;
+
+        if (parsedJson.id && parsedJson.name && parsedJson.treeData && parsedJson.lastModified) {
+          newProject = { ...parsedJson, treeData: initializeNodes(parsedJson.treeData), isExample: parsedJson.isExample || false };
+        } else if (parsedJson.name && (Array.isArray(parsedJson.children) || parsedJson.children === undefined)) {
+          newProject = {
+            id: generateUUID(), name: parsedJson.name || "Pasted Project",
+            treeData: initializeNodes(parsedJson), lastModified: new Date().toISOString(), isExample: false
+          };
+        } else {
+          throw new Error("Invalid JSON structure for a project or tree. It must be a full project object or a single tree node object.");
+        }
+        
+        const existingProjectIndex = projects.findIndex(p => p.id === newProject.id);
+        if (existingProjectIndex !== -1) {
+          setProjects(prev => { const updated = [...prev]; updated[existingProjectIndex] = newProject; return updated; });
+          addHistoryEntry('PROJECT_IMPORTED', `Project "${newProject.name}" updated from pasted JSON.`);
+        } else {
+          setProjects(prev => [...prev, newProject]);
+          addHistoryEntry('PROJECT_IMPORTED', `Project "${newProject.name}" created from pasted JSON.`);
+        }
+        
+        handleSetActiveProject(newProject.id, newProject.isExample);
+        setError(null);
+        closeConfirmModal();
+
+      } catch (err) => {
+        setError({ message: err.message, details: err.stack });
+        // Don't close the modal on error
+      }
+    };
+    
+    openConfirmModal({
+      title: "Paste Project JSON",
+      message: React.createElement('div', null,
+        React.createElement('p', {style: {marginBottom: '10px'}}, 'Paste the complete JSON from your external AI tool below. This can be a full project object or just the root tree node object.'),
+        React.createElement('textarea', {
+          onChange: handleInputChange,
+          style: { width: '100%', minHeight: '200px', resize: 'vertical', fontFamily: 'monospace' },
+          placeholder: '{"id": "root...", "name": "...", "children": [...]}'
+        })
+      ),
+      confirmText: "Create Project from JSON",
+      onConfirm: () => {
+        if (!pastedJson.trim()) {
+          setError({ message: "Pasted content is empty." });
+          return;
+        }
+        parseAndLoad(pastedJson);
+      },
+    });
+  }, [projects, setProjects, addHistoryEntry, handleSetActiveProject, setError, openConfirmModal, closeConfirmModal]);
+
   return {
     projects, activeProjectId, setActiveProjectId,
     handleSetActiveProject, saveNewProject, handleCreateNewProject,
     handleAddNewProjectFromFile, handleSaveActiveProject, handleRenameProject,
     handleDeleteProject, handleSaveCurrentTreeAsExampleProject, handleLoadAndGoToGraph,
+    handlePasteNewProject,
     resetTreeForNewProjectContext, initializeDefaultProjects, saveProjectsToLocalStorage, internalRenameProject,
     updateProjectData, 
   };
