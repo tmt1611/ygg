@@ -141,11 +141,16 @@ export const useTreeOperationsAI = ({
     const suggestionToApply = pendingAiSuggestion; 
     if (suggestionToApply) {
       // The undo state was already set when the suggestion was generated.
-      // We annotate to get a consistent structure, then clean it for the main state.
-      const annotatedTree = compareAndAnnotateTree(baseForModalDiffProp, suggestionToApply);
+      // IMPORTANT: Initialize the tree first to assign real UUIDs to any new nodes.
+      // This preserves existing IDs, so it's safe to run before diffing.
+      const initializedTree = initializeNodes(suggestionToApply);
+
+      // We annotate to get a consistent structure with statuses, then clean it for the main state.
+      const annotatedTree = compareAndAnnotateTree(baseForModalDiffProp, initializedTree);
       const cleanTree = cleanTreeForState(annotatedTree.annotatedTree);
+      
       setTechTreeData(cleanTree);
-      addHistoryEntry('AI_MOD_CONFIRMED', 'AI modifications applied to project from modal.', { nodeCount: countNodesInTree(suggestionToApply), projectId: activeProjectId });
+      addHistoryEntry('AI_MOD_CONFIRMED', 'AI modifications applied to project from modal.', { nodeCount: countNodesInTree(initializedTree), projectId: activeProjectId });
       setModificationPrompt(''); 
       handleSaveActiveProject(false);
       if (viewStates) {
