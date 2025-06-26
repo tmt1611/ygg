@@ -1297,10 +1297,6 @@ html[data-theme-base='dark'] .ai-insights-list-item-name { color: var(--text-on-
 .ai-insights-list li input[type="checkbox"] {
   accent-color: var(--primary-accent);
 }
-
-.ai-insights-list li input[type="checkbox"] {
-  accent-color: var(--primary-accent);
-}
 .ai-insights-tag-list {
   display: flex;
   flex-wrap: wrap;
