@@ -190,35 +190,7 @@ const parseGeminiJsonResponse = (responseText, forModification = false) => {
 
 
 
-const parseGeminiJsonResponseForInsights = (responseText) => {
-    const jsonStr = extractJsonFromMarkdown(responseText);
-    if (!jsonStr) {
-      throw new Error("AI returned an empty response for insights.");
-    }
-    
-    try {
-        const parsed = JSON.parse(jsonStr);
-        if (typeof parsed !== 'object' || parsed === null ||
-            typeof parsed.suggested_description !== 'string' ||
-            !Array.isArray(parsed.potential_children) || 
-            !parsed.potential_children.every((item) => 
-                typeof item === 'object' && item !== null && 
-                typeof item.name === 'string' && 
-                typeof item.description === 'string'
-            ) ||
-            !Array.isArray(parsed.alternative_names) || 
-            !parsed.alternative_names.every((item) => typeof item === 'string') ||
-            !Array.isArray(parsed.key_concepts) || 
-            !parsed.key_concepts.every((item) => typeof item === 'string')) {
-            console.error("Gemini Insights JSON parsing error: Invalid structure.", parsed);
-            throw new Error("AI returned malformed JSON for insights. Expected 'suggested_description' (string), 'alternative_names' (array of strings), 'potential_children' (array of {name: string, description: string}), and 'key_concepts' (array of strings).");
-        }
-        return parsed;
-    } catch (e) {
-        console.error("Gemini Insights JSON parsing critical error. Raw text:", responseText, "Attempted to parse:", jsonStr, "Error:", e);
-        throw new Error(`AI returned invalid JSON for insights. ${e.message || 'Parsing failed.'}`);
-    }
-};
+
 
 const getQuickEditPrompt = (nodeToEdit, modificationPrompt) => {
   const systemInstruction = `You are an AI assistant that modifies a single JSON node object based on a user instruction.
@@ -608,35 +580,36 @@ export const generateStrategicSuggestions = withApiClient(async (
 });
 
 export const getPromptTextFor = (type, payload) => {
-  switch (type) {
-    case 'generateTree':
-      return getGenerateTechTreePrompt(payload.prompt).userPrompt;
-    case 'modifyTree':
-      return getModifyTechTreePrompt(payload.tree, payload.prompt, payload.lockedIds).userPrompt;
-    case 'quickEdit':
-      return getQuickEditPrompt(payload.node, payload.prompt).userPrompt;
-    case 'projectInsights':
-      return getProjectInsightsPrompt(payload.tree, payload.context).userPrompt;
-    case 'strategicSuggestions':
-      return getStrategicSuggestionsPrompt(payload.context, payload.summary).userPrompt;
-    default:
-      return "No prompt available for this action type.";
-  }
-};
+  const getPromptFunctions = {
+    generateTree: (p) => getGenerateTechTreePrompt(p.prompt),
+    modifyTree: (p) => getModifyTechTreePrompt(p.tree, p.prompt, p.lockedIds),
+    quickEdit: (p) => getQuickEditPrompt(p.node, p.prompt),
+    projectInsights: (p) => getProjectInsightsPrompt(p.tree, p.context),
+    strategicSuggestions: (p) => getStrategicSuggestionsPrompt(p.context, p.summary),
+  };
 
-export const getPromptTextFor = (type, payload) => {
-  switch (type) {
-    case 'generateTree':
-      return getGenerateTechTreePrompt(payload.prompt).userPrompt;
-    case 'modifyTree':
-      return getModifyTechTreePrompt(payload.tree, payload.prompt, payload.lockedIds).userPrompt;
-    case 'quickEdit':
-      return getQuickEditPrompt(payload.node, payload.prompt).userPrompt;
-    case 'projectInsights':
-      return getProjectInsightsPrompt(payload.tree, payload.context).userPrompt;
-    case 'strategicSuggestions':
-      return getStrategicSuggestionsPrompt(payload.context, payload.summary).userPrompt;
-    default:
-      return "No prompt available for this action type.";
+  const getPrompt = getPromptFunctions[type];
+  if (!getPrompt) {
+    return "No prompt available for this action type.";
   }
+  
+  const instructions = getPrompt(payload);
+  if (!instructions) return "Could not generate prompt preview.";
+
+  const systemInstructionText = instructions.systemInstruction || "No system instruction provided.";
+  
+  // Re-construct the user prompt with placeholders if payload values are strings,
+  // otherwise use the original prompt which contains the full data.
+  // This allows for clean previews without duplicating prompt logic.
+  const userPromptText = instructions.userPrompt
+    .replace(
+      JSON.stringify(payload.tree, null, 2), 
+      typeof payload.tree === 'string' ? payload.tree : JSON.stringify(payload.tree, null, 2)
+    )
+    .replace(
+      JSON.stringify(payload.node, null, 2), 
+      typeof payload.node === 'string' ? payload.node : JSON.stringify(payload.node, null, 2)
+    );
+
+  return `--- SYSTEM INSTRUCTION ---\n${systemInstructionText}\n\n--- USER PROMPT ---\n${userPromptText}`;
 };

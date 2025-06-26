@@ -133,7 +133,7 @@ const AppModals = ({
           onChangeImportanceOfAllChildren: nodeOperations.handleChangeImportanceOfAllChildren,
           onDeleteAllChildren: nodeOperations.handleDeleteAllChildren,
           onPasteNode: nodeOperations.handlePasteNode,
-          onGenerateInsights: () => onGenerateInsights(findNodeById(techTreeData, contextMenuNodeId)),
+          onGenerateInsights: onGenerateInsights,
           onLinkToProject: (nodeId) => projectLinkingHook.handleOpenLinkProjectModal(nodeId),
           onGoToLinkedProject: (projectId) => projectLinkingHook.handleNavigateToLinkedProject(projectId),
           onUnlinkProject: (nodeId) => projectLinkingHook.handleUnlinkProjectFromNode(nodeId),
