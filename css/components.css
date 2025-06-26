@@ -1269,11 +1269,6 @@ html[data-theme-base='dark'] .ai-insight-text { color: var(--text-on-dark-bg); }
 .ai-insights-list li:hover {
   background: rgba(var(--panel-bg-rgb), 0.3);
 }
-.ai-insights-list li.selected {
-  background-color: rgba(var(--primary-accent-rgb), 0.1);
-  border-left: 3px solid var(--primary-accent-light);
-  padding-left: 5px; /* Adjust for border */
-}
 .ai-insights-list-item-content {
   flex-grow: 1;
 }
