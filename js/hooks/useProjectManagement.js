@@ -247,13 +247,21 @@ export const useProjectManagement = ({
           const parsedJson = JSON.parse(content);
           let newProject;
           if (parsedJson.id && parsedJson.name && parsedJson.treeData && parsedJson.lastModified) {
+            // Full project object format
             newProject = { ...parsedJson, treeData: initializeNodes(parsedJson.treeData), isExample: parsedJson.isExample || false };
           } else if (parsedJson.name && parsedJson.tree) { 
+             // Older project object format
             newProject = {
               id: generateUUID(), name: parsedJson.context || parsedJson.name || file.name.replace(/\.json$|\.project\.json$/i, '') || "Imported Project",
               treeData: initializeNodes(parsedJson.tree), lastModified: new Date().toISOString(), isExample: false,
             };
-          } else { throw new Error("Invalid JSON structure for project import."); }
+          } else if (parsedJson.name && (Array.isArray(parsedJson.children) || parsedJson.children === undefined)) {
+            // A single tree node object, common from AI tools
+            newProject = {
+                id: generateUUID(), name: parsedJson.name || "Imported Project",
+                treeData: initializeNodes(parsedJson), lastModified: new Date().toISOString(), isExample: false
+            };
+          } else { throw new Error("Invalid JSON structure. It must be a full project object or a single tree node object."); }
           
           const existingProjectIndex = projects.findIndex(p => p.id === newProject.id);
           if (existingProjectIndex !== -1) {
@@ -449,8 +457,10 @@ export const useProjectManagement = ({
         let newProject;
 
         if (parsedJson.id && parsedJson.name && parsedJson.treeData && parsedJson.lastModified) {
+          // Full project object format
           newProject = { ...parsedJson, treeData: initializeNodes(parsedJson.treeData), isExample: parsedJson.isExample || false };
         } else if (parsedJson.name && (Array.isArray(parsedJson.children) || parsedJson.children === undefined)) {
+           // A single tree node object, common from AI tools
           newProject = {
             id: generateUUID(), name: parsedJson.name || "Pasted Project",
             treeData: initializeNodes(parsedJson), lastModified: new Date().toISOString(), isExample: false

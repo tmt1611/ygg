@@ -314,12 +314,25 @@ export const reinitializeNodeIds = (node, newParentId = null) => {
   if (!node) return null;
   // Create a new ID for the current node
   const newId = generateUUID();
-  // Create a new node object with the new ID and parent ID
-  const newNode = { ...node, id: newId, _parentId: newParentId };
+  
+  // Create a new node object with the new ID, parent ID, and all defaults.
+  // This ensures that pasted nodes are fully compliant with the app's data structure.
+  const newNode = {
+    ...node, // Keep any other properties from the paste
+    id: newId,
+    _parentId: newParentId,
+    name: node.name || "Pasted Node",
+    description: node.description ?? "",
+    isLocked: node.isLocked ?? false,
+    importance: ['minor', 'common', 'major'].includes(node.importance) ? node.importance : 'common',
+    children: Array.isArray(node.children) ? node.children : [],
+    linkedProjectId: node.linkedProjectId ?? null, // Preserve links if they exist, but they might be invalid in the new context.
+    linkedProjectName: node.linkedProjectName ?? null,
+  };
   
   // If there are children, recursively call this function for each child,
   // passing the new ID of the current node as their new parent ID.
-  if (newNode.children && newNode.children.length > 0) {
+  if (newNode.children.length > 0) {
     newNode.children = newNode.children.map(child => reinitializeNodeIds(child, newId));
   }
   

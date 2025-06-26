@@ -247,11 +247,14 @@ export const useNodeOperations = ({
       addHistoryEntry('NODE_CREATED', `Pasted node "${parsedNode.name}" as child of "${parentNode.name}".`);
 
     } catch (e) {
-      let errorMessage = "Failed to paste node from clipboard.";
+      let errorMessage;
       if (e instanceof SyntaxError) {
-        errorMessage = "Clipboard does not contain valid JSON.";
+        errorMessage = "Could not paste: The content from the clipboard is not valid JSON.";
       } else if (e.message) {
-        errorMessage = e.message;
+        // Use the specific message if available (e.g., from our validation)
+        errorMessage = `Could not paste node: ${e.message}`;
+      } else {
+        errorMessage = "An unknown error occurred while trying to paste from the clipboard.";
       }
       console.error("Paste Error:", e);
       setError(errorMessage);
