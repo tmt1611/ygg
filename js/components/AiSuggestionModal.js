@@ -45,6 +45,38 @@ const AiSuggestionModal = ({
     return compareAndAnnotateTree(currentTreeForDiff, suggestion);
   }, [currentTreeForDiff, suggestion, isOpen]);
 
+  const removedNodesTree = useMemo(() => {
+    if (!comparisonResult || !comparisonResult.removedNodes.length) return [];
+    
+    // Add the status to every node first and prepare for tree building
+    const removedNodesWithStatus = comparisonResult.removedNodes.map(n => ({
+        ...n,
+        _changeStatus: 'removed',
+        children: []
+    }));
+
+    const removedNodesById = new Map(removedNodesWithStatus.map(n => [n.id, n]));
+    const rootRemovedNodes = [];
+
+    removedNodesById.forEach(node => {
+        // A node is a root of a removed subtree if its parent is NOT in the removed list.
+        if (!node._parentId || !removedNodesById.has(node._parentId)) {
+            rootRemovedNodes.push(node);
+        } else {
+            // It's a child of another removed node.
+            const parent = removedNodesById.get(node._parentId);
+            if (parent) {
+                // Ensure children are not duplicated if map iteration order is weird
+                if (!parent.children.some(c => c.id === node.id)) {
+                    parent.children.push(node);
+                }
+            }
+        }
+    });
+
+    return rootRemovedNodes;
+  }, [comparisonResult]);
+
   const displayTree = useMemo(() => {
     if (!comparisonResult) return null;
     const { annotatedTree } = comparisonResult;
@@ -128,38 +160,6 @@ const AiSuggestionModal = ({
       sessionStorage.setItem('aiSuggestionModalSummaryVisible', JSON.stringify(isSummaryVisible));
     }
   }, [isSummaryVisible, isOpen]);
-
-  const removedNodesTree = useMemo(() => {
-    if (!comparisonResult || !comparisonResult.removedNodes.length) return [];
-    
-    // Add the status to every node first and prepare for tree building
-    const removedNodesWithStatus = comparisonResult.removedNodes.map(n => ({
-        ...n,
-        _changeStatus: 'removed',
-        children: []
-    }));
-
-    const removedNodesById = new Map(removedNodesWithStatus.map(n => [n.id, n]));
-    const rootRemovedNodes = [];
-
-    removedNodesById.forEach(node => {
-        // A node is a root of a removed subtree if its parent is NOT in the removed list.
-        if (!node._parentId || !removedNodesById.has(node._parentId)) {
-            rootRemovedNodes.push(node);
-        } else {
-            // It's a child of another removed node.
-            const parent = removedNodesById.get(node._parentId);
-            if (parent) {
-                // Ensure children are not duplicated if map iteration order is weird
-                if (!parent.children.some(c => c.id === node.id)) {
-                    parent.children.push(node);
-                }
-            }
-        }
-    });
-
-    return rootRemovedNodes;
-  }, [comparisonResult]);
 
   useEffect(() => {
     if (isOpen) {
