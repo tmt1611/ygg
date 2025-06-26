@@ -84,35 +84,35 @@ const AiQuickEditModal = ({ isOpen, node, onConfirm, onCancel, apiKeyIsSet, sele
     setError(null);
     setDiff(null);
 
-    // Attempt to parse as JSON first. If it succeeds and is a valid node, treat it as manual input.
-    try {
-      // Use a raw parse, as our custom parser is too lenient for this initial check.
-      const parsedData = JSON.parse(prompt);
-      
-      if (typeof parsedData === 'object' && parsedData !== null && !Array.isArray(parsedData)) {
-        // It's a single object, now validate its shape.
-        const initializedNode = initializeNodes(parsedData, null);
-        
-        if (!isValidTechTreeNodeShape(initializedNode)) {
-          throw new Error("Pasted JSON does not have the required node structure (e.g., missing 'name').");
-        }
+    const isJsonAttempt = prompt.trim().startsWith('{');
 
+    if (isJsonAttempt) {
+      try {
+        const parsedData = JSON.parse(prompt);
+        if (typeof parsedData !== 'object' || parsedData === null || Array.isArray(parsedData)) {
+            throw new Error("Pasted content must be a single JSON object.");
+        }
+        const initializedNode = initializeNodes(parsedData, null);
+        if (!isValidTechTreeNodeShape(initializedNode)) {
+          throw new Error("Pasted JSON object does not have the required node structure (e.g., missing 'name').");
+        }
         const finalNode = { ...initializedNode, id: node.id }; // Enforce original ID
         setDiff({ from: node, to: finalNode });
+      } catch (e) {
+        setError({ message: `JSON Paste Error: ${e.message}. Please correct the JSON or enter a text prompt.` });
+      } finally {
         setIsLoading(false);
-        return; // Success, stop here.
       }
-    } catch (e) {
-      // It's not valid JSON, or failed validation. Fall through to treat as a text prompt.
-      // If no API key is set, we can show the JSON error now.
-      if (!apiKeyIsSet) {
-        setError({ message: `Input is not valid JSON and no API key is set for text prompts. Error: ${e.message}` });
-        setIsLoading(false);
-        return;
-      }
+      return; // Stop here after handling JSON attempt.
     }
 
-    // Treat as a natural language prompt
+    // If it's not a JSON attempt, treat as a natural language prompt.
+    if (!apiKeyIsSet) {
+        setError({ message: "An API Key is required to use text prompts for AI edits. Please set one in the Workspace." });
+        setIsLoading(false);
+        return;
+    }
+    
     try {
       const suggestedNode = await geminiService.generateQuickEdit(node, prompt, selectedModel);
       setDiff({ from: node, to: suggestedNode });
