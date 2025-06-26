@@ -9,6 +9,7 @@ const AiInsightsTab = ({
   isLoading,
   error,
   onGenerateInsights,
+  onApplyManualInsights,
   onUseDescription,
   onAddSuggestedChildToNode,
   onAddNewBranchToRoot,
@@ -36,6 +37,32 @@ const AiInsightsTab = ({
     );
   };
 
+  const handlePasteInsights = () => {
+    let pastedJson = '';
+    const handleInputChange = (e) => {
+      pastedJson = e.target.value;
+    };
+    modalManager.openConfirmModal({
+      title: "Paste AI Insights JSON",
+      message: React.createElement('div', null,
+        React.createElement('p', {style: {marginBottom: '10px'}}, 'Paste the complete JSON object from your external AI tool below.'),
+        React.createElement('textarea', {
+          onChange: handleInputChange,
+          style: { width: '100%', minHeight: '200px', resize: 'vertical', fontFamily: 'monospace' },
+          placeholder: '{"overall_summary": "...", "key_node_insights": [...], "suggested_new_branches": [...] }'
+        })
+      ),
+      confirmText: "Apply Insights",
+      onConfirm: () => {
+        if (!pastedJson.trim()) {
+          return;
+        }
+        onApplyManualInsights(pastedJson);
+        modalManager.closeConfirmModal();
+      },
+    });
+  };
+
   return (
     React.createElement("div", { className: "ai-insights-panel" },
       React.createElement("div", { className: "panel-header", style: { display: 'block' } },
@@ -50,7 +77,14 @@ const AiInsightsTab = ({
             className: "primary panel-button",
             style: { flexGrow: 1 },
             title: fetchButtonTitle
-          }, isLoading ? React.createElement("span", { className: "basic-spinner-animation" }) : '✨ Generate Insights'),
+          }, isLoading ? React.createElement("span", { className: "basic-spinner-animation" }) : '✨ Generate'),
+          React.createElement("button", {
+            onClick: handlePasteInsights,
+            disabled: !hasTechTreeData || isLoading || isAppBusy,
+            className: "secondary panel-button",
+            style: { flexGrow: 1 },
+            title: "Paste insights from an external AI tool"
+          }, "Paste..."),
           React.createElement("button", {
             onClick: handleShowPrompt,
             disabled: fetchButtonDisabled,

@@ -325,8 +325,10 @@ const App = () => {
           isAiSuggestionModalOpen: modalManager.isAiSuggestionModalOpen,
           initialPromptForStrategy: initialPrompt,
           strategicSuggestions: strategicSuggestions,
+          setStrategicSuggestions: setStrategicSuggestions,
           isFetchingStrategicSuggestions: isFetchingStrategicSuggestions,
           strategicSuggestionsError: strategicSuggestionsError,
+          setStrategicSuggestionsError: setStrategicSuggestionsError,
           onGenerateStrategicSuggestions: handleGenerateStrategicSuggestions,
           onApplyStrategicSuggestion: handleApplyStrategicSuggestion,
           // AI Insights Tab Props
@@ -334,6 +336,7 @@ const App = () => {
           aiInsightsIsLoading: aiInsightsIsLoading,
           aiInsightsError: aiInsightsError,
           onGenerateProjectInsights: handleGenerateProjectInsights,
+          onApplyManualInsights: aiInsightsHook.handleApplyManualInsights,
           onUseSuggestedDescription: aiInsightsHook.handleUseSuggestedDescription,
           onAddSuggestedChildToNode: aiInsightsHook.handleAddSuggestedChildToNode,
           onAddNewBranchToRoot: aiInsightsHook.handleAddNewBranchToRoot,

@@ -77,6 +77,23 @@ export const useAiInsights = ({
     setAiInsightsError(null);
   }, []);
 
+  const handleApplyManualInsights = useCallback((jsonString) => {
+    try {
+      const insights = JSON.parse(jsonString);
+      // Basic validation
+      if (typeof insights !== 'object' || insights === null || typeof insights.overall_summary !== 'string' || !Array.isArray(insights.key_node_insights) || !Array.isArray(insights.suggested_new_branches)) {
+        throw new Error("Invalid JSON structure for project insights.");
+      }
+      setAiInsightsData(insights);
+      setAiInsightsError(null);
+      addHistoryEntry('NODE_INSIGHTS_GENERATED', 'AI project insights applied from manual input.');
+    } catch (e) {
+      console.error("Error applying manual AI project insights:", e);
+      setAiInsightsError({ message: `Failed to apply manual insights. ${e.message}`, details: e.stack });
+      setAiInsightsData(null);
+    }
+  }, [addHistoryEntry]);
+
   return {
     aiInsightsIsLoading, aiInsightsData, aiInsightsError,
     handleGenerateProjectInsights,
@@ -84,5 +101,6 @@ export const useAiInsights = ({
     handleAddSuggestedChildToNode,
     handleAddNewBranchToRoot,
     clearAiInsights,
+    handleApplyManualInsights,
   };
 };

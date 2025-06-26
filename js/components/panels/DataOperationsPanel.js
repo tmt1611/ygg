@@ -24,6 +24,28 @@ const DataOperationsPanel = ({
     modalManager.openTechExtractionModal(promptText, "AI Summary Prompt");
   };
 
+  const handleManualSummary = () => {
+    let pastedText = '';
+    const handleInputChange = (e) => { pastedText = e.target.value; };
+    modalManager.openConfirmModal({
+      title: "Paste Manual Summary",
+      message: React.createElement('div', null,
+        React.createElement('p', {style: {marginBottom: '10px'}}, 'Paste the summary text from your external AI tool below.'),
+        React.createElement('textarea', {
+          onChange: handleInputChange,
+          style: { width: '100%', minHeight: '150px', resize: 'vertical' },
+          placeholder: 'The project is about...'
+        })
+      ),
+      confirmText: "Show Summary",
+      onConfirm: () => {
+        if (!pastedText.trim()) return;
+        modalManager.openTechExtractionModal(pastedText, "Manual AI Summary");
+        modalManager.closeConfirmModal();
+      }
+    });
+  };
+
   return (
     React.createElement("div", null,
       React.createElement("div", { style: { display: 'flex', flexDirection: 'column', gap: '15px' }},
@@ -66,7 +88,15 @@ const DataOperationsPanel = ({
                 "Summarizing..."
               )
             ) : 'Extract Data'
-          )
+          ),
+          React.createElement("hr", { style: { margin: '15px 0' }}),
+          React.createElement("button", {
+            onClick: handleManualSummary,
+            disabled: controlsDisabled,
+            className: "secondary",
+            style: { width: '100%' },
+            title: "Paste a summary from an external AI tool to view it in a modal."
+          }, "Paste & View Manual Summary...")
         )
       )
     )

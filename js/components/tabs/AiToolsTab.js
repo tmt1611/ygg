@@ -10,9 +10,9 @@ import { getLockedNodeIds, countNodesInTree } from '../../utils.js';
 const AiToolsTab = ({
   modificationPrompt, setModificationPrompt, treeOperationsAI, isAiModifying,
   canUndoAiMod, onUndoAiModification, isAiSuggestionModalOpen,
-  initialPromptForStrategy, strategicSuggestions, isFetchingStrategicSuggestions,
-  strategicSuggestionsError, onGenerateStrategicSuggestions,
-  onApplyStrategicSuggestion,
+  initialPromptForStrategy, strategicSuggestions, setStrategicSuggestions,
+  isFetchingStrategicSuggestions, strategicSuggestionsError, setStrategicSuggestionsError,
+  onGenerateStrategicSuggestions, onApplyStrategicSuggestion,
   apiKeyIsSet, hasTechTreeData, techTreeData, isAppBusy,
   collapsedPanels, onTogglePanel,
   modalManager
@@ -21,7 +21,7 @@ const AiToolsTab = ({
   const canGenerateStrategicSuggestions = apiKeyIsSet && !!initialPromptForStrategy?.trim() && !isAppBusy && !isFetchingStrategicSuggestions;
 
   const handleShowModificationPrompt = () => {
-    if (!techTreeData) return;
+    if (!techTreeData || !modificationPrompt.trim()) return;
     const promptText = getPromptTextFor('modifyTree', { tree: techTreeData, prompt: modificationPrompt, lockedIds: getLockedNodeIds(techTreeData) });
     modalManager.openTechExtractionModal(
       promptText,
@@ -30,17 +30,55 @@ const AiToolsTab = ({
   };
   
   const handleShowStrategicPrompt = () => {
-      let treeSummary = "No current tree structure or it's empty.";
-      if (techTreeData) {
-        treeSummary = `Current main branches: ${techTreeData.children?.map(c => c.name).join(', ') || 'None (root only)'}. Total nodes: ${countNodesInTree(techTreeData)}.`;
-      }
-      const promptText = getPromptTextFor('strategicSuggestions', { context: initialPromptForStrategy, summary: treeSummary });
-      modalManager.openTechExtractionModal(
+    if (!initialPromptForStrategy) return;
+    let treeSummary = "No current tree structure or it's empty.";
+    if (techTreeData) {
+      treeSummary = `Current main branches: ${techTreeData.children?.map(c => c.name).join(', ') || 'None (root only)'}. Total nodes: ${countNodesInTree(techTreeData)}.`;
+    }
+    const promptText = getPromptTextFor('strategicSuggestions', { context: initialPromptForStrategy, summary: treeSummary });
+    modalManager.openTechExtractionModal(
       promptText,
       "AI Strategic Advisor Prompt"
     );
   };
 
+  const handlePasteStrategicSuggestions = () => {
+    let pastedJson = '';
+    const handleInputChange = (e) => {
+      pastedJson = e.target.value;
+    };
+    modalManager.openConfirmModal({
+      title: "Paste Strategic Suggestions",
+      message: React.createElement('div', null,
+        React.createElement('p', {style: {marginBottom: '10px'}}, 'Paste the JSON array of strings from your external AI tool below.'),
+        React.createElement('textarea', {
+          onChange: handleInputChange,
+          style: { width: '100%', minHeight: '150px', resize: 'vertical', fontFamily: 'monospace' },
+          placeholder: '["Suggestion one", "Suggestion two", "Suggestion three"]'
+        })
+      ),
+      confirmText: "Apply Suggestions",
+      onConfirm: () => {
+        if (!pastedJson.trim()) {
+          return;
+        }
+        try {
+          const suggestions = JSON.parse(pastedJson);
+          if (Array.isArray(suggestions) && suggestions.every(s => typeof s === 'string')) {
+            setStrategicSuggestions(suggestions);
+            if (setStrategicSuggestionsError) setStrategicSuggestionsError(null);
+            modalManager.closeConfirmModal();
+          } else {
+            throw new Error("Input must be a valid JSON array of strings.");
+          }
+        } catch (e) {
+          if (setStrategicSuggestionsError) {
+            setStrategicSuggestionsError({ message: `Failed to parse pasted suggestions. ${e.message}` });
+          }
+        }
+      },
+    });
+  };
 
   const treeModifierTitle = 'Tree Modifier AI';
 
@@ -67,6 +105,7 @@ const AiToolsTab = ({
         React.createElement("div", { style: { display: 'flex', gap: '8px', marginTop: '8px' }},
           React.createElement("button", {
             onClick: handleShowModificationPrompt,
+            disabled: !modificationPrompt.trim() || !hasTechTreeData,
             className: 'secondary',
             style: { flex: 1, fontSize: '0.85em' },
             title: "Show the prompt that will be sent to the AI"
@@ -109,10 +148,18 @@ const AiToolsTab = ({
             style: { flexGrow: 1 },
             title: !apiKeyIsSet ? "API Key required for AI suggestions." : !initialPromptForStrategy?.trim() ? "Project context (name/topic) must be set." : isAppBusy || isFetchingStrategicSuggestions ? "Processing another task..." : "Generate AI suggestions for project development"
           },
-            isFetchingStrategicSuggestions ? "Analyzing..." : "✨ Generate Ideas"
+            isFetchingStrategicSuggestions ? "Analyzing..." : "✨ Generate"
           ),
           React.createElement("button", {
+            onClick: handlePasteStrategicSuggestions,
+            disabled: isAppBusy || isFetchingStrategicSuggestions,
+            className: "secondary panel-button",
+            style: { flexGrow: 1 },
+            title: "Paste a list of suggestions from an external tool"
+          }, "Paste..."),
+          React.createElement("button", {
             onClick: handleShowStrategicPrompt,
+            disabled: !canGenerateStrategicSuggestions,
             className: 'secondary',
             style: { flexShrink: 0, padding: '0 10px' },
             title: "Show the prompt that will be sent to the AI"
@@ -120,7 +167,7 @@ const AiToolsTab = ({
         ),
 
         isFetchingStrategicSuggestions && React.createElement(LoadingSpinner, { message: null }),
-        strategicSuggestionsError && React.createElement(ErrorMessage, { error: strategicSuggestionsError, mode: "inline" }),
+        strategicSuggestionsError && React.createElement(ErrorMessage, { error: strategicSuggestionsError, onClose: () => setStrategicSuggestionsError(null), mode: "inline" }),
 
         strategicSuggestions && strategicSuggestions.length > 0 && (
           React.createElement("div", { style: { marginTop: '15px' } },

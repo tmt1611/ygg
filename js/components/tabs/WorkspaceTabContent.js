@@ -6,7 +6,14 @@ import DataOperationsPanel from '../panels/DataOperationsPanel.js';
 import CollapsiblePanel from '../CollapsiblePanel.js';
 import ContextualHelpTooltip from '../ContextualHelpTooltip.js';
 import { APP_STORAGE_KEYS } from '../../constants.js';
-import { getPromptTextFor } from '../../services/geminiService.js';
+import React, { useState, useEffect } from 'react';
+import ProjectManagementPanel from '../panels/ProjectManagementPanel.js';
+import ApiKeySetupPanel from '../panels/ApiKeySetupPanel.js';
+import AiGenerationPanel from '../panels/AiGenerationPanel.js';
+import DataOperationsPanel from '../panels/DataOperationsPanel.js';
+import CollapsiblePanel from '../CollapsiblePanel.js';
+import ContextualHelpTooltip from '../ContextualHelpTooltip.js';
+import { APP_STORAGE_KEYS } from '../../constants.js';
 import { getPromptTextFor } from '../../services/geminiService.js';
 
 const StatDisplay = ({ label, value, valueClassName }) => (
