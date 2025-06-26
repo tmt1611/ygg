@@ -2133,50 +2133,8 @@ html[data-theme-base='dark'] .panel-variant-sidebar .panel-toggle-button {
   margin-left: 4px;
   color: var(--error-color);
 }
-.error-message-inline .error-message-close-btn:hover {
-  background-color: rgba(var(--error-color-rgb, 220, 53, 69), 0.15);
-}
-
-
-
-.error-message-inline {
-  background-color: var(--error-bg);
-  color: var(--error-color);
-  border: 1px solid var(--error-color);
-  border-radius: var(--border-radius);
-  padding: 8px 12px;
-  margin: 5px 0;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 0.9em;
-}
-.error-message-inline .error-icon {
-  font-size: 1.2em;
-  line-height: 1;
-  flex-shrink: 0;
-}
-.error-message-inline .error-message-close-btn {
-  font-size: 1.4em;
-  padding: 0;
-  width: 22px;
-  height: 22px;
-  line-height: 1;
-  flex-shrink: 0;
-  margin-left: auto;
-  color: var(--error-color);
-}
-.error-message-inline .error-message-copy-btn {
-  font-size: 1.2em;
-  padding: 0;
-  width: 22px;
-  height: 22px;
-  line-height: 1;
-  flex-shrink: 0;
-  margin-left: 4px;
-  color: var(--error-color);
-}
-.error-message-inline .error-message-close-btn:hover {
+.error-message-inline .error-message-close-btn:hover,
+.error-message-inline .error-message-copy-btn:hover {
   background-color: rgba(var(--error-color-rgb, 220, 53, 69), 0.15);
 }
 
