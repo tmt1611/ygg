@@ -63,15 +63,17 @@ const FocusViewComponent = ({
       return `M${p1.x},${p1.y} C${p1.x},${midY} ${p2.x},${midY} ${p2.x},${p2.y}`;
     };
 
-    if (focusPos && parentNodeData) {
+    if (parentNodeData) {
         const parentPos = allNodePositions.get(parentNodeData.id);
         if (parentPos) {
-            // Connect parent to focus node and all siblings
-            const allChildrenOnFocusLevel = [focusNodeData, ...siblingsNodeData];
-            allChildrenOnFocusLevel.forEach(childNode => {
-                const childPos = allNodePositions.get(childNode.id);
-                if (childPos) {
-                    lines.push({ d: getPath(parentPos, childPos), id: `line-parent-${parentNodeData.id}-to-${childNode.id}` });
+            // Connect parent to focus node
+            if(focusPos) lines.push({ d: getPath(parentPos, focusPos), id: `line-parent-to-focus`, className: 'focus-view-parent-line' });
+
+            // Connect parent to all siblings
+            siblingsNodeData.forEach(siblingNode => {
+                const siblingPos = allNodePositions.get(siblingNode.id);
+                if (siblingPos) {
+                    lines.push({ d: getPath(parentPos, siblingPos), id: `line-parent-to-sibling-${siblingNode.id}`, className: 'focus-view-parent-line' });
                 }
             });
         }
@@ -79,11 +81,11 @@ const FocusViewComponent = ({
     if (focusPos) {
         childrenNodeData.forEach(child => {
             const childPos = allNodePositions.get(child.id);
-            if (childPos) lines.push({ d: getPath(focusPos, childPos), id: `line-${focusNodeId}-to-child-${child.id}` });
+            if (childPos) lines.push({ d: getPath(focusPos, childPos), id: `line-${focusNodeId}-to-child-${child.id}`, className: 'focus-view-child-line' });
         });
     }
     return lines;
-  }, [allNodePositions, focusNodeId, parentNodeData, childrenNodeData, siblingsNodeData, focusNodeData]);
+  }, [allNodePositions, focusNodeId, parentNodeData, childrenNodeData, siblingsNodeData]);
 
   const handleNodeClick = useCallback((nodeId, isFocusTarget = false) => {
     onSelectNodeInPanel(nodeId);
@@ -153,6 +155,7 @@ const FocusViewComponent = ({
                 )
                 )
             ),
+            areaRects.siblings && React.createElement("div", { className: "focus-view-area-marker siblings-area", style: { top: `${areaRects.siblings.y}px`, left: `${areaRects.siblings.x}px`, width: `${areaRects.siblings.width}px`, height: `${areaRects.siblings.height}px` }}),
             areaRects.focus && React.createElement("div", { className: "focus-view-area-marker focus-area", style: { top: `${areaRects.focus.y}px`, left: `${areaRects.focus.x}px`, width: `${areaRects.focus.width}px`, height: `${areaRects.focus.height}px` }}),
             areaRects.children && React.createElement("div", { className: "focus-view-area-marker children-area", style: { top: `${areaRects.children.y}px`, left: `${areaRects.children.x}px`, width: `${areaRects.children.width}px`, height: `${areaRects.children.height}px` }},
                 childrenNodeData.length === 0 && (
@@ -167,7 +170,7 @@ const FocusViewComponent = ({
                 React.createElement("path", { 
                   key: line.id,
                   d: line.d,
-                  className: "focus-view-connector-line"
+                  className: line.className
                 })
               )
             ),

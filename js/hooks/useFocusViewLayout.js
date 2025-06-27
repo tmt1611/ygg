@@ -130,21 +130,27 @@ export const useFocusViewLayout = (
     if (parentNodeData) {
       positions.set(parentNodeData.id, { x: centerX, y: currentY + parentAreaHeight / 2, ...parentSize });
     }
-    currentY += parentAreaHeight + VERTICAL_SPACING / 2;
+    currentY += parentAreaHeight + VERTICAL_SPACING;
 
-    // --- 2. Focus & Siblings Area ---
-    const focusLevelNodes = [
-        ...siblingsDims.filter((_, i) => i % 2 === 0).reverse(),
-        {...focusSize, id: focusNodeData.id},
-        ...siblingsDims.filter((_, i) => i % 2 !== 0),
-    ];
+    // --- 2. Siblings Area (New) ---
+    if (siblingsNodeData.length > 0) {
+        const siblingsAreaStartY = currentY;
+        const { totalHeight: siblingsAreaContentHeight } = calculateAndPositionRows(siblingsDims, siblingsAreaStartY + AREA_PADDING, true);
+        const siblingsAreaHeight = siblingsAreaContentHeight > 0 ? siblingsAreaContentHeight + AREA_PADDING * 2 : 0;
+        if (siblingsAreaHeight > 0) {
+            areaRects.siblings = { x: 0, y: siblingsAreaStartY, width: layoutWidth, height: siblingsAreaHeight };
+            currentY += siblingsAreaHeight + VERTICAL_SPACING;
+        }
+    }
+
+    // --- 3. Focus Area ---
     const focusAreaStartY = currentY;
-    const { totalHeight: focusAreaContentHeight } = calculateAndPositionRows(focusLevelNodes, focusAreaStartY + AREA_PADDING, true);
-    const focusAreaHeight = focusAreaContentHeight > 0 ? focusAreaContentHeight + AREA_PADDING * 2 : 120;
+    const focusAreaHeight = focusSize.height + AREA_PADDING * 2;
     areaRects.focus = { x: 0, y: focusAreaStartY, width: layoutWidth, height: focusAreaHeight };
-    currentY = focusAreaStartY + focusAreaHeight + VERTICAL_SPACING / 2;
-    
-    // --- 3. Children Area ---
+    positions.set(focusNodeData.id, { x: centerX, y: focusAreaStartY + focusAreaHeight / 2, ...focusSize });
+    currentY += focusAreaHeight + VERTICAL_SPACING;
+
+    // --- 4. Children Area ---
     const childrenAreaStartY = currentY;
     const { totalHeight: childrenAreaContentHeight } = calculateAndPositionRows(childrenDims, childrenAreaStartY + AREA_PADDING, true);
     const childrenAreaHeight = childrenAreaContentHeight > 0 ? childrenAreaContentHeight + AREA_PADDING * 2 : 120;

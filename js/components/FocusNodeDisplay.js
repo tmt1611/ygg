@@ -60,8 +60,8 @@ const FocusNodeDisplay = React.memo(React.forwardRef(
           "celestial-body",
           `importance-${node.importance || 'common'}`,
           node.isLocked ? "is-locked" : "",
-          (node.linkedProjectId || (isRootNode && linkSourceInfo)) ? "has-link" : "", 
-          isLeaf ? "is-leaf-node" : "",
+          (node.linkedProjectId || (isRootNode && linkSourceInfo)) ? "has-link" : "",
+          !isLeaf ? "has-children" : "",
       ].filter(Boolean).join(" ");
 
       return {
