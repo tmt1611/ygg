@@ -131,8 +131,9 @@ export const useProjectManagement = ({
     }
   }, [activeProjectId, setTechTreeData, setInitialPrompt, setProjects]);
 
-  const handleSetActiveProject = useCallback((projectId, fromExample = false) => {
-    const projectToLoad = projects.find(p => p.id === projectId);
+  const handleSetActiveProject = useCallback((projectId, fromExample = false, projectObject = null) => {
+    // If a projectObject is provided, use it. Otherwise, find from the projects state array.
+    const projectToLoad = projectObject || projects.find(p => p.id === projectId);
     if (projectToLoad) {
       viewStates?.commonViewResetLogic(false);
       const initializedTree = initializeNodes(projectToLoad.treeData);
@@ -307,7 +308,7 @@ export const useProjectManagement = ({
           upsertProject(newProject);
           addHistoryEntry('PROJECT_IMPORTED', `Project "${newProject.name}" ${isUpdate ? 'updated' : 'imported'} from ${file.name}.`);
           
-          handleSetActiveProject(newProject.id, newProject.isExample);
+          handleSetActiveProject(newProject.id, newProject.isExample, newProject);
           setError(null);
         } catch (err) {
           setError({ message: `Failed to import project: ${err.message}` });
@@ -414,7 +415,7 @@ export const useProjectManagement = ({
         if (activeProjectId === projectId) {
             const nextUserProject = projectsWithLinksCleaned.find(p => !p.isExample);
             if(nextUserProject) {
-                handleSetActiveProject(nextUserProject.id);
+                handleSetActiveProject(nextUserProject.id, false, nextUserProject);
             } else {
                 resetTreeForNewProjectContext();
             }
