@@ -1463,6 +1463,20 @@ html[data-theme-base='dark'] .celestial-body.has-children {
     0 0 30px rgba(var(--focus-connector-stroke-rgb), 0.7),
     0 0 0 5px var(--focus-connector-stroke);
 }
+.celestial-body.has-children {
+  /* Add a prominent outer ring to signify it's a parent node.
+     This is achieved with a non-layout-affecting box-shadow instead of a border. */
+  box-shadow: 
+    inset 0 0 12px 2px rgba(0,0,0,0.4), /* Inner shadow for depth */
+    0 0 25px rgba(var(--focus-connector-stroke-rgb), 0.6), /* A softer glow */
+    0 0 0 5px var(--focus-connector-stroke); /* A sharp, solid-colored outer ring */
+}
+html[data-theme-base='dark'] .celestial-body.has-children {
+  box-shadow: 
+    inset 0 0 15px 3px rgba(0,0,0,0.5), 
+    0 0 30px rgba(var(--focus-connector-stroke-rgb), 0.7),
+    0 0 0 5px var(--focus-connector-stroke);
+}
 
 .celestial-body.is-locked::after { content: ''; position: absolute; top: -4px; left: -4px; right: -4px; bottom: -4px; border-radius: 50%; border: 2px dashed var(--focus-node-shield-color); animation: rotateShield 20s linear infinite; opacity: 0.7; pointer-events: none; }
 @keyframes rotateShield { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
