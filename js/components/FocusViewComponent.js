@@ -26,10 +26,10 @@ const getNodeRadiusForLayout = (node, isFocus = false) => {
         radius *= FOCUS_NODE_SCALE;
     }
     
-    // Add the 6px from the .has-children box-shadow if applicable.
+    // Add the 7px from the .has-children box-shadow if applicable.
     // The line should connect to this outer ring.
     if (node.children && node.children.length > 0) {
-        radius += 6;
+        radius += 7;
     }
     
     return radius;
