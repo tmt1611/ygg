@@ -11,6 +11,76 @@ const HORIZONTAL_NODE_GAP = 30;
 const VERTICAL_ROW_GAP = 30; // Spacing between rows of nodes within an area
 const AREA_PADDING = 20; // Padding inside area markers
 
+import { useState, useEffect, useMemo } from 'react';
+
+const NODE_SIZES_PX = {
+    minor: { width: 60, height: 60 },
+    common: { width: 90, height: 90 },
+    major: { width: 130, height: 130 },
+};
+const FOCUS_NODE_SCALE = 1.15;
+const VERTICAL_SPACING = 60; // Spacing between areas
+const HORIZONTAL_NODE_GAP = 30;
+const VERTICAL_ROW_GAP = 30; // Spacing between rows of nodes within an area
+const AREA_PADDING = 20; // Padding inside area markers
+
+/**
+ * A pure helper function to calculate node positions within an area, supporting wrapping.
+ * @returns {{totalHeight: number, positions: Map<string, object>}}
+ */
+const calculateNodeRowsAndPositions = (nodeDims, startY, layoutWidth, centerX) => {
+  const newPositions = new Map();
+  if (nodeDims.length === 0) {
+    return { totalHeight: 0, positions: newPositions };
+  }
+
+  const wrappingWidth = layoutWidth - (AREA_PADDING * 4);
+  const rows = [];
+  let currentRow = [];
+  let currentRowWidth = 0;
+
+  nodeDims.forEach(nodeDim => {
+    const requiredWidth = nodeDim.width + (currentRow.length > 0 ? HORIZONTAL_NODE_GAP : 0);
+    if (currentRow.length > 0 && currentRowWidth + requiredWidth > wrappingWidth) {
+      rows.push({ items: currentRow, width: currentRowWidth });
+      currentRow = [nodeDim];
+      currentRowWidth = nodeDim.width;
+    } else {
+      currentRow.push(nodeDim);
+      currentRowWidth += requiredWidth;
+    }
+  });
+  if (currentRow.length > 0) {
+    rows.push({ items: currentRow, width: currentRowWidth });
+  }
+
+  let rowY = startY;
+  let totalHeight = 0;
+
+  rows.forEach(row => {
+    const maxRowHeight = Math.max(...row.items.map(d => d.height), 0);
+    const rowCenterY = rowY + maxRowHeight / 2;
+    
+    const startX = centerX - row.width / 2;
+    let currentX = startX;
+    
+    row.items.forEach(childDim => {
+      newPositions.set(childDim.id, {
+        x: currentX + childDim.width / 2,
+        y: rowCenterY,
+        ...childDim,
+      });
+      currentX += childDim.width + HORIZONTAL_NODE_GAP;
+    });
+    
+    rowY += maxRowHeight + VERTICAL_ROW_GAP;
+    totalHeight += maxRowHeight + VERTICAL_ROW_GAP;
+  });
+
+  return { totalHeight: totalHeight > 0 ? totalHeight - VERTICAL_ROW_GAP : 0, positions: newPositions };
+};
+
+
 export const useFocusViewLayout = (
   layoutRef,
   focusNodeData,
@@ -70,58 +140,6 @@ export const useFocusViewLayout = (
     const centerX = layoutWidth / 2;
     
     let currentY = 0;
-    
-    // --- Helper to calculate and position rows of nodes ---
-    const calculateAndPositionRows = (nodeDims, startY, centerHorizontally = true) => {
-      if (nodeDims.length === 0) {
-        return { totalHeight: 0, endY: startY };
-      }
-      
-      const wrappingWidth = layoutWidth - (AREA_PADDING * 4); // Extra padding for safety
-      const rows = [];
-      let currentRow = [];
-      let currentRowWidth = 0;
-
-      nodeDims.forEach(nodeDim => {
-        const requiredWidth = nodeDim.width + (currentRow.length > 0 ? HORIZONTAL_NODE_GAP : 0);
-        if (currentRow.length > 0 && currentRowWidth + requiredWidth > wrappingWidth) {
-          rows.push({ items: currentRow, width: currentRowWidth });
-          currentRow = [nodeDim];
-          currentRowWidth = nodeDim.width;
-        } else {
-          currentRow.push(nodeDim);
-          currentRowWidth += requiredWidth;
-        }
-      });
-      if (currentRow.length > 0) {
-        rows.push({ items: currentRow, width: currentRowWidth });
-      }
-      
-      let rowY = startY;
-      let totalHeight = 0;
-      
-      rows.forEach(row => {
-        const maxRowHeight = Math.max(...row.items.map(d => d.height), 0);
-        const rowCenterY = rowY + maxRowHeight / 2;
-        
-        const startX = centerHorizontally ? centerX - row.width / 2 : AREA_PADDING * 2;
-        let currentX = startX;
-        
-        row.items.forEach(childDim => {
-          positions.set(childDim.id, {
-            x: currentX + childDim.width / 2,
-            y: rowCenterY,
-            ...childDim,
-          });
-          currentX += childDim.width + HORIZONTAL_NODE_GAP;
-        });
-        
-        rowY += maxRowHeight + VERTICAL_ROW_GAP;
-        totalHeight += maxRowHeight + VERTICAL_ROW_GAP;
-      });
-
-      return { totalHeight: totalHeight - VERTICAL_ROW_GAP };
-    };
 
     // --- 1. Parent Area ---
     const parentSize = parentNodeData ? NODE_SIZES_PX[parentNodeData.importance || 'common'] : { width: 100, height: 40 }; // Placeholder size
@@ -135,7 +153,9 @@ export const useFocusViewLayout = (
     // --- 2. Siblings Area (New) ---
     if (siblingsNodeData.length > 0) {
         const siblingsAreaStartY = currentY;
-        const { totalHeight: siblingsAreaContentHeight } = calculateAndPositionRows(siblingsDims, siblingsAreaStartY + AREA_PADDING, true);
+        const { totalHeight: siblingsAreaContentHeight, positions: siblingPositions } = calculateNodeRowsAndPositions(siblingsDims, siblingsAreaStartY + AREA_PADDING, layoutWidth, centerX);
+        siblingPositions.forEach((pos, id) => positions.set(id, pos));
+
         const siblingsAreaHeight = siblingsAreaContentHeight > 0 ? siblingsAreaContentHeight + AREA_PADDING * 2 : 0;
         if (siblingsAreaHeight > 0) {
             areaRects.siblings = { x: 0, y: siblingsAreaStartY, width: layoutWidth, height: siblingsAreaHeight };
@@ -152,7 +172,9 @@ export const useFocusViewLayout = (
 
     // --- 4. Children Area ---
     const childrenAreaStartY = currentY;
-    const { totalHeight: childrenAreaContentHeight } = calculateAndPositionRows(childrenDims, childrenAreaStartY + AREA_PADDING, true);
+    const { totalHeight: childrenAreaContentHeight, positions: childrenPositions } = calculateNodeRowsAndPositions(childrenDims, childrenAreaStartY + AREA_PADDING, layoutWidth, centerX);
+    childrenPositions.forEach((pos, id) => positions.set(id, pos));
+
     const childrenAreaHeight = childrenAreaContentHeight > 0 ? childrenAreaContentHeight + AREA_PADDING * 2 : 120;
     areaRects.children = { x: 0, y: childrenAreaStartY, width: layoutWidth, height: childrenAreaHeight };
     currentY = childrenAreaStartY + childrenAreaHeight;
