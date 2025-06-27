@@ -736,14 +736,15 @@ html[data-theme-base='dark'] .panel-header-icon { color: var(--primary-accent); 
 }
 
 .focus-view-parent-focus-line {
-  stroke: var(--focus-parent-connector-stroke); /* A different color from children lines */
+  stroke: var(--focus-parent-feed); /* Green */
 }
 
 .focus-view-child-line {
-  stroke: var(--focus-connector-stroke);
+  stroke: var(--focus-child-feed); /* Yellow */
 }
 @keyframes warpPulse { 0% { stroke-dasharray: 50 200; stroke-dashoffset: 0; } 50% { stroke-dasharray: 100 150; stroke-dashoffset: -125; } 100% { stroke-dasharray: 50 200; stroke-dashoffset: -250; } }
-#warp-arrow path { fill: var(--focus-connector-stroke); }
+#warp-arrow-parent path { fill: var(--focus-parent-feed); }
+#warp-arrow-child path { fill: var(--focus-child-feed); }
 
 .focus-view-area-marker {
   position: absolute;

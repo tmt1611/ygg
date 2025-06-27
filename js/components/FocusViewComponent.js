@@ -11,6 +11,20 @@ const getCurvePath = (p1, p2) => {
   return `M${p1.x},${p1.y} C${p1.x},${midY} ${p2.x},${midY} ${p2.x},${p2.y}`;
 };
 
+const NODE_SIZES_PX = {
+    minor: { width: 60, height: 60 },
+    common: { width: 90, height: 90 },
+    major: { width: 130, height: 130 },
+};
+const FOCUS_NODE_SCALE = 1.15;
+
+const getNodeRadiusForLayout = (node, isFocus = false) => {
+    if (!node) return NODE_SIZES_PX.common.width / 2;
+    const size = NODE_SIZES_PX[node.importance || 'common']?.width || NODE_SIZES_PX.common.width;
+    const radius = size / 2;
+    return isFocus ? radius * FOCUS_NODE_SCALE : radius;
+};
+
 const FocusViewComponent = ({
   treeData, focusNodeId, selectedNodeInPanelId, onSelectNodeInPanel, onChangeFocusNode,
   onExitFocusView, onOpenNodeEditModal, onToggleLock, onNodeImportanceChange, isAppBusy,
@@ -64,37 +78,65 @@ const FocusViewComponent = ({
     const lines = [];
     const focusPos = allNodePositions.get(focusNodeId);
 
-    if (parentNodeData) {
-        const parentPos = allNodePositions.get(parentNodeData.id);
-        if (parentPos) {
-            // Connect parent to focus node
-            if(focusPos) lines.push({
-                d: getCurvePath(parentPos, focusPos),
-                id: `line-parent-to-focus`,
-                className: 'focus-view-animated-line focus-view-parent-focus-line'
-            });
+    const nodeDataMap = new Map();
+    if (parentNodeData) nodeDataMap.set(parentNodeData.id, parentNodeData);
+    if (focusNodeData) nodeDataMap.set(focusNodeData.id, focusNodeData);
+    childrenNodeData.forEach(n => nodeDataMap.set(n.id, n));
+    siblingsNodeData.forEach(n => nodeDataMap.set(n.id, n));
 
-            // Connect parent to all siblings
-            siblingsNodeData.forEach(siblingNode => {
-                const siblingPos = allNodePositions.get(siblingNode.id);
-                if (siblingPos) {
-                    lines.push({ d: getCurvePath(parentPos, siblingPos), id: `line-parent-to-sibling-${siblingNode.id}`, className: 'focus-view-parent-line' });
-                }
-            });
+    const createShortenedPath = (sourceId, targetId, className) => {
+        const p1 = allNodePositions.get(sourceId);
+        const p2 = allNodePositions.get(targetId);
+        if (!p1 || !p2) return null;
+
+        const sourceNode = nodeDataMap.get(sourceId);
+        const targetNode = nodeDataMap.get(targetId);
+
+        const r1 = getNodeRadiusForLayout(sourceNode, sourceId === focusNodeId);
+        const r2 = getNodeRadiusForLayout(targetNode, targetId === focusNodeId);
+
+        const dx = p2.x - p1.x;
+        const dy = p2.y - p1.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        
+        // If nodes are overlapping, don't draw a line
+        if (dist <= r1 + r2) return null;
+
+        const startPoint = {
+            x: p1.x + (dx / dist) * r1,
+            y: p1.y + (dy / dist) * r1,
+        };
+        const endPoint = {
+            x: p2.x - (dx / dist) * r2,
+            y: p2.y - (dy / dist) * r2,
+        };
+
+        return {
+            d: getCurvePath(startPoint, endPoint),
+            id: `line-${sourceId}-to-${targetId}`,
+            className,
+        };
+    };
+
+    if (parentNodeData && focusPos) {
+        const parentToFocusLine = createShortenedPath(parentNodeData.id, focusNodeId, 'focus-view-animated-line focus-view-parent-focus-line');
+        if (parentToFocusLine) lines.push(parentToFocusLine);
+    }
+    
+    siblingsNodeData.forEach(siblingNode => {
+        if (parentNodeData) {
+            const parentToSiblingLine = createShortenedPath(parentNodeData.id, siblingNode.id, 'focus-view-parent-line');
+            if (parentToSiblingLine) lines.push(parentToSiblingLine);
         }
-    }
-    if (focusPos) {
-        childrenNodeData.forEach(child => {
-            const childPos = allNodePositions.get(child.id);
-            if (childPos) lines.push({
-                d: getCurvePath(focusPos, childPos),
-                id: `line-${focusNodeId}-to-child-${child.id}`,
-                className: 'focus-view-animated-line focus-view-child-line'
-            });
-        });
-    }
+    });
+
+    childrenNodeData.forEach(child => {
+        const focusToChildLine = createShortenedPath(focusNodeId, child.id, 'focus-view-animated-line focus-view-child-line');
+        if (focusToChildLine) lines.push(focusToChildLine);
+    });
+
     return lines;
-  }, [allNodePositions, focusNodeId, parentNodeData, childrenNodeData, siblingsNodeData]);
+  }, [allNodePositions, focusNodeId, parentNodeData, childrenNodeData, siblingsNodeData, focusNodeData]);
 
   const handleNodeClick = useCallback((nodeId, isFocusTarget = false) => {
     onSelectNodeInPanel(nodeId);

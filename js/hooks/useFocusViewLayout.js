@@ -133,61 +133,74 @@ export const useFocusViewLayout = (
     }
     currentY += parentAreaHeight + VERTICAL_SPACING;
 
-    // --- 2. Center Area (Focus + Siblings) ---
+    // --- 2. Center Area (Focus + Siblings) with Wrapping ---
     const centerAreaStartY = currentY;
     const focusSize = {
         width: NODE_SIZES_PX[focusNodeData.importance || 'common'].width * FOCUS_NODE_SCALE,
         height: NODE_SIZES_PX[focusNodeData.importance || 'common'].height * FOCUS_NODE_SCALE,
     };
 
+    const leftSiblingsDims = [];
+    const rightSiblingsDims = [];
     let leftWidth = 0, rightWidth = 0;
-    const leftSiblings = [], rightSiblings = [];
 
-    // Balance siblings by width
     siblingsDims.forEach(dim => {
       if (leftWidth <= rightWidth) {
-        leftSiblings.push(dim);
+        leftSiblingsDims.push(dim);
         leftWidth += dim.width + HORIZONTAL_NODE_GAP;
       } else {
-        rightSiblings.push(dim);
+        rightSiblingsDims.push(dim);
         rightWidth += dim.width + HORIZONTAL_NODE_GAP;
       }
     });
+
+    const sideAvailableWidth = Math.max(50, (layoutWidth - focusSize.width - HORIZONTAL_NODE_GAP * 2 - AREA_PADDING * 2) / 2);
     
-    const maxSiblingHeight = Math.max(0, ...siblingsDims.map(d => d.height));
-    const centerRowHeight = Math.max(focusSize.height, maxSiblingHeight);
-    const centerRowY = centerAreaStartY + centerRowHeight / 2 + AREA_PADDING;
+    const { totalHeight: leftHeight, positions: leftPositions } = calculateWrappedPositions(
+        leftSiblingsDims.reverse(),
+        sideAvailableWidth,
+        centerX - focusSize.width / 2 - HORIZONTAL_NODE_GAP - sideAvailableWidth,
+        0
+    );
+
+    const { totalHeight: rightHeight, positions: rightPositions } = calculateWrappedPositions(
+        rightSiblingsDims,
+        sideAvailableWidth,
+        centerX + focusSize.width / 2 + HORIZONTAL_NODE_GAP,
+        0
+    );
+
+    const maxCenterAreaContentHeight = Math.max(leftHeight, rightHeight, focusSize.height);
+    const centerRowY = centerAreaStartY + AREA_PADDING + maxCenterAreaContentHeight / 2;
 
     positions.set(focusNodeData.id, { x: centerX, y: centerRowY, ...focusSize });
     
-    // Position left siblings
-    let currentX = centerX - (focusSize.width / 2) - HORIZONTAL_NODE_GAP;
-    leftSiblings.reverse().forEach(dim => {
-        positions.set(dim.id, {
-            x: currentX - dim.width / 2,
-            y: centerRowY, ...dim
-        });
-        currentX -= (dim.width + HORIZONTAL_NODE_GAP);
+    const leftBlockYOffset = centerRowY - leftHeight / 2;
+    leftPositions.forEach((pos, id) => {
+        pos.y += leftBlockYOffset;
+        positions.set(id, pos);
     });
 
-    // Position right siblings
-    currentX = centerX + (focusSize.width / 2) + HORIZONTAL_NODE_GAP;
-    rightSiblings.forEach(dim => {
-        positions.set(dim.id, {
-            x: currentX + dim.width / 2,
-            y: centerRowY, ...dim
-        });
-        currentX += (dim.width + HORIZONTAL_NODE_GAP);
+    const rightBlockYOffset = centerRowY - rightHeight / 2;
+    rightPositions.forEach((pos, id) => {
+        pos.y += rightBlockYOffset;
+        positions.set(id, pos);
     });
-    
-    const centerAreaHeight = centerRowHeight + AREA_PADDING * 2;
+
+    const centerAreaHeight = maxCenterAreaContentHeight + AREA_PADDING * 2;
     areaRects.focus = { x: 0, y: centerAreaStartY, width: layoutWidth, height: centerAreaHeight };
     currentY += centerAreaHeight + VERTICAL_SPACING;
 
     // --- 3. Children Area ---
     const childrenAreaStartY = currentY;
-    const { totalHeight: childrenAreaContentHeight, positions: childrenPositions } = calculateNodeRowsAndPositions(childrenDims, childrenAreaStartY + AREA_PADDING, layoutWidth, centerX);
+    const { totalHeight: childrenAreaContentHeight, positions: childrenPositions } = calculateWrappedPositions(
+        childrenDims,
+        layoutWidth - AREA_PADDING * 2,
+        AREA_PADDING,
+        childrenAreaStartY + AREA_PADDING
+    );
     childrenPositions.forEach((pos, id) => positions.set(id, pos));
+
     const childrenAreaHeight = childrenAreaContentHeight > 0 ? childrenAreaContentHeight + AREA_PADDING * 2 : 120;
     areaRects.children = { x: 0, y: childrenAreaStartY, width: layoutWidth, height: childrenAreaHeight };
     currentY = childrenAreaStartY + childrenAreaHeight;
