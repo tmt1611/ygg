@@ -145,7 +145,7 @@ export const useFocusViewLayout = (
 
     // --- 3. Focus Area ---
     const focusAreaStartY = currentY;
-    const focusAreaHeight = focusSize.height + AREA_PADDING * 2;
+    const focusAreaHeight = focusSize.height + AREA_PADDING * 4; // Extra padding for emphasis
     areaRects.focus = { x: 0, y: focusAreaStartY, width: layoutWidth, height: focusAreaHeight };
     positions.set(focusNodeData.id, { x: centerX, y: focusAreaStartY + focusAreaHeight / 2, ...focusSize });
     currentY += focusAreaHeight + VERTICAL_SPACING;
