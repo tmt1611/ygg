@@ -1391,7 +1391,21 @@ html[data-theme-base='dark'] .history-item-summary .history-entity {
   -webkit-line-clamp: 5; /* Allow more lines for larger size */
   max-height: 6em; /* 5 lines * 1.2em line-height */
 }
-.celestial-body.is-locked::after { content: ''; position: absolute; top: -4px; left: -4px; right: -4px; bottom: -4px; border-radius: 50%; border: 2px dashed var(--focus-node-shield-color); animation: rotateShield 20s linear infinite; opacity: 0.7; }
+.celestial-body.is-leaf-node {
+  /* A more solid, less atmospheric look for leaf nodes */
+  box-shadow: inset 0 0 5px 2px rgba(0,0,0,0.15), 0 0 8px rgba(255,255,255,0.05);
+  border: 1px solid rgba(var(--focus-panel-text), 0.3);
+}
+.celestial-body.is-leaf-node.importance-minor {
+  background: radial-gradient(circle, var(--focus-node-asteroid-bg) 80%, var(--focus-node-asteroid-glow) 95%);
+}
+.celestial-body.is-leaf-node.importance-common {
+  background: radial-gradient(circle, var(--focus-node-planet-bg) 85%, var(--focus-node-planet-glow) 98%);
+}
+.celestial-body.is-leaf-node.importance-major {
+   border-color: var(--focus-node-star-glow);
+}
+.celestial-body.is-locked::after { content: ''; position: absolute; top: -4px; left: -4px; right: -4px; bottom: -4px; border-radius: 50%; border: 2px dashed var(--focus-node-shield-color); animation: rotateShield 20s linear infinite; opacity: 0.7; pointer-events: none; }
 @keyframes rotateShield { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 .celestial-body.has-link .celestial-body-link-indicator { animation: pulseBeacon 1.5s infinite alternate; }
 @keyframes pulseBeacon { from { opacity: 0.6; transform: scale(1); } to { opacity: 1; transform: scale(1.2); } }

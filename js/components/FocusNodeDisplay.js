@@ -20,9 +20,15 @@ const FocusNodeDisplay = React.memo(React.forwardRef(
       }
       
       const importanceLabel = node.importance ? node.importance.charAt(0).toUpperCase() + node.importance.slice(1) : 'Common';
-      
+      const isLeaf = !node.children || node.children.length === 0;
+
       const titleLines = [`Object: ${node.name}`, `Importance: ${importanceLabel}`];
       const ariaLabelParts = [`Celestial Object: ${node.name}`, `Importance: ${importanceLabel}`];
+      
+      if(isLeaf) {
+        titleLines.push('Type: Terminal System (No Subsystems)');
+        ariaLabelParts.push('Terminal System');
+      }
 
       const truncatedDescription = node.description 
         ? (node.description.length > 100 ? `${node.description.substring(0, 100)}...` : node.description)
@@ -55,6 +61,7 @@ const FocusNodeDisplay = React.memo(React.forwardRef(
           `importance-${node.importance || 'common'}`,
           node.isLocked ? "is-locked" : "",
           (node.linkedProjectId || (isRootNode && linkSourceInfo)) ? "has-link" : "", 
+          isLeaf ? "is-leaf-node" : "",
       ].filter(Boolean).join(" ");
 
       return {

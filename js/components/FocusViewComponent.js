@@ -45,7 +45,7 @@ const FocusViewComponent = ({
   }, [isFocusNodeRoot, activeProjectId, projects, findLinkSource]);
 
   const layoutRef = useRef(null); 
-  const { positions: allNodePositions, height: layoutHeight } = useFocusViewLayout(layoutRef, focusNodeData, parentNodeData, childrenNodeData, siblingsNodeData);
+  const { positions: allNodePositions, width: layoutWidth, height: layoutHeight } = useFocusViewLayout(layoutRef, focusNodeData, parentNodeData, childrenNodeData, siblingsNodeData);
 
   const connectorLines = useMemo(() => {
     if (!allNodePositions || allNodePositions.size === 0) return [];
@@ -155,7 +155,7 @@ const FocusViewComponent = ({
       React.createElement("div", { className: "focus-view-container" },
         React.createElement("div", { className: "focus-view-main-area" },
           React.createElement("div", { ref: layoutRef, className: "focus-view-layout", style: { minHeight: `${layoutHeight}px` }, onScroll: onCloseContextMenu },
-            React.createElement("svg", { className: "focus-view-svg-overlay", style: { height: `${layoutHeight}px` } },
+            React.createElement("svg", { className: "focus-view-svg-overlay", style: { width: `${layoutWidth}px`, height: `${layoutHeight}px` } },
               connectorLines.map(line => 
                 React.createElement("path", { 
                   key: line.id,
