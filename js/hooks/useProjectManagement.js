@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import { generateUUID, initializeNodes, findNodeById, updateNodeInTree, getAllNodesAsMap, downloadObjectAsJson, cleanTreeForExport } from '../utils.js';
+import { generateUUID, initializeNodes, findNodeById, updateNodeInTree, getAllNodesAsMap, downloadObjectAsJson, cleanTreeForExport, isValidTechTreeNodeShape } from '../utils.js';
 import { APP_STORAGE_KEYS, ELF_WARFARE_STRUCTURE_JSON_STRING, ADVANCED_NATURE_MAGIC_JSON_STRING } from '../constants.js';
 
 const downloadProjectFile = (project, addHistoryEntry) => {
@@ -44,69 +44,67 @@ export const useProjectManagement = ({
   useEffect(() => { saveProjectsToLocalStorage(); }, [saveProjectsToLocalStorage]);
 
   const updateProjectData = useCallback((projectId, newTreeData, newName) => {
-    setProjects(prevProjects => {
-      const projectIndex = prevProjects.findIndex(p => p.id === projectId);
-      if (projectIndex === -1) {
-        console.warn(`updateProjectData: Project with ID ${projectId} not found.`);
-        return prevProjects;
+  setProjects(prevProjects => {
+    const projectIndex = prevProjects.findIndex(p => p.id === projectId);
+    if (projectIndex === -1) {
+      console.warn(`updateProjectData: Project with ID ${projectId} not found.`);
+      return prevProjects;
+    }
+    const updatedProjects = [...prevProjects];
+    const projectToUpdate = updatedProjects[projectIndex];
+    updatedProjects[projectIndex] = {
+      ...projectToUpdate,
+      name: newName || projectToUpdate.name,
+      treeData: newTreeData,
+      lastModified: new Date().toISOString(),
+    };
+    return updatedProjects;
+  });
+  if (projectId === activeProjectId) {
+    setTechTreeData(newTreeData);
+    if (newName) {
+      setInitialPrompt(newName);
+    }
+  }
+}, [activeProjectId, setTechTreeData, setInitialPrompt]);
+
+const _loadProjectsFromStorage = useCallback(() => {
+  try {
+    const storedProjects = localStorage.getItem(APP_STORAGE_KEYS.PROJECT_COLLECTION);
+    if (storedProjects) {
+      const parsed = JSON.parse(storedProjects);
+      if (Array.isArray(parsed) && parsed.every(p => p.id && p.name && p.treeData && p.lastModified)) {
+        return parsed.map(p => ({ ...p, treeData: initializeNodes(p.treeData) }));
       }
-      const updatedProjects = [...prevProjects];
-      const projectToUpdate = updatedProjects[projectIndex];
-      updatedProjects[projectIndex] = {
-        ...projectToUpdate,
-        name: newName || projectToUpdate.name,
-        treeData: newTreeData,
+    }
+  } catch (e) {
+    console.error("Error loading projects from storage:", e);
+    addHistoryEntry('PROJECT_LOADED', 'Failed to load projects from storage.', { error: e.message });
+  }
+  return [];
+}, [addHistoryEntry]);
+
+const _addMissingExampleProjects = useCallback((projectsList) => {
+  let newProjects = [...projectsList];
+  const examplesData = [
+    { parsedData: JSON.parse(ELF_WARFARE_STRUCTURE_JSON_STRING), name: "Elven Warfare Doctrines" },
+    { parsedData: JSON.parse(ADVANCED_NATURE_MAGIC_JSON_STRING), name: "Advanced Nature Magic" },
+  ];
+
+  examplesData.forEach(example => {
+    const exampleExists = newProjects.some(p => p.isExample && p.treeData.id === example.parsedData.tree.id);
+    if (!exampleExists) {
+      newProjects.push({
+        id: generateUUID(),
+        name: example.parsedData.tree.name || example.name,
+        treeData: initializeNodes(example.parsedData.tree),
         lastModified: new Date().toISOString(),
-      };
-      return updatedProjects;
-    });
-    if (projectId === activeProjectId) {
-      setTechTreeData(newTreeData);
-      if (newName) {
-        setInitialPrompt(newName);
-      }
-    }
-  }, [activeProjectId, setTechTreeData, setInitialPrompt]);
-
-  const _loadProjectsFromStorage = useCallback(() => {
-    try {
-      const storedProjects = localStorage.getItem(APP_STORAGE_KEYS.PROJECT_COLLECTION);
-      if (storedProjects) {
-        const parsed = JSON.parse(storedProjects);
-        if (Array.isArray(parsed) && parsed.every(p => p.id && p.name && p.treeData && p.lastModified)) {
-          return parsed.map(p => ({ ...p, treeData: initializeNodes(p.treeData) }));
-        }
-      }
-    } catch (e) {
-      console.error("Error loading projects from storage:", e);
-      addHistoryEntry('PROJECT_LOADED', 'Failed to load projects from storage.', { error: e.message });
-    }
-    return [];
-  }, [addHistoryEntry]);
-
-  const _addMissingExampleProjects = useCallback((projectsList) => {
-      let newProjects = [...projectsList];
-      const examplesData = [
-          { parsedData: JSON.parse(ELF_WARFARE_STRUCTURE_JSON_STRING), name: "Elven Warfare Doctrines" },
-          { parsedData: JSON.parse(ADVANCED_NATURE_MAGIC_JSON_STRING), name: "Advanced Nature Magic" },
-      ];
-
-      examplesData.forEach(example => {
-          const exampleExists = newProjects.some(p => p.isExample && p.treeData.id === example.parsedData.tree.id);
-          if (!exampleExists) {
-              newProjects.push({
-                  id: generateUUID(),
-                  name: example.parsedData.tree.name || example.name,
-                  treeData: initializeNodes(example.parsedData.tree),
-                  lastModified: new Date().toISOString(),
-                  isExample: true,
-              });
-          }
+        isExample: true,
       });
-      return newProjects;
-  }, []);
-
-
+    }
+  });
+  return newProjects;
+}, []);
 
   const _setActiveInitialProject = useCallback((allProjects) => {
     const startupLogged = localStorage.getItem(APP_STORAGE_KEYS.STARTUP_LOAD_LOGGED);
@@ -263,7 +261,7 @@ export const useProjectManagement = ({
             throw new Error("Invalid JSON structure. Must be a full project object, an older project object with a 'tree' property, or a single valid tree node.");
           }
 
-          newProject = {
+          let newProject = {
             id: existingId || generateUUID(),
             name: projectName || file.name.replace(/\.json$|\.project\.json$/i, '') || "Imported Project",
             treeData: initializeNodes(treeObject),
@@ -281,8 +279,12 @@ export const useProjectManagement = ({
           }
           handleSetActiveProject(newProject.id, newProject.isExample);
           setError(null);
-        } catch (err) { setError(err); console.error("Project File Load Error:", err); }
-        finally { event.target.value = ''; }
+        } catch (err) {
+          setError({ message: `Failed to import project: ${err.message}` });
+          console.error("Project File Load Error:", err);
+        } finally {
+          event.target.value = '';
+        }
       };
       reader.readAsText(file);
     }
