@@ -102,25 +102,26 @@
         --graph-radial-color-1: rgba(112, 92, 77, 0.04);
         --graph-radial-color-2: rgba(46, 125, 50, 0.02);
 
-        --focus-stellar-bg: #E8F0F8;
-        --focus-connector-stroke: #3498DB;
-        --focus-connector-stroke-rgb: 52,152,219;
-        --focus-node-asteroid-bg: #A0A0B0;
-        --focus-node-asteroid-glow: #B0B0C0;
-        --focus-node-planet-bg: #6F8FAF;
-        --focus-node-planet-glow: #8FA9C9;
-        --focus-node-star-bg: #F39C12;
-        --focus-node-star-glow: #F5B041;
-        --focus-node-shield-color: #5DADE2;
-        --focus-node-beacon-color: #F1C40F;
+        --focus-stellar-bg: #F0F4F8;
+        --focus-stellar-bg-rgb: 240, 244, 248;
+        --focus-connector-stroke: var(--primary-accent);
+        --focus-connector-stroke-rgb: var(--primary-accent-rgb);
+        --focus-node-asteroid-bg: #B0BEC5;
+        --focus-node-asteroid-glow: #CFD8DC;
+        --focus-node-planet-bg: #4CAF50;
+        --focus-node-planet-glow: #81C784;
+        --focus-node-star-bg: var(--secondary-accent);
+        --focus-node-star-glow: #A1887F;
+        --focus-node-shield-color: var(--primary-accent-light);
+        --focus-node-beacon-color: var(--primary-accent-dark);
         --focus-panel-text: var(--text-primary);
         --focus-panel-text-rgb: 55,71,79;
-        --focus-parent-connector-stroke: #90A4AE; /* Cool Grey */
-        --focus-parent-feed: #2E7D32; /* Green for parent->focus line */
-        --focus-child-feed: #FBC02D; /* Yellow for focus->children line */
-        --focus-panel-bg: rgba(var(--panel-bg-rgb), 0.9);
-        --focus-placeholder-bg: rgba(var(--panel-alt-bg-rgb), 0.8);
+        --focus-parent-feed: var(--secondary-accent-dark);
+        --focus-child-feed: var(--primary-accent-dark);
+        --focus-panel-bg: rgba(var(--panel-bg-rgb), 0.95);
+        --focus-placeholder-bg: rgba(var(--panel-alt-bg-rgb), 0.9);
         --focus-placeholder-text: var(--text-tertiary);
+        --focus-panel-control-bg: rgba(var(--focus-panel-text-rgb), 0.04);
 
         --font-family-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
         --font-family-serif-display: "Georgia", "Times New Roman", serif;
@@ -234,25 +235,26 @@
         --yggdrasil-leaf-green: #38A169;
 
         /* Focus View override for Dark Theme */
-        --focus-stellar-bg: #080B10; 
-        --focus-connector-stroke: var(--primary-accent-light); 
+        --focus-stellar-bg: #080B10;
+        --focus-stellar-bg-rgb: 8,11,16;
+        --focus-connector-stroke: var(--primary-accent-light);
         --focus-connector-stroke-rgb: 104,211,145;
-        --focus-node-asteroid-bg: #718096; 
+        --focus-node-asteroid-bg: #718096;
         --focus-node-asteroid-glow: #A0AEC0;
-        --focus-node-planet-bg: #2D3748; 
-        --focus-node-planet-glow: #4A5568;
-        --focus-node-star-bg: #38A169; 
-        --focus-node-star-glow: #68D391;
-        --focus-node-shield-color: #03a9f4; 
-        --focus-node-beacon-color: #fdd835; 
+        --focus-node-planet-bg: #4A5568;
+        --focus-node-planet-glow: #718096;
+        --focus-node-star-bg: var(--primary-accent);
+        --focus-node-star-glow: var(--primary-accent-light);
+        --focus-node-shield-color: var(--primary-accent-light);
+        --focus-node-beacon-color: var(--warning-color);
         --focus-panel-text: #E0E0E0;
         --focus-panel-text-rgb: 224,224,224;
-        --focus-parent-connector-stroke: #718096; /* Medium Cool Grey */
-        --focus-parent-feed: #68D391;
-        --focus-child-feed: #fdd835;
-        --focus-panel-bg: rgba(var(--panel-bg-rgb), 0.9); 
+        --focus-parent-feed: var(--secondary-accent-dark);
+        --focus-child-feed: var(--primary-accent);
+        --focus-panel-bg: rgba(var(--panel-bg-rgb), 0.9);
         --focus-placeholder-bg: rgba(var(--panel-alt-bg-rgb), 0.8);
-        --focus-placeholder-text: #a0a8c0;
+        --focus-placeholder-text: var(--text-secondary);
+        --focus-panel-control-bg: rgba(0,0,0,0.2);
       }
 
       /* Sol Theme (Ancient Scroll) */
@@ -330,25 +332,26 @@
         --yggdrasil-bark-border: #E0D8CE;
 
         /* Focus View override for Sol Theme */
-        --focus-stellar-bg: #F5EFE6; 
-        --focus-connector-stroke: var(--primary-accent); 
-        --focus-connector-stroke-rgb: 191,54,12;
-        --focus-node-asteroid-bg: #BCAAA4; 
+        --focus-stellar-bg: #F5EFE6;
+        --focus-stellar-bg-rgb: 245,239,230;
+        --focus-connector-stroke: var(--primary-accent);
+        --focus-connector-stroke-rgb: var(--primary-accent-rgb);
+        --focus-node-asteroid-bg: #BCAAA4;
         --focus-node-asteroid-glow: #D7CCC8;
-        --focus-node-planet-bg: #FFB74D; 
+        --focus-node-planet-bg: var(--secondary-accent);
         --focus-node-planet-glow: #FFD54F;
-        --focus-node-star-bg: #FF7043; 
-        --focus-node-star-glow: #FF8A65;
-        --focus-node-shield-color: #64B5F6; 
+        --focus-node-star-bg: var(--primary-accent);
+        --focus-node-star-glow: var(--primary-accent-light);
+        --focus-node-shield-color: var(--secondary-accent);
         --focus-node-beacon-color: var(--secondary-accent-dark);
         --focus-panel-text: var(--text-primary);
         --focus-panel-text-rgb: 93,64,55;
-        --focus-parent-connector-stroke: #A1887F; /* Sepia-like grey */
-        --focus-parent-feed: #8D6E63; /* Earthy Green */
-        --focus-child-feed: #FFA000; /* Gold Ink */
-        --focus-panel-bg: rgba(255, 255, 255, 0.85);
-        --focus-placeholder-bg: rgba(253,251,246, 0.8);
+        --focus-parent-feed: var(--text-tertiary);
+        --focus-child-feed: var(--primary-accent-dark);
+        --focus-panel-bg: rgba(var(--app-bg-rgb), 0.9);
+        --focus-placeholder-bg: rgba(var(--app-bg-rgb), 0.8);
         --focus-placeholder-text: var(--text-tertiary);
+        --focus-panel-control-bg: rgba(var(--focus-panel-text-rgb), 0.05);
       }
 
       /* Ocean Theme */
@@ -433,24 +436,25 @@
 
         /* Focus View override for Ocean Theme */
         --focus-stellar-bg: #01579B; /* Deep Ocean */
-        --focus-connector-stroke: #FFD54F; /* Sunlight through water */
-        --focus-connector-stroke-rgb: 255,213,79;
+        --focus-stellar-bg-rgb: 1,87,155;
+        --focus-connector-stroke: var(--secondary-accent); /* Sunlight through water */
+        --focus-connector-stroke-rgb: var(--secondary-accent-rgb);
         --focus-node-asteroid-bg: #455A64; /* Rock */
         --focus-node-asteroid-glow: #607D8B;
-        --focus-node-planet-bg: #0288D1; /* Water Planet */
-        --focus-node-planet-glow: #29B6F6;
-        --focus-node-star-bg: #FBC02D; /* Sun */
+        --focus-node-planet-bg: var(--primary-accent); /* Water Planet */
+        --focus-node-planet-glow: var(--primary-accent-light);
+        --focus-node-star-bg: var(--secondary-accent); /* Sun */
         --focus-node-star-glow: #FFF176;
-        --focus-node-shield-color: #4DD0E1; 
-        --focus-node-beacon-color: #FFD54F;
+        --focus-node-shield-color: var(--primary-accent-light);
+        --focus-node-beacon-color: var(--secondary-accent-dark);
         --focus-panel-text: #E1F5FE;
         --focus-panel-text-rgb: 225,245,254;
-        --focus-parent-connector-stroke: #B0BEC5; /* Light blue-grey */
-        --focus-parent-feed: #4DD0E1; /* Aqua */
-        --focus-child-feed: #FFD54F; /* Sunlight */
-        --focus-panel-bg: rgba(1, 87, 155, 0.85);
-        --focus-placeholder-bg: rgba(2, 119, 189, 0.8);
+        --focus-parent-feed: var(--primary-accent-light); /* Aqua */
+        --focus-child-feed: var(--secondary-accent-dark); /* Sunlight */
+        --focus-panel-bg: rgba(var(--focus-stellar-bg-rgb), 0.95);
+        --focus-placeholder-bg: rgba(var(--focus-stellar-bg-rgb), 0.7);
         --focus-placeholder-text: #B3E5FC;
+        --focus-panel-control-bg: rgba(var(--focus-panel-text-rgb), 0.05);
       }
 
       /* Nebula Theme */
@@ -531,25 +535,26 @@
         --yggdrasil-leaf-green: var(--success-color);
 
         /* Focus View override for Nebula Theme */
-        --focus-stellar-bg: #0a041a; 
-        --focus-connector-stroke: #ff00ff; /* Magenta */
-        --focus-connector-stroke-rgb: 255,0,255;
-        --focus-node-asteroid-bg: #6e407e; 
-        --focus-node-asteroid-glow: #8e5a9e;
-        --focus-node-planet-bg: #a777ff; 
-        --focus-node-planet-glow: #c39fff;
-        --focus-node-star-bg: #00e5ff; 
+        --focus-stellar-bg: #0a041a;
+        --focus-stellar-bg-rgb: 10,4,26;
+        --focus-connector-stroke: var(--secondary-accent); /* Cyan */
+        --focus-connector-stroke-rgb: var(--secondary-accent-rgb);
+        --focus-node-asteroid-bg: #4f417a;
+        --focus-node-asteroid-glow: #6e5a9e;
+        --focus-node-planet-bg: var(--primary-accent);
+        --focus-node-planet-glow: var(--primary-accent-light);
+        --focus-node-star-bg: var(--secondary-accent);
         --focus-node-star-glow: #66f5ff;
-        --focus-node-shield-color: var(--primary-accent); 
-        --focus-node-beacon-color: #eac54f;
+        --focus-node-shield-color: var(--primary-accent);
+        --focus-node-beacon-color: var(--warning-color);
         --focus-panel-text: #e0cffc;
         --focus-panel-text-rgb: 224,207,252;
-        --focus-parent-connector-stroke: #7f7f9f;
-        --focus-parent-feed: #00e5ff; /* Cyan */
-        --focus-child-feed: #a777ff; /* Purple */
-        --focus-panel-bg: rgba(30, 10, 50, 0.9);
-        --focus-placeholder-bg: rgba(20, 15, 40, 0.8);
-        --focus-placeholder-text: #a098c0;
+        --focus-parent-feed: var(--primary-accent-light);
+        --focus-child-feed: var(--secondary-accent-dark);
+        --focus-panel-bg: rgba(var(--panel-bg-rgb), 0.9);
+        --focus-placeholder-bg: rgba(var(--panel-alt-bg-rgb), 0.8);
+        --focus-placeholder-text: var(--text-tertiary);
+        --focus-panel-control-bg: rgba(0,0,0,0.2);
       }
 
       /* Synthwave Theme */
@@ -641,25 +646,26 @@
         --yggdrasil-leaf-green: var(--secondary-accent);
 
         /* Focus View override for Synthwave Theme */
-        --focus-stellar-bg: #000000; 
-        --focus-connector-stroke: var(--secondary-accent); 
-        --focus-connector-stroke-rgb: 0,240,255;
-        --focus-node-asteroid-bg: #4f21a5; 
+        --focus-stellar-bg: var(--app-bg);
+        --focus-stellar-bg-rgb: var(--app-bg-rgb);
+        --focus-connector-stroke: var(--secondary-accent);
+        --focus-connector-stroke-rgb: var(--secondary-accent-rgb);
+        --focus-node-asteroid-bg: #4f21a5;
         --focus-node-asteroid-glow: #6c35d4;
-        --focus-node-planet-bg: var(--primary-accent); 
+        --focus-node-planet-bg: var(--primary-accent);
         --focus-node-planet-glow: var(--primary-accent-light);
-        --focus-node-star-bg: #ffff00; /* Neon Yellow */
+        --focus-node-star-bg: var(--warning-color); /* Neon Yellow */
         --focus-node-star-glow: #ffff66;
-        --focus-node-shield-color: var(--secondary-accent); 
-        --focus-node-beacon-color: #ffff00;
+        --focus-node-shield-color: var(--secondary-accent);
+        --focus-node-beacon-color: var(--warning-color);
         --focus-panel-text: var(--text-primary);
         --focus-panel-text-rgb: 240,232,255;
-        --focus-parent-connector-stroke: #9088b0;
-        --focus-parent-feed: #00f0ff; /* Cyan */
-        --focus-child-feed: #ff00ff; /* Magenta */
-        --focus-panel-bg: rgba(26, 9, 56, 0.85);
-        --focus-placeholder-bg: rgba(36, 13, 82, 0.8);
+        --focus-parent-feed: var(--secondary-accent-dark);
+        --focus-child-feed: var(--primary-accent-dark);
+        --focus-panel-bg: rgba(var(--panel-bg-rgb), 0.9);
+        --focus-placeholder-bg: rgba(var(--panel-alt-bg-rgb), 0.8);
         --focus-placeholder-text: var(--text-secondary);
+        --focus-panel-control-bg: rgba(0,0,0,0.2);
       }
 
       /* Global Styles */
