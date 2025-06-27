@@ -5,15 +5,50 @@ import * as ReactDOM from 'react-dom/client';
 import App from './components/App.js';
 import ErrorBoundary from './components/ErrorBoundary.js';
 
+/**
+ * Displays a full-screen, self-contained error message.
+ * This is used for fatal errors that prevent the React app from rendering.
+ * @param {string} title The main title of the error message.
+ * @param {string} message A user-friendly explanation of the error.
+ * @param {string} [errorDetails] Optional technical details about the error.
+ */
+const displayFatalError = (title, message, errorDetails) => {
+  document.body.innerHTML = ''; // Clear the page to remove any broken UI
+  const errorDiv = document.createElement('div');
+  // Use inline styles for a self-contained error display that doesn't rely on external CSS
+  Object.assign(errorDiv.style, {
+    position: 'fixed',
+    inset: '0',
+    padding: '40px 20px',
+    backgroundColor: '#1a0000',
+    color: '#ffc0c0',
+    fontFamily: 'monospace, sans-serif',
+    zIndex: '9999',
+    overflow: 'auto',
+  });
+
+  let errorHtml = `
+    <div style="max-width: 800px; margin: auto; border: 1px solid #ff5050; padding: 20px 30px; background-color: #330000; border-radius: 8px;">
+      <h1 style="color: #ff8080; margin-top: 0;">${title}</h1>
+      <p style="font-size: 1.1em; line-height: 1.5;">${message}</p>`;
+
+  if (errorDetails) {
+    errorHtml += `
+      <hr style="border-color: #ff5050; margin: 20px 0;">
+      <pre style="white-space: pre-wrap; word-break: break-all; background-color: #1a0000; padding: 10px; border-radius: 4px;"><strong>Error:</strong> ${errorDetails}</pre>`;
+  }
+  errorHtml += `</div>`;
+  
+  errorDiv.innerHTML = errorHtml;
+  document.body.prepend(errorDiv);
+};
+
 const rootElement = document.getElementById('root');
 
 if (!rootElement) {
-  console.error("CRITICAL: Root element with ID 'root' not found in document. Yggdrasil cannot grow.");
-  // Attempt to create a visible error message for the user.
-  const errorDiv = document.createElement('div');
-  errorDiv.setAttribute('style', 'position:fixed; top:0; left:0; width:100%; padding:20px; background: #ffdddd; color: #d8000c; text-align:center; font-family:sans-serif; z-index:9999;');
-  errorDiv.innerHTML = '<h1>Critical Error</h1><p>The application could not start because a critical HTML element is missing. Please ensure the HTML is not corrupted.</p>';
-  document.body.prepend(errorDiv);
+  const errorMessage = 'The application could not start because the main HTML element (id="root") is missing. Please ensure the index.html file is not corrupted.';
+  console.error(`CRITICAL: Root element not found. ${errorMessage}`);
+  displayFatalError('Critical Error: Root Element Missing', errorMessage);
 } else {
   console.log('Root element found. Creating React root...');
   try {
@@ -28,22 +63,8 @@ if (!rootElement) {
     );
     console.log('Yggdrasil has taken root. App rendering initiated.');
   } catch (e) {
+    const errorMessage = 'An unexpected error prevented the application from rendering correctly. Please see the browser console for technical details. You can try reloading the page.';
     console.error('FATAL: An unhandled error occurred during the initial React render:', e);
-    // Display a more user-friendly error message if the render itself fails.
-    const errorDiv = document.createElement('div');
-    errorDiv.setAttribute('style', 'position:fixed; top:0; left:0; width:100%; padding:20px; background: #ffdddd; color: #d8000c; text-align:left; font-family:sans-serif; z-index:9999;');
-    errorDiv.innerHTML = `
-      <div style="max-width: 800px; margin: auto;">
-        <h1>Application failed to start</h1>
-        <p>An unexpected error prevented the application from rendering correctly. Please see the browser console for technical details.</p>
-        <p>You can try reloading the page. If the issue persists, the application files may be corrupted or there might be an incompatibility with your browser.</p>
-        <hr>
-        <pre><strong>Error:</strong> ${e.message}</pre>
-      </div>`;
-    // Clear the root element to avoid showing a broken partial render.
-    while (rootElement.firstChild) {
-      rootElement.removeChild(rootElement.firstChild);
-    }
-    rootElement.appendChild(errorDiv);
+    displayFatalError('Fatal Error: Application Failed to Render', errorMessage, e.message);
   }
 }
