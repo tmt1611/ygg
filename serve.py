@@ -8,7 +8,14 @@ PORT = 8080
 DIRECTORY = "." # Serve files from the current directory
 URL = f"http://localhost:{PORT}"
 
-Handler = partial(http.server.SimpleHTTPRequestHandler, directory=DIRECTORY)
+class NoCacheHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
+    def end_headers(self):
+        self.send_header("Cache-Control", "no-store, no-cache, must-revalidate")
+        self.send_header("Pragma", "no-cache")
+        self.send_header("Expires", "0")
+        super().end_headers()
+
+Handler = partial(NoCacheHTTPRequestHandler, directory=DIRECTORY)
 
 # Allow reusing the address to avoid "Address already in use" error on quick restarts
 socketserver.TCPServer.allow_reuse_address = True
