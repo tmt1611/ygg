@@ -11,19 +11,6 @@ const HORIZONTAL_NODE_GAP = 30;
 const VERTICAL_ROW_GAP = 30; // Spacing between rows of nodes within an area
 const AREA_PADDING = 20; // Padding inside area markers
 
-import { useState, useEffect, useMemo } from 'react';
-
-const NODE_SIZES_PX = {
-    minor: { width: 60, height: 60 },
-    common: { width: 90, height: 90 },
-    major: { width: 130, height: 130 },
-};
-const FOCUS_NODE_SCALE = 1.15;
-const VERTICAL_SPACING = 60; // Spacing between areas
-const HORIZONTAL_NODE_GAP = 30;
-const VERTICAL_ROW_GAP = 30; // Spacing between rows of nodes within an area
-const AREA_PADDING = 20; // Padding inside area markers
-
 /**
  * A pure helper function to calculate node positions within an area, supporting wrapping.
  * @returns {{totalHeight: number, positions: Map<string, object>}}
