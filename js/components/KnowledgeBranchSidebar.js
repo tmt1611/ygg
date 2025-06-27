@@ -44,6 +44,7 @@ const KnowledgeBranchSidebar = (props) => {
     localStorage.setItem(APP_STORAGE_KEYS.SIDEBAR_PANEL_STATES, JSON.stringify(Array.from(collapsedPanels)));
   }, [collapsedPanels]);
 
+
   return (
     React.createElement("aside", { className: `knowledge-branch-sidebar ${isCollapsed ? 'collapsed' : ''}` },
       React.createElement("div", { className: "sidebar-header" },
@@ -133,7 +134,7 @@ const KnowledgeBranchSidebar = (props) => {
               })
             ),
             activeSidebarTab === 'history' && (
-              React.createElement(HistoryViewTabContent, { history: props.history, onClearHistory: props.onClearHistory })
+              React.createElement(HistoryViewTabContent, { history: history })
             )
           )
         )
