@@ -1454,14 +1454,14 @@ html[data-theme-base='dark'] .history-item-summary .history-entity {
      This is achieved with a non-layout-affecting box-shadow instead of a border. */
   box-shadow: 
     inset 0 0 10px 3px rgba(0,0,0,0.35), /* Inner shadow for depth */
-    0 0 25px rgba(var(--focus-connector-stroke-rgb), 0.7), /* A wider glow */
-    0 0 0 6px rgba(var(--focus-connector-stroke-rgb), 0.9); /* A strong, solid-looking outer ring */
+    0 0 30px rgba(var(--focus-connector-stroke-rgb), 0.75), /* A wider glow */
+    0 0 0 7px rgba(var(--focus-connector-stroke-rgb), 0.95); /* A strong, solid-looking outer ring */
 }
 html[data-theme-base='dark'] .celestial-body.has-children {
   box-shadow: 
     inset 0 0 12px 4px rgba(0,0,0,0.45), 
-    0 0 30px rgba(var(--focus-connector-stroke-rgb), 0.8),
-    0 0 0 6px rgba(var(--focus-connector-stroke-rgb), 1);
+    0 0 35px rgba(var(--focus-connector-stroke-rgb), 0.8),
+    0 0 0 7px rgba(var(--focus-connector-stroke-rgb), 1);
 }
 .celestial-body.has-children.importance-major {
    border-color: var(--focus-node-star-glow);

@@ -5,6 +5,12 @@ import FocusViewDetailPanel from './FocusViewDetailPanel.js';
 import { useFocusViewLayout } from '../hooks/useFocusViewLayout.js';
 import PathToRootDisplay from './PathToRootDisplay.js';
 
+const getCurvePath = (p1, p2) => {
+  if (!p1 || !p2) return '';
+  const midY = (p1.y + p2.y) / 2;
+  return `M${p1.x},${p1.y} C${p1.x},${midY} ${p2.x},${midY} ${p2.x},${p2.y}`;
+};
+
 const FocusViewComponent = ({
   treeData, focusNodeId, selectedNodeInPanelId, onSelectNodeInPanel, onChangeFocusNode,
   onExitFocusView, onOpenNodeEditModal, onToggleLock, onNodeImportanceChange, isAppBusy,
@@ -58,22 +64,17 @@ const FocusViewComponent = ({
     const lines = [];
     const focusPos = allNodePositions.get(focusNodeId);
 
-    const getPath = (p1, p2) => {
-      const midY = (p1.y + p2.y) / 2;
-      return `M${p1.x},${p1.y} C${p1.x},${midY} ${p2.x},${midY} ${p2.x},${p2.y}`;
-    };
-
     if (parentNodeData) {
         const parentPos = allNodePositions.get(parentNodeData.id);
         if (parentPos) {
             // Connect parent to focus node
-            if(focusPos) lines.push({ d: getPath(parentPos, focusPos), id: `line-parent-to-focus`, className: 'focus-view-parent-line' });
+            if(focusPos) lines.push({ d: getCurvePath(parentPos, focusPos), id: `line-parent-to-focus`, className: 'focus-view-parent-line' });
 
             // Connect parent to all siblings
             siblingsNodeData.forEach(siblingNode => {
                 const siblingPos = allNodePositions.get(siblingNode.id);
                 if (siblingPos) {
-                    lines.push({ d: getPath(parentPos, siblingPos), id: `line-parent-to-sibling-${siblingNode.id}`, className: 'focus-view-parent-line' });
+                    lines.push({ d: getCurvePath(parentPos, siblingPos), id: `line-parent-to-sibling-${siblingNode.id}`, className: 'focus-view-parent-line' });
                 }
             });
         }
@@ -81,7 +82,7 @@ const FocusViewComponent = ({
     if (focusPos) {
         childrenNodeData.forEach(child => {
             const childPos = allNodePositions.get(child.id);
-            if (childPos) lines.push({ d: getPath(focusPos, childPos), id: `line-${focusNodeId}-to-child-${child.id}`, className: 'focus-view-child-line' });
+            if (childPos) lines.push({ d: getCurvePath(focusPos, childPos), id: `line-${focusNodeId}-to-child-${child.id}`, className: 'focus-view-child-line' });
         });
     }
     return lines;
