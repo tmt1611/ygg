@@ -2344,10 +2344,10 @@ html[data-theme-base='dark'] .welcome-screen-title {
   .yggdrasil-app-body.sidebar-collapsed .knowledge-branch-sidebar .sidebar-header-logo { margin: 8px auto; }
 
   /* Removed overlay-panel-view responsive styles */
-  .focus-view-main-area { flex-direction: column; }
+  .focus-view-main-area { flex-direction: column; min-height: 0; }
   .focus-view-layout {
-    /* On mobile, override inline min-height from JS and let flexbox handle sizing. */
-    /* This allows the container to shrink and activate its own scrollbar. */
+    /* On mobile, override inline min-height from JS and let flexbox handle sizing.
+       This allows this container to shrink and activate its own scrollbar. */
     min-height: 0 !important;
   }
   .focus-view-detail-panel { 
