@@ -116,7 +116,7 @@ const AiInsightsTab = ({
           }, "Paste..."),
           React.createElement("button", {
             onClick: handleShowPrompt,
-            disabled: fetchButtonDisabled,
+            disabled: !hasTechTreeData || isLoading || isAppBusy,
             className: "secondary panel-button",
             title: "Show the prompt that will be sent to the AI"
           }, '📋')

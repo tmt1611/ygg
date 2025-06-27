@@ -37,7 +37,7 @@ const AiGenerationPanel = ({
         ),
         React.createElement("button", {
           onClick: handleShowPrompt,
-          disabled: generateUIDisabled || !initialPrompt.trim(),
+          disabled: controlsDisabled || !initialPrompt.trim(),
           className: 'secondary',
           style: { flexShrink: 0, padding: '0 12px' },
           title: "Show the prompt that will be sent to the AI"

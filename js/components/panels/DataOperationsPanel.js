@@ -18,7 +18,7 @@ const DataOperationsPanel = ({
   const extractButtonDisabled = controlsDisabled || !currentTreeExists || (extractionMode === 'summary' && !apiKeyIsSet);
 
   const handleShowSummaryPrompt = () => {
-    if (!apiKeyIsSet || !currentTreeExists || !techTreeData) return;
+    if (!currentTreeExists || !techTreeData) return;
     const projectSummaryContext = `Project: ${contextText || 'Unnamed Project'}\nContext: ${contextText}\nNodes:\n${JSON.stringify(techTreeData, (key, value) => (key.startsWith('_') ? undefined : value), 2)}`;
     const promptText = getPromptTextFor('summarize', { text: projectSummaryContext });
     modalManager.openTechExtractionModal(promptText, "AI Summary Prompt");
@@ -69,7 +69,7 @@ const DataOperationsPanel = ({
               React.createElement(ContextualHelpTooltip, { helpText: "Uses AI to generate a concise summary of the current project's structure. Requires a valid API Key." }),
               React.createElement("button", {
                 onClick: (e) => { e.preventDefault(); handleShowSummaryPrompt(); },
-                disabled: !apiKeyIsSet || !currentTreeExists,
+                disabled: !currentTreeExists,
                 className: "base-icon-button",
                 style: { marginLeft: 'auto', padding: '2px', fontSize: '1em' },
                 title: "Show summary prompt"

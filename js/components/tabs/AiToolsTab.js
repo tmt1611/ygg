@@ -159,7 +159,7 @@ const AiToolsTab = ({
           }, "Paste..."),
           React.createElement("button", {
             onClick: handleShowStrategicPrompt,
-            disabled: !canGenerateStrategicSuggestions,
+            disabled: !initialPromptForStrategy?.trim() || isAppBusy || isFetchingStrategicSuggestions,
             className: 'secondary',
             style: { flexShrink: 0, padding: '0 10px' },
             title: "Show the prompt that will be sent to the AI"

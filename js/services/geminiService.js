@@ -51,7 +51,7 @@ const _initializeClient = (key) => {
   }
 };
 
-export const setApiKey = async (apiKey) => {
+export const setApiKey = (apiKey) => {
   return _initializeClient(apiKey);
 };
 
