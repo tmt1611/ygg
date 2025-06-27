@@ -329,7 +329,7 @@ const GraphViewComponent = ({
 
     // Draw links
     g.selectAll(".graph-view-link, .graph-view-project-link")
-      .data(allLinks, (d) => `${d.source.id}-${d.target.id}`)
+      .data(allLinks, (d) => `${d.source.data?.id || d.source.id}-${d.target.data?.id || d.target.id}`)
       .join(
         (enter) =>
           enter.append("path")
@@ -380,7 +380,7 @@ const GraphViewComponent = ({
     // Draw arrowheads for regular links at the midpoint
     const regularLinks = allLinks.filter(link => !link.isProjectLink);
     g.selectAll(".graph-arrowhead-group")
-      .data(regularLinks, d => `${d.source.id}-${d.target.id}`)
+      .data(regularLinks, d => `${d.source.data?.id || d.source.id}-${d.target.data?.id || d.target.id}`)
       .join(
         enter => {
           const group = enter.append("g").attr("class", "graph-arrowhead-group");
@@ -425,7 +425,7 @@ const GraphViewComponent = ({
     // Draw node groups
     const nodeGroups = g
       .selectAll(".graph-view-node")
-      .data(allNodes, (d) => d.id)
+      .data(allNodes, (d) => d.data?.id || d.id)
       .join(
         (enter) => {
           const group = enter.append("g")

@@ -94,7 +94,7 @@ const FocusViewComponent = ({
   }), [treeData, selectedNodeInPanelId, focusNodeId, onChangeFocusNode]);
 
   if (!focusNodeData) {
-    return ( React.createElement("div", { className: "focus-view-container", style: {padding: '20px', textAlign: 'center'}}, " Error: Focus node (ID: ", focusNodeId, ") not found. ", React.createElement("button", {onClick: onExitFocusView, style: {marginTop: '10px'}}, "Exit Focus View") ));
+    return ( React.createElement("div", { className: "focus-view-container", style: {padding: '20px', textAlign: 'center'}}, " Error: Focus node (ID: ", focusNodeId, ") not found. ", React.createElement("button", {onClick: () => onExitFocusView(null), style: {marginTop: '10px'}}, "Exit Focus View") ));
   }
 
   const renderNode = (nodeData, type) => {
@@ -137,7 +137,7 @@ const FocusViewComponent = ({
         ),
         React.createElement("div", { className: "overlay-panel-header-actions" },
             React.createElement("button", {
-                onClick: onExitFocusView,
+                onClick: () => onExitFocusView(focusNodeData.id),
                 className: "base-icon-button",
                 "aria-label": "Close Focus View",
                 title: "Close Focus View and return to Graph View"
@@ -177,7 +177,7 @@ const FocusViewComponent = ({
               onNavigateToLinkedProject: onNavigateToLinkedProject,
               onUnlinkProjectFromNode: onUnlinkProjectFromNode,
               onDeleteNode: onDeleteNode,
-              onExitFocusView: onExitFocusView,
+              onExitFocusView: () => onExitFocusView(focusNodeData.id),
               isProjectRoot: nodeForDetailPanel?.id === treeData?.id,
               incomingLinkInfo: nodeForDetailPanel?.id === treeData?.id ? incomingLinkInfoForFocusNode : null,
               handleNavigateToSourceNode: handleNavigateToSourceNode

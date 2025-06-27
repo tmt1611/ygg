@@ -155,7 +155,12 @@ const MainContentRouter = ({
           selectedNodeInPanelId: viewStates.selectedNodeInFocusPanelId,
           onSelectNodeInPanel: viewStates.setSelectedNodeInFocusPanelId,
           onChangeFocusNode: (id) => viewStates.handleSwitchToFocusView(id, techTreeData),
-          onExitFocusView: () => setYggdrasilViewMode('graph'),
+          onExitFocusView: (nodeIdToFocus) => {
+            if (nodeIdToFocus) {
+              viewStates.setSelectedGraphNodeId(nodeIdToFocus);
+            }
+            setYggdrasilViewMode('graph');
+          },
           onOpenNodeEditModal: modalManager.openNodeEditModal,
           onToggleLock: nodeOperations.handleToggleNodeLock,
           onNodeImportanceChange: nodeOperations.handleNodeImportanceChange,
