@@ -77,7 +77,7 @@ export const useFocusViewLayout = (
   siblingsNodeData
 ) => {
   const [layoutMetrics, setLayoutMetrics] = useState({ positions: new Map(), areaRects: {}, width: 0, height: 0 });
-  const [viewportWidth, setViewportWidth] = useState(0);
+  const [viewportSize, setViewportSize] = useState({ width: 0, height: 0 });
 
   const childrenDims = useMemo(() => 
     childrenNodeData.map(child => ({
@@ -97,12 +97,13 @@ export const useFocusViewLayout = (
     
     const resizeObserver = new ResizeObserver(entries => {
       if (entries[0]) {
-        setViewportWidth(entries[0].contentRect.width);
+        const { width, height } = entries[0].contentRect;
+        setViewportSize({ width, height });
       }
     });
     
     resizeObserver.observe(element);
-    setViewportWidth(element.clientWidth);
+    setViewportSize({ width: element.clientWidth, height: element.clientHeight });
 
     return () => {
       if (element) {
@@ -112,27 +113,75 @@ export const useFocusViewLayout = (
   }, [layoutRef]);
 
   useEffect(() => {
-    if (!focusNodeData || viewportWidth === 0) {
+    if (!focusNodeData || viewportSize.width === 0) {
       setLayoutMetrics({ positions: new Map(), areaRects: {}, width: 0, height: 0 });
       return;
     }
 
+    const { width: layoutWidth, height: viewportHeight } = viewportSize;
+    
+    // --- Calculate content heights first to determine adaptive spacing ---
+    const parentContentHeight = parentNodeData ? NODE_SIZES_PX[parentNodeData.importance || 'common'].height : 40;
+    
+    const focusSizeForHeightCalc = {
+        height: NODE_SIZES_PX[focusNodeData.importance || 'common'].height * FOCUS_NODE_SCALE,
+        width: NODE_SIZES_PX[focusNodeData.importance || 'common'].width * FOCUS_NODE_SCALE,
+    };
+    
+    const leftSiblingsDimsForHeightCalc = [];
+    const rightSiblingsDimsForHeightCalc = [];
+    let leftWidthForHeightCalc = 0, rightWidthForHeightCalc = 0;
+    siblingsDims.forEach(dim => {
+      if (leftWidthForHeightCalc <= rightWidthForHeightCalc) {
+        leftSiblingsDimsForHeightCalc.push(dim);
+        leftWidthForHeightCalc += dim.width + HORIZONTAL_NODE_GAP;
+      } else {
+        rightSiblingsDimsForHeightCalc.push(dim);
+        rightWidthForHeightCalc += dim.width + HORIZONTAL_NODE_GAP;
+      }
+    });
+
+    const sideAvailableWidthForHeightCalc = Math.max(50, (layoutWidth - focusSizeForHeightCalc.width - HORIZONTAL_NODE_GAP * 2 - AREA_PADDING * 2) / 2);
+    
+    const { totalHeight: leftSiblingsHeight } = calculateWrappedPositions(
+        leftSiblingsDimsForHeightCalc, sideAvailableWidthForHeightCalc, 0, 0
+    );
+    const { totalHeight: rightSiblingsHeight } = calculateWrappedPositions(
+        rightSiblingsDimsForHeightCalc, sideAvailableWidthForHeightCalc, 0, 0
+    );
+    
+    const centerContentHeight = Math.max(leftSiblingsHeight, rightSiblingsHeight, focusSizeForHeightCalc.height);
+
+    const { totalHeight: childrenContentHeight } = calculateWrappedPositions(
+        childrenDims, layoutWidth - AREA_PADDING * 2, 0, 0
+    );
+    const childrenPlaceholderHeight = 120;
+    const finalChildrenAreaHeight = childrenContentHeight > 0 ? (childrenContentHeight + AREA_PADDING * 2) : childrenPlaceholderHeight;
+    const parentAreaHeightWithPadding = parentContentHeight + AREA_PADDING * 2;
+    const centerAreaHeightWithPadding = centerContentHeight + AREA_PADDING * 2;
+    
+    const totalAreaHeight = parentAreaHeightWithPadding + centerAreaHeightWithPadding + finalChildrenAreaHeight;
+
+    let adaptiveVerticalSpacing = VERTICAL_SPACING;
+    if (viewportHeight > 0 && (totalAreaHeight + (VERTICAL_SPACING * 2) > viewportHeight)) {
+        const remainingSpace = viewportHeight - totalAreaHeight;
+        adaptiveVerticalSpacing = Math.max(5, remainingSpace / 2);
+    }
+
+    // --- Now perform the layout using the adaptive spacing ---
     const positions = new Map();
     const areaRects = {};
-    
-    const layoutWidth = viewportWidth;
     const centerX = layoutWidth / 2;
     
     let currentY = 0;
 
     // --- 1. Parent Area ---
     const parentSize = parentNodeData ? NODE_SIZES_PX[parentNodeData.importance || 'common'] : { width: 100, height: 40 };
-    const parentAreaHeight = parentSize.height + AREA_PADDING * 2;
-    areaRects.parent = { x: 0, y: currentY, width: layoutWidth, height: parentAreaHeight };
+    areaRects.parent = { x: 0, y: currentY, width: layoutWidth, height: parentAreaHeightWithPadding };
     if (parentNodeData) {
-      positions.set(parentNodeData.id, { x: centerX, y: currentY + parentAreaHeight / 2, ...parentSize });
+      positions.set(parentNodeData.id, { x: centerX, y: currentY + parentAreaHeightWithPadding / 2, ...parentSize });
     }
-    currentY += parentAreaHeight + VERTICAL_SPACING;
+    currentY += parentAreaHeightWithPadding + adaptiveVerticalSpacing;
 
     // --- 2. Center Area (Focus + Siblings) with Wrapping ---
     const centerAreaStartY = currentY;
@@ -157,44 +206,42 @@ export const useFocusViewLayout = (
 
     const sideAvailableWidth = Math.max(50, (layoutWidth - focusSize.width - HORIZONTAL_NODE_GAP * 2 - AREA_PADDING * 2) / 2);
     
-    const { totalHeight: leftHeight, positions: leftPositions } = calculateWrappedPositions(
+    const { positions: leftPositions } = calculateWrappedPositions(
         leftSiblingsDims.reverse(),
         sideAvailableWidth,
         centerX - focusSize.width / 2 - HORIZONTAL_NODE_GAP - sideAvailableWidth,
         0
     );
 
-    const { totalHeight: rightHeight, positions: rightPositions } = calculateWrappedPositions(
+    const { positions: rightPositions } = calculateWrappedPositions(
         rightSiblingsDims,
         sideAvailableWidth,
         centerX + focusSize.width / 2 + HORIZONTAL_NODE_GAP,
         0
     );
 
-    const maxCenterAreaContentHeight = Math.max(leftHeight, rightHeight, focusSize.height);
-    const centerRowY = centerAreaStartY + AREA_PADDING + maxCenterAreaContentHeight / 2;
+    const centerRowY = centerAreaStartY + AREA_PADDING + centerContentHeight / 2;
 
     positions.set(focusNodeData.id, { x: centerX, y: centerRowY, ...focusSize });
     
-    const leftBlockYOffset = centerRowY - leftHeight / 2;
+    const leftBlockYOffset = centerRowY - leftSiblingsHeight / 2;
     leftPositions.forEach((pos, id) => {
         pos.y += leftBlockYOffset;
         positions.set(id, pos);
     });
 
-    const rightBlockYOffset = centerRowY - rightHeight / 2;
+    const rightBlockYOffset = centerRowY - rightSiblingsHeight / 2;
     rightPositions.forEach((pos, id) => {
         pos.y += rightBlockYOffset;
         positions.set(id, pos);
     });
 
-    const centerAreaHeight = maxCenterAreaContentHeight + AREA_PADDING * 2;
-    areaRects.focus = { x: 0, y: centerAreaStartY, width: layoutWidth, height: centerAreaHeight };
-    currentY += centerAreaHeight + VERTICAL_SPACING;
+    areaRects.focus = { x: 0, y: centerAreaStartY, width: layoutWidth, height: centerAreaHeightWithPadding };
+    currentY += centerAreaHeightWithPadding + adaptiveVerticalSpacing;
 
     // --- 3. Children Area ---
     const childrenAreaStartY = currentY;
-    const { totalHeight: childrenAreaContentHeight, positions: childrenPositions } = calculateWrappedPositions(
+    const { positions: childrenPositions } = calculateWrappedPositions(
         childrenDims,
         layoutWidth - AREA_PADDING * 2,
         AREA_PADDING,
@@ -202,9 +249,8 @@ export const useFocusViewLayout = (
     );
     childrenPositions.forEach((pos, id) => positions.set(id, pos));
 
-    const childrenAreaHeight = childrenAreaContentHeight > 0 ? childrenAreaContentHeight + AREA_PADDING * 2 : 120;
-    areaRects.children = { x: 0, y: childrenAreaStartY, width: layoutWidth, height: childrenAreaHeight };
-    currentY = childrenAreaStartY + childrenAreaHeight;
+    areaRects.children = { x: 0, y: childrenAreaStartY, width: layoutWidth, height: finalChildrenAreaHeight };
+    currentY = childrenAreaStartY + finalChildrenAreaHeight;
     
     const totalHeight = currentY + AREA_PADDING;
 
@@ -214,7 +260,7 @@ export const useFocusViewLayout = (
       width: layoutWidth,
       height: totalHeight,
     });
-  }, [focusNodeData, parentNodeData, childrenNodeData, siblingsNodeData, viewportWidth]);
+  }, [focusNodeData, parentNodeData, childrenNodeData, siblingsNodeData, viewportSize]);
   
   return layoutMetrics;
 };
