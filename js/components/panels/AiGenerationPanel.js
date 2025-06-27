@@ -9,7 +9,8 @@ const AiGenerationPanel = ({
   generateUIDisabled,
   activeUserProjectExists,
   apiKeyIsSet,
-  handleShowPrompt
+  handleShowPrompt,
+  controlsDisabled
 }) => {
   return (
     React.createElement("div", null,

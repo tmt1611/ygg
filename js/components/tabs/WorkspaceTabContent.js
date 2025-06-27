@@ -111,7 +111,8 @@ const WorkspaceTabContent = ({
             React.createElement(AiGenerationPanel, {
               initialPrompt, setInitialPrompt, handleGenerateTree, isLoadingInitial,
               generateUIDisabled, activeUserProjectExists, apiKeyIsSet: apiKeyHook.status.isSet,
-              handleShowPrompt: handleShowGenerationPrompt
+              handleShowPrompt: handleShowGenerationPrompt,
+              controlsDisabled: controlsDisabled
             })
           ),
           React.createElement(CollapsiblePanel, {
