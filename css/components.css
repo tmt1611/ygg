@@ -768,10 +768,13 @@ html[data-theme-base='dark'] .focus-view-area-marker.siblings-area {
 }
 
 .focus-view-area-marker.focus-area {
-  background-color: rgba(var(--focus-connector-stroke-rgb), 0.08);
-  border-top: 2px solid rgba(var(--focus-connector-stroke-rgb), 0.4);
-  border-bottom: 2px solid rgba(var(--focus-connector-stroke-rgb), 0.4);
-  box-shadow: 0 0 20px rgba(var(--focus-connector-stroke-rgb), 0.15);
+  background: radial-gradient(ellipse at center, 
+    rgba(var(--focus-connector-stroke-rgb), 0.1) 0%, 
+    rgba(var(--focus-connector-stroke-rgb), 0.03) 60%, 
+    transparent 80%);
+  border-top: 3px solid rgba(var(--focus-connector-stroke-rgb), 0.6);
+  border-bottom: 3px solid rgba(var(--focus-connector-stroke-rgb), 0.6);
+  box-shadow: 0 0 25px rgba(var(--focus-connector-stroke-rgb), 0.2);
 }
 
 .focus-view-area-marker.children-area {
@@ -1452,19 +1455,19 @@ html[data-theme-base='dark'] .history-item-summary .history-entity {
 }
 .celestial-body.has-children {
   /* Add a prominent outer ring to signify it's a parent node */
-  border: 3px solid rgba(var(--focus-connector-stroke-rgb), 0.7);
-  /* A glow, plus an outer ring */
+  border: 4px solid rgba(var(--focus-connector-stroke-rgb), 0.8);
+  /* A glow, plus an outer ring that doesn't affect layout */
   box-shadow: 
-    inset 0 0 6px 2px rgba(0,0,0,0.25), /* Inner shadow for depth */
-    0 0 12px rgba(var(--focus-connector-stroke-rgb), 0.4), /* Glow */
-    0 0 0 5px rgba(var(--focus-connector-stroke-rgb), 0.3); /* Outer ring */
+    inset 0 0 8px 3px rgba(0,0,0,0.3), /* Inner shadow for depth */
+    0 0 18px rgba(var(--focus-connector-stroke-rgb), 0.55), /* Glow */
+    0 0 0 6px rgba(var(--focus-connector-stroke-rgb), 0.4); /* Outer ring */
 }
 html[data-theme-base='dark'] .celestial-body.has-children {
-  border-color: rgba(var(--focus-connector-stroke-rgb), 0.8);
+  border-color: rgba(var(--focus-connector-stroke-rgb), 0.9);
   box-shadow: 
-    inset 0 0 8px 3px rgba(0,0,0,0.4), 
-    0 0 15px rgba(var(--focus-connector-stroke-rgb), 0.5),
-    0 0 0 5px rgba(var(--focus-connector-stroke-rgb), 0.4);
+    inset 0 0 10px 4px rgba(0,0,0,0.4), 
+    0 0 22px rgba(var(--focus-connector-stroke-rgb), 0.65),
+    0 0 0 6px rgba(var(--focus-connector-stroke-rgb), 0.5);
 }
 .celestial-body.has-children.importance-major {
    border-color: var(--focus-node-star-glow);
