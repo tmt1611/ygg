@@ -358,8 +358,8 @@ export const cleanTreeForExport = (nodeToClean) => {
 
 export const cleanTreeForState = (nodeToClean) => {
     if (!nodeToClean) return null;
-    // This function specifically removes annotation properties but keeps internal ones like _parentId and temporary status for highlighting.
-    const { _modificationDetails, _oldParentId, ...rest } = nodeToClean;
+    // This function removes temporary annotation properties before setting the node to the main state.
+    const { _modificationDetails, _oldParentId, _changeStatus, ...rest } = nodeToClean;
     const cleanedNode = { ...rest };
     if (cleanedNode.children && Array.isArray(cleanedNode.children)) {
         cleanedNode.children = cleanedNode.children.map(cleanTreeForState);
