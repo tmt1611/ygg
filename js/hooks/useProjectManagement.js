@@ -245,7 +245,6 @@ export const useProjectManagement = ({
         try {
           const content = e.target?.result; 
           const parsedJson = JSON.parse(content);
-          let newProject;
           let treeObject;
           let projectName;
           let existingId = null;
