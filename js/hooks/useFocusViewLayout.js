@@ -77,8 +77,11 @@ export const useFocusViewLayout = (
       ? parentY + parentSize.height + VERTICAL_SPACING
       : VERTICAL_SPACING;
     
+    const maxFocusLevelHeight = Math.max(focusSize.height, ...siblingsDims.map(d => d.height), 0);
+    const focusLevelCenterY = focusLevelY + maxFocusLevelHeight / 2;
+
     // Place focus node first
-    positions.set(focusNodeData.id, { x: centerX, y: focusLevelY + focusSize.height / 2, ...focusSize });
+    positions.set(focusNodeData.id, { x: centerX, y: focusLevelCenterY, ...focusSize });
 
     // Place siblings
     const leftSiblings = siblingsDims.filter((_, i) => i % 2 === 0);
@@ -88,7 +91,7 @@ export const useFocusViewLayout = (
     leftSiblings.reverse().forEach(siblingDim => {
       positions.set(siblingDim.id, {
         x: currentX_left - siblingDim.width / 2,
-        y: focusLevelY + siblingDim.height / 2,
+        y: focusLevelCenterY,
         ...siblingDim
       });
       currentX_left -= (siblingDim.width + HORIZONTAL_CHILD_GAP);
@@ -98,14 +101,12 @@ export const useFocusViewLayout = (
     rightSiblings.forEach(siblingDim => {
       positions.set(siblingDim.id, {
         x: currentX_right + siblingDim.width / 2,
-        y: focusLevelY + siblingDim.height / 2,
+        y: focusLevelCenterY,
         ...siblingDim
       });
       currentX_right += (siblingDim.width + HORIZONTAL_CHILD_GAP);
     });
     
-    const maxFocusLevelHeight = Math.max(focusSize.height, ...siblingsDims.map(d => d.height), 0);
-
     let totalHeight = focusLevelY + maxFocusLevelHeight + VERTICAL_SPACING;
 
     // Children layout logic
@@ -131,15 +132,15 @@ export const useFocusViewLayout = (
       if (currentRow.length > 0) rows.push(currentRow);
 
       rows.forEach(row => {
+        const maxRowHeight = Math.max(...row.map(d => d.height), 0);
+        const rowCenterY = currentY + maxRowHeight / 2;
         const totalRowWidth = row.reduce((sum, dim) => sum + dim.width, 0) + (row.length - 1) * HORIZONTAL_CHILD_GAP;
         let currentX = centerX - totalRowWidth / 2;
-        let maxRowHeight = 0;
         
         row.forEach(childDim => {
-          maxRowHeight = Math.max(maxRowHeight, childDim.height);
           positions.set(childDim.id, {
             x: currentX + childDim.width / 2,
-            y: currentY + childDim.height / 2,
+            y: rowCenterY,
             ...childDim,
           });
           currentX += childDim.width + HORIZONTAL_CHILD_GAP;

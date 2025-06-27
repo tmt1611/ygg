@@ -718,8 +718,7 @@ html[data-theme-base='dark'] .panel-header-icon { color: var(--primary-accent); 
   display: flex; /* For overall centering if needed, but nodes are absolute */
   align-items: center; /* Center placeholder text if no nodes */
   justify-content: center; /* Center placeholder text if no nodes */
-  overflow-y: auto; /* Allow layout to scroll if content overflows */
-  overflow-x: hidden;
+  overflow: auto; /* Allow layout to scroll if content overflows horizontally or vertically */
   min-height: 350px;
   padding: 10px; /* Padding inside the scrollable area */
 }

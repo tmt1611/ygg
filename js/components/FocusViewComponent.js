@@ -52,6 +52,11 @@ const FocusViewComponent = ({
     const lines = [];
     const focusPos = allNodePositions.get(focusNodeId);
 
+    const getPath = (p1, p2) => {
+      const midY = (p1.y + p2.y) / 2;
+      return `M${p1.x},${p1.y} C${p1.x},${midY} ${p2.x},${midY} ${p2.x},${p2.y}`;
+    };
+
     if (focusPos && parentNodeData) {
         const parentPos = allNodePositions.get(parentNodeData.id);
         if (parentPos) {
@@ -60,7 +65,7 @@ const FocusViewComponent = ({
             allChildrenOnFocusLevel.forEach(childNode => {
                 const childPos = allNodePositions.get(childNode.id);
                 if (childPos) {
-                    lines.push({ x1: parentPos.x, y1: parentPos.y, x2: childPos.x, y2: childPos.y, id: `line-parent-${parentNodeData.id}-to-${childNode.id}` });
+                    lines.push({ d: getPath(parentPos, childPos), id: `line-parent-${parentNodeData.id}-to-${childNode.id}` });
                 }
             });
         }
@@ -68,7 +73,7 @@ const FocusViewComponent = ({
     if (focusPos) {
         childrenNodeData.forEach(child => {
             const childPos = allNodePositions.get(child.id);
-            if (childPos) lines.push({ x1: focusPos.x, y1: focusPos.y, x2: childPos.x, y2: childPos.y, id: `line-${focusNodeId}-to-child-${child.id}` });
+            if (childPos) lines.push({ d: getPath(focusPos, childPos), id: `line-${focusNodeId}-to-child-${child.id}` });
         });
     }
     return lines;
@@ -152,9 +157,9 @@ const FocusViewComponent = ({
           React.createElement("div", { ref: layoutRef, className: "focus-view-layout", style: { minHeight: `${layoutHeight}px` }, onScroll: onCloseContextMenu },
             React.createElement("svg", { className: "focus-view-svg-overlay", style: { height: `${layoutHeight}px` } },
               connectorLines.map(line => 
-                React.createElement("line", { 
+                React.createElement("path", { 
                   key: line.id,
-                  x1: line.x1, y1: line.y1, x2: line.x2, y2: line.y2, 
+                  d: line.d,
                   className: "focus-view-connector-line"
                 })
               )
