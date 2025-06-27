@@ -1436,7 +1436,8 @@ html[data-theme-base='dark'] .history-item-summary .history-entity {
 }
 .celestial-body.importance-major { 
   --node-size: 130px;
-  background: radial-gradient(circle, var(--focus-node-star-bg) 50%, var(--focus-node-star-glow) 80%, transparent 100%); 
+  background: radial-gradient(circle, var(--focus-node-star-bg) 50%, var(--focus-node-star-glow) 80%, transparent 100%);
+  color: var(--focus-node-major-text, var(--focus-panel-text));
 }
 .celestial-body.importance-major .celestial-body-name {
   -webkit-line-clamp: 5; /* Allow more lines for larger size */
