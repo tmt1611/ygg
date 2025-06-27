@@ -939,7 +939,7 @@ html[data-theme-base='dark'] .graph-view-node.highlighted .node-label-wrapper {
   fill: var(--primary-accent);
 }
 
-.graph-view-node .node-rune-icon { font-size: 0.9em; dominant-baseline: middle; text-anchor: middle; fill: var(--text-primary); pointer-events: none; }
+.graph-view-node .node-rune-icon { dominant-baseline: middle; text-anchor: middle; fill: var(--text-primary); pointer-events: none; }
 .graph-view-node .node-icon { font-size: 0.8em; pointer-events: none; }
 
 .graph-view-node.proxy rect {

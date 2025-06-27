@@ -19,6 +19,17 @@ const getNodeRadius = (node) => {
     }
 };
 
+const getRuneIconSize = (node) => {
+    const radius = getNodeRadius(node);
+    const baseMultiplier = 1.1;
+    // Use a larger multiplier for the 'major' icon to make it stand out,
+    // while keeping other icons proportionally sized to their nodes.
+    switch (node?.data?.importance) {
+        case 'major': return radius * 1.3;
+        default: return radius * baseMultiplier;
+    }
+};
+
 const createAcronym = (name) => {
     if (!name) return '??';
     const words = name.split(' ').filter(Boolean);
@@ -458,10 +469,10 @@ const GraphViewComponent = ({
           });
           
           group.append("text").attr("class", "node-rune-icon").attr("dy", "0.35em")
-            .attr("font-size", d => `${getNodeRadius(d) * 1.1}px`).style("pointer-events", "none").style("user-select", "none");
+            .style("pointer-events", "none").style("user-select", "none");
 
           group.append("text").attr("class", "node-icon node-lock-icon").attr("dy", d => `${getNodeRadius(d) * 0.4}px`)
-            .attr("dx", d => `${-getNodeRadius(d) * 0.9}px`).attr("font-size", d => `${getNodeRadius(d) * 0.8}px`)
+            .attr("dx", d => `${-getNodeRadius(d) * 0.9}px`)
             .attr("fill", "var(--text-tertiary)").style("pointer-events", "none");
 
           return group;
@@ -526,6 +537,7 @@ const GraphViewComponent = ({
       .html(d => d.data.name || "");
 
     nodeGroups.select(".node-rune-icon")
+      .attr("font-size", d => `${getRuneIconSize(d)}px`)
       .attr("transform", null) // No rotation needed for any layout
       .text(d => {
         if (d.isProxy) return '';
@@ -533,6 +545,7 @@ const GraphViewComponent = ({
       });
 
     nodeGroups.select(".node-lock-icon")
+      .attr("font-size", d => `${getNodeRadius(d) * 0.8}px`)
       .attr("transform", null) // No rotation needed for any layout
       .text(d => (d.data.isLocked && !d.isProxy ? "🔒" : ""));
 
