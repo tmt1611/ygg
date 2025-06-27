@@ -157,7 +157,6 @@ const FocusViewComponent = ({
                 )
             ),
             areaRects.siblings && React.createElement("div", { className: "focus-view-area-marker siblings-area", style: { top: `${areaRects.siblings.y}px`, left: `${areaRects.siblings.x}px`, width: `${areaRects.siblings.width}px`, height: `${areaRects.siblings.height}px` }}),
-            areaRects.siblings && React.createElement("div", { className: "focus-view-area-marker siblings-area", style: { top: `${areaRects.siblings.y}px`, left: `${areaRects.siblings.x}px`, width: `${areaRects.siblings.width}px`, height: `${areaRects.siblings.height}px` }}),
             areaRects.focus && React.createElement("div", { className: "focus-view-area-marker focus-area", style: { top: `${areaRects.focus.y}px`, left: `${areaRects.focus.x}px`, width: `${areaRects.focus.width}px`, height: `${areaRects.focus.height}px` }}),
             areaRects.children && React.createElement("div", { className: "focus-view-area-marker children-area", style: { top: `${areaRects.children.y}px`, left: `${areaRects.children.x}px`, width: `${areaRects.children.width}px`, height: `${areaRects.children.height}px` }},
                 childrenNodeData.length === 0 && (
