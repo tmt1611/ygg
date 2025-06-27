@@ -154,7 +154,8 @@ const AiSuggestionModal = ({
   const { annotatedTree, removedNodes, newNodes, modifiedContentNodes, lockedContentChangedNodes, structureModifiedNodes, reparentedNodes, lockedNodesRemoved } = comparisonResult;
 
   const currentTotalNodes = currentTreeForDiff ? countNodesInTree(currentTreeForDiff) : 0;
-  const suggestedTotalNodes = annotatedTree && !annotatedTree._isErrorNode ? countNodesInTree(annotatedTree) : 0;
+  const isError = !!comparisonResult?.annotatedTree?._isErrorNode;
+  const suggestedTotalNodes = annotatedTree && !isError ? countNodesInTree(annotatedTree) : 0;
   const netChange = suggestedTotalNodes - currentTotalNodes;
 
   const netChangeStyle = { color: netChange > 0 ? 'var(--success-color)' : netChange < 0 ? 'var(--error-color)' : 'var(--text-secondary)'};
@@ -182,8 +183,6 @@ const AiSuggestionModal = ({
       onRefineSuggestion(followUpPrompt, suggestion, originalPrompt);
     }
   };
-
-  const isError = !!comparisonResult?.annotatedTree?._isErrorNode;
 
   return (
     <div className="modal-overlay-basic" role="dialog" aria-modal="true" aria-labelledby="ai-suggestion-modal-title" aria-describedby="ai-suggestion-summary" onClick={(e) => { if (e.target === e.currentTarget) onCancel(); }}>
