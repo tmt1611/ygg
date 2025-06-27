@@ -1463,9 +1463,7 @@ html[data-theme-base='dark'] .celestial-body.has-children {
     0 0 25px rgba(var(--focus-connector-stroke-rgb), 0.6),
     0 0 0 4px var(--focus-connector-stroke);
 }
-.celestial-body.has-children.importance-major {
-   border-color: var(--focus-node-star-glow);
-}
+
 .celestial-body.is-locked::after { content: ''; position: absolute; top: -4px; left: -4px; right: -4px; bottom: -4px; border-radius: 50%; border: 2px dashed var(--focus-node-shield-color); animation: rotateShield 20s linear infinite; opacity: 0.7; pointer-events: none; }
 @keyframes rotateShield { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 .celestial-body.has-link .celestial-body-link-indicator { animation: pulseBeacon 1.5s infinite alternate; }
