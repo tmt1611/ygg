@@ -92,5 +92,5 @@ export const useApiKey = (addHistoryEntry) => {
     setInputKey,
     setApiKey,
     clearActiveUserKey,
-  }), [selectedModel, inputKey, status, isProcessing, setSelectedModel, setInputKey, setApiKey, clearActiveUserKey]);
+  }), [selectedModel, inputKey, status, isProcessing, setApiKey, clearActiveUserKey]);
 };
