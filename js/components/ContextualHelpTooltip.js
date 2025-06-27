@@ -1,12 +1,23 @@
 import React, { useCallback } from 'react';
 
-// Using a button for better accessibility and semantics.
+/**
+ * A small, circular help icon button that displays a tooltip on hover/focus.
+ * It's designed to provide contextual information without cluttering the UI.
+ *
+ * This component is memoized for performance and uses a <button> element for
+ * accessibility, making it focusable and interactive for all users.
+ *
+ * @param {object} props - The component props.
+ * @param {string} props.helpText - The text content to display inside the tooltip.
+ * @param {'top' | 'right' | 'bottom'} [props.position='top'] - The position of the tooltip relative to the icon.
+ */
 const ContextualHelpTooltip = React.memo(({ helpText, position = 'top' }) => {
-  // useCallback is used here to prevent creating a new function on every render,
-  // which would break the optimization of React.memo.
+  // A click handler that prevents default browser actions (like form submission)
+  // or propagation to parent clickable elements. This ensures the help icon
+  // acts independently.
   const handleClick = useCallback((e) => {
-    e.preventDefault(); // Prevent any form submission if it's inside a form.
-    e.stopPropagation(); // Prevent triggering clicks on parent elements.
+    e.preventDefault();
+    e.stopPropagation();
   }, []);
 
   return (
@@ -16,7 +27,7 @@ const ContextualHelpTooltip = React.memo(({ helpText, position = 'top' }) => {
       className: "tooltip-container contextual-help-icon",
       onClick: handleClick
     },
-      "?",
+      "?", // The visual representation of the help icon.
       React.createElement("span", {
         className: `tooltip-text position-${position}`,
         role: "tooltip",

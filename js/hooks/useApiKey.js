@@ -41,7 +41,7 @@ export const useApiKey = (addHistoryEntry) => {
    * Updates status and processing state accordingly.
    * @param {string} keyToSubmit - The API key to set.
    */
-  const setApiKey = useCallback(async (keyToSubmit) => {
+  const setApiKey = useCallback((keyToSubmit) => {
     setIsProcessing(true);
     setStatus({ message: 'Validating key...', type: 'info', isSet: false });
     const key = keyToSubmit.trim();
@@ -52,7 +52,8 @@ export const useApiKey = (addHistoryEntry) => {
       return;
     }
 
-    const result = await geminiService.setApiKey(key);
+    // The setApiKey service is synchronous and returns a result object.
+    const result = geminiService.setApiKey(key);
     
     setStatus({
       message: result.message || 'Status could not be determined.',
@@ -64,7 +65,9 @@ export const useApiKey = (addHistoryEntry) => {
     addHistoryEntry('API_KEY_STATUS_CHANGED', historyMessage);
     
     if (result.success) {
-      setInputKey(key); // Keep input field populated on success for user reference.
+      // Keep the input field populated on success for user reference,
+      // as the service internally stores the key.
+      setInputKey(key); 
     }
     
     setIsProcessing(false);
