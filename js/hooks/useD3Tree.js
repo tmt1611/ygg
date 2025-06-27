@@ -211,6 +211,7 @@ export const useD3Tree = (
           }
         });
       svg.call(zoomBehaviorRef.current);
+      svg.on("dblclick.zoom", null); // Prevent zoom on double-click, allowing node dblclick to fire.
 
       if (onBackgroundClick) {
         svg.on('click', (event) => {
