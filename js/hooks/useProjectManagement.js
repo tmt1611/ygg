@@ -109,7 +109,8 @@ export const useProjectManagement = ({
     setProjects(prevProjects => {
       const projectIndex = prevProjects.findIndex(p => p.id === projectId);
       if (projectIndex === -1) {
-        console.warn(`updateProjectData: Project with ID ${projectId} not found.`);
+        console.warn('updateProjectData: Project not found. ID:', projectId);
+
         return prevProjects;
       }
       const updatedProjects = [...prevProjects];
