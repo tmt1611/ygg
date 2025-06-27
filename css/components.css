@@ -1368,12 +1368,22 @@ html[data-theme-base='dark'] .history-item-summary .history-entity {
 .celestial-body.importance-minor { 
   background: radial-gradient(circle, var(--focus-node-asteroid-bg) 60%, var(--focus-node-asteroid-glow)); 
   width: 60px; height: 60px; 
-} 
+}
+.celestial-body.importance-minor .celestial-body-name {
+  font-size: 0.7em;
+  -webkit-line-clamp: 3; /* Adjust line clamp for smaller size */
+  max-height: 3.6em; /* 3 lines * 1.2em line-height */
+}
 .celestial-body.importance-common { background: radial-gradient(circle, var(--focus-node-planet-bg) 70%, var(--focus-node-planet-glow)); } /* Default size is 90px */
 .celestial-body.importance-major { 
   background: radial-gradient(circle, var(--focus-node-star-bg) 50%, var(--focus-node-star-glow) 80%, transparent 100%); 
   width: 130px; height: 130px;
-} 
+}
+.celestial-body.importance-major .celestial-body-name {
+  font-size: 1em;
+  -webkit-line-clamp: 5; /* Allow more lines for larger size */
+  max-height: 6em; /* 5 lines * 1.2em line-height */
+}
 .celestial-body.is-locked::after { content: ''; position: absolute; top: -4px; left: -4px; right: -4px; bottom: -4px; border-radius: 50%; border: 2px dashed var(--focus-node-shield-color); animation: rotateShield 20s linear infinite; opacity: 0.7; }
 @keyframes rotateShield { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 .celestial-body.has-link .celestial-body-link-indicator { animation: pulseBeacon 1.5s infinite alternate; }
