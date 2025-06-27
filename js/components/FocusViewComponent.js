@@ -68,7 +68,11 @@ const FocusViewComponent = ({
         const parentPos = allNodePositions.get(parentNodeData.id);
         if (parentPos) {
             // Connect parent to focus node
-            if(focusPos) lines.push({ d: getCurvePath(parentPos, focusPos), id: `line-parent-to-focus`, className: 'focus-view-parent-line' });
+            if(focusPos) lines.push({
+                d: getCurvePath(parentPos, focusPos),
+                id: `line-parent-to-focus`,
+                className: 'focus-view-animated-line focus-view-parent-focus-line'
+            });
 
             // Connect parent to all siblings
             siblingsNodeData.forEach(siblingNode => {
@@ -82,7 +86,11 @@ const FocusViewComponent = ({
     if (focusPos) {
         childrenNodeData.forEach(child => {
             const childPos = allNodePositions.get(child.id);
-            if (childPos) lines.push({ d: getCurvePath(focusPos, childPos), id: `line-${focusNodeId}-to-child-${child.id}`, className: 'focus-view-child-line' });
+            if (childPos) lines.push({
+                d: getCurvePath(focusPos, childPos),
+                id: `line-${focusNodeId}-to-child-${child.id}`,
+                className: 'focus-view-animated-line focus-view-child-line'
+            });
         });
     }
     return lines;
@@ -156,7 +164,6 @@ const FocusViewComponent = ({
                 )
                 )
             ),
-            areaRects.siblings && React.createElement("div", { className: "focus-view-area-marker siblings-area", style: { top: `${areaRects.siblings.y}px`, left: `${areaRects.siblings.x}px`, width: `${areaRects.siblings.width}px`, height: `${areaRects.siblings.height}px` }}),
             areaRects.focus && React.createElement("div", { className: "focus-view-area-marker focus-area", style: { top: `${areaRects.focus.y}px`, left: `${areaRects.focus.x}px`, width: `${areaRects.focus.width}px`, height: `${areaRects.focus.height}px` }}),
             areaRects.children && React.createElement("div", { className: "focus-view-area-marker children-area", style: { top: `${areaRects.children.y}px`, left: `${areaRects.children.x}px`, width: `${areaRects.children.width}px`, height: `${areaRects.children.height}px` }},
                 childrenNodeData.length === 0 && (
