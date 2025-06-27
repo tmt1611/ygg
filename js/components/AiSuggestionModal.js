@@ -185,8 +185,8 @@ const AiSuggestionModal = ({
 
   return (
     React.createElement("div", { className: "modal-overlay-basic", role: "dialog", "aria-modal": "true", "aria-labelledby": "ai-suggestion-modal-title", "aria-describedby": "ai-suggestion-summary", onClick: (e) => { if (e.target === e.currentTarget) onCancel(); } },
-      React.createElement("div", { className: "modal-content-basic large"},
-        React.createElement("h2", { id: "ai-suggestion-modal-title", className: "modal-title"},
+      React.createElement("div", { className: "modal-content-basic large" },
+        React.createElement("h2", { id: "ai-suggestion-modal-title", className: "modal-title" },
           React.createElement("span", { className: "modal-icon", "aria-hidden": "true" }, "🤖"),
           "AI Modification Preview"
         ),
@@ -239,9 +239,9 @@ const AiSuggestionModal = ({
                   React.createElement("p", { style: { color: 'var(--text-secondary)' } }, "No additions or modifications to display in the tree view."),
                   React.createElement("p", { style: { color: 'var(--text-tertiary)', fontSize: '0.9em' } }, "Check the 'Removed Nodes' section below for deletions.")
                 )
-              ),
-              ),
-              removedNodesTree.length > 0 && (
+              )
+            ),
+            removedNodesTree.length > 0 && (
                 React.createElement("div", { className: "ai-suggestion-modal-summary-section", style: { marginTop: '15px' } },
                     React.createElement("h4", { 
                         className: "ai-suggestion-modal-summary-title", 

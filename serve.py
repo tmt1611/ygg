@@ -8,12 +8,26 @@ PORT = 8080
 DIRECTORY = "." # Serve files from the current directory
 URL = f"http://localhost:{PORT}"
 
+import time
+import urllib
+
 class NoCacheHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
+    def do_GET(self):
+        if self.path.startswith('/clear-cache'):
+            # Redirect to root with a timestamp query to bust browser cache
+            ts = int(time.time())
+            self.send_response(302)
+            self.send_header('Location', f'/?_={ts}')
+            self.end_headers()
+        else:
+            super().do_GET()
+
     def end_headers(self):
         self.send_header("Cache-Control", "no-store, no-cache, must-revalidate")
         self.send_header("Pragma", "no-cache")
         self.send_header("Expires", "0")
         super().end_headers()
+
 
 Handler = partial(NoCacheHTTPRequestHandler, directory=DIRECTORY)
 
