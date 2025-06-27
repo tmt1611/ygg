@@ -13,15 +13,16 @@ const AREA_PADDING = 20;
 
 /**
  * A pure helper function to calculate node positions within an area, supporting wrapping.
- * @returns {{totalHeight: number, positions: Map<string, object>}}
+ * It takes a set of nodes, a wrapping width, and starting coordinates, and lays out the
+ * nodes in rows, centering each row within the available width.
+ * @returns {{totalHeight: number, positions: Map<string, {x: number, y: number, ...}>}}
  */
-const calculateNodeRowsAndPositions = (nodeDims, startY, layoutWidth, centerX) => {
+const calculateWrappedPositions = (nodeDims, wrappingWidth, startX, startY) => {
   const newPositions = new Map();
   if (nodeDims.length === 0) {
     return { totalHeight: 0, positions: newPositions };
   }
 
-  const wrappingWidth = layoutWidth - (AREA_PADDING * 4);
   const rows = [];
   let currentRow = [];
   let currentRowWidth = 0;
@@ -41,15 +42,15 @@ const calculateNodeRowsAndPositions = (nodeDims, startY, layoutWidth, centerX) =
     rows.push({ items: currentRow, width: currentRowWidth });
   }
 
-  let rowY = startY;
+  let currentY = startY;
   let totalHeight = 0;
 
   rows.forEach(row => {
     const maxRowHeight = Math.max(...row.items.map(d => d.height), 0);
-    const rowCenterY = rowY + maxRowHeight / 2;
+    const rowCenterY = currentY + maxRowHeight / 2;
     
-    const startX = centerX - row.width / 2;
-    let currentX = startX;
+    // Center each row horizontally within the given wrapping width
+    let currentX = startX + (wrappingWidth - row.width) / 2;
     
     row.items.forEach(childDim => {
       newPositions.set(childDim.id, {
@@ -60,7 +61,7 @@ const calculateNodeRowsAndPositions = (nodeDims, startY, layoutWidth, centerX) =
       currentX += childDim.width + HORIZONTAL_NODE_GAP;
     });
     
-    rowY += maxRowHeight + VERTICAL_ROW_GAP;
+    currentY += maxRowHeight + VERTICAL_ROW_GAP;
     totalHeight += maxRowHeight + VERTICAL_ROW_GAP;
   });
 
