@@ -1349,8 +1349,13 @@ html[data-theme-base='dark'] .history-item-summary .history-entity {
   border: 2px solid var(--focus-node-star-glow);
 }
 .celestial-body .celestial-body-name { 
-  /* Dynamically adjust font size based on the node's size for better readability */
-  font-size: calc(0.5em + var(--node-size) * 0.004);
+  /*
+    Dynamically adjust font size based on the node's size for better readability.
+    The formula uses a base size (6px) and a factor multiplied by the node's diameter (--node-size).
+    This ensures that text is larger and more readable on bigger nodes.
+    e.g., minor (60px) -> ~10.8px, common (90px) -> ~13.2px, major (130px) -> ~16.4px.
+  */
+  font-size: calc(6px + var(--node-size) * 0.08);
   font-weight: bold; 
   padding: 0 5px; /* Vertical padding handled by flex centering */
   word-break: break-word; 
