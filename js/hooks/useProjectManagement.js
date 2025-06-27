@@ -11,6 +11,31 @@ const downloadProjectFile = (project, addHistoryEntry) => {
     }
 };
 
+const _parseImportedJson = (parsedJson) => {
+    if (parsedJson.id && parsedJson.name && parsedJson.treeData && parsedJson.lastModified) { // Full project object
+        return {
+            id: parsedJson.id,
+            name: parsedJson.name,
+            treeData: parsedJson.treeData,
+            isExample: parsedJson.isExample || false,
+        };
+    }
+    if (parsedJson.tree) { // Older project object with context
+        return {
+            name: parsedJson.context || parsedJson.name,
+            treeData: parsedJson.tree,
+        };
+    }
+    if (isValidTechTreeNodeShape(parsedJson)) { // Just a tree node
+        return {
+            name: parsedJson.name,
+            treeData: parsedJson,
+        };
+    }
+    return null;
+};
+
+
 export const useProjectManagement = ({
   modalManager,
   historyManager,
@@ -35,141 +60,75 @@ export const useProjectManagement = ({
   }, [viewStates, setTechTreeData, setInitialPrompt, setActiveProjectId]);
 
   const saveProjectsToLocalStorage = useCallback(() => {
-    if (projects.length > 0) localStorage.setItem(APP_STORAGE_KEYS.PROJECT_COLLECTION, JSON.stringify(projects));
-    else localStorage.removeItem(APP_STORAGE_KEYS.PROJECT_COLLECTION);
-    if (activeProjectId) localStorage.setItem(APP_STORAGE_KEYS.ACTIVE_PROJECT_ID, activeProjectId);
-    else localStorage.removeItem(APP_STORAGE_KEYS.ACTIVE_PROJECT_ID);
+    if (projects.length > 0) {
+        localStorage.setItem(APP_STORAGE_KEYS.PROJECT_COLLECTION, JSON.stringify(projects));
+    } else {
+        localStorage.removeItem(APP_STORAGE_KEYS.PROJECT_COLLECTION);
+    }
+    if (activeProjectId) {
+        localStorage.setItem(APP_STORAGE_KEYS.ACTIVE_PROJECT_ID, activeProjectId);
+    } else {
+        localStorage.removeItem(APP_STORAGE_KEYS.ACTIVE_PROJECT_ID);
+    }
   }, [projects, activeProjectId]);
 
   useEffect(() => { saveProjectsToLocalStorage(); }, [saveProjectsToLocalStorage]);
+  
+  const upsertProject = useCallback((project) => {
+    setProjects(prev => {
+        const index = prev.findIndex(p => p.id === project.id);
+        if (index > -1) {
+            const updated = [...prev];
+            updated[index] = project;
+            return updated;
+        }
+        return [...prev, project];
+    });
+  }, [setProjects]);
+  
+  const _updateCrossProjectLinks = useCallback((projectsToUpdate, targetProjectId, linkUpdates) => {
+    return projectsToUpdate.map(p => {
+        if (!p.treeData) return p;
+
+        let treeData = p.treeData;
+        let wasModified = false;
+        const nodesMap = getAllNodesAsMap(treeData);
+
+        nodesMap.forEach(node => {
+            if (node.linkedProjectId === targetProjectId) {
+                treeData = updateNodeInTree(treeData, node.id, linkUpdates);
+                wasModified = true;
+            }
+        });
+
+        return wasModified ? { ...p, treeData, lastModified: new Date().toISOString() } : p;
+    });
+  }, []);
 
   const updateProjectData = useCallback((projectId, newTreeData, newName) => {
-  setProjects(prevProjects => {
-    const projectIndex = prevProjects.findIndex(p => p.id === projectId);
-    if (projectIndex === -1) {
-      console.warn(`updateProjectData: Project with ID ${projectId} not found.`);
-      return prevProjects;
-    }
-    const updatedProjects = [...prevProjects];
-    const projectToUpdate = updatedProjects[projectIndex];
-    updatedProjects[projectIndex] = {
-      ...projectToUpdate,
-      name: newName || projectToUpdate.name,
-      treeData: newTreeData,
-      lastModified: new Date().toISOString(),
-    };
-    return updatedProjects;
-  });
-  if (projectId === activeProjectId) {
-    setTechTreeData(newTreeData);
-    if (newName) {
-      setInitialPrompt(newName);
-    }
-  }
-}, [activeProjectId, setTechTreeData, setInitialPrompt]);
-
-const _loadProjectsFromStorage = useCallback(() => {
-  try {
-    const storedProjects = localStorage.getItem(APP_STORAGE_KEYS.PROJECT_COLLECTION);
-    if (storedProjects) {
-      const parsed = JSON.parse(storedProjects);
-      if (Array.isArray(parsed) && parsed.every(p => p.id && p.name && p.treeData && p.lastModified)) {
-        return parsed.map(p => ({ ...p, treeData: initializeNodes(p.treeData) }));
+    setProjects(prevProjects => {
+      const projectIndex = prevProjects.findIndex(p => p.id === projectId);
+      if (projectIndex === -1) {
+        console.warn(`updateProjectData: Project with ID ${projectId} not found.`);
+        return prevProjects;
       }
-    }
-  } catch (e) {
-    console.error("Error loading projects from storage:", e);
-    addHistoryEntry('PROJECT_LOADED', 'Failed to load projects from storage.', { error: e.message });
-  }
-  return [];
-}, [addHistoryEntry]);
-
-const _addMissingExampleProjects = useCallback((projectsList) => {
-  let newProjects = [...projectsList];
-  const examplesData = [
-    { parsedData: JSON.parse(ELF_WARFARE_STRUCTURE_JSON_STRING), name: "Elven Warfare Doctrines" },
-    { parsedData: JSON.parse(ADVANCED_NATURE_MAGIC_JSON_STRING), name: "Advanced Nature Magic" },
-  ];
-
-  examplesData.forEach(example => {
-    const exampleExists = newProjects.some(p => p.isExample && p.treeData.id === example.parsedData.tree.id);
-    if (!exampleExists) {
-      newProjects.push({
-        id: generateUUID(),
-        name: example.parsedData.tree.name || example.name,
-        treeData: initializeNodes(example.parsedData.tree),
+      const updatedProjects = [...prevProjects];
+      const projectToUpdate = updatedProjects[projectIndex];
+      updatedProjects[projectIndex] = {
+        ...projectToUpdate,
+        name: newName || projectToUpdate.name,
+        treeData: newTreeData,
         lastModified: new Date().toISOString(),
-        isExample: true,
-      });
-    }
-  });
-  return newProjects;
-}, []);
-
-  const _setActiveInitialProject = useCallback((allProjects) => {
-    const startupLogged = localStorage.getItem(APP_STORAGE_KEYS.STARTUP_LOAD_LOGGED);
-    const logId = `startup-project-load-${new Date().toISOString()}`;
-
-    const loadProjectState = (project, source) => {
-      viewStates?.commonViewResetLogic(false); // Centralized view reset
-      setActiveProjectId(project.isExample ? null : project.id);
-      setTechTreeData(initializeNodes(project.treeData));
-      setInitialPrompt(project.name);
-      if (!startupLogged) {
-        addHistoryEntry('PROJECT_LOADED', `Loaded project "${project.name}".`, { source, logId, projectId: project.id });
+      };
+      return updatedProjects;
+    });
+    if (projectId === activeProjectId) {
+      setTechTreeData(newTreeData);
+      if (newName) {
+        setInitialPrompt(newName);
       }
-    };
-    
-    const findAndLoadProject = () => {
-        const storedActiveId = localStorage.getItem(APP_STORAGE_KEYS.ACTIVE_PROJECT_ID);
-        if (storedActiveId) {
-            const activeProj = allProjects.find(p => p.id === storedActiveId && !p.isExample);
-            if (activeProj) {
-                loadProjectState(activeProj, 'localStorage-active');
-                return true;
-            }
-        }
-    
-        const firstUserProject = allProjects.find(p => !p.isExample);
-        if (firstUserProject) {
-            loadProjectState(firstUserProject, 'fallback-first-user');
-            return true;
-        }
-        
-        // If we reach here, there are no user projects.
-        // We will let the WelcomeScreen show by not loading any project.
-        return false;
     }
-
-    if (!findAndLoadProject()) {
-        // If no user project was loaded, we ensure the app is in a clean state
-        // for the welcome screen.
-        resetTreeForNewProjectContext();
-        if (!startupLogged) {
-            addHistoryEntry('PROJECT_LOADED', 'Welcome screen shown; no user projects found.', { source: 'initial-load', logId });
-        }
-    }
-
-  }, [setTechTreeData, setInitialPrompt, viewStates, addHistoryEntry, setActiveProjectId, resetTreeForNewProjectContext]);
-
-
-  const initializeDefaultProjects = useCallback(() => {
-    const startupLogged = localStorage.getItem(APP_STORAGE_KEYS.STARTUP_LOAD_LOGGED);
-    try {
-      let projectsFromStorage = _loadProjectsFromStorage();
-      let allProjects = _addMissingExampleProjects(projectsFromStorage);
-      
-      setProjects(allProjects);
-      _setActiveInitialProject(allProjects);
-    } catch (e) {
-      console.error("Error initializing projects:", e);
-      setError("A critical error occurred while initializing projects.");
-      addHistoryEntry('APP_ERROR_ENCOUNTERED', 'Project initialization failed.', { error: e.message });
-    } finally {
-        if (!startupLogged) localStorage.setItem(APP_STORAGE_KEYS.STARTUP_LOAD_LOGGED, 'true');
-    }
-  }, [_loadProjectsFromStorage, _addMissingExampleProjects, _setActiveInitialProject, setError, addHistoryEntry]);
-
+  }, [activeProjectId, setTechTreeData, setInitialPrompt, setProjects]);
 
   const handleSetActiveProject = useCallback((projectId, fromExample = false) => {
     const projectToLoad = projects.find(p => p.id === projectId);
@@ -186,20 +145,22 @@ const _addMissingExampleProjects = useCallback((projectsList) => {
         setActiveProjectId(projectToLoad.id);
         addHistoryEntry('PROJECT_LOADED', `Project "${projectToLoad.name}" activated.`);
       }
-      // Switch to graph view after loading a project from the workspace
       if (viewStates) {
         viewStates.setYggdrasilViewMode('graph');
       }
     } else {
-      setError(`Project with ID ${projectId} not found.`);
+      setError({ message: `Project with ID ${projectId} not found.` });
     }
   }, [projects, viewStates, setTechTreeData, setInitialPrompt, addHistoryEntry, setError, setActiveProjectId]);
 
   const saveNewProject = useCallback((treeToSave, name, isExample = false) => {
-    if (!treeToSave) { setError("No tree data to save as project."); return null; }
+    if (!treeToSave) {
+        setError({ message: "No tree data to save as project." });
+        return null;
+    }
     const newProject = {
-      id: generateUUID(), name: name, treeData: cleanTreeForExport(treeToSave),
-      lastModified: new Date().toISOString(), isExample: isExample,
+      id: generateUUID(), name, treeData: cleanTreeForExport(treeToSave),
+      lastModified: new Date().toISOString(), isExample,
     };
     setProjects(prev => [...prev, newProject]);
     if (!isExample) {
@@ -208,11 +169,11 @@ const _addMissingExampleProjects = useCallback((projectsList) => {
     }
     addHistoryEntry('PROJECT_CREATED', `${isExample ? 'Example p' : 'P'}roject "${name}" saved.`);
     return newProject;
-  }, [addHistoryEntry, setError, setInitialPrompt]);
+  }, [addHistoryEntry, setError, setInitialPrompt, setProjects, setActiveProjectId]);
 
   const internalCreateNewProject = useCallback((name) => {
     if (projects.some(p => !p.isExample && p.name.toLowerCase() === name.toLowerCase())) {
-        setError(`A project named "${name}" already exists. Please choose a unique name.`);
+        setError({ message: `A project named "${name}" already exists. Please choose a unique name.` });
         closeProjectNameModal();
         return;
     }
@@ -225,15 +186,99 @@ const _addMissingExampleProjects = useCallback((projectsList) => {
     
     const savedProject = saveNewProject(newEmptyTree, name, false);
     closeProjectNameModal();
-    if (viewStates && savedProject && savedProject.treeData.id) {
+    if (viewStates && savedProject?.treeData.id) {
         viewStates.setYggdrasilViewMode('graph');
-        viewStates.setSelectedGraphNodeId(savedProject.treeData.id); // Select the root node
+        viewStates.setSelectedGraphNodeId(savedProject.treeData.id);
     }
   }, [projects, setError, resetTreeForNewProjectContext, setTechTreeData, setInitialPrompt, saveNewProject, closeProjectNameModal, viewStates]);
-
+  
   const handleCreateNewProject = useCallback(() => {
     openProjectNameModal({ mode: 'create', onConfirm: internalCreateNewProject });
   }, [openProjectNameModal, internalCreateNewProject]);
+
+  const _loadProjectsFromStorage = useCallback(() => {
+    try {
+      const storedProjects = localStorage.getItem(APP_STORAGE_KEYS.PROJECT_COLLECTION);
+      if (storedProjects) {
+        const parsed = JSON.parse(storedProjects);
+        if (Array.isArray(parsed) && parsed.every(p => p.id && p.name && p.treeData)) {
+          return parsed.map(p => ({ ...p, treeData: initializeNodes(p.treeData) }));
+        }
+      }
+    } catch (e) {
+      console.error("Error loading projects from storage:", e);
+      addHistoryEntry('PROJECT_LOADED', 'Failed to load projects from storage.', { error: e.message });
+    }
+    return [];
+  }, [addHistoryEntry]);
+
+  const _addMissingExampleProjects = useCallback((projectsList) => {
+    let newProjects = [...projectsList];
+    const examplesData = [
+      { parsedData: JSON.parse(ELF_WARFARE_STRUCTURE_JSON_STRING), name: "Elven Warfare Doctrines" },
+      { parsedData: JSON.parse(ADVANCED_NATURE_MAGIC_JSON_STRING), name: "Advanced Nature Magic" },
+    ];
+
+    examplesData.forEach(example => {
+      if (!newProjects.some(p => p.isExample && p.treeData.id === example.parsedData.tree.id)) {
+        newProjects.push({
+          id: generateUUID(),
+          name: example.parsedData.tree.name || example.name,
+          treeData: initializeNodes(example.parsedData.tree),
+          lastModified: new Date().toISOString(),
+          isExample: true,
+        });
+      }
+    });
+    return newProjects;
+  }, []);
+
+  const _setActiveInitialProject = useCallback((allProjects) => {
+    const startupLogged = localStorage.getItem(APP_STORAGE_KEYS.STARTUP_LOAD_LOGGED);
+    const logId = `startup-project-load-${new Date().toISOString()}`;
+
+    const loadProjectState = (project, source) => {
+      viewStates?.commonViewResetLogic(false);
+      setActiveProjectId(project.isExample ? null : project.id);
+      setTechTreeData(initializeNodes(project.treeData));
+      setInitialPrompt(project.name);
+      if (!startupLogged) {
+        addHistoryEntry('PROJECT_LOADED', `Loaded project "${project.name}".`, { source, logId, projectId: project.id });
+      }
+    };
+    
+    const storedActiveId = localStorage.getItem(APP_STORAGE_KEYS.ACTIVE_PROJECT_ID);
+    const activeProj = storedActiveId ? allProjects.find(p => p.id === storedActiveId && !p.isExample) : null;
+    const firstUserProject = allProjects.find(p => !p.isExample);
+
+    if (activeProj) {
+      loadProjectState(activeProj, 'localStorage-active');
+    } else if (firstUserProject) {
+      loadProjectState(firstUserProject, 'fallback-first-user');
+    } else {
+      resetTreeForNewProjectContext();
+      if (!startupLogged) {
+          addHistoryEntry('PROJECT_LOADED', 'Welcome screen shown; no user projects found.', { source: 'initial-load', logId });
+      }
+    }
+  }, [setTechTreeData, setInitialPrompt, viewStates, addHistoryEntry, setActiveProjectId, resetTreeForNewProjectContext]);
+
+  const initializeDefaultProjects = useCallback(() => {
+    const startupLogged = localStorage.getItem(APP_STORAGE_KEYS.STARTUP_LOAD_LOGGED);
+    try {
+      let projectsFromStorage = _loadProjectsFromStorage();
+      let allProjects = _addMissingExampleProjects(projectsFromStorage);
+      
+      setProjects(allProjects);
+      _setActiveInitialProject(allProjects);
+    } catch (e) {
+      console.error("Error initializing projects:", e);
+      setError({ message: "A critical error occurred while initializing projects." });
+      addHistoryEntry('APP_ERROR_ENCOUNTERED', 'Project initialization failed.', { error: e.message });
+    } finally {
+        if (!startupLogged) localStorage.setItem(APP_STORAGE_KEYS.STARTUP_LOAD_LOGGED, 'true');
+    }
+  }, [_loadProjectsFromStorage, _addMissingExampleProjects, _setActiveInitialProject, setProjects, setError, addHistoryEntry]);
 
   const handleAddNewProjectFromFile = useCallback((event) => {
     const file = event.target.files?.[0];
@@ -241,42 +286,25 @@ const _addMissingExampleProjects = useCallback((projectsList) => {
       const reader = new FileReader();
       reader.onload = (e) => {
         try {
-          const content = e.target?.result; 
-          const parsedJson = JSON.parse(content);
-          let treeObject;
-          let projectName;
-          let existingId = null;
+          const content = e.target?.result;
+          const parsedData = _parseImportedJson(JSON.parse(content));
 
-          if (parsedJson.id && parsedJson.name && parsedJson.treeData && parsedJson.lastModified) { // Full project object
-            treeObject = parsedJson.treeData;
-            projectName = parsedJson.name;
-            existingId = parsedJson.id;
-          } else if (parsedJson.tree) { // Older project object with context
-            treeObject = parsedJson.tree;
-            projectName = parsedJson.context || parsedJson.name;
-          } else if (isValidTechTreeNodeShape(parsedJson)) { // Just a tree node
-            treeObject = parsedJson;
-            projectName = parsedJson.name;
-          } else {
-            throw new Error("Invalid JSON structure. Must be a full project object, an older project object with a 'tree' property, or a single valid tree node.");
+          if (!parsedData) {
+              throw new Error("Invalid JSON structure.");
           }
 
-          let newProject = {
-            id: existingId || generateUUID(),
-            name: projectName || file.name.replace(/\.json$|\.project\.json$/i, '') || "Imported Project",
-            treeData: initializeNodes(treeObject),
+          const newProject = {
+            id: parsedData.id || generateUUID(),
+            name: parsedData.name || file.name.replace(/\.json$|\.project\.json$/i, '') || "Imported Project",
+            treeData: initializeNodes(parsedData.treeData),
             lastModified: new Date().toISOString(),
-            isExample: parsedJson.isExample || false,
+            isExample: parsedData.isExample || false,
           };
           
-          const existingProjectIndex = projects.findIndex(p => p.id === newProject.id);
-          if (existingProjectIndex !== -1) {
-             setProjects(prev => { const updated = [...prev]; updated[existingProjectIndex] = newProject; return updated; });
-             addHistoryEntry('PROJECT_IMPORTED', `Project "${newProject.name}" updated from ${file.name}.`);
-          } else {
-            setProjects(prev => [...prev, newProject]);
-            addHistoryEntry('PROJECT_IMPORTED', `Project "${newProject.name}" imported from ${file.name}.`);
-          }
+          const isUpdate = projects.some(p => p.id === newProject.id);
+          upsertProject(newProject);
+          addHistoryEntry('PROJECT_IMPORTED', `Project "${newProject.name}" ${isUpdate ? 'updated' : 'imported'} from ${file.name}.`);
+          
           handleSetActiveProject(newProject.id, newProject.isExample);
           setError(null);
         } catch (err) {
@@ -288,18 +316,15 @@ const _addMissingExampleProjects = useCallback((projectsList) => {
       };
       reader.readAsText(file);
     }
-  }, [projects, addHistoryEntry, handleSetActiveProject, setError]);
+  }, [projects, addHistoryEntry, handleSetActiveProject, setError, upsertProject]);
 
   const handleSaveActiveProject = useCallback((andDownload = false) => {
-    if (!currentTechTreeData) { setError("No tree data to save."); return; }
-    let effectiveActiveProjectId = activeProjectId;
-    const currentActiveProjectDetails = projects.find(p => p.id === activeProjectId);
+    if (!currentTechTreeData) { setError({ message: "No tree data to save." }); return; }
     
-    if (currentActiveProjectDetails?.isExample) {
-        effectiveActiveProjectId = null; 
-    }
+    const currentActiveProjectDetails = projects.find(p => p.id === activeProjectId);
+    const isSavingExample = currentActiveProjectDetails?.isExample;
 
-    if (!effectiveActiveProjectId) {
+    if (!activeProjectId || isSavingExample) {
       openProjectNameModal({
         mode: 'create', currentName: currentContextText || "New Project",
         onConfirm: (nameFromModal) => {
@@ -310,106 +335,74 @@ const _addMissingExampleProjects = useCallback((projectsList) => {
           }
           closeProjectNameModal();
         }
-      }); return;
+      });
+      return;
     }
 
-    const projectIndex = projects.findIndex(p => p.id === effectiveActiveProjectId && !p.isExample);
-    if (projectIndex === -1) { setError("Active user project not found for saving."); return; }
-    
     const updatedProject = { 
-        ...projects[projectIndex], 
+        ...currentActiveProjectDetails, 
         treeData: cleanTreeForExport(currentTechTreeData), 
         name: currentContextText, 
-        lastModified: new Date().toISOString(), 
-        isExample: false
+        lastModified: new Date().toISOString(),
     };
-    setProjects(prev => { const newProjects = [...prev]; newProjects[projectIndex] = updatedProject; return newProjects; });
+    upsertProject(updatedProject);
     addHistoryEntry('PROJECT_SAVED', `Project "${updatedProject.name}" saved.`);
     if (andDownload) {
       downloadProjectFile(updatedProject, addHistoryEntry);
     }
-  }, [activeProjectId, currentTechTreeData, projects, currentContextText, addHistoryEntry, openProjectNameModal, saveNewProject, closeProjectNameModal, setInitialPrompt, setError]);
+  }, [activeProjectId, currentTechTreeData, projects, currentContextText, addHistoryEntry, openProjectNameModal, saveNewProject, closeProjectNameModal, setInitialPrompt, setError, upsertProject]);
 
   const internalRenameProject = useCallback((projectId, newName) => {
     const oldProject = projects.find(p => p.id === projectId);
     if (!oldProject) return;
 
     if (projects.some(p => p.id !== projectId && !p.isExample && p.name.toLowerCase() === newName.toLowerCase())) {
-        setError(`A project named "${newName}" already exists. Please choose a unique name.`);
+        setError({ message: `A project named "${newName}" already exists. Please choose a unique name.`});
         closeProjectNameModal();
         return;
     }
+    
+    let updatedProjects = projects.map(proj =>
+        proj.id === projectId
+            ? { ...proj, name: newName, lastModified: new Date().toISOString() }
+            : proj
+    );
+    updatedProjects = _updateCrossProjectLinks(updatedProjects, projectId, { linkedProjectName: newName });
 
-    // Find all projects that link to the project being renamed and update them.
-    const projectsWithLinksUpdated = projects.map(proj => {
-      if (proj.id === projectId) {
-        // This is the project being renamed.
-        return { ...proj, name: newName, lastModified: new Date().toISOString() };
-      }
-
-      // Check if this project has links to the renamed project.
-      if (!proj.treeData) return proj;
-      
-      let treeData = proj.treeData;
-      let wasModified = false;
-      const nodesMap = getAllNodesAsMap(treeData);
-
-      nodesMap.forEach(node => {
-        if (node.linkedProjectId === projectId) {
-          treeData = updateNodeInTree(treeData, node.id, { linkedProjectName: newName });
-          wasModified = true;
-        }
-      });
-
-      if (wasModified) {
-        return { ...proj, treeData, lastModified: new Date().toISOString() };
-      }
-      
-      return proj;
-    });
-
-    setProjects(projectsWithLinksUpdated);
+    setProjects(updatedProjects);
 
     if (activeProjectId === projectId) { setInitialPrompt(newName); }
     addHistoryEntry('PROJECT_RENAMED', `Project "${oldProject.name}" renamed to "${newName}". Incoming links updated.`);
     closeProjectNameModal();
-  }, [projects, activeProjectId, addHistoryEntry, closeProjectNameModal, setInitialPrompt]);
+  }, [projects, activeProjectId, addHistoryEntry, closeProjectNameModal, setInitialPrompt, setProjects, setError, _updateCrossProjectLinks]);
 
-  const handleRenameProject = useCallback((projectIdToRename, currentName) => { 
+  const handleRenameProject = useCallback((projectIdToRename) => { 
     const projectToRename = projects.find(p => p.id === projectIdToRename && !p.isExample);
     if(projectToRename){
-        openProjectNameModal({ mode: 'rename', projectId: projectToRename.id, currentName: projectToRename.name, onConfirm: (newName) => internalRenameProject(projectToRename.id, newName) });
+        openProjectNameModal({
+            mode: 'rename',
+            projectId: projectToRename.id,
+            currentName: projectToRename.name,
+            onConfirm: (newName) => internalRenameProject(projectToRename.id, newName)
+        });
     } else {
-        setError("Project not found for renaming or it's an example.");
+        setError({ message: "Project not found for renaming or it's an example." });
     }
   }, [projects, openProjectNameModal, internalRenameProject, setError]);
 
-
   const handleDeleteProject = useCallback((projectId) => {
     const projectToDelete = projects.find(p => p.id === projectId);
-    if (!projectToDelete) { setError("Project not found for deletion."); return; }
+    if (!projectToDelete) { setError({ message: "Project not found for deletion." }); return; }
+    
     openConfirmModal({
-      title: `Delete ${projectToDelete.isExample ? 'Example' : ''} Project?`, message: `Delete "${projectToDelete.name}"? This will also remove any links pointing to it from other projects. This cannot be undone.`,
-      confirmText: `Delete ${projectToDelete.isExample ? 'Example' : ''} Project`, cancelText: "Cancel", confirmButtonStyle: 'danger',
+      title: `Delete ${projectToDelete.isExample ? 'Example' : ''} Project?`,
+      message: `Delete "${projectToDelete.name}"? This will also remove any links pointing to it from other projects. This cannot be undone.`,
+      confirmText: `Delete ${projectToDelete.isExample ? 'Example' : ''} Project`,
+      cancelText: "Cancel",
+      confirmButtonStyle: 'danger',
       onConfirm: () => {
-        
-        const projectsWithLinksCleaned = projects
-          .filter(p => p.id !== projectId) // Remove the deleted project
-          .map(p => { // Check every other project for links TO the deleted one
-            if (!p.treeData) return p;
-            let treeData = p.treeData;
-            let wasModified = false;
-            const nodesMap = getAllNodesAsMap(treeData);
-            
-            nodesMap.forEach(node => {
-              if (node.linkedProjectId === projectId) {
-                treeData = updateNodeInTree(treeData, node.id, { linkedProjectId: null, linkedProjectName: null });
-                wasModified = true;
-              }
-            });
-            
-            return wasModified ? { ...p, treeData, lastModified: new Date().toISOString() } : p;
-          });
+        let remainingProjects = projects.filter(p => p.id !== projectId);
+        const projectsWithLinksCleaned = _updateCrossProjectLinks(remainingProjects, projectId, { linkedProjectId: null, linkedProjectName: null });
 
         setProjects(projectsWithLinksCleaned);
         addHistoryEntry('PROJECT_DELETED', `${projectToDelete.isExample ? 'Example p' : 'P'}roject "${projectToDelete.name}" deleted. Dangling links cleaned.`);
@@ -419,26 +412,23 @@ const _addMissingExampleProjects = useCallback((projectsList) => {
             if(nextUserProject) {
                 handleSetActiveProject(nextUserProject.id);
             } else {
-                // No more user projects, go to welcome screen state.
                 resetTreeForNewProjectContext();
             }
         }
         closeConfirmModal();
       },
-      onCancel: () => { 
-        closeConfirmModal();
-      }
+      onCancel: closeConfirmModal,
     });
-  }, [projects, activeProjectId, addHistoryEntry, openConfirmModal, closeConfirmModal, setError, handleSetActiveProject, resetTreeForNewProjectContext]);
+  }, [projects, activeProjectId, addHistoryEntry, openConfirmModal, closeConfirmModal, setError, handleSetActiveProject, resetTreeForNewProjectContext, setProjects, _updateCrossProjectLinks]);
   
   const internalSaveAsExample = useCallback((name) => {
-    if (!currentTechTreeData) { setError("No tree data to save as example."); return; }
+    if (!currentTechTreeData) { setError({ message: "No tree data to save as example." }); return; }
     saveNewProject(currentTechTreeData, name, true);
     closeProjectNameModal();
   }, [currentTechTreeData, saveNewProject, closeProjectNameModal, setError]);
 
   const handleSaveCurrentTreeAsExampleProject = useCallback(() => {
-    if (!currentTechTreeData) { setError("No active tree data to save as an example."); return; }
+    if (!currentTechTreeData) { setError({ message: "No active tree data to save as an example." }); return; }
     openProjectNameModal({ mode: 'createExample', currentName: `Example: ${currentContextText || 'My Custom Structure'}`, onConfirm: internalSaveAsExample });
   }, [currentTechTreeData, currentContextText, openProjectNameModal, internalSaveAsExample, setError]);
 
@@ -446,64 +436,51 @@ const _addMissingExampleProjects = useCallback((projectsList) => {
     const projectToLoad = projects.find(p => p.id === projectId);
     if (projectToLoad && viewStates) {
         handleSetActiveProject(projectId, projectToLoad.isExample);
-         viewStates.setYggdrasilViewMode('graph'); 
-        if (projectToLoad.treeData && projectToLoad.treeData.id) {
+        viewStates.setYggdrasilViewMode('graph'); 
+        if (projectToLoad.treeData?.id) {
            viewStates.setSelectedGraphNodeId(projectToLoad.treeData.id); 
         }
     } else {
-        setError(`Project with ID ${projectId} not found or view system not ready.`);
+        setError({ message: `Project with ID ${projectId} not found or view system not ready.` });
     }
   }, [projects, viewStates, handleSetActiveProject, setError]);
 
   const handlePasteNewProject = useCallback(() => {
     let pastedJson = '';
-    const handleInputChange = (e) => {
-      pastedJson = e.target.value;
-    };
 
     const parseAndLoad = (jsonString) => {
       try {
-        const parsedJson = JSON.parse(jsonString);
-        let newProject;
-
-        if (parsedJson.id && parsedJson.name && parsedJson.treeData && parsedJson.lastModified) {
-          // Full project object format
-          newProject = { ...parsedJson, treeData: initializeNodes(parsedJson.treeData), isExample: parsedJson.isExample || false };
-        } else if (parsedJson.name && (Array.isArray(parsedJson.children) || parsedJson.children === undefined)) {
-           // A single tree node object, common from AI tools
-          newProject = {
-            id: generateUUID(), name: parsedJson.name || "Pasted Project",
-            treeData: initializeNodes(parsedJson), lastModified: new Date().toISOString(), isExample: false
-          };
-        } else {
-          throw new Error("Invalid JSON structure for a project or tree. It must be a full project object or a single tree node object.");
+        const parsedData = _parseImportedJson(JSON.parse(jsonString));
+        if (!parsedData) {
+          throw new Error("Invalid JSON structure for a project or tree.");
         }
         
-        const existingProjectIndex = projects.findIndex(p => p.id === newProject.id);
-        if (existingProjectIndex !== -1) {
-          setProjects(prev => { const updated = [...prev]; updated[existingProjectIndex] = newProject; return updated; });
-          addHistoryEntry('PROJECT_IMPORTED', `Project "${newProject.name}" updated from pasted JSON.`);
-        } else {
-          setProjects(prev => [...prev, newProject]);
-          addHistoryEntry('PROJECT_IMPORTED', `Project "${newProject.name}" created from pasted JSON.`);
-        }
+        const newProject = {
+          id: parsedData.id || generateUUID(),
+          name: parsedData.name || "Pasted Project",
+          treeData: initializeNodes(parsedData.treeData),
+          lastModified: new Date().toISOString(),
+          isExample: parsedData.isExample || false,
+        };
+        
+        const isUpdate = projects.some(p => p.id === newProject.id);
+        upsertProject(newProject);
+        addHistoryEntry('PROJECT_IMPORTED', `Project "${newProject.name}" ${isUpdate ? 'updated' : 'created'} from pasted JSON.`);
         
         handleSetActiveProject(newProject.id, newProject.isExample);
         setError(null);
         closeConfirmModal();
-
       } catch (err) {
         setError({ message: err.message, details: err.stack });
-        // Don't close the modal on error
       }
     };
     
     openConfirmModal({
       title: "Paste Project JSON",
       message: React.createElement('div', null,
-        React.createElement('p', {style: {marginBottom: '10px'}}, 'Paste the complete JSON from your external AI tool below. This can be a full project object or just the root tree node object.'),
+        React.createElement('p', {style: {marginBottom: '10px'}}, 'Paste the complete JSON below. This can be a full project object or just the root tree node object.'),
         React.createElement('textarea', {
-          onChange: handleInputChange,
+          onChange: e => pastedJson = e.target.value,
           style: { width: '100%', minHeight: '200px', resize: 'vertical', fontFamily: 'monospace' },
           placeholder: '{"id": "root...", "name": "...", "children": [...]}'
         })
@@ -517,7 +494,7 @@ const _addMissingExampleProjects = useCallback((projectsList) => {
         parseAndLoad(pastedJson);
       },
     });
-  }, [projects, setProjects, addHistoryEntry, handleSetActiveProject, setError, openConfirmModal, closeConfirmModal]);
+  }, [projects, upsertProject, addHistoryEntry, handleSetActiveProject, setError, openConfirmModal, closeConfirmModal]);
 
   return {
     projects, activeProjectId, setActiveProjectId,
@@ -525,7 +502,7 @@ const _addMissingExampleProjects = useCallback((projectsList) => {
     handleAddNewProjectFromFile, handleSaveActiveProject, handleRenameProject,
     handleDeleteProject, handleSaveCurrentTreeAsExampleProject, handleLoadAndGoToGraph,
     handlePasteNewProject,
-    resetTreeForNewProjectContext, initializeDefaultProjects, saveProjectsToLocalStorage, internalRenameProject,
-    updateProjectData, 
+    resetTreeForNewProjectContext, initializeDefaultProjects, saveProjectsToLocalStorage,
+    updateProjectData
   };
 };
