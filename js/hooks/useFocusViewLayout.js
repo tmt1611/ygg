@@ -6,9 +6,10 @@ const NODE_SIZES_PX = {
     major: { width: 130, height: 130 },
 };
 const FOCUS_NODE_SCALE = 1.15;
-const VERTICAL_SPACING = 50; // Increased spacing
-const HORIZONTAL_CHILD_GAP = 30; // Increased spacing
-const CHILD_ROW_VERTICAL_GAP = 40; // Increased spacing
+const VERTICAL_SPACING = 60; // Spacing between areas
+const HORIZONTAL_NODE_GAP = 30;
+const VERTICAL_ROW_GAP = 30; // Spacing between rows of nodes within an area
+const AREA_PADDING = 20; // Padding inside area markers
 
 export const useFocusViewLayout = (
   layoutRef,
@@ -17,7 +18,7 @@ export const useFocusViewLayout = (
   childrenNodeData,
   siblingsNodeData
 ) => {
-  const [layoutMetrics, setLayoutMetrics] = useState({ positions: new Map(), width: 0, height: 0 });
+  const [layoutMetrics, setLayoutMetrics] = useState({ positions: new Map(), areaRects: {}, width: 0, height: 0 });
   const [viewportWidth, setViewportWidth] = useState(0);
 
   const childrenDims = useMemo(() => 
@@ -54,105 +55,111 @@ export const useFocusViewLayout = (
 
   useEffect(() => {
     if (!focusNodeData || viewportWidth === 0) {
-      setLayoutMetrics({ positions: new Map(), width: 0, height: 0 });
+      setLayoutMetrics({ positions: new Map(), areaRects: {}, width: 0, height: 0 });
       return;
     }
 
     const positions = new Map();
+    const areaRects = {};
     const focusSize = {
         width: NODE_SIZES_PX[focusNodeData.importance || 'common'].width * FOCUS_NODE_SCALE,
         height: NODE_SIZES_PX[focusNodeData.importance || 'common'].height * FOCUS_NODE_SCALE,
     };
     
-    // --- Determine Layout Width ---
-    const allFocusLevelDims = [
-      ...siblingsDims.filter((_, i) => i % 2 === 0).reverse(),
-      {...focusSize, id: focusNodeData.id},
-      ...siblingsDims.filter((_, i) => i % 2 !== 0),
-    ];
-    const totalFocusLevelWidth = allFocusLevelDims.reduce((acc, dim) => acc + dim.width, 0) + (allFocusLevelDims.length - 1) * HORIZONTAL_CHILD_GAP;
-
-    let maxChildRowWidth = 0;
-    const childrenRows = [];
-    if (childrenDims.length > 0) {
-        const wrappingWidth = Math.max(300, viewportWidth * 0.95);
-        let currentRow = [];
-        let currentRowWidth = 0;
-        
-        childrenDims.forEach(childDim => {
-            const requiredWidth = childDim.width + (currentRow.length > 0 ? HORIZONTAL_CHILD_GAP : 0);
-            if (currentRow.length > 0 && currentRowWidth + requiredWidth > wrappingWidth) {
-                childrenRows.push({items: currentRow, width: currentRowWidth});
-                maxChildRowWidth = Math.max(maxChildRowWidth, currentRowWidth);
-                currentRow = [childDim];
-                currentRowWidth = childDim.width;
-            } else {
-                currentRow.push(childDim);
-                currentRowWidth += requiredWidth;
-            }
-        });
-        if (currentRow.length > 0) {
-            childrenRows.push({items: currentRow, width: currentRowWidth});
-            maxChildRowWidth = Math.max(maxChildRowWidth, currentRowWidth);
-        }
-    }
-
-    const layoutWidth = Math.max(totalFocusLevelWidth, maxChildRowWidth, viewportWidth) + 100; // Add horizontal padding
+    const layoutWidth = viewportWidth;
     const centerX = layoutWidth / 2;
-
-    // --- Position Nodes ---
-    const parentSize = parentNodeData ? NODE_SIZES_PX[parentNodeData.importance || 'common'] : { width: 0, height: 0 };
-    const parentY = parentNodeData ? VERTICAL_SPACING : 0;
-    if (parentNodeData) {
-      positions.set(parentNodeData.id, { x: centerX, y: parentY + parentSize.height / 2, ...parentSize });
-    }
-
-    const focusLevelY = parentNodeData ? parentY + parentSize.height + VERTICAL_SPACING : VERTICAL_SPACING;
-    const maxFocusLevelHeight = Math.max(focusSize.height, ...siblingsDims.map(d => d.height), 0);
-    const focusLevelCenterY = focusLevelY + maxFocusLevelHeight / 2;
     
-    // Position focus level nodes (focus + siblings) centered within their total width
-    let currentX = centerX - totalFocusLevelWidth / 2;
-    allFocusLevelDims.forEach(dim => {
-        positions.set(dim.id, {
-            x: currentX + dim.width / 2,
-            y: focusLevelCenterY,
-            ...dim
-        });
-        currentX += (dim.width + HORIZONTAL_CHILD_GAP);
-    });
+    let currentY = 0;
     
-    let totalHeight = focusLevelY + maxFocusLevelHeight + VERTICAL_SPACING;
+    // --- Helper to calculate and position rows of nodes ---
+    const calculateAndPositionRows = (nodeDims, startY, centerHorizontally = true) => {
+      if (nodeDims.length === 0) {
+        return { totalHeight: 0, endY: startY };
+      }
+      
+      const wrappingWidth = layoutWidth - (AREA_PADDING * 4); // Extra padding for safety
+      const rows = [];
+      let currentRow = [];
+      let currentRowWidth = 0;
 
-    // Position children rows
-    if (childrenRows.length > 0) {
-      let currentY = focusLevelY + maxFocusLevelHeight + VERTICAL_SPACING;
-      childrenRows.forEach(row => {
+      nodeDims.forEach(nodeDim => {
+        const requiredWidth = nodeDim.width + (currentRow.length > 0 ? HORIZONTAL_NODE_GAP : 0);
+        if (currentRow.length > 0 && currentRowWidth + requiredWidth > wrappingWidth) {
+          rows.push({ items: currentRow, width: currentRowWidth });
+          currentRow = [nodeDim];
+          currentRowWidth = nodeDim.width;
+        } else {
+          currentRow.push(nodeDim);
+          currentRowWidth += requiredWidth;
+        }
+      });
+      if (currentRow.length > 0) {
+        rows.push({ items: currentRow, width: currentRowWidth });
+      }
+      
+      let rowY = startY;
+      let totalHeight = 0;
+      
+      rows.forEach(row => {
         const maxRowHeight = Math.max(...row.items.map(d => d.height), 0);
-        const rowCenterY = currentY + maxRowHeight / 2;
-        let currentChildX = centerX - row.width / 2;
+        const rowCenterY = rowY + maxRowHeight / 2;
+        
+        const startX = centerHorizontally ? centerX - row.width / 2 : AREA_PADDING * 2;
+        let currentX = startX;
         
         row.items.forEach(childDim => {
           positions.set(childDim.id, {
-            x: currentChildX + childDim.width / 2,
+            x: currentX + childDim.width / 2,
             y: rowCenterY,
             ...childDim,
           });
-          currentChildX += childDim.width + HORIZONTAL_CHILD_GAP;
+          currentX += childDim.width + HORIZONTAL_NODE_GAP;
         });
-        currentY += maxRowHeight + CHILD_ROW_VERTICAL_GAP;
+        
+        rowY += maxRowHeight + VERTICAL_ROW_GAP;
+        totalHeight += maxRowHeight + VERTICAL_ROW_GAP;
       });
-      totalHeight = currentY;
+
+      return { totalHeight: totalHeight - VERTICAL_ROW_GAP };
+    };
+
+    // --- 1. Parent Area ---
+    const parentSize = parentNodeData ? NODE_SIZES_PX[parentNodeData.importance || 'common'] : { width: 100, height: 40 }; // Placeholder size
+    const parentAreaHeight = parentSize.height + AREA_PADDING * 2;
+    areaRects.parent = { x: 0, y: currentY, width: layoutWidth, height: parentAreaHeight };
+    if (parentNodeData) {
+      positions.set(parentNodeData.id, { x: centerX, y: currentY + parentAreaHeight / 2, ...parentSize });
     }
+    currentY += parentAreaHeight + VERTICAL_SPACING / 2;
+
+    // --- 2. Focus & Siblings Area ---
+    const focusLevelNodes = [
+        ...siblingsDims.filter((_, i) => i % 2 === 0).reverse(),
+        {...focusSize, id: focusNodeData.id},
+        ...siblingsDims.filter((_, i) => i % 2 !== 0),
+    ];
+    const focusAreaStartY = currentY;
+    const { totalHeight: focusAreaContentHeight } = calculateAndPositionRows(focusLevelNodes, focusAreaStartY + AREA_PADDING, true);
+    const focusAreaHeight = focusAreaContentHeight > 0 ? focusAreaContentHeight + AREA_PADDING * 2 : 120;
+    areaRects.focus = { x: 0, y: focusAreaStartY, width: layoutWidth, height: focusAreaHeight };
+    currentY = focusAreaStartY + focusAreaHeight + VERTICAL_SPACING / 2;
     
-    totalHeight += VERTICAL_SPACING; // Bottom padding
+    // --- 3. Children Area ---
+    const childrenAreaStartY = currentY;
+    const { totalHeight: childrenAreaContentHeight } = calculateAndPositionRows(childrenDims, childrenAreaStartY + AREA_PADDING, true);
+    const childrenAreaHeight = childrenAreaContentHeight > 0 ? childrenAreaContentHeight + AREA_PADDING * 2 : 120;
+    areaRects.children = { x: 0, y: childrenAreaStartY, width: layoutWidth, height: childrenAreaHeight };
+    currentY = childrenAreaStartY + childrenAreaHeight;
+    
+    const totalHeight = currentY + AREA_PADDING;
 
     setLayoutMetrics({
       positions,
+      areaRects,
       width: layoutWidth,
       height: totalHeight,
     });
-  }, [focusNodeData, parentNodeData, childrenDims, siblingsDims, viewportWidth]);
+  }, [focusNodeData, parentNodeData, childrenNodeData, siblingsNodeData, viewportWidth]);
   
   return layoutMetrics;
 };

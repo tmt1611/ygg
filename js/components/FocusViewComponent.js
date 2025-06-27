@@ -45,7 +45,13 @@ const FocusViewComponent = ({
   }, [isFocusNodeRoot, activeProjectId, projects, findLinkSource]);
 
   const layoutRef = useRef(null); 
-  const { positions: allNodePositions, width: layoutWidth, height: layoutHeight } = useFocusViewLayout(layoutRef, focusNodeData, parentNodeData, childrenNodeData, siblingsNodeData);
+  const { positions: allNodePositions, areaRects, width: layoutWidth, height: layoutHeight } = useFocusViewLayout(
+    layoutRef,
+    focusNodeData,
+    parentNodeData,
+    childrenNodeData,
+    siblingsNodeData
+  );
 
   const connectorLines = useMemo(() => {
     if (!allNodePositions || allNodePositions.size === 0) return [];
@@ -118,22 +124,6 @@ const FocusViewComponent = ({
     );
   };
 
-  const focusPos = allNodePositions.get(focusNodeData.id);
-
-  const parentPlaceholder = !parentNodeData && focusPos ? (
-    React.createElement("div", { className: "focus-node-placeholder", style: { position: 'absolute', top: `${focusPos.y - focusPos.height / 2 - 40}px`, left: '50%', transform: 'translate(-50%, -100%)' }},
-      React.createElement("span", { className: "focus-node-placeholder-icon" }, "🌌"),
-      "Sector Core (Root)"
-    )
-  ) : null;
-  
-  const childrenPlaceholder = childrenNodeData.length === 0 && focusPos ? (
-    React.createElement("div", { className: "focus-node-placeholder", style: { position: 'absolute', top: `${focusPos.y + focusPos.height / 2 + 40}px`, left: '50%', transform: 'translateX(-50%)' }},
-      React.createElement("span", { className: "focus-node-placeholder-icon" }, "🛰️"),
-      "No Subsystems Detected"
-    )
-  ) : null;
-
   return (
     React.createElement("div", { className: "focus-view-page-container" },
       React.createElement("div", { className: "focus-view-header" },
@@ -155,6 +145,23 @@ const FocusViewComponent = ({
       React.createElement("div", { className: "focus-view-container" },
         React.createElement("div", { className: "focus-view-main-area" },
           React.createElement("div", { ref: layoutRef, className: "focus-view-layout", style: { minHeight: `${layoutHeight}px` }, onScroll: onCloseContextMenu },
+            areaRects.parent && React.createElement("div", { className: "focus-view-area-marker parent-area", style: { top: `${areaRects.parent.y}px`, left: `${areaRects.parent.x}px`, width: `${areaRects.parent.width}px`, height: `${areaRects.parent.height}px` }},
+                !parentNodeData && (
+                React.createElement("div", { className: "focus-node-placeholder" },
+                    React.createElement("span", { className: "focus-node-placeholder-icon" }, "🌌"),
+                    "Sector Core (Root)"
+                )
+                )
+            ),
+            areaRects.focus && React.createElement("div", { className: "focus-view-area-marker focus-area", style: { top: `${areaRects.focus.y}px`, left: `${areaRects.focus.x}px`, width: `${areaRects.focus.width}px`, height: `${areaRects.focus.height}px` }}),
+            areaRects.children && React.createElement("div", { className: "focus-view-area-marker children-area", style: { top: `${areaRects.children.y}px`, left: `${areaRects.children.x}px`, width: `${areaRects.children.width}px`, height: `${areaRects.children.height}px` }},
+                childrenNodeData.length === 0 && (
+                React.createElement("div", { className: "focus-node-placeholder" },
+                    React.createElement("span", { className: "focus-node-placeholder-icon" }, "🛰️"),
+                    "No Subsystems Detected"
+                )
+                )
+            ),
             React.createElement("svg", { className: "focus-view-svg-overlay", style: { width: `${layoutWidth}px`, height: `${layoutHeight}px` } },
               connectorLines.map(line => 
                 React.createElement("path", { 
@@ -165,12 +172,9 @@ const FocusViewComponent = ({
               )
             ),
             parentNodeData && renderNode(parentNodeData, 'parent'),
-            parentPlaceholder,
             renderNode(focusNodeData, 'focus'),
             siblingsNodeData.map((sibling) => renderNode(sibling, 'sibling')),
-            childrenNodeData.length > 0 
-              ? childrenNodeData.map((child) => renderNode(child, 'child'))
-              : childrenPlaceholder
+            childrenNodeData.map((child) => renderNode(child, 'child'))
           ),
           React.createElement(FocusViewDetailPanel, {
               node: nodeForDetailPanel,
