@@ -263,7 +263,7 @@ export const useProjectManagement = ({
             throw new Error("Invalid JSON structure. Must be a full project object, an older project object with a 'tree' property, or a single valid tree node.");
           }
 
-          const newProject = {
+          newProject = {
             id: existingId || generateUUID(),
             name: projectName || file.name.replace(/\.json$|\.project\.json$/i, '') || "Imported Project",
             treeData: initializeNodes(treeObject),
