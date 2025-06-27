@@ -21,8 +21,18 @@ const FOCUS_NODE_SCALE = 1.15;
 const getNodeRadiusForLayout = (node, isFocus = false) => {
     if (!node) return NODE_SIZES_PX.common.width / 2;
     const size = NODE_SIZES_PX[node.importance || 'common']?.width || NODE_SIZES_PX.common.width;
-    const radius = size / 2;
-    return isFocus ? radius * FOCUS_NODE_SCALE : radius;
+    let radius = size / 2;
+    if (isFocus) {
+        radius *= FOCUS_NODE_SCALE;
+    }
+    
+    // Add the 6px from the .has-children box-shadow if applicable.
+    // The line should connect to this outer ring.
+    if (node.children && node.children.length > 0) {
+        radius += 6;
+    }
+    
+    return radius;
 };
 
 const FocusViewComponent = ({

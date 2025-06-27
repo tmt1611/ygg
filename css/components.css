@@ -757,11 +757,9 @@ html[data-theme-base='dark'] .panel-header-icon { color: var(--primary-accent); 
 }
 .focus-view-area-marker.parent-area {
   background-color: rgba(var(--focus-panel-text-rgb, 55, 71, 79), 0.03);
-  border-bottom: 2px dashed rgba(var(--focus-panel-text-rgb, 55, 71, 79), 0.2);
 }
 html[data-theme-base='dark'] .focus-view-area-marker.parent-area {
   background-color: rgba(var(--focus-panel-text-rgb, 224, 224, 224), 0.03);
-  border-bottom: 2px dashed rgba(var(--focus-panel-text-rgb, 224, 224, 224), 0.2);
 }
 
 .focus-view-area-marker.focus-area {
@@ -776,11 +774,9 @@ html[data-theme-base='dark'] .focus-view-area-marker.parent-area {
 
 .focus-view-area-marker.children-area {
   background-color: rgba(var(--focus-panel-text-rgb, 55, 71, 79), 0.03);
-  border-top: 2px dashed rgba(var(--focus-panel-text-rgb, 55, 71, 79), 0.2);
 }
 html[data-theme-base='dark'] .focus-view-area-marker.children-area {
   background-color: rgba(var(--focus-panel-text-rgb, 224, 224, 224), 0.03);
-  border-top: 2px dashed rgba(var(--focus-panel-text-rgb, 224, 224, 224), 0.2);
 }
 
 

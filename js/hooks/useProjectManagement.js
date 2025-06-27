@@ -282,7 +282,8 @@ export const useProjectManagement = ({
   }, [_loadProjectsFromStorage, _addMissingExampleProjects, _setActiveInitialProject, setProjects, setError, addHistoryEntry]);
 
   const handleAddNewProjectFromFile = useCallback((event) => {
-    const file = event.target.files?.[0];
+    const fileInput = event.target;
+    const file = fileInput.files?.[0];
     if (file) {
       const reader = new FileReader();
       reader.onload = (e) => {
@@ -311,12 +312,14 @@ export const useProjectManagement = ({
         } catch (err) {
           setError({ message: `Failed to import project: ${err.message}` });
           console.error("Project File Load Error:", err);
-        } finally {
-          event.target.value = '';
         }
       };
       reader.readAsText(file);
     }
+    // Reset the input value. This allows selecting the same file again
+    // if the user cancels and re-opens the dialog. It must be done
+    // after we have the `file` object but before the handler exits.
+    fileInput.value = '';
   }, [projects, addHistoryEntry, handleSetActiveProject, setError, upsertProject]);
 
   const handleSaveActiveProject = useCallback((andDownload = false) => {
